@@ -1,4 +1,4 @@
-class ApplicationRoleConnection
+class ApplicationRoleConnectionMetadata
     """
     A representation of role connection metadata for an application.
 
