@@ -71,46 +71,56 @@ primitive TimestampStyleShortTime is TimestampStyle
     """
     Example: 16:20
     """
+
     fun value(): String => "t"
 primitive TimestampStyleMediumTime is TimestampStyle
     """
     Example: 16:20:30
     """
+
     fun value(): String => "T"
 primitive TimestampStyleShortDate is TimestampStyle
     """
+
     Example: 20/04/2021
     """
+
     fun value(): String => "d"
 primitive TimestampStyleLongDate is TimestampStyle
     """
     Example: April 20, 2021
     """
+
     fun value(): String => "D"
 primitive TimestampStyleLongDateShortTime is TimestampStyle
     """
     Example: April 20, 2021 at 16:20
     """
+
     fun value(): String => "f"
 primitive TimestampStyleFullDateShortTime is TimestampStyle
     """
     Example: Tuesday, April 20, 2021 at 16:20
     """
+
     fun value(): String => "F"
 primitive TimestampStyleShortDateShortTime is TimestampStyle
     """
     Example: 20/04/2021, 16:20
     """
+
     fun value(): String => "s"
 primitive TimestampStyleShortDateMediumTime is TimestampStyle
     """
     Example: 20/04/2021, 16:20:30
     """
+
     fun value(): String => "S"
 primitive TimestampStyleRelativeTime is TimestampStyle
     """
     Example: 4 years ago
     """
+
     fun value(): String => "R"
 
 trait GuildNavigationType
@@ -119,21 +129,25 @@ primitive GuildNavigationTypeChannelAndRoles is GuildNavigationType
     """
     Channel & Roles tab with Onboarding prompts
     """
+
     fun value(): String => "customize"
 primitive GuildNavigationTypeBrowseChannels is GuildNavigationType
     """
     Browse Channels tab
     """
+
     fun value(): String => "browse"
 primitive GuildNavigationTypeServerGuide is GuildNavigationType
     """
     Server Guide tab
     """
+
     fun value(): String => "guide"
 primitive GuildNavigationTypeLinkedRoles is GuildNavigationType
     """
     Linked Roles tab
     """
+
     fun value(): String => "linked-roles"
 class GuildNavigationTypeLinkedRolesWithId is GuildNavigationType
     """
