@@ -1,9 +1,13 @@
-trait VoiceOpcode
+use collections = "collections"
+
+trait val VoiceOpcode is (collections.Hashable & Equatable[VoiceOpcode])
     """
     Our voice gateways have their own set of opcodes and close codes.
     """
 
     fun value(): U16
+    fun hash(): USize => value().hash()
+    fun eq(that: VoiceOpcode): Bool => value() == that.value()
 primitive VoiceOpcodeIdentify is VoiceOpcode
     """
     Sent by: Client
@@ -189,9 +193,11 @@ primitive VoiceOpcodeDAVEMLSInvalidCommitWelcome is VoiceOpcode
 
     fun value(): U16 => 31
 
-trait VoiceCloseEventCode
+trait val VoiceCloseEventCode is (collections.Hashable & Equatable[VoiceCloseEventCode])
     fun value(): U16
     fun reconnect(): Bool
+    fun hash(): USize => value().hash()
+    fun eq(that: VoiceCloseEventCode): Bool => value() == that.value()
 primitive VoiceCloseEventCodeUnknownOpcode is VoiceCloseEventCode
     """
     You sent an invalid opcode.

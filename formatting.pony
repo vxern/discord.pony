@@ -1,3 +1,5 @@
+use collections = "collections"
+
 primitive Formatting
     """
     Discord utilizes a subset of markdown for rendering message content on its clients, while also adding some custom functionality to enable things like mentioning users and channels.
@@ -65,8 +67,10 @@ primitive Formatting
 primitive FormattingDefaults
     fun timestamp_style(): TimestampStyle val => TimestampStyleLongDateShortTime
 
-trait TimestampStyle
+trait val TimestampStyle is (collections.Hashable & Equatable[TimestampStyle])
     fun value(): String
+    fun hash(): USize => value().hash()
+    fun eq(that: TimestampStyle): Bool => value() == that.value()
 primitive TimestampStyleShortTime is TimestampStyle
     """
     Example: 16:20
@@ -123,8 +127,10 @@ primitive TimestampStyleRelativeTime is TimestampStyle
 
     fun value(): String => "R"
 
-trait GuildNavigationType
+trait val GuildNavigationType is (collections.Hashable & Equatable[GuildNavigationType])
     fun value(): String
+    fun hash(): USize => value().hash()
+    fun eq(that: GuildNavigationType): Bool => value() == that.value()
 primitive GuildNavigationTypeChannelAndRoles is GuildNavigationType
     """
     Channel & Roles tab with Onboarding prompts
