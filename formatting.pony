@@ -55,6 +55,8 @@ primitive Formatting
 
     fun timestamp(timestamp_s: U64, style: TimestampStyle val = FormattingDefaults.timestamp_style()): String => "<t:" + timestamp_s.string() + ":" + style.value() + ">"
         """
+        Timestamps are expressed in seconds and display the given timestamp in the user’s timezone and locale.
+
         Example: <t:1618953630:d>
         """
 
@@ -66,35 +68,77 @@ primitive FormattingDefaults
 trait TimestampStyle
     fun value(): String
 primitive TimestampStyleShortTime is TimestampStyle
+    """
+    Example: 16:20
+    """
     fun value(): String => "t"
 primitive TimestampStyleMediumTime is TimestampStyle
+    """
+    Example: 16:20:30
+    """
     fun value(): String => "T"
 primitive TimestampStyleShortDate is TimestampStyle
+    """
+    Example: 20/04/2021
+    """
     fun value(): String => "d"
 primitive TimestampStyleLongDate is TimestampStyle
+    """
+    Example: April 20, 2021
+    """
     fun value(): String => "D"
 primitive TimestampStyleLongDateShortTime is TimestampStyle
+    """
+    Example: April 20, 2021 at 16:20
+    """
     fun value(): String => "f"
 primitive TimestampStyleFullDateShortTime is TimestampStyle
+    """
+    Example: Tuesday, April 20, 2021 at 16:20
+    """
     fun value(): String => "F"
 primitive TimestampStyleShortDateShortTime is TimestampStyle
+    """
+    Example: 20/04/2021, 16:20
+    """
     fun value(): String => "s"
 primitive TimestampStyleShortDateMediumTime is TimestampStyle
+    """
+    Example: 20/04/2021, 16:20:30
+    """
     fun value(): String => "S"
 primitive TimestampStyleRelativeTime is TimestampStyle
+    """
+    Example: 4 years ago
+    """
     fun value(): String => "R"
 
 trait GuildNavigationType
     fun value(): String
 primitive GuildNavigationTypeChannelAndRoles is GuildNavigationType
+    """
+    Channel & Roles tab with Onboarding prompts
+    """
     fun value(): String => "customize"
 primitive GuildNavigationTypeBrowseChannels is GuildNavigationType
+    """
+    Browse Channels tab
+    """
     fun value(): String => "browse"
 primitive GuildNavigationTypeServerGuide is GuildNavigationType
+    """
+    Server Guide tab
+    """
     fun value(): String => "guide"
 primitive GuildNavigationTypeLinkedRoles is GuildNavigationType
+    """
+    Linked Roles tab
+    """
     fun value(): String => "linked-roles"
 class GuildNavigationTypeLinkedRolesWithId is GuildNavigationType
+    """
+    Specific linked role, opening the connection modal on click (the second id is the role id)
+    """
     let id: U64
 
     new apply(id': U64) => id = id'
