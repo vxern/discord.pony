@@ -285,6 +285,7 @@ primitive AutoModerationActionMessageType is MessageType
     """
     Can only be deleted by members with MANAGE_MESSAGES permission
     """
+
     fun value(): U8 => 24
 	fun deletable(): Bool => true
 primitive RoleSubscriptionPurchaseMessageType is MessageType
@@ -358,61 +359,73 @@ primitive CrosspostedMessageFlag is MessageFlag
     """
     this message has been published to subscribed channels (via Channel Following)
     """
+
     fun value(): U8 => 0
 primitive IsCrosspostMessageFlag is MessageFlag
     """
     this message originated from a message in another channel (via Channel Following)
     """
+
     fun value(): U8 => 1
 primitive SuppressEmbedsMessageFlag is MessageFlag
     """
     do not include any embeds when serializing this message
     """
+
     fun value(): U8 => 2
 primitive SourceMessageDeletedMessageFlag is MessageFlag
     """
     the source message for this crosspost has been deleted (via Channel Following)
     """
+
     fun value(): U8 => 3
 primitive UrgentMessageFlag is MessageFlag
     """
     this message came from the urgent message system
     """
+
     fun value(): U8 => 4
 primitive HasThreadMessageFlag is MessageFlag
     """
     this message has an associated thread, with the same id as the message
     """
+
     fun value(): U8 => 5
 primitive EphemeralMessageFlag is MessageFlag
     """
     this message is only visible to the user who invoked the Interaction
     """
+
     fun value(): U8 => 6
 primitive LoadingMessageFlag is MessageFlag
     """
     this message is an Interaction Response and the bot is “thinking”
     """
+
     fun value(): U8 => 7
 primitive FailedToMentionSomeRolesInThreadMessageFlag is MessageFlag
     """
     this message failed to mention some roles and add their members to the thread
     """
+
     fun value(): U8 => 8
 primitive SuppressNotificationsMessageFlag is MessageFlag
     """
     this message will not trigger push and desktop notifications
     """
+
     fun value(): U8 => 12
 primitive IsVoiceMessageMessageFlag is MessageFlag
     """
     this message is a voice message
     """
+
     fun value(): U8 => 13
 primitive HasSnapshotMessageFlag is MessageFlag
     """
     this message has a snapshot (via Message Forwarding)
     """
+
     fun value(): U8 => 14
 primitive IsComponentsV2MessageFlag is MessageFlag
     """
@@ -420,6 +433,7 @@ primitive IsComponentsV2MessageFlag is MessageFlag
 
     Once a message has been sent with this flag, it can’t be removed from that message.
     """
+
     fun value(): U8 => 15
 
 class ApplicationCommandInteractionMetadata
@@ -454,16 +468,19 @@ trait MessageReferenceType
     """
     Determines how associated data is populated.
     """
+
     fun value(): U8
 primitive DefaultMessageReferenceType
     """
     A standard reference used by replies.
     """
+
     fun value(): U8 => 0
 primitive ForwardMessageReferenceType
     """
     Reference used to point to a message at a point in time.
     """
+
     fun value(): U8 => 1
 
 class MessageSnapshot
@@ -526,21 +543,25 @@ trait AllowedMention
     - Setting the SUPPRESS_NOTIFICATIONS flag when sending a message will disable push notifications and only cause a notification badge
     - Users can customize their notification settings through the Discord app, which might cause them to only receive a notification badge and no push notification
     """
+
     fun value(): String
 primitive AllowedMentionRole is AllowedMention
     """
     Controls role mentions
     """
+
     fun value(): String => "roles"
 primitive AllowedMentionUser is AllowedMention
     """
     Controls user mentions
     """
+
     fun value(): String => "users"
 primitive AllowedMentionEveryone is AllowedMention
     """
     Controls @everyone and @here mentions
     """
+
     fun value(): String => "everyone"
 
 class RoleSubscriptionData
