@@ -53,7 +53,7 @@ primitive Formatting
         Example: <a:b1nzy:392938283556143104>
         """
 
-    fun timestamp(timestamp_ms: U64, style: TimestampStyle val = FormattingDefaults.timestamp_style()): String => "<t:" + timestamp_ms.string() + ":" + style.value() + ">"
+    fun timestamp(timestamp_s: U64, style: TimestampStyle val = FormattingDefaults.timestamp_style()): String => "<t:" + timestamp_s.string() + ":" + style.value() + ">"
         """
         Example: <t:1618953630:d>
         """
