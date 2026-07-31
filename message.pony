@@ -1,3 +1,5 @@
+use collections = "collections"
+
 class Message
     """
     Represents a message sent in a channel within Discord.
@@ -65,21 +67,21 @@ class Message
         Not all channel mentions in a message will appear in mention_channels. Only textual channels that are visible to everyone in a public guild will ever be included. Only crossposted messages (via Channel Following) currently include mention_channels at all. If no mentions in the message meet these requirements, this field will not be sent.
         """
 
-    let attachments: Array[Attachment]
+    let attachments: Array[MessageAttachment]
         """
         any attached files that are not referenced in embeds or components
 
         An app will receive empty values in the content, embeds, attachments, and components fields while poll will be omitted if they have not configured (or been approved for) the MESSAGE_CONTENT privileged intent (1 << 15).
         """
 
-    let embeds: Array[Embed]
+    let embeds: Array[MessageEmbed]
         """
         any embedded content
 
         An app will receive empty values in the content, embeds, attachments, and components fields while poll will be omitted if they have not configured (or been approved for) the MESSAGE_CONTENT privileged intent (1 << 15).
         """
 
-    let reactions: (Array[Reaction] | None)
+    let reactions: (Array[MessageReaction] | None)
         """
         reactions to the message
         """
@@ -150,7 +152,7 @@ class Message
         Sent if the message is sent as a result of an interaction
         """
 
-    let interaction: (MessageInteraction | None)
+    let interaction: (Interaction | None)
         """
         Deprecated in favor of interaction_metadata; sent if the message is a response to an interaction
         """
@@ -160,14 +162,14 @@ class Message
         the thread that was started from this message, includes thread member object
         """
 
-    let components: (Array[MessageComponent] | None)
+    let components: (Array[Component] | None)
         """
         sent if the message contains components like buttons, action rows, or other interactive components
 
         An app will receive empty values in the content, embeds, attachments, and components fields while poll will be omitted if they have not configured (or been approved for) the MESSAGE_CONTENT privileged intent (1 << 15).
         """
 
-    let sticker_items: (Array[MessageStickerItem] | None)
+    let sticker_items: (Array[StickerItem] | None)
         """
         sent if the message contains stickers
         """
@@ -209,9 +211,11 @@ class Message
         the custom client-side theme shared via the message
         """
 
-trait MessageType
+trait val MessageType is (collections.Hashable & Equatable[MessageType])
     fun value(): U8
 	fun deletable(): Bool
+    fun hash(): USize => value().hash()
+    fun eq(that: MessageType): Bool => value() == that.value()
 primitive DefaultMessageType is MessageType
     fun value(): U8 => 0
 	fun deletable(): Bool => true
@@ -339,8 +343,10 @@ class MessageActivity
     """
     let party_id: String
 
-trait MessageActivityType
+trait val MessageActivityType is (Hashable & Equatable[MessageActivityType])
     fun value(): U8
+    fun hash(): USize => value().hash()
+    fun eq(that: MessageActivityType): Bool => value() == that.value()
 primitive JoinMessageActivityType is MessageActivityType
     fun value(): U8 => 1
 primitive SpectateMessageActivityType is MessageActivityType
@@ -350,11 +356,13 @@ primitive ListenMessageActivityType is MessageActivityType
 primitive JoinRequestMessageActivityType is MessageActivityType
     fun value(): U8 => 5
 
-trait MessageFlag
+trait val MessageFlag is (Hashable & Equatable[MessageFlag])
     fun value(): U8
         """
         Represents the bit-shift value. Unshift by this value to get the flag.
         """
+    fun hash(): USize => value().hash()
+    fun eq(that: MessageFlag): Bool => value() == that.value()
 primitive CrosspostedMessageFlag is MessageFlag
     """
     this message has been published to subscribed channels (via Channel Following)
@@ -464,12 +472,14 @@ class MessageReference
     // TODO(vxern): Implement.
 
 // TODO(vxern): Do these need to have the 'Coupled Message Field'?
-trait MessageReferenceType
+trait val MessageReferenceType is (Hashable & Equatable[MessageReferenceType])
     """
     Determines how associated data is populated.
     """
 
     fun value(): U8
+    fun hash(): USize => value().hash()
+    fun eq(that: MessageReferenceType): Bool => value() == that.value()
 primitive DefaultMessageReferenceType
     """
     A standard reference used by replies.
@@ -535,7 +545,7 @@ trait MessageAttachmentFlag
 class ChannelMention
     // TODO(vxern): Implement.
 
-trait AllowedMention
+trait val AllowedMention is (Hashable & Equatable[AllowedMention])
     """
     Setting the allowed_mentions field lets you determine whether users will receive notifications when you include mentions in the message content, or the content of components attached to that message. This field is always validated against your permissions and the presence of said mentions in the message, to avoid “phantom” pings where users receive a notification without a visible mention in the message. For example, if you want to ping everyone, including it in the allowed_mentions field is not enough, the mention format (@everyone) must also be present in the content of the message or its components. It is important to note that setting this field does not guarantee a push notification will be sent, as additional factors can influence this:
     - To mention roles and notify their members, the role’s mentionable field must be set to true, or the bot must have the MENTION_EVERYONE permission
@@ -545,6 +555,8 @@ trait AllowedMention
     """
 
     fun value(): String
+    fun hash(): USize => value().hash()
+    fun eq(that: AllowedMention): Bool => value() == that.value()
 primitive AllowedMentionRole is AllowedMention
     """
     Controls role mentions
