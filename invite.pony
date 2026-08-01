@@ -25,14 +25,20 @@ class val Invite
 
     // TODO(vxern): Add `channel` (partial channel object; the channel this invite is for) once `Channel` is implemented.
 
-    // TODO(vxern): Add `inviter` (user object; the user who created the invite) once `User` is implemented.
+    let inviter: (User | None)
+        """
+        the user who created the invite
+        """
 
     let target_type: (InviteTargetType | None)
         """
         the type of target for this voice channel invite
         """
 
-    // TODO(vxern): Add `target_user` (user object; the user whose stream to display for this voice channel stream invite) once `User` supports JSON conversion.
+    let target_user: (User | None)
+        """
+        the user whose stream to display for this voice channel stream invite
+        """
 
     let target_application: (Application | None)
         """
@@ -68,7 +74,9 @@ class val Invite
         var type'': (InviteType | None) = None
         var code': (String | None) = None
         var guild': (Guild | None) = None
+        var inviter': (User | None) = None
         var target_type': (InviteTargetType | None) = None
+        var target_user': (User | None) = None
         var target_application': (Application | None) = None
         var approximate_presence_count': (USize | None) = None
         var approximate_member_count': (USize | None) = None
@@ -81,7 +89,9 @@ class val Invite
             | "type" => type'' = InviteTypes.from((value as I64).u8())?
             | "code" => code' = value as String
             | "guild" => guild' = Guild.from_json(value as json.JsonObject)?
+            | "inviter" => inviter' = User.from_json(value as json.JsonObject)?
             | "target_type" => target_type' = InviteTargetTypes.from((value as I64).u8())?
+            | "target_user" => target_user' = User.from_json(value as json.JsonObject)?
             | "target_application" => target_application' = Application.from_json(value as json.JsonObject)?
             | "approximate_presence_count" => approximate_presence_count' = (value as I64).usize()
             | "approximate_member_count" => approximate_member_count' = (value as I64).usize()

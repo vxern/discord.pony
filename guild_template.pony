@@ -32,7 +32,10 @@ class val GuildTemplate
         the ID of the user who created the template
         """
 
-    // TODO(vxern): Add `creator` (user object; the user who created the template) once `User` is implemented.
+    let creator: User
+        """
+        the user who created the template
+        """
 
     let created_at: ISO8601
         """
@@ -67,6 +70,7 @@ class val GuildTemplate
         var description': (String | None) = None
         var usage_count': (USize | None) = None
         var creator_id': (Snowflake | None) = None
+        var creator': (User | None) = None
         var created_at': (ISO8601 | None) = None
         var updated_at': (ISO8601 | None) = None
         var source_guild_id': (Snowflake | None) = None
@@ -81,6 +85,7 @@ class val GuildTemplate
                 match value | let string: String => description' = string end
             | "usage_count" => usage_count' = (value as I64).usize()
             | "creator_id" => creator_id' = Snowflake.from_json(value)?
+            | "creator" => creator' = User.from_json(value as json.JsonObject)?
             | "created_at" => created_at' = value as String
             | "updated_at" => updated_at' = value as String
             | "source_guild_id" => source_guild_id' = Snowflake.from_json(value)?
@@ -95,6 +100,7 @@ class val GuildTemplate
         description = description'
         usage_count = usage_count' as USize
         creator_id = creator_id' as Snowflake
+        creator = creator' as User
         created_at = created_at' as ISO8601
         updated_at = updated_at' as ISO8601
         source_guild_id = source_guild_id' as Snowflake
@@ -108,6 +114,7 @@ class val GuildTemplate
             .update("description", description)
             .update("usage_count", usage_count.i64())
             .update("creator_id", creator_id.to_json())
+            .update("creator", creator.to_json())
             .update("created_at", created_at)
             .update("updated_at", updated_at)
             .update("source_guild_id", source_guild_id.to_json())

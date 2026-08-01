@@ -33,7 +33,10 @@ class val AuditLog
         Threads referenced in THREAD_CREATE and THREAD_UPDATE events are included in the threads map since archived threads might not be kept in memory by clients.
         """
 
-    // TODO(vxern): Add `users` (array of user objects; List of users referenced in the audit log) once `User` supports JSON conversion.
+    let users: Array[User] val
+        """
+        List of users referenced in the audit log
+        """
 
     // TODO(vxern): Add `webhooks` (array of webhook objects; List of webhooks referenced in the audit log) once `Webhook` is implemented.
 
@@ -41,24 +44,28 @@ class val AuditLog
         var audit_log_entries': (Array[AuditLogEntry] val | None) = None
         var auto_moderation_rules': (Array[AutoModerationRule] val | None) = None
         var threads': (Array[Channel] val | None) = None
+        var users': (Array[User] val | None) = None
 
         for (key, value) in obj.pairs() do
             match key
             | "audit_log_entries" => audit_log_entries' = _AuditLogEntries(value)?
             | "auto_moderation_rules" => auto_moderation_rules' = _AutoModerationRules(value)?
             | "threads" => threads' = _Channels(value)?
+            | "users" => users' = _Users(value)?
             end
         end
 
         audit_log_entries = audit_log_entries' as Array[AuditLogEntry] val
         auto_moderation_rules = auto_moderation_rules' as Array[AutoModerationRule] val
         threads = threads' as Array[Channel] val
+        users = users' as Array[User] val
 
     fun to_json(): json.JsonObject =>
         json.JsonObject
             .update("audit_log_entries", _AuditLogEntries.to_json(audit_log_entries))
             .update("auto_moderation_rules", _AutoModerationRules.to_json(auto_moderation_rules))
             .update("threads", _Channels.to_json(threads))
+            .update("users", _Users.to_json(users))
 
 class val AuditLogEntry
     """

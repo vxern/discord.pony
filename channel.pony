@@ -68,7 +68,10 @@ class val Channel
         amount of seconds a user has to wait before sending another message (0-21600); bots, as well as users with the permission manage_messages or manage_channel, are unaffected
         """
 
-    // TODO(vxern): Add `recipients` (array of user objects; the recipients of the DM) once `User` is implemented.
+    let recipients: (Array[User] val | None)
+        """
+        the recipients of the DM
+        """
 
     let icon: (String | None)
         """
@@ -193,6 +196,7 @@ class val Channel
         var bitrate': (USize | None) = None
         var user_limit': (USize | None) = None
         var rate_limit_per_user': (USize | None) = None
+        var recipients': (Array[User] val | None) = None
         var icon': (String | None) = None
         var owner_id': (Snowflake | None) = None
         var application_id': (Snowflake | None) = None
@@ -233,6 +237,7 @@ class val Channel
             | "bitrate" => bitrate' = (value as I64).usize()
             | "user_limit" => user_limit' = (value as I64).usize()
             | "rate_limit_per_user" => rate_limit_per_user' = (value as I64).usize()
+            | "recipients" => recipients' = _Users(value)?
             | "icon" =>
                 match value | let string: String => icon' = string end
             | "owner_id" => owner_id' = Snowflake.from_json(value)?
@@ -276,6 +281,7 @@ class val Channel
         bitrate = bitrate'
         user_limit = user_limit'
         rate_limit_per_user = rate_limit_per_user'
+        recipients = recipients'
         icon = icon'
         owner_id = owner_id'
         application_id = application_id'
@@ -342,6 +348,10 @@ class val Channel
 
         match rate_limit_per_user
         | let rate_limit_per_user': USize => obj = obj.update("rate_limit_per_user", rate_limit_per_user'.i64())
+        end
+
+        match recipients
+        | let recipients': Array[User] val => obj = obj.update("recipients", _Users.to_json(recipients'))
         end
 
         match icon

@@ -102,6 +102,10 @@ class val Emoji
         | let r: Array[Snowflake] val => obj = obj.update("roles", _Snowflakes.to_json(r))
         end
 
+        match user
+        | let u: User => obj = obj.update("user", u.to_json())
+        end
+
         match require_colons
         | let b: Bool => obj = obj.update("require_colons", b)
         end
