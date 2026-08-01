@@ -34,7 +34,10 @@ class val Emoji
         roles allowed to use this emoji
         """
 
-    // TODO(vxern): Restore `user` (user object; the user that created this emoji) once `User` supports JSON conversion.
+    let user: (User | None)
+        """
+        user that created this emoji
+        """
 
     let require_colons: (Bool | None)
         """
@@ -60,6 +63,7 @@ class val Emoji
         var id': (Snowflake | None) = None
         var name': (String | None) = None
         var roles': (Array[Snowflake] val | None) = None
+        var user': (User | None) = None
         var require_colons': (Bool | None) = None
         var managed': (Bool | None) = None
         var animated': (Bool | None) = None
@@ -72,6 +76,7 @@ class val Emoji
             | "name" =>
                 match value | let s: String => name' = s end
             | "roles" => roles' = _Snowflakes(value)?
+            | "user" => user' = User.from_json(value as json.JsonObject)?
             | "require_colons" => require_colons' = value as Bool
             | "managed" => managed' = value as Bool
             | "animated" => animated' = value as Bool
@@ -82,6 +87,7 @@ class val Emoji
         id = id'
         name = name'
         roles = roles'
+        user = user'
         require_colons = require_colons'
         managed = managed'
         animated = animated'
