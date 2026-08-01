@@ -23,7 +23,12 @@ class val Invite
         the guild this invite is for
         """
 
-    // TODO(vxern): Add `channel` (partial channel object; the channel this invite is for) once `Channel` is implemented.
+    let channel: (Channel | None)
+        """
+        the channel this invite is for
+
+        This is a partial channel object carrying only `id`, `name` and `type`.
+        """
 
     let inviter: (User | None)
         """
@@ -74,6 +79,7 @@ class val Invite
         var type'': (InviteType | None) = None
         var code': (String | None) = None
         var guild': (Guild | None) = None
+        var channel': (Channel | None) = None
         var inviter': (User | None) = None
         var target_type': (InviteTargetType | None) = None
         var target_user': (User | None) = None
@@ -89,6 +95,8 @@ class val Invite
             | "type" => type'' = InviteTypes.from((value as I64).u8())?
             | "code" => code' = value as String
             | "guild" => guild' = Guild.from_json(value as json.JsonObject)?
+            | "channel" =>
+                match value | let obj': json.JsonObject => channel' = Channel.from_json(obj')? end
             | "inviter" => inviter' = User.from_json(value as json.JsonObject)?
             | "target_type" => target_type' = InviteTargetTypes.from((value as I64).u8())?
             | "target_user" => target_user' = User.from_json(value as json.JsonObject)?
@@ -105,6 +113,7 @@ class val Invite
         type' = type'' as InviteType
         code = code' as String
         guild = guild'
+        channel = channel'
         inviter = inviter'
         target_type = target_type'
         target_user = target_user'
@@ -122,6 +131,10 @@ class val Invite
 
         match guild
         | let guild': Guild => obj = obj.update("guild", guild'.to_json())
+        end
+
+        match channel
+        | let channel': Channel => obj = obj.update("channel", channel'.to_json())
         end
 
         match inviter

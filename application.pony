@@ -75,7 +75,7 @@ class val Application
         Guild associated with the app. For example, a developer support server.
         """
 
-    // TODO(vxern): Add `guild` (partial guild object; Partial object of the associated guild) once `Guild` is implemented.
+    // TODO(vxern): Add `guild` (partial guild object; Partial object of the associated guild) once a partial variant of `Guild` is implemented. Discord omits most of the fields `Guild` requires, so `Guild` cannot decode it.
 
     let primary_sku_id: (Snowflake | None)
         """

@@ -22,9 +22,12 @@ class val AuditLog
         List of auto moderation rules referenced in the audit log
         """
 
-    // TODO(vxern): Add `guild_scheduled_events` (array of guild scheduled event objects; List of guild scheduled events referenced in the audit log) once `GuildScheduledEvent` is implemented.
+    let guild_scheduled_events: Array[GuildScheduledEvent] val
+        """
+        List of guild scheduled events referenced in the audit log
+        """
 
-    // TODO(vxern): Add `integrations` (array of partial integration objects; List of partial integration objects) once `Integration` is implemented.
+    // TODO(vxern): Add `integrations` (array of partial integration objects; List of partial integration objects) once a partial variant of `Integration` is implemented. Discord sends only `id`, `name`, `type` and `account`, so `Integration` — which requires `enabled` — cannot decode them.
 
     let threads: Array[Channel] val
         """
@@ -38,34 +41,45 @@ class val AuditLog
         List of users referenced in the audit log
         """
 
-    // TODO(vxern): Add `webhooks` (array of webhook objects; List of webhooks referenced in the audit log) once `Webhook` is implemented.
+    let webhooks: Array[Webhook] val
+        """
+        List of webhooks referenced in the audit log
+        """
 
     new val from_json(obj: json.JsonObject) ? =>
         var audit_log_entries': (Array[AuditLogEntry] val | None) = None
         var auto_moderation_rules': (Array[AutoModerationRule] val | None) = None
+        var guild_scheduled_events': (Array[GuildScheduledEvent] val | None) = None
         var threads': (Array[Channel] val | None) = None
         var users': (Array[User] val | None) = None
+        var webhooks': (Array[Webhook] val | None) = None
 
         for (key, value) in obj.pairs() do
             match key
             | "audit_log_entries" => audit_log_entries' = _AuditLogEntries(value)?
             | "auto_moderation_rules" => auto_moderation_rules' = _AutoModerationRules(value)?
+            | "guild_scheduled_events" => guild_scheduled_events' = _GuildScheduledEvents(value)?
             | "threads" => threads' = _Channels(value)?
             | "users" => users' = _Users(value)?
+            | "webhooks" => webhooks' = _Webhooks(value)?
             end
         end
 
         audit_log_entries = audit_log_entries' as Array[AuditLogEntry] val
         auto_moderation_rules = auto_moderation_rules' as Array[AutoModerationRule] val
+        guild_scheduled_events = guild_scheduled_events' as Array[GuildScheduledEvent] val
         threads = threads' as Array[Channel] val
         users = users' as Array[User] val
+        webhooks = webhooks' as Array[Webhook] val
 
     fun to_json(): json.JsonObject =>
         json.JsonObject
             .update("audit_log_entries", _AuditLogEntries.to_json(audit_log_entries))
             .update("auto_moderation_rules", _AutoModerationRules.to_json(auto_moderation_rules))
+            .update("guild_scheduled_events", _GuildScheduledEvents.to_json(guild_scheduled_events))
             .update("threads", _Channels.to_json(threads))
             .update("users", _Users.to_json(users))
+            .update("webhooks", _Webhooks.to_json(webhooks))
 
 class val AuditLogEntry
     """
