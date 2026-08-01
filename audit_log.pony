@@ -17,7 +17,10 @@ class val AuditLog
         List of audit log entries, sorted from most to least recent
         """
 
-    // TODO(vxern): Add `auto_moderation_rules` (array of auto moderation rule objects; List of auto moderation rules referenced in the audit log) once `AutoModerationRule` is implemented.
+    let auto_moderation_rules: Array[AutoModerationRule] val
+        """
+        List of auto moderation rules referenced in the audit log
+        """
 
     // TODO(vxern): Add `guild_scheduled_events` (array of guild scheduled event objects; List of guild scheduled events referenced in the audit log) once `GuildScheduledEvent` is implemented.
 
@@ -32,18 +35,22 @@ class val AuditLog
 
     new val from_json(obj: json.JsonObject) ? =>
         var audit_log_entries': (Array[AuditLogEntry] val | None) = None
+        var auto_moderation_rules': (Array[AutoModerationRule] val | None) = None
 
         for (key, value) in obj.pairs() do
             match key
             | "audit_log_entries" => audit_log_entries' = _AuditLogEntries(value)?
+            | "auto_moderation_rules" => auto_moderation_rules' = _AutoModerationRules(value)?
             end
         end
 
         audit_log_entries = audit_log_entries' as Array[AuditLogEntry] val
+        auto_moderation_rules = auto_moderation_rules' as Array[AutoModerationRule] val
 
     fun to_json(): json.JsonObject =>
         json.JsonObject
             .update("audit_log_entries", _AuditLogEntries.to_json(audit_log_entries))
+            .update("auto_moderation_rules", _AutoModerationRules.to_json(auto_moderation_rules))
 
 class val AuditLogEntry
     """
