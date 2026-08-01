@@ -26,8 +26,12 @@ class val AuditLog
 
     // TODO(vxern): Add `integrations` (array of partial integration objects; List of partial integration objects) once `Integration` is implemented.
 
-    // TODO(vxern): Add `threads` (array of thread-specific channel objects; List of threads referenced in the audit log*) once `Channel` supports JSON conversion.
-    //              * Threads referenced in THREAD_CREATE and THREAD_UPDATE events are included in the threads map since archived threads might not be kept in memory by clients.
+    let threads: Array[Channel] val
+        """
+        List of threads referenced in the audit log
+
+        Threads referenced in THREAD_CREATE and THREAD_UPDATE events are included in the threads map since archived threads might not be kept in memory by clients.
+        """
 
     // TODO(vxern): Add `users` (array of user objects; List of users referenced in the audit log) once `User` supports JSON conversion.
 
@@ -36,21 +40,25 @@ class val AuditLog
     new val from_json(obj: json.JsonObject) ? =>
         var audit_log_entries': (Array[AuditLogEntry] val | None) = None
         var auto_moderation_rules': (Array[AutoModerationRule] val | None) = None
+        var threads': (Array[Channel] val | None) = None
 
         for (key, value) in obj.pairs() do
             match key
             | "audit_log_entries" => audit_log_entries' = _AuditLogEntries(value)?
             | "auto_moderation_rules" => auto_moderation_rules' = _AutoModerationRules(value)?
+            | "threads" => threads' = _Channels(value)?
             end
         end
 
         audit_log_entries = audit_log_entries' as Array[AuditLogEntry] val
         auto_moderation_rules = auto_moderation_rules' as Array[AutoModerationRule] val
+        threads = threads' as Array[Channel] val
 
     fun to_json(): json.JsonObject =>
         json.JsonObject
             .update("audit_log_entries", _AuditLogEntries.to_json(audit_log_entries))
             .update("auto_moderation_rules", _AutoModerationRules.to_json(auto_moderation_rules))
+            .update("threads", _Channels.to_json(threads))
 
 class val AuditLogEntry
     """

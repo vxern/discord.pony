@@ -28,13 +28,17 @@ class val Lobby
         members of the lobby
         """
 
-    // TODO(vxern): Add `linked_channel` (channel object; The guild channel linked to the lobby) once `Channel` is implemented.
+    let linked_channel: (Channel | None)
+        """
+        the guild channel linked to the lobby
+        """
 
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
         var application_id': (Snowflake | None) = None
         var metadata': (collections.Map[String, String] | None) = None
         var members': (Array[LobbyMember] val | None) = None
+        var linked_channel': (Channel | None) = None
 
         for (key, value) in obj.pairs() do
             match key
@@ -42,6 +46,7 @@ class val Lobby
             | "application_id" => application_id' = Snowflake.from_json(value)?
             | "metadata" => metadata' = _Metadata(value)
             | "members" => members' = _LobbyMembers(value)?
+            | "linked_channel" => linked_channel' = Channel.from_json(value as json.JsonObject)?
             end
         end
 
@@ -49,6 +54,7 @@ class val Lobby
         application_id = application_id' as Snowflake
         metadata = metadata'
         members = members' as Array[LobbyMember] val
+        linked_channel = linked_channel'
 
     fun to_json(): json.JsonObject =>
         var obj = json.JsonObject
@@ -58,6 +64,10 @@ class val Lobby
 
         match metadata
         | let metadata': collections.Map[String, String] box => obj = obj.update("metadata", _Metadata.to_json(metadata'))
+        end
+
+        match linked_channel
+        | let linked_channel': Channel => obj = obj.update("linked_channel", linked_channel'.to_json())
         end
 
         obj
