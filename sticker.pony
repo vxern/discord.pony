@@ -347,3 +347,21 @@ class val StickerPack
         end
 
         obj
+
+primitive _StickerItems
+    fun apply(value: json.JsonValue): Array[StickerItem] val ? =>
+        """
+        Decodes an array of sticker items.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let items = Array[StickerItem](array.size())
+            for item in array.values() do items.push(StickerItem.from_json(item as json.JsonObject)?) end
+            items
+        end
+
+    fun to_json(items: Array[StickerItem] val): json.JsonArray =>
+        var array = json.JsonArray
+        for item in items.values() do array = array.push(item.to_json()) end
+        array

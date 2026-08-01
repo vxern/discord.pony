@@ -77,7 +77,10 @@ class val Interaction
         Read-only property, always 1
         """
 
-    // TODO(vxern): Add `message` (message object; For components, the message they were attached to) once `Message` supports JSON conversion.
+    let message: (Message | None)
+        """
+        For components, the message they were attached to
+        """
 
     let app_permissions: Array[Permission] val
         """
@@ -126,6 +129,7 @@ class val Interaction
         var user': (User | None) = None
         var token': (String | None) = None
         var version': (USize | None) = None
+        var message': (Message | None) = None
         var app_permissions': (Array[Permission] val | None) = None
         var locale': (Locale | None) = None
         var guild_locale': (Locale | None) = None
@@ -149,6 +153,7 @@ class val Interaction
             | "user" => user' = User.from_json(value as json.JsonObject)?
             | "token" => token' = value as String
             | "version" => version' = (value as I64).usize()
+            | "message" => message' = Message.from_json(value as json.JsonObject)?
             | "app_permissions" => app_permissions' = _Permissions(value)?
             | "locale" => locale' = Locales.from(value as String)?
             | "guild_locale" => guild_locale' = Locales.from(value as String)?
@@ -168,6 +173,7 @@ class val Interaction
         user = user'
         token = token' as String
         version = version' as USize
+        message = message'
         app_permissions = app_permissions' as Array[Permission] val
         locale = locale'
         guild_locale = guild_locale'
@@ -216,6 +222,10 @@ class val Interaction
 
         match user
         | let user': User => obj = obj.update("user", user'.to_json())
+        end
+
+        match message
+        | let message': Message => obj = obj.update("message", message'.to_json())
         end
 
         match locale
@@ -410,11 +420,16 @@ class val MessageComponentData
         the custom_id of the component
         """
 
-    // TODO(vxern): Add `component_type` (integer; the type of the component) once `ComponentType` is implemented.
+    let component_type: ComponentType
+        """
+        the type of the component
+        """
 
     let values: (Array[String] val | None)
         """
         values the user selected in a select menu component
+
+        This is always present for select menu components.
         """
 
     let resolved: (ResolvedData | None)
@@ -424,24 +439,28 @@ class val MessageComponentData
 
     new val from_json(obj: json.JsonObject) ? =>
         var custom_id': (String | None) = None
+        var component_type': (ComponentType | None) = None
         var values': (Array[String] val | None) = None
         var resolved': (ResolvedData | None) = None
 
         for (key, value) in obj.pairs() do
             match key
             | "custom_id" => custom_id' = value as String
+            | "component_type" => component_type' = ComponentTypes.from((value as I64).u8())?
             | "values" => values' = _Strings(value)?
             | "resolved" => resolved' = ResolvedData.from_json(value as json.JsonObject)?
             end
         end
 
         custom_id = custom_id' as String
+        component_type = component_type' as ComponentType
         values = values'
         resolved = resolved'
 
     fun to_json(): json.JsonObject =>
         var obj = json.JsonObject
             .update("custom_id", custom_id)
+            .update("component_type", component_type.value().i64())
 
         match values
         | let values': Array[String] val => obj = obj.update("values", _Strings.to_json(values'))
@@ -465,22 +484,29 @@ class val ModalSubmitData
         the custom_id of the modal
         """
 
-    // TODO(vxern): Add `components` (array of message components; the values submitted by the user) once `Component` is implemented.
+    let components: Array[Component] val
+        """
+        Values submitted by the user
+        """
 
     new val from_json(obj: json.JsonObject) ? =>
         var custom_id': (String | None) = None
+        var components': (Array[Component] val | None) = None
 
         for (key, value) in obj.pairs() do
             match key
             | "custom_id" => custom_id' = value as String
+            | "components" => components' = _Components(value)?
             end
         end
 
         custom_id = custom_id' as String
+        components = components' as Array[Component] val
 
     fun to_json(): json.JsonObject =>
         json.JsonObject
             .update("custom_id", custom_id)
+            .update("components", _Components.to_json(components))
 
 class val ResolvedData
     """
@@ -508,26 +534,38 @@ class val ResolvedData
         Partial Channel objects only have `id`, `name`, `type` and `permissions` fields. Threads will also have `thread_metadata` and `parent_id` fields.
         """
 
-    // TODO(vxern): Add `messages` (map of snowflakes to partial message objects; the ids and partial Message objects) once `Message` supports JSON conversion.
+    let messages: (collections.Map[Snowflake, Message] | None)
+        """
+        the ids and partial Message objects
+        """
 
-    // TODO(vxern): Add `attachments` (map of snowflakes to attachment objects; the ids and attachment objects) once `MessageAttachment` supports JSON conversion.
+    let attachments: (collections.Map[Snowflake, MessageAttachment] | None)
+        """
+        the ids and attachment objects
+        """
 
     new val from_json(obj: json.JsonObject) ? =>
         var users': (collections.Map[Snowflake, User] | None) = None
         var roles': (collections.Map[Snowflake, Role] | None) = None
         var channels': (collections.Map[Snowflake, Channel] | None) = None
+        var messages': (collections.Map[Snowflake, Message] | None) = None
+        var attachments': (collections.Map[Snowflake, MessageAttachment] | None) = None
 
         for (key, value) in obj.pairs() do
             match key
             | "users" => users' = _ResolvedUsers(value)?
             | "roles" => roles' = _ResolvedRoles(value)?
             | "channels" => channels' = _ResolvedChannels(value)?
+            | "messages" => messages' = _ResolvedMessages(value)?
+            | "attachments" => attachments' = _ResolvedAttachments(value)?
             end
         end
 
         users = users'
         roles = roles'
         channels = channels'
+        messages = messages'
+        attachments = attachments'
 
     fun to_json(): json.JsonObject =>
         var obj = json.JsonObject
@@ -542,6 +580,14 @@ class val ResolvedData
 
         match channels
         | let channels': collections.Map[Snowflake, Channel] box => obj = obj.update("channels", _ResolvedChannels.to_json(channels'))
+        end
+
+        match messages
+        | let messages': collections.Map[Snowflake, Message] box => obj = obj.update("messages", _ResolvedMessages.to_json(messages'))
+        end
+
+        match attachments
+        | let attachments': collections.Map[Snowflake, MessageAttachment] box => obj = obj.update("attachments", _ResolvedAttachments.to_json(attachments'))
         end
 
         obj
@@ -600,6 +646,42 @@ primitive _ResolvedChannels
         for (id, channel) in map.pairs() do obj = obj.update(id.string(), channel.to_json()) end
         obj
 
+primitive _ResolvedMessages
+    fun apply(value: json.JsonValue): collections.Map[Snowflake, Message] ? =>
+        """
+        Decodes a mapping of snowflakes to messages.
+        """
+
+        let obj = value as json.JsonObject
+        let map = collections.Map[Snowflake, Message](obj.size())
+        for (key, value') in obj.pairs() do
+            map(Snowflake.from_json(key)?) = Message.from_json(value' as json.JsonObject)?
+        end
+        map
+
+    fun to_json(map: collections.Map[Snowflake, Message] box): json.JsonObject =>
+        var obj = json.JsonObject
+        for (id, message) in map.pairs() do obj = obj.update(id.string(), message.to_json()) end
+        obj
+
+primitive _ResolvedAttachments
+    fun apply(value: json.JsonValue): collections.Map[Snowflake, MessageAttachment] ? =>
+        """
+        Decodes a mapping of snowflakes to attachments.
+        """
+
+        let obj = value as json.JsonObject
+        let map = collections.Map[Snowflake, MessageAttachment](obj.size())
+        for (key, value') in obj.pairs() do
+            map(Snowflake.from_json(key)?) = MessageAttachment.from_json(value' as json.JsonObject)?
+        end
+        map
+
+    fun to_json(map: collections.Map[Snowflake, MessageAttachment] box): json.JsonObject =>
+        var obj = json.JsonObject
+        for (id, attachment) in map.pairs() do obj = obj.update(id.string(), attachment.to_json()) end
+        obj
+
 class val InteractionResponse
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-response-object-interaction-response-structure
@@ -610,7 +692,7 @@ class val InteractionResponse
         the type of response
         """
 
-    // TODO(vxern): Add `data` (interaction callback data; an optional response message) once `Component`, `MessageEmbed`, `AllowedMention` and `MessageAttachment` support JSON conversion.
+    // TODO(vxern): Add `data` (interaction callback data; an optional response message) once `ApplicationCommandOptionChoice` is implemented. The messages and modal variants are now expressible, but the autocomplete variant carries `choices`, and the variant in play is determined by `type` rather than by a tag on `data` itself.
 
     new val from_json(obj: json.JsonObject) ? =>
         var type'': (InteractionCallbackType | None) = None
@@ -856,21 +938,29 @@ class val InteractionCallbackResource
         Only present if `type` is LAUNCH_ACTIVITY.
         """
 
-    // TODO(vxern): Add `message` (message object; Message created by the interaction) once `Message` supports JSON conversion.
+    let message: (Message | None)
+        """
+        Message created by the interaction
+
+        Only present if `type` is either CHANNEL_MESSAGE_WITH_SOURCE or UPDATE_MESSAGE.
+        """
 
     new val from_json(obj: json.JsonObject) ? =>
         var type'': (InteractionCallbackType | None) = None
         var activity_instance': (InteractionCallbackActivityInstanceResource | None) = None
+        var message': (Message | None) = None
 
         for (key, value) in obj.pairs() do
             match key
             | "type" => type'' = InteractionCallbackTypes.from((value as I64).u8())?
             | "activity_instance" => activity_instance' = InteractionCallbackActivityInstanceResource.from_json(value as json.JsonObject)?
+            | "message" => message' = Message.from_json(value as json.JsonObject)?
             end
         end
 
         type' = type'' as InteractionCallbackType
         activity_instance = activity_instance'
+        message = message'
 
     fun to_json(): json.JsonObject =>
         var obj = json.JsonObject
@@ -878,6 +968,10 @@ class val InteractionCallbackResource
 
         match activity_instance
         | let activity_instance': InteractionCallbackActivityInstanceResource => obj = obj.update("activity_instance", activity_instance'.to_json())
+        end
+
+        match message
+        | let message': Message => obj = obj.update("message", message'.to_json())
         end
 
         obj
