@@ -88,7 +88,7 @@ actor Rest
         """
 
     // TODO(vxern): Implement.
-    be edit_auto_moderation_rule(guild_id: Snowflake, auto_moderation_rule_id: Snowflake, params: ParamsStub, reason: Reason = None) => "/guilds/" + guild_id.string() + "/auto-moderation/rules/" + auto_moderation_rule_id.string()
+    be update_auto_moderation_rule(guild_id: Snowflake, auto_moderation_rule_id: Snowflake, params: ParamsStub, reason: Reason = None) => "/guilds/" + guild_id.string() + "/auto-moderation/rules/" + auto_moderation_rule_id.string()
         """
         https://docs.discord.com/developers/resources/auto-moderation#modify-auto-moderation-rule
 
@@ -112,7 +112,7 @@ actor Rest
         """
 
     // TODO(vxern): Implement.
-    be edit_channel(channel_id: Snowflake, params: ParamsStub, reason: Reason = None) => "/channels/" + channel_id.string()
+    be update_channel(channel_id: Snowflake, params: ParamsStub, reason: Reason = None) => "/channels/" + channel_id.string()
         """
         https://docs.discord.com/developers/resources/channel#modify-channel
 
@@ -136,7 +136,7 @@ actor Rest
         """
 
     // TODO(vxern): Implement.
-    be edit_channel_permissions(channel_id: Snowflake, permission_overwrite_id: Snowflake, reason: Reason = None) => "/channels/" + channel_id.string() + "/permissions/" + permission_overwrite_id.string()
+    be update_channel_permissions(channel_id: Snowflake, permission_overwrite_id: Snowflake, reason: Reason = None) => "/channels/" + channel_id.string() + "/permissions/" + permission_overwrite_id.string()
         """
         https://docs.discord.com/developers/resources/channel#edit-channel-permissions
 
@@ -389,6 +389,1843 @@ actor Rest
         https://docs.discord.com/developers/resources/emoji#delete-application-emoji
 
         Delete the given emoji. Returns 204 No Content on success.
+        """
+
+    // TODO(vxern): Implement.
+    be get_entitlements(application_id: Snowflake, params: ParamsStub) => "/applications/" + application_id.string() + "/entitlements"
+        """
+        https://docs.discord.com/developers/resources/entitlement#list-entitlements
+
+        Returns all entitlements for a given app, active and expired.
+        """
+
+    // TODO(vxern): Implement.
+    be get_entitlement(application_id: Snowflake, entitlement_id: Snowflake) => "/applications/" + application_id.string() + "/entitlements/" + entitlement_id.string()
+        """
+        https://docs.discord.com/developers/resources/entitlement#get-entitlement
+
+        Returns an entitlement.
+        """
+
+    // TODO(vxern): Implement.
+    be consume_entitlement(application_id: Snowflake, entitlement_id: Snowflake) => "/applications/" + application_id.string() + "/entitlements/" + entitlement_id.string() + "/consume"
+        """
+        https://docs.discord.com/developers/resources/entitlement#consume-an-entitlement
+
+        For One-Time Purchase consumable SKUs, marks a given entitlement for the user as consumed. The entitlement will have consumed: true when using List Entitlements.
+
+        Returns a 204 No Content on success.
+        """
+
+    // TODO(vxern): Implement.
+    be create_test_entitlement(application_id: Snowflake, params: ParamsStub) => "/applications/" + application_id.string() + "/entitlements"
+        """
+        https://docs.discord.com/developers/resources/entitlement#create-test-entitlement
+
+        Creates a test entitlement to a given SKU for a given guild or user. Discord will act as though that user or guild has entitlement to your premium offering.
+
+        This endpoint returns a partial entitlement object. It will not contain subscription_id, starts_at, or ends_at, as it's valid in perpetuity.
+
+        After creating a test entitlement, you'll need to reload your Discord client. After doing so, you'll see that your server or user now has premium access.
+        """
+
+    // TODO(vxern): Implement.
+    be delete_test_entitlement(application_id: Snowflake, entitlement_id: Snowflake) => "/applications/" + application_id.string() + "/entitlements/" + entitlement_id.string()
+        """
+        https://docs.discord.com/developers/resources/entitlement#delete-test-entitlement
+
+        Deletes a currently-active test entitlement. Discord will act as though that user or guild _no longer has_ entitlement to your premium offering.
+
+        Returns 204 No Content on success.
+        """
+
+    // TODO(vxern): Implement.
+    be get_guild(guild_id: Snowflake, params: ParamsStub) => "/guilds/" + guild_id.string()
+        """
+        https://docs.discord.com/developers/resources/guild#get-guild
+
+        Returns the guild object for the given id. If with_counts is set to true, this endpoint will also return approximate_member_count and approximate_presence_count for the guild.
+        """
+
+    // TODO(vxern): Implement.
+    be get_guild_preview(guild_id: Snowflake) => "/guilds/" + guild_id.string() + "/preview"
+        """
+        https://docs.discord.com/developers/resources/guild#get-guild-preview
+
+        Returns the guild preview object for the given id.
+        If the user is not in the guild, then the guild must be discoverable.
+        """
+
+    // TODO(vxern): Implement.
+    be update_guild(guild_id: Snowflake, params: ParamsStub, reason: Reason = None) => "/guilds/" + guild_id.string()
+        """
+        https://docs.discord.com/developers/resources/guild#modify-guild
+
+        Modify a guild's settings. Requires the MANAGE_GUILD permission. Returns the updated guild object on success. Fires a Guild Update Gateway event.
+
+        All parameters to this endpoint are optional.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+
+        Attempting to add or remove the COMMUNITY guild feature requires the ADMINISTRATOR permission.
+        """
+
+    // TODO(vxern): Implement.
+    be get_guild_channels(guild_id: Snowflake) => "/guilds/" + guild_id.string() + "/channels"
+        """
+        https://docs.discord.com/developers/resources/guild#get-guild-channels
+
+        Returns a list of guild channel objects. Does not include threads.
+        """
+
+    // TODO(vxern): Implement.
+    be create_guild_channel(guild_id: Snowflake, params: ParamsStub, reason: Reason = None) => "/guilds/" + guild_id.string() + "/channels"
+        """
+        https://docs.discord.com/developers/resources/guild#create-guild-channel
+
+        Create a new channel object for the guild. Requires the MANAGE_CHANNELS permission. If setting permission overwrites, only permissions your bot has in the guild can be allowed/denied. Setting MANAGE_ROLES permission in channels is only possible for guild administrators. Returns the new channel object on success. Fires a Channel Create Gateway event.
+
+        All parameters to this endpoint are optional and nullable excluding name.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+        """
+
+    // TODO(vxern): Implement.
+    be update_guild_channel_positions(guild_id: Snowflake, params: ParamsStub) => "/guilds/" + guild_id.string() + "/channels"
+        """
+        https://docs.discord.com/developers/resources/guild#modify-guild-channel-positions
+
+        Modify the positions of a set of channel objects for the guild. Requires MANAGE_CHANNELS permission. Returns a 204 empty response on success. Fires multiple Channel Update Gateway events.
+
+        Only channels to be modified are required.
+
+        This endpoint takes a JSON array of parameters in the following format:
+        """
+
+    // TODO(vxern): Implement.
+    be get_active_guild_threads(guild_id: Snowflake) => "/guilds/" + guild_id.string() + "/threads/active"
+        """
+        https://docs.discord.com/developers/resources/guild#list-active-guild-threads
+
+        Returns all active threads in the guild, including public and private threads. Threads are ordered by their id, in descending order.
+        """
+
+    // TODO(vxern): Implement.
+    be get_guild_member(guild_id: Snowflake, user_id: Snowflake) => "/guilds/" + guild_id.string() + "/members/" + user_id.string()
+        """
+        https://docs.discord.com/developers/resources/guild#get-guild-member
+
+        Returns a guild member object for the specified user.
+        """
+
+    // TODO(vxern): Implement.
+    be get_guild_members(guild_id: Snowflake, params: ParamsStub) => "/guilds/" + guild_id.string() + "/members"
+        """
+        https://docs.discord.com/developers/resources/guild#list-guild-members
+
+        Returns a list of guild member objects that are members of the guild.
+
+        This endpoint requires the GUILD_MEMBERS Privileged Intent.
+
+        All parameters to this endpoint are optional.
+        """
+
+    // TODO(vxern): Implement.
+    be search_guild_members(guild_id: Snowflake, params: ParamsStub) => "/guilds/" + guild_id.string() + "/members/search"
+        """
+        https://docs.discord.com/developers/resources/guild#search-guild-members
+
+        Returns a list of guild member objects whose username or nickname starts with a provided string.
+
+        All parameters to this endpoint except for query are optional
+        """
+
+    // TODO(vxern): Implement.
+    be add_guild_member(guild_id: Snowflake, user_id: Snowflake, params: ParamsStub) => "/guilds/" + guild_id.string() + "/members/" + user_id.string()
+        """
+        https://docs.discord.com/developers/resources/guild#add-guild-member
+
+        Adds a user to the guild, provided you have a valid oauth2 access token for the user with the guilds.join scope. Returns a 201 Created with the guild member as the body, or 204 No Content if the user is already a member of the guild. Fires a Guild Member Add Gateway event.
+
+        For guilds with Membership Screening enabled, this endpoint will default to adding new members as pending in the guild member object. Members that are pending will have to complete membership screening before they become full members that can talk.
+
+        All parameters to this endpoint except for access_token are optional.
+
+        The Authorization header must be a Bot token (belonging to the same application used for authorization), and the bot must be a member of the guild with CREATE_INSTANT_INVITE permission.
+        """
+
+    // TODO(vxern): Implement.
+    be update_guild_member(guild_id: Snowflake, user_id: Snowflake, params: ParamsStub, reason: Reason = None) => "/guilds/" + guild_id.string() + "/members/" + user_id.string()
+        """
+        https://docs.discord.com/developers/resources/guild#modify-guild-member
+
+        Modify attributes of a guild member. Returns a 200 OK with the guild member as the body. Fires a Guild Member Update Gateway event. If the channel_id is set to null, this will force the target user to be disconnected from voice.
+
+        All parameters to this endpoint are optional and nullable. When moving members to channels, the API user _must_ have permissions to both connect to the channel and have the MOVE_MEMBERS permission.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+        """
+
+    // TODO(vxern): Implement.
+    be update_current_member(guild_id: Snowflake, params: ParamsStub, reason: Reason = None) => "/guilds/" + guild_id.string() + "/members/@me"
+        """
+        https://docs.discord.com/developers/resources/guild#modify-current-member
+
+        Modifies the current member in a guild. Returns a 200 with the updated member object on success. Fires a Guild Member Update Gateway event.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+        """
+
+    // TODO(vxern): Implement.
+    be update_current_user_nick(guild_id: Snowflake, params: ParamsStub, reason: Reason = None) => "/guilds/" + guild_id.string() + "/members/@me/nick"
+        """
+        https://docs.discord.com/developers/resources/guild#modify-current-user-nick
+
+        Deprecated in favor of Modify Current Member.
+
+        Modifies the nickname of the current user in a guild. Returns a 200 with the nickname on success. Fires a Guild Member Update Gateway event.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+        """
+
+    // TODO(vxern): Implement.
+    be add_guild_member_role(guild_id: Snowflake, user_id: Snowflake, role_id: Snowflake, reason: Reason = None) => "/guilds/" + guild_id.string() + "/members/" + user_id.string() + "/roles/" + role_id.string()
+        """
+        https://docs.discord.com/developers/resources/guild#add-guild-member-role
+
+        Adds a role to a guild member. Requires the MANAGE_ROLES permission. Returns a 204 empty response on success. Fires a Guild Member Update Gateway event.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+        """
+
+    // TODO(vxern): Implement.
+    be remove_guild_member_role(guild_id: Snowflake, user_id: Snowflake, role_id: Snowflake, reason: Reason = None) => "/guilds/" + guild_id.string() + "/members/" + user_id.string() + "/roles/" + role_id.string()
+        """
+        https://docs.discord.com/developers/resources/guild#remove-guild-member-role
+
+        Removes a role from a guild member. Requires the MANAGE_ROLES permission. Returns a 204 empty response on success. Fires a Guild Member Update Gateway event.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+        """
+
+    // TODO(vxern): Implement.
+    be remove_guild_member(guild_id: Snowflake, user_id: Snowflake, reason: Reason = None) => "/guilds/" + guild_id.string() + "/members/" + user_id.string()
+        """
+        https://docs.discord.com/developers/resources/guild#remove-guild-member
+
+        Remove a member from a guild. Requires KICK_MEMBERS permission. Returns a 204 empty response on success. Fires a Guild Member Remove Gateway event.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+        """
+
+    // TODO(vxern): Implement.
+    be get_guild_bans(guild_id: Snowflake, params: ParamsStub) => "/guilds/" + guild_id.string() + "/bans"
+        """
+        https://docs.discord.com/developers/resources/guild#get-guild-bans
+
+        Returns a list of ban objects for the users banned from this guild. Requires the BAN_MEMBERS permission.
+        """
+
+    // TODO(vxern): Implement.
+    be get_guild_ban(guild_id: Snowflake, user_id: Snowflake) => "/guilds/" + guild_id.string() + "/bans/" + user_id.string()
+        """
+        https://docs.discord.com/developers/resources/guild#get-guild-ban
+
+        Returns a ban object for the given user or a 404 not found if the ban cannot be found. Requires the BAN_MEMBERS permission.
+        """
+
+    // TODO(vxern): Implement.
+    be create_guild_ban(guild_id: Snowflake, user_id: Snowflake, params: ParamsStub, reason: Reason = None) => "/guilds/" + guild_id.string() + "/bans/" + user_id.string()
+        """
+        https://docs.discord.com/developers/resources/guild#create-guild-ban
+
+        Create a guild ban, and optionally delete previous messages sent by the banned user. Requires the BAN_MEMBERS permission. Returns a 204 empty response on success. Fires a Guild Ban Add Gateway event.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+        """
+
+    // TODO(vxern): Implement.
+    be remove_guild_ban(guild_id: Snowflake, user_id: Snowflake, reason: Reason = None) => "/guilds/" + guild_id.string() + "/bans/" + user_id.string()
+        """
+        https://docs.discord.com/developers/resources/guild#remove-guild-ban
+
+        Remove the ban for a user. Requires the BAN_MEMBERS permissions. Returns a 204 empty response on success. Fires a Guild Ban Remove Gateway event.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+        """
+
+    // TODO(vxern): Implement.
+    be bulk_guild_ban(guild_id: Snowflake, params: ParamsStub, reason: Reason = None) => "/guilds/" + guild_id.string() + "/bulk-ban"
+        """
+        https://docs.discord.com/developers/resources/guild#bulk-guild-ban
+
+        Ban up to 200 users from a guild, and optionally delete previous messages sent by the banned users. Requires both the BAN_MEMBERS and MANAGE_GUILD permissions. Returns a 200 response on success, including the fields banned_users with the IDs of the banned users and failed_users with IDs that could not be banned or were already banned.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+        """
+
+    // TODO(vxern): Implement.
+    be get_guild_roles(guild_id: Snowflake) => "/guilds/" + guild_id.string() + "/roles"
+        """
+        https://docs.discord.com/developers/resources/guild#get-guild-roles
+
+        Returns a list of role objects for the guild.
+        """
+
+    // TODO(vxern): Implement.
+    be get_guild_role(guild_id: Snowflake, role_id: Snowflake) => "/guilds/" + guild_id.string() + "/roles/" + role_id.string()
+        """
+        https://docs.discord.com/developers/resources/guild#get-guild-role
+
+        Returns a role object for the specified role.
+        """
+
+    // TODO(vxern): Implement.
+    be get_guild_role_member_counts(guild_id: Snowflake) => "/guilds/" + guild_id.string() + "/roles/member-counts"
+        """
+        https://docs.discord.com/developers/resources/guild#get-guild-role-member-counts
+
+        Returns a map of role IDs to the number of members with the role. Does not include the @everyone role.
+        """
+
+    // TODO(vxern): Implement.
+    be create_guild_role(guild_id: Snowflake, params: ParamsStub, reason: Reason = None) => "/guilds/" + guild_id.string() + "/roles"
+        """
+        https://docs.discord.com/developers/resources/guild#create-guild-role
+
+        Create a new role for the guild. Requires the MANAGE_ROLES permission. Returns the new role object on success. Fires a Guild Role Create Gateway event. All JSON params are optional.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+        """
+
+    // TODO(vxern): Implement.
+    be update_guild_role_positions(guild_id: Snowflake, params: ParamsStub, reason: Reason = None) => "/guilds/" + guild_id.string() + "/roles"
+        """
+        https://docs.discord.com/developers/resources/guild#modify-guild-role-positions
+
+        Modify the positions of a set of role objects for the guild. Requires the MANAGE_ROLES permission. Returns a list of all of the guild's role objects on success. Fires multiple Guild Role Update Gateway events.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+
+        This endpoint takes a JSON array of parameters in the following format:
+        """
+
+    // TODO(vxern): Implement.
+    be update_guild_role(guild_id: Snowflake, role_id: Snowflake, params: ParamsStub, reason: Reason = None) => "/guilds/" + guild_id.string() + "/roles/" + role_id.string()
+        """
+        https://docs.discord.com/developers/resources/guild#modify-guild-role
+
+        Modify a guild role. Requires the MANAGE_ROLES permission. Returns the updated role on success. Fires a Guild Role Update Gateway event.
+
+        All parameters to this endpoint are optional and nullable.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+        """
+
+    // TODO(vxern): Implement.
+    be delete_guild_role(guild_id: Snowflake, role_id: Snowflake, reason: Reason = None) => "/guilds/" + guild_id.string() + "/roles/" + role_id.string()
+        """
+        https://docs.discord.com/developers/resources/guild#delete-guild-role
+
+        Delete a guild role. Requires the MANAGE_ROLES permission. Returns a 204 empty response on success. Fires a Guild Role Delete Gateway event.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+        """
+
+    // TODO(vxern): Implement.
+    be get_guild_prune_count(guild_id: Snowflake, params: ParamsStub) => "/guilds/" + guild_id.string() + "/prune"
+        """
+        https://docs.discord.com/developers/resources/guild#get-guild-prune-count
+
+        Returns an object with one pruned key indicating the number of members that would be removed in a prune operation. Requires the MANAGE_GUILD and KICK_MEMBERS permissions.
+
+        By default, prune will not remove users with roles. You can optionally include specific roles in your prune by providing the include_roles parameter. Any inactive user that has a subset of the provided role(s) will be counted in the prune and users with additional roles will not.
+        """
+
+    // TODO(vxern): Implement.
+    be begin_guild_prune(guild_id: Snowflake, params: ParamsStub, reason: Reason = None) => "/guilds/" + guild_id.string() + "/prune"
+        """
+        https://docs.discord.com/developers/resources/guild#begin-guild-prune
+
+        Begin a prune operation. Requires the MANAGE_GUILD and KICK_MEMBERS permissions. Returns an object with one pruned key indicating the number of members that were removed in the prune operation. For large guilds it's recommended to set the compute_prune_count option to false, forcing pruned to null. Fires multiple Guild Member Remove Gateway events.
+
+        By default, prune will not remove users with roles. You can optionally include specific roles in your prune by providing the include_roles parameter. Any inactive user that has a subset of the provided role(s) will be included in the prune and users with additional roles will not.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+        """
+
+    // TODO(vxern): Implement.
+    be get_guild_voice_regions(guild_id: Snowflake) => "/guilds/" + guild_id.string() + "/regions"
+        """
+        https://docs.discord.com/developers/resources/guild#get-guild-voice-regions
+
+        Returns a list of voice region objects for the guild. Unlike the similar /voice route, this returns VIP servers when the guild is VIP-enabled.
+        """
+
+    // TODO(vxern): Implement.
+    be get_guild_invites(guild_id: Snowflake) => "/guilds/" + guild_id.string() + "/invites"
+        """
+        https://docs.discord.com/developers/resources/guild#get-guild-invites
+
+        Returns a list of invite objects. Requires the MANAGE_GUILD or VIEW_AUDIT_LOG permission. Invite Metadata is included with the MANAGE_GUILD permission.
+        """
+
+    // TODO(vxern): Implement.
+    be get_guild_integrations(guild_id: Snowflake) => "/guilds/" + guild_id.string() + "/integrations"
+        """
+        https://docs.discord.com/developers/resources/guild#get-guild-integrations
+
+        Returns a list of integration objects for the guild. Requires the MANAGE_GUILD permission.
+
+        This endpoint returns a maximum of 50 integrations. If a guild has more integrations, they cannot be accessed.
+        """
+
+    // TODO(vxern): Implement.
+    be delete_guild_integration(guild_id: Snowflake, integration_id: Snowflake, reason: Reason = None) => "/guilds/" + guild_id.string() + "/integrations/" + integration_id.string()
+        """
+        https://docs.discord.com/developers/resources/guild#delete-guild-integration
+
+        Delete the attached integration object for the guild. Deletes any associated webhooks and kicks the associated bot if there is one. Requires the MANAGE_GUILD permission. Returns a 204 empty response on success. Fires Guild Integrations Update and Integration Delete Gateway events.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+        """
+
+    // TODO(vxern): Implement.
+    be get_guild_widget_settings(guild_id: Snowflake) => "/guilds/" + guild_id.string() + "/widget"
+        """
+        https://docs.discord.com/developers/resources/guild#get-guild-widget-settings
+
+        Returns a guild widget settings object. Requires the MANAGE_GUILD permission.
+        """
+
+    // TODO(vxern): Implement.
+    be update_guild_widget(guild_id: Snowflake, params: ParamsStub, reason: Reason = None) => "/guilds/" + guild_id.string() + "/widget"
+        """
+        https://docs.discord.com/developers/resources/guild#modify-guild-widget
+
+        Modify a guild widget settings object for the guild. All attributes may be passed in with JSON and modified. Requires the MANAGE_GUILD permission. Returns the updated guild widget settings object. Fires a Guild Update Gateway event.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+        """
+
+    // TODO(vxern): Implement.
+    be get_guild_widget(guild_id: Snowflake) => "/guilds/" + guild_id.string() + "/widget.json"
+        """
+        https://docs.discord.com/developers/resources/guild#get-guild-widget
+
+        Returns the widget for the guild. Fires an Invite Create Gateway event when an invite channel is defined and a new Invite is generated.
+        """
+
+    // TODO(vxern): Implement.
+    be get_guild_vanity_url(guild_id: Snowflake) => "/guilds/" + guild_id.string() + "/vanity-url"
+        """
+        https://docs.discord.com/developers/resources/guild#get-guild-vanity-url
+
+        Returns a partial invite object for guilds with that feature enabled. Requires the MANAGE_GUILD permission. code will be null if a vanity url for the guild is not set.
+
+        This endpoint is required to get the usage count of the vanity invite, but the invite code can be accessed as vanity_url_code in the guild object without having the MANAGE_GUILD permission.
+        """
+
+    // TODO(vxern): Implement.
+    be get_guild_widget_image(guild_id: Snowflake, params: ParamsStub) => "/guilds/" + guild_id.string() + "/widget.png"
+        """
+        https://docs.discord.com/developers/resources/guild#get-guild-widget-image
+
+        Returns a PNG image widget for the guild. Requires no permissions or authentication.
+
+        All parameters to this endpoint are optional.
+        """
+
+    // TODO(vxern): Implement.
+    be get_guild_welcome_screen(guild_id: Snowflake) => "/guilds/" + guild_id.string() + "/welcome-screen"
+        """
+        https://docs.discord.com/developers/resources/guild#get-guild-welcome-screen
+
+        Returns the Welcome Screen object for the guild. If the welcome screen is not enabled, the MANAGE_GUILD permission is required.
+        """
+
+    // TODO(vxern): Implement.
+    be update_guild_welcome_screen(guild_id: Snowflake, params: ParamsStub, reason: Reason = None) => "/guilds/" + guild_id.string() + "/welcome-screen"
+        """
+        https://docs.discord.com/developers/resources/guild#modify-guild-welcome-screen
+
+        Modify the guild's Welcome Screen. Requires the MANAGE_GUILD permission. Returns the updated Welcome Screen object. May fire a Guild Update Gateway event.
+
+        All parameters to this endpoint are optional and nullable.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+        """
+
+    // TODO(vxern): Implement.
+    be get_guild_onboarding(guild_id: Snowflake) => "/guilds/" + guild_id.string() + "/onboarding"
+        """
+        https://docs.discord.com/developers/resources/guild#get-guild-onboarding
+
+        Returns the Onboarding object for the guild.
+        """
+
+    // TODO(vxern): Implement.
+    be update_guild_onboarding(guild_id: Snowflake, params: ParamsStub, reason: Reason = None) => "/guilds/" + guild_id.string() + "/onboarding"
+        """
+        https://docs.discord.com/developers/resources/guild#modify-guild-onboarding
+
+        Modifies the onboarding configuration of the guild. Returns a 200 with the Onboarding object for the guild. Requires the MANAGE_GUILD and MANAGE_ROLES permissions.
+
+        Onboarding enforces constraints when enabled. These constraints are that there must be at least 7 Default Channels and at least 5 of them must allow sending messages to the @everyone role. The mode field modifies what is considered when enforcing these constraints.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+
+        All parameters to this endpoint are optional.
+        """
+
+    // TODO(vxern): Implement.
+    be update_guild_incident_actions(guild_id: Snowflake, params: ParamsStub) => "/guilds/" + guild_id.string() + "/incident-actions"
+        """
+        https://docs.discord.com/developers/resources/guild#modify-guild-incident-actions
+
+        Modifies the incident actions of the guild. Returns a 200 with the Incidents Data object for the guild. Requires the MANAGE_GUILD permission.
+        """
+
+    // TODO(vxern): Implement.
+    be get_guild_scheduled_events(guild_id: Snowflake, params: ParamsStub) => "/guilds/" + guild_id.string() + "/scheduled-events"
+        """
+        https://docs.discord.com/developers/resources/guild-scheduled-event#list-scheduled-events-for-guild
+
+        Returns a list of guild scheduled event objects for the given guild.
+        """
+
+    // TODO(vxern): Implement.
+    be create_guild_scheduled_event(guild_id: Snowflake, params: ParamsStub, reason: Reason = None) => "/guilds/" + guild_id.string() + "/scheduled-events"
+        """
+        https://docs.discord.com/developers/resources/guild-scheduled-event#create-guild-scheduled-event
+
+        Create a guild scheduled event in the guild. Returns a guild scheduled event object on success. Fires a Guild Scheduled Event Create Gateway event.
+
+        A guild can have a maximum of 100 events with SCHEDULED or ACTIVE status at any time.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+        """
+
+    // TODO(vxern): Implement.
+    be get_guild_scheduled_event(guild_id: Snowflake, guild_scheduled_event_id: Snowflake, params: ParamsStub) => "/guilds/" + guild_id.string() + "/scheduled-events/" + guild_scheduled_event_id.string()
+        """
+        https://docs.discord.com/developers/resources/guild-scheduled-event#get-guild-scheduled-event
+
+        Get a guild scheduled event. Returns a guild scheduled event object on success.
+        """
+
+    // TODO(vxern): Implement.
+    be update_guild_scheduled_event(guild_id: Snowflake, guild_scheduled_event_id: Snowflake, params: ParamsStub, reason: Reason = None) => "/guilds/" + guild_id.string() + "/scheduled-events/" + guild_scheduled_event_id.string()
+        """
+        https://docs.discord.com/developers/resources/guild-scheduled-event#modify-guild-scheduled-event
+
+        Modify a guild scheduled event. Returns the modified guild scheduled event object on success. Fires a Guild Scheduled Event Update Gateway event.
+
+        To start or end an event, use this endpoint to modify the event's status field.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+
+        This endpoint silently discards entity_metadata for non-EXTERNAL events.
+
+        All parameters to this endpoint are optional.
+        """
+
+    // TODO(vxern): Implement.
+    be delete_guild_scheduled_event(guild_id: Snowflake, guild_scheduled_event_id: Snowflake) => "/guilds/" + guild_id.string() + "/scheduled-events/" + guild_scheduled_event_id.string()
+        """
+        https://docs.discord.com/developers/resources/guild-scheduled-event#delete-guild-scheduled-event
+
+        Delete a guild scheduled event. Returns a 204 on success. Fires a Guild Scheduled Event Delete Gateway event.
+        """
+
+    // TODO(vxern): Implement.
+    be get_guild_scheduled_event_users(guild_id: Snowflake, guild_scheduled_event_id: Snowflake, params: ParamsStub) => "/guilds/" + guild_id.string() + "/scheduled-events/" + guild_scheduled_event_id.string() + "/users"
+        """
+        https://docs.discord.com/developers/resources/guild-scheduled-event#get-guild-scheduled-event-users
+
+        Get a list of guild scheduled event users subscribed to a guild scheduled event. Returns a list of guild scheduled event user objects on success. Guild member data, if it exists, is included if the with_member query parameter is set.
+        """
+
+    // TODO(vxern): Implement.
+    be get_guild_template(template_code: String) => "/guilds/templates/" + template_code
+        """
+        https://docs.discord.com/developers/resources/guild-template#get-guild-template
+
+        Returns a guild template object for the given code.
+        """
+
+    // TODO(vxern): Implement.
+    be get_guild_templates(guild_id: Snowflake) => "/guilds/" + guild_id.string() + "/templates"
+        """
+        https://docs.discord.com/developers/resources/guild-template#get-guild-templates
+
+        Returns an array of guild template objects. Requires the MANAGE_GUILD permission.
+        """
+
+    // TODO(vxern): Implement.
+    be create_guild_template(guild_id: Snowflake, params: ParamsStub) => "/guilds/" + guild_id.string() + "/templates"
+        """
+        https://docs.discord.com/developers/resources/guild-template#create-guild-template
+
+        Creates a template for the guild. Requires the MANAGE_GUILD permission. Returns the created guild template object on success.
+        """
+
+    // TODO(vxern): Implement.
+    be sync_guild_template(guild_id: Snowflake, template_code: String) => "/guilds/" + guild_id.string() + "/templates/" + template_code
+        """
+        https://docs.discord.com/developers/resources/guild-template#sync-guild-template
+
+        Syncs the template to the guild's current state. Requires the MANAGE_GUILD permission. Returns the guild template object on success.
+        """
+
+    // TODO(vxern): Implement.
+    be update_guild_template(guild_id: Snowflake, template_code: String, params: ParamsStub) => "/guilds/" + guild_id.string() + "/templates/" + template_code
+        """
+        https://docs.discord.com/developers/resources/guild-template#modify-guild-template
+
+        Modifies the template's metadata. Requires the MANAGE_GUILD permission. Returns the guild template object on success.
+        """
+
+    // TODO(vxern): Implement.
+    be delete_guild_template(guild_id: Snowflake, template_code: String) => "/guilds/" + guild_id.string() + "/templates/" + template_code
+        """
+        https://docs.discord.com/developers/resources/guild-template#delete-guild-template
+
+        Deletes the template. Requires the MANAGE_GUILD permission. Returns the deleted guild template object on success.
+        """
+
+    // TODO(vxern): Implement.
+    be get_invite(invite_code: String, params: ParamsStub) => "/invites/" + invite_code
+        """
+        https://docs.discord.com/developers/resources/invite#get-invite
+
+        Returns an invite object for the given code.
+        """
+
+    // TODO(vxern): Implement.
+    be delete_invite(invite_code: String, reason: Reason = None) => "/invites/" + invite_code
+        """
+        https://docs.discord.com/developers/resources/invite#delete-invite
+
+        Delete an invite. Requires the MANAGE_CHANNELS permission on the channel this invite belongs to, or MANAGE_GUILD to remove any invite across the guild. Returns an invite object on success. Fires an Invite Delete Gateway event.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+        """
+
+    // TODO(vxern): Implement.
+    be get_invite_target_users(invite_code: String) => "/invites/" + invite_code + "/target-users"
+        """
+        https://docs.discord.com/developers/resources/invite#get-target-users
+
+        Gets the users allowed to see and accept this invite. Response is a CSV file with the header user_id and each user ID from the original file passed to invite create on its own line. Requires the caller to be the inviter, or have MANAGE_GUILD permission, or have VIEW_AUDIT_LOG permission.
+        """
+
+    // TODO(vxern): Implement.
+    be update_invite_target_users(invite_code: String, params: ParamsStub) => "/invites/" + invite_code + "/target-users"
+        """
+        https://docs.discord.com/developers/resources/invite#update-target-users
+
+        Updates the users allowed to see and accept this invite. Uploading a file with invalid user IDs will result in a 400 with the invalid IDs described. Requires the caller to be the inviter or have the MANAGE_GUILD permission.
+        """
+
+    // TODO(vxern): Implement.
+    be get_invite_target_users_job_status(invite_code: String) => "/invites/" + invite_code + "/target-users/job-status"
+        """
+        https://docs.discord.com/developers/resources/invite#get-target-users-job-status
+
+        Processing target users from a CSV when creating or updating an invite is done asynchronously. This endpoint allows you to check the status of that job. Requires the caller to be the inviter, or have MANAGE_GUILD permission, or have VIEW_AUDIT_LOG permission.
+        """
+
+    // TODO(vxern): Implement.
+    be create_lobby(params: ParamsStub) => "/lobbies"
+        """
+        https://docs.discord.com/developers/resources/lobby#create-lobby
+
+        Creates a new lobby, adding any of the specified members to it, if provided.
+
+        Returns a lobby object.
+
+        Discord Social SDK clients will not be able to join or leave a lobby created using this API, such as Client::CreateOrJoinLobby. See Managing Lobbies for more information.
+        """
+
+    // TODO(vxern): Implement.
+    be create_or_join_lobby(params: ParamsStub) => "/lobbies"
+        """
+        https://docs.discord.com/developers/resources/lobby#create-or-join-lobby
+
+        Creates a new lobby for the application identified by a secret, or joins the calling user to the existing lobby with that secret if one already exists. Updates lobby metadata and the calling member's metadata on join.
+
+        Uses Bearer token for authorization with the sdk.social_layer scope.
+
+        Returns a lobby object.
+        """
+
+    // TODO(vxern): Implement.
+    be get_lobby(lobby_id: Snowflake) => "/lobbies/" + lobby_id.string()
+        """
+        https://docs.discord.com/developers/resources/lobby#get-lobby
+
+        Returns a lobby object for the specified lobby id, if it exists.
+        """
+
+    // TODO(vxern): Implement.
+    be update_lobby(lobby_id: Snowflake, params: ParamsStub) => "/lobbies/" + lobby_id.string()
+        """
+        https://docs.discord.com/developers/resources/lobby#modify-lobby
+
+        Modifies the specified lobby with new values, if provided.
+
+        Returns the updated lobby object.
+        """
+
+    // TODO(vxern): Implement.
+    be delete_lobby(lobby_id: Snowflake) => "/lobbies/" + lobby_id.string()
+        """
+        https://docs.discord.com/developers/resources/lobby#delete-lobby
+
+        Deletes the specified lobby if it exists.
+
+        It is safe to call even if the lobby is already deleted as well.
+
+        Returns nothing.
+        """
+
+    // TODO(vxern): Implement.
+    be add_lobby_member(lobby_id: Snowflake, user_id: Snowflake, params: ParamsStub) => "/lobbies/" + lobby_id.string() + "/members/" + user_id.string()
+        """
+        https://docs.discord.com/developers/resources/lobby#add-a-member-to-a-lobby
+
+        Adds the provided user to the specified lobby. If called when the user is already a member of the lobby will update fields such as metadata on that user instead.
+
+        Returns the lobby member object.
+        """
+
+    // TODO(vxern): Implement.
+    be bulk_update_lobby_members(lobby_id: Snowflake, params: ParamsStub) => "/lobbies/" + lobby_id.string() + "/members/bulk"
+        """
+        https://docs.discord.com/developers/resources/lobby#bulk-update-lobby-members
+
+        Adds, updates, or removes up to 25 members from the specified lobby in a single request. Members with remove_member: false (the default) are upserted — added if not present, or updated with the provided metadata and flags if already a member. Members with remove_member: true are removed.
+
+        Returns an array of lobby member objects for the upserted members. Removed members are not included in the response.
+
+        Users unknown to Discord will return a 404 UNKNOWN_USER error. Users that fail permission checks or who have already reached the maximum number of lobbies per application (and are not already a member of this lobby) are silently dropped from the upsert set.
+        """
+
+    // TODO(vxern): Implement.
+    be remove_lobby_member(lobby_id: Snowflake, user_id: Snowflake) => "/lobbies/" + lobby_id.string() + "/members/" + user_id.string()
+        """
+        https://docs.discord.com/developers/resources/lobby#remove-a-member-from-a-lobby
+
+        Removes the provided user from the specified lobby. It is safe to call this even if the user is no longer a member of the lobby, but will fail if the lobby does not exist.
+
+        Returns nothing.
+        """
+
+    // TODO(vxern): Implement.
+    be leave_lobby(lobby_id: Snowflake) => "/lobbies/" + lobby_id.string() + "/members/@me"
+        """
+        https://docs.discord.com/developers/resources/lobby#leave-lobby
+
+        Removes the current user from the specified lobby. It is safe to call this even if the user is no longer a member of the lobby, but will fail if the lobby does not exist.
+
+        Uses Bearer token for authorization.
+
+        Returns nothing.
+        """
+
+    // TODO(vxern): Implement.
+    be link_channel_to_lobby(lobby_id: Snowflake, params: ParamsStub) => "/lobbies/" + lobby_id.string() + "/channel-linking"
+        """
+        https://docs.discord.com/developers/resources/lobby#link-channel-to-lobby
+
+        Links an existing text channel to a lobby. See Linked Channels for more information.
+
+        Uses Bearer token for authorization and user must be a lobby member with CanLinkLobby lobby member flag.
+
+        Returns a lobby object with a linked channel.
+        """
+
+    // TODO(vxern): Implement.
+    be unlink_channel_from_lobby(lobby_id: Snowflake) => "/lobbies/" + lobby_id.string() + "/channel-linking"
+        """
+        https://docs.discord.com/developers/resources/lobby#unlink-channel-from-lobby
+
+        Unlinks any currently linked channels from the specified lobby.
+
+        Send a request to this endpoint with an empty body to unlink any currently linked channels from the specified lobby.
+
+        Uses Bearer token for authorization and user must be a lobby member with CanLinkLobby lobby member flag.
+
+        Returns a lobby object without a linked channel.
+        """
+
+    // TODO(vxern): Implement.
+    be send_lobby_message(lobby_id: Snowflake, params: ParamsStub) => "/lobbies/" + lobby_id.string() + "/messages"
+        """
+        https://docs.discord.com/developers/resources/lobby#send-lobby-message
+
+        Sends a message to the specified lobby. The calling user must be a member of the lobby.
+
+        Uses Bearer token for authorization with the sdk.social_layer scope.
+
+        Returns the created lobby message object.
+
+        If the lobby has a linked channel, the message is also forwarded to that channel. If forwarding fails (for example, due to AutoMod), the lobby message is still delivered to other lobby members.
+        """
+
+    // TODO(vxern): Implement.
+    be get_lobby_messages(lobby_id: Snowflake, params: ParamsStub) => "/lobbies/" + lobby_id.string() + "/messages"
+        """
+        https://docs.discord.com/developers/resources/lobby#get-lobby-messages
+
+        Returns the most recent messages in the specified lobby. The calling user must be a member of the lobby.
+
+        Uses Bearer token for authorization with the sdk.social_layer scope.
+
+        Returns an array of lobby message objects (see Send Lobby Message for the object shape).
+        """
+
+    // TODO(vxern): Implement.
+    be update_lobby_message_moderation_metadata(lobby_id: Snowflake, message_id: Snowflake, params: ParamsStub) => "/lobbies/" + lobby_id.string() + "/messages/" + message_id.string() + "/moderation-metadata"
+        """
+        https://docs.discord.com/developers/resources/lobby#update-lobby-message-moderation-metadata
+
+        Sets the moderation metadata for a lobby message. The metadata is app-scoped and delivered to active
+        game clients via the Social SDK as a realtime message update. See Integrate Moderation
+        for the full moderation flow.
+
+        Uses Bot token for authorization.
+
+        Returns HTTP 204: No Content on success.
+        """
+
+    // TODO(vxern): Implement.
+    be create_lobby_channel_invite_for_self(lobby_id: Snowflake) => "/lobbies/" + lobby_id.string() + "/members/@me/invites"
+        """
+        https://docs.discord.com/developers/resources/lobby#create-lobby-channel-invite-for-self
+
+        Creates a single-use guild invite to the lobby's linked channel, targeted at the calling user. The lobby must have a linked channel and the caller must be a member of the lobby. The invite expires after one hour.
+
+        Uses Bearer token for authorization with the sdk.social_layer scope.
+
+        Returns a lobby invite object.
+        """
+
+    // TODO(vxern): Implement.
+    be create_lobby_channel_invite_for_user(lobby_id: Snowflake, user_id: Snowflake) => "/lobbies/" + lobby_id.string() + "/members/" + user_id.string() + "/invites"
+        """
+        https://docs.discord.com/developers/resources/lobby#create-lobby-channel-invite-for-user
+
+        Creates a single-use guild invite to the lobby's linked channel on behalf of an application, targeted at the specified user. The lobby must have a linked channel. The invite expires after one hour.
+
+        Uses Bot token for authorization.
+
+        Returns a lobby invite object.
+        """
+
+    // TODO(vxern): Implement.
+    be get_channel_messages(channel_id: Snowflake, params: ParamsStub) => "/channels/" + channel_id.string() + "/messages"
+        """
+        https://docs.discord.com/developers/resources/message#get-channel-messages
+
+        Retrieves the messages in a channel. Returns an array of message objects from newest to oldest on success.
+
+        If operating on a guild channel, this endpoint requires the current user to have the VIEW_CHANNEL permission. If the channel is a voice channel, they must _also_ have the CONNECT permission.
+
+        If the current user is missing the READ_MESSAGE_HISTORY permission in the channel, then no messages will be returned.
+
+        The before, after, and around parameters are mutually exclusive, only one may be passed at a time.
+        """
+
+    // TODO(vxern): Implement.
+    be search_guild_messages(guild_id: Snowflake, params: ParamsStub) => "/guilds/" + guild_id.string() + "/messages/search"
+        """
+        https://docs.discord.com/developers/resources/message#search-guild-messages
+
+        Returns a list of messages without the reactions key that match a search query in the guild. Requires the READ_MESSAGE_HISTORY permission.
+
+        This endpoint is restricted according to whether the MESSAGE_CONTENT Privileged Intent is enabled for your application.
+
+        If the entity you are searching is not yet indexed, the endpoint will return a 202 accepted response. The response body will not contain any search results, and will look similar to an error response:
+
+        You should retry the request after the timeframe specified in the retry_after field. If the retry_after field is 0, you should retry the request after a short delay.
+
+        Due to speed optimizations, search may return slightly fewer results than the limit specified when messages have not been accessed for a long time.
+        Clients should not rely on the length of the messages array to paginate results.
+
+        Additionally, when messages are actively being created or deleted, the total_results field may not be accurate.
+        """
+
+    // TODO(vxern): Implement.
+    be get_channel_message(channel_id: Snowflake, message_id: Snowflake) => "/channels/" + channel_id.string() + "/messages/" + message_id.string()
+        """
+        https://docs.discord.com/developers/resources/message#get-channel-message
+
+        Retrieves a specific message in the channel. Returns a message object on success.
+
+        If operating on a guild channel, this endpoint requires the current user to have the VIEW_CHANNEL and READ_MESSAGE_HISTORY permissions. If the channel is a voice channel, they must _also_ have the CONNECT permission.
+        """
+
+    // TODO(vxern): Implement.
+    be create_message(channel_id: Snowflake, params: ParamsStub) => "/channels/" + channel_id.string() + "/messages"
+        """
+        https://docs.discord.com/developers/resources/message#create-message
+
+        Discord may strip certain characters from message content, like invalid unicode characters or characters which cause unexpected message formatting. If you are passing user-generated strings into message content, consider sanitizing the data to prevent unexpected behavior and using allowed_mentions to prevent unexpected mentions.
+
+        Post a message to a guild text or DM channel. Returns a message object. Fires a Message Create Gateway event. See message formatting for more information on how to properly format messages.
+
+        To create a message as a reply or forward of another message, apps can include a message_reference.
+        Refer to the documentation for required fields.
+
+        Files must be attached using a multipart/form-data body as described in Uploading Files.
+        """
+
+    // TODO(vxern): Implement.
+    be crosspost_message(channel_id: Snowflake, message_id: Snowflake) => "/channels/" + channel_id.string() + "/messages/" + message_id.string() + "/crosspost"
+        """
+        https://docs.discord.com/developers/resources/message#crosspost-message
+
+        Crosspost a message in an Announcement Channel to following channels. This endpoint requires the SEND_MESSAGES permission, if the current user sent the message, or additionally the MANAGE_MESSAGES permission, for all other messages, to be present for the current user.
+
+        Returns a message object. Fires a Message Update Gateway event.
+        """
+
+    // TODO(vxern): Implement.
+    be create_reaction(channel_id: Snowflake, message_id: Snowflake, emoji: String) => "/channels/" + channel_id.string() + "/messages/" + message_id.string() + "/reactions/" + emoji + "/@me"
+        """
+        https://docs.discord.com/developers/resources/message#create-reaction
+
+        Create a reaction for the message. This endpoint requires the READ_MESSAGE_HISTORY permission to be present on the current user. Additionally, if nobody else has reacted to the message using this emoji, this endpoint requires the ADD_REACTIONS permission to be present on the current user. Returns a 204 empty response on success. Fires a Message Reaction Add Gateway event.
+        The emoji must be URL Encoded or the request will fail with 10014: Unknown Emoji. To use custom emoji, you must encode it in the format name:id with the emoji name and emoji id.
+        """
+
+    // TODO(vxern): Implement.
+    be delete_own_reaction(channel_id: Snowflake, message_id: Snowflake, emoji: String) => "/channels/" + channel_id.string() + "/messages/" + message_id.string() + "/reactions/" + emoji + "/@me"
+        """
+        https://docs.discord.com/developers/resources/message#delete-own-reaction
+
+        Delete a reaction the current user has made for the message. Returns a 204 empty response on success. Fires a Message Reaction Remove Gateway event.
+        The emoji must be URL Encoded or the request will fail with 10014: Unknown Emoji. To use custom emoji, you must encode it in the format name:id with the emoji name and emoji id.
+        """
+
+    // TODO(vxern): Implement.
+    be delete_user_reaction(channel_id: Snowflake, message_id: Snowflake, emoji: String, user_id: Snowflake) => "/channels/" + channel_id.string() + "/messages/" + message_id.string() + "/reactions/" + emoji + "/" + user_id.string()
+        """
+        https://docs.discord.com/developers/resources/message#delete-user-reaction
+
+        Deletes another user's reaction. This endpoint requires the MANAGE_MESSAGES permission to be present on the current user. Returns a 204 empty response on success. Fires a Message Reaction Remove Gateway event.
+        The emoji must be URL Encoded or the request will fail with 10014: Unknown Emoji. To use custom emoji, you must encode it in the format name:id with the emoji name and emoji id.
+        """
+
+    // TODO(vxern): Implement.
+    be get_reactions(channel_id: Snowflake, message_id: Snowflake, emoji: String, params: ParamsStub) => "/channels/" + channel_id.string() + "/messages/" + message_id.string() + "/reactions/" + emoji
+        """
+        https://docs.discord.com/developers/resources/message#get-reactions
+
+        Get a list of users that reacted with this emoji. Returns an array of user objects on success.
+        The emoji must be URL Encoded or the request will fail with 10014: Unknown Emoji. To use custom emoji, you must encode it in the format name:id with the emoji name and emoji id.
+        """
+
+    // TODO(vxern): Implement.
+    be delete_all_reactions(channel_id: Snowflake, message_id: Snowflake) => "/channels/" + channel_id.string() + "/messages/" + message_id.string() + "/reactions"
+        """
+        https://docs.discord.com/developers/resources/message#delete-all-reactions
+
+        Deletes all reactions on a message. This endpoint requires the MANAGE_MESSAGES permission to be present on the current user. Fires a Message Reaction Remove All Gateway event.
+        """
+
+    // TODO(vxern): Implement.
+    be delete_all_reactions_for_emoji(channel_id: Snowflake, message_id: Snowflake, emoji: String) => "/channels/" + channel_id.string() + "/messages/" + message_id.string() + "/reactions/" + emoji
+        """
+        https://docs.discord.com/developers/resources/message#delete-all-reactions-for-emoji
+
+        Deletes all the reactions for a given emoji on a message. This endpoint requires the MANAGE_MESSAGES permission to be present on the current user. Fires a Message Reaction Remove Emoji Gateway event.
+        The emoji must be URL Encoded or the request will fail with 10014: Unknown Emoji. To use custom emoji, you must encode it in the format name:id with the emoji name and emoji id.
+        """
+
+    // TODO(vxern): Implement.
+    be update_message(channel_id: Snowflake, message_id: Snowflake, params: ParamsStub) => "/channels/" + channel_id.string() + "/messages/" + message_id.string()
+        """
+        https://docs.discord.com/developers/resources/message#edit-message
+
+        Edit a previously sent message. The fields content, embeds, flags and components can be edited by the original message author. Other users can only edit flags and only if they have the MANAGE_MESSAGES permission in the corresponding channel. When specifying flags, ensure to include all previously set flags/bits in addition to ones that you are modifying. Only flags documented in the table below may be modified by users (unsupported flag changes are currently ignored without error).
+
+        When the content field is edited, the arrays mentions and mention_roles and the boolean mention_everyone in the message object will be reconstructed from scratch based on the new content. When the message flag IS_COMPONENTS_V2 is set, the reconstructed arrays and boolean are based on the edited content in the components array. The allowed_mentions field of the edit request controls how this happens. If there is no explicit allowed_mentions in the edit request, the content will be parsed with _default_ allowances, that is, without regard to whether or not an allowed_mentions was present in the request that originally created the message.
+
+        Returns a message object. Fires a Message Update Gateway event.
+
+        Refer to Uploading Files for details on attachments and multipart/form-data requests.
+        Any provided files will be appended to the message. To remove or replace files you will have to supply the attachments field which specifies the files to retain on the message after edit.
+
+        Starting with API v10, the attachments array must contain all attachments that should be present after edit, including retained and new attachments provided in the request body.
+
+        All parameters to this endpoint are optional and nullable.
+        """
+
+    // TODO(vxern): Implement.
+    be delete_message(channel_id: Snowflake, message_id: Snowflake, reason: Reason = None) => "/channels/" + channel_id.string() + "/messages/" + message_id.string()
+        """
+        https://docs.discord.com/developers/resources/message#delete-message
+
+        Delete a message. If operating on a guild channel and trying to delete a message that was not sent by the current user, this endpoint requires the MANAGE_MESSAGES permission. Returns a 204 empty response on success. Fires a Message Delete Gateway event.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+        """
+
+    // TODO(vxern): Implement.
+    be bulk_delete_messages(channel_id: Snowflake, params: ParamsStub, reason: Reason = None) => "/channels/" + channel_id.string() + "/messages/bulk-delete"
+        """
+        https://docs.discord.com/developers/resources/message#bulk-delete-messages
+
+        Delete multiple messages in a single request. This endpoint can only be used on guild channels and requires the MANAGE_MESSAGES permission. Returns a 204 empty response on success. Fires a Message Delete Bulk Gateway event.
+
+        Any message IDs given that do not exist or are invalid will count towards the minimum and maximum message count (currently 2 and 100 respectively).
+
+        This endpoint will not delete messages older than 2 weeks, and will fail with a 400 BAD REQUEST if any message provided is older than that or if any duplicate message IDs are provided.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+        """
+
+    // TODO(vxern): Implement.
+    be get_channel_pins(channel_id: Snowflake, params: ParamsStub) => "/channels/" + channel_id.string() + "/messages/pins"
+        """
+        https://docs.discord.com/developers/resources/message#get-channel-pins
+
+        Retrieves the list of pins in a channel. Requires the VIEW_CHANNEL permission. If the user is missing the READ_MESSAGE_HISTORY permission in the channel, then no pins will be returned.
+        """
+
+    // TODO(vxern): Implement.
+    be pin_message(channel_id: Snowflake, message_id: Snowflake, reason: Reason = None) => "/channels/" + channel_id.string() + "/messages/pins/" + message_id.string()
+        """
+        https://docs.discord.com/developers/resources/message#pin-message
+
+        Pin a message in a channel. Requires the PIN_MESSAGES permission. Fires a Channel Pins Update Gateway event.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+        """
+
+    // TODO(vxern): Implement.
+    be unpin_message(channel_id: Snowflake, message_id: Snowflake, reason: Reason = None) => "/channels/" + channel_id.string() + "/messages/pins/" + message_id.string()
+        """
+        https://docs.discord.com/developers/resources/message#unpin-message
+
+        Unpin a message in a channel. Requires the PIN_MESSAGES permission. Returns a 204 empty response on success. Fires a Channel Pins Update Gateway event.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+        """
+
+    // TODO(vxern): Implement.
+    be get_pinned_messages_deprecated(channel_id: Snowflake) => "/channels/" + channel_id.string() + "/pins"
+        """
+        https://docs.discord.com/developers/resources/message#get-pinned-messages-deprecated
+
+        Gets the first 50 pinned messages in a channel, returning an array of message objects on success.
+        This endpoint is deprecated. Use Get Channel Pins instead.
+        """
+
+    // TODO(vxern): Implement.
+    be pin_message_deprecated(channel_id: Snowflake, message_id: Snowflake) => "/channels/" + channel_id.string() + "/pins/" + message_id.string()
+        """
+        https://docs.discord.com/developers/resources/message#pin-message-deprecated
+
+        This endpoint is deprecated. Use Pin Message instead.
+        """
+
+    // TODO(vxern): Implement.
+    be unpin_message_deprecated(channel_id: Snowflake, message_id: Snowflake) => "/channels/" + channel_id.string() + "/pins/" + message_id.string()
+        """
+        https://docs.discord.com/developers/resources/message#unpin-message-deprecated
+
+        This endpoint is deprecated. Use Unpin Message instead.
+        """
+
+    // TODO(vxern): Implement.
+    be get_answer_voters(channel_id: Snowflake, message_id: Snowflake, answer_id: U64, params: ParamsStub) => "/channels/" + channel_id.string() + "/polls/" + message_id.string() + "/answers/" + answer_id.string()
+        """
+        https://docs.discord.com/developers/resources/poll#get-answer-voters
+
+        Get a list of users that voted for this specific answer.
+        """
+
+    // TODO(vxern): Implement.
+    be end_poll(channel_id: Snowflake, message_id: Snowflake) => "/channels/" + channel_id.string() + "/polls/" + message_id.string() + "/expire"
+        """
+        https://docs.discord.com/developers/resources/poll#end-poll
+
+        Immediately ends the poll. You cannot end polls from other users.
+
+        Returns a message object. Fires a Message Update Gateway event.
+        """
+
+    // TODO(vxern): Implement.
+    be get_skus(application_id: Snowflake) => "/applications/" + application_id.string() + "/skus"
+        """
+        https://docs.discord.com/developers/resources/sku#list-skus
+
+        Returns all SKUs for a given application.
+
+        Because of how our SKU and subscription systems work, you will see two SKUs for your subscription offering. For integration and testing entitlements for Subscriptions, you should use the SKU with type: 5.
+        """
+
+    // TODO(vxern): Implement.
+    be send_soundboard_sound(channel_id: Snowflake, params: ParamsStub) => "/channels/" + channel_id.string() + "/send-soundboard-sound"
+        """
+        https://docs.discord.com/developers/resources/soundboard#send-soundboard-sound
+
+        Send a soundboard sound to a voice channel the user is connected to. Fires a Voice Channel Effect Send Gateway event.
+
+        Requires the SPEAK and USE_SOUNDBOARD permissions, and also the USE_EXTERNAL_SOUNDS permission if the sound is from a different server. Additionally, requires the user to be connected to the voice channel, having a voice state without deaf, self_deaf, mute, or suppress enabled.
+        """
+
+    // TODO(vxern): Implement.
+    be get_default_soundboard_sounds() => "/soundboard-default-sounds"
+        """
+        https://docs.discord.com/developers/resources/soundboard#list-default-soundboard-sounds
+
+        Returns an array of soundboard sound objects that can be used by all users.
+        """
+
+    // TODO(vxern): Implement.
+    be get_guild_soundboard_sounds(guild_id: Snowflake) => "/guilds/" + guild_id.string() + "/soundboard-sounds"
+        """
+        https://docs.discord.com/developers/resources/soundboard#list-guild-soundboard-sounds
+
+        Returns a list of the guild's soundboard sounds. Includes user fields if the bot has the CREATE_GUILD_EXPRESSIONS or MANAGE_GUILD_EXPRESSIONS permission.
+        """
+
+    // TODO(vxern): Implement.
+    be get_guild_soundboard_sound(guild_id: Snowflake, sound_id: Snowflake) => "/guilds/" + guild_id.string() + "/soundboard-sounds/" + sound_id.string()
+        """
+        https://docs.discord.com/developers/resources/soundboard#get-guild-soundboard-sound
+
+        Returns a soundboard sound object for the given sound id. Includes the user field if the bot has the CREATE_GUILD_EXPRESSIONS or MANAGE_GUILD_EXPRESSIONS permission.
+        """
+
+    // TODO(vxern): Implement.
+    be create_guild_soundboard_sound(guild_id: Snowflake, params: ParamsStub, reason: Reason = None) => "/guilds/" + guild_id.string() + "/soundboard-sounds"
+        """
+        https://docs.discord.com/developers/resources/soundboard#create-guild-soundboard-sound
+
+        Create a new soundboard sound for the guild. Requires the CREATE_GUILD_EXPRESSIONS permission. Returns the new soundboard sound object on success. Fires a Guild Soundboard Sound Create Gateway event.
+
+        Soundboard sounds have a max file size of 512kb and a max duration of 5.2 seconds.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+        """
+
+    // TODO(vxern): Implement.
+    be update_guild_soundboard_sound(guild_id: Snowflake, sound_id: Snowflake, params: ParamsStub, reason: Reason = None) => "/guilds/" + guild_id.string() + "/soundboard-sounds/" + sound_id.string()
+        """
+        https://docs.discord.com/developers/resources/soundboard#modify-guild-soundboard-sound
+
+        Modify the given soundboard sound. For sounds created by the current user, requires either the CREATE_GUILD_EXPRESSIONS or MANAGE_GUILD_EXPRESSIONS permission. For other sounds, requires the MANAGE_GUILD_EXPRESSIONS permission. Returns the updated soundboard sound object on success. Fires a Guild Soundboard Sound Update Gateway event.
+
+        All parameters to this endpoint are optional.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+        """
+
+    // TODO(vxern): Implement.
+    be delete_guild_soundboard_sound(guild_id: Snowflake, sound_id: Snowflake, reason: Reason = None) => "/guilds/" + guild_id.string() + "/soundboard-sounds/" + sound_id.string()
+        """
+        https://docs.discord.com/developers/resources/soundboard#delete-guild-soundboard-sound
+
+        Delete the given soundboard sound. For sounds created by the current user, requires either the CREATE_GUILD_EXPRESSIONS or MANAGE_GUILD_EXPRESSIONS permission. For other sounds, requires the MANAGE_GUILD_EXPRESSIONS permission. Returns 204 No Content on success. Fires a Guild Soundboard Sound Delete Gateway event.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+        """
+
+    // TODO(vxern): Implement.
+    be create_stage_instance(params: ParamsStub, reason: Reason = None) => "/stage-instances"
+        """
+        https://docs.discord.com/developers/resources/stage-instance#create-stage-instance
+
+        Creates a new Stage instance associated to a Stage channel. Returns that Stage instance. Fires a Stage Instance Create Gateway event.
+
+        Requires the user to be a moderator of the Stage channel.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+        """
+
+    // TODO(vxern): Implement.
+    be get_stage_instance(channel_id: Snowflake) => "/stage-instances/" + channel_id.string()
+        """
+        https://docs.discord.com/developers/resources/stage-instance#get-stage-instance
+
+        Gets the stage instance associated with the Stage channel, if it exists.
+        """
+
+    // TODO(vxern): Implement.
+    be update_stage_instance(channel_id: Snowflake, params: ParamsStub, reason: Reason = None) => "/stage-instances/" + channel_id.string()
+        """
+        https://docs.discord.com/developers/resources/stage-instance#modify-stage-instance
+
+        Updates fields of an existing Stage instance. Returns the updated Stage instance. Fires a Stage Instance Update Gateway event.
+
+        Requires the user to be a moderator of the Stage channel.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+        """
+
+    // TODO(vxern): Implement.
+    be delete_stage_instance(channel_id: Snowflake, reason: Reason = None) => "/stage-instances/" + channel_id.string()
+        """
+        https://docs.discord.com/developers/resources/stage-instance#delete-stage-instance
+
+        Deletes the Stage instance. Returns 204 No Content. Fires a Stage Instance Delete Gateway event.
+
+        Requires the user to be a moderator of the Stage channel.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+        """
+
+    // TODO(vxern): Implement.
+    be get_sticker(sticker_id: Snowflake) => "/stickers/" + sticker_id.string()
+        """
+        https://docs.discord.com/developers/resources/sticker#get-sticker
+
+        Returns a sticker object for the given sticker ID.
+        """
+
+    // TODO(vxern): Implement.
+    be get_sticker_packs() => "/sticker-packs"
+        """
+        https://docs.discord.com/developers/resources/sticker#list-sticker-packs
+
+        Returns a list of available sticker packs.
+        """
+
+    // TODO(vxern): Implement.
+    be get_sticker_pack(sticker_pack_id: Snowflake) => "/sticker-packs/" + sticker_pack_id.string()
+        """
+        https://docs.discord.com/developers/resources/sticker#get-sticker-pack
+
+        Returns a sticker pack object for the given sticker pack ID.
+        """
+
+    // TODO(vxern): Implement.
+    be get_guild_stickers(guild_id: Snowflake) => "/guilds/" + guild_id.string() + "/stickers"
+        """
+        https://docs.discord.com/developers/resources/sticker#list-guild-stickers
+
+        Returns an array of sticker objects for the given guild. Includes user fields if the bot has the CREATE_GUILD_EXPRESSIONS or MANAGE_GUILD_EXPRESSIONS permission.
+        """
+
+    // TODO(vxern): Implement.
+    be get_guild_sticker(guild_id: Snowflake, sticker_id: Snowflake) => "/guilds/" + guild_id.string() + "/stickers/" + sticker_id.string()
+        """
+        https://docs.discord.com/developers/resources/sticker#get-guild-sticker
+
+        Returns a sticker object for the given guild and sticker IDs. Includes the user field if the bot has the CREATE_GUILD_EXPRESSIONS or MANAGE_GUILD_EXPRESSIONS permission.
+        """
+
+    // TODO(vxern): Implement.
+    be create_guild_sticker(guild_id: Snowflake, params: ParamsStub, reason: Reason = None) => "/guilds/" + guild_id.string() + "/stickers"
+        """
+        https://docs.discord.com/developers/resources/sticker#create-guild-sticker
+
+        Create a new sticker for the guild. Send a multipart/form-data body. Requires the CREATE_GUILD_EXPRESSIONS permission. Returns the new sticker object on success. Fires a Guild Stickers Update Gateway event.
+
+        Every guilds has five free sticker slots by default, and each Boost level will grant access to more slots.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+
+        Lottie stickers can only be uploaded on guilds that have either the VERIFIED and/or the PARTNERED guild feature.
+
+        Uploaded stickers are constrained to 5 seconds in length for animated stickers, and 320 x 320 pixels.
+        """
+
+    // TODO(vxern): Implement.
+    be update_guild_sticker(guild_id: Snowflake, sticker_id: Snowflake, params: ParamsStub, reason: Reason = None) => "/guilds/" + guild_id.string() + "/stickers/" + sticker_id.string()
+        """
+        https://docs.discord.com/developers/resources/sticker#modify-guild-sticker
+
+        Modify the given sticker. For stickers created by the current user, requires either the CREATE_GUILD_EXPRESSIONS or MANAGE_GUILD_EXPRESSIONS permission. For other stickers, requires the MANAGE_GUILD_EXPRESSIONS permission. Returns the updated sticker object on success. Fires a Guild Stickers Update Gateway event.
+
+        All parameters to this endpoint are optional.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+        """
+
+    // TODO(vxern): Implement.
+    be delete_guild_sticker(guild_id: Snowflake, sticker_id: Snowflake, reason: Reason = None) => "/guilds/" + guild_id.string() + "/stickers/" + sticker_id.string()
+        """
+        https://docs.discord.com/developers/resources/sticker#delete-guild-sticker
+
+        Delete the given sticker. For stickers created by the current user, requires either the CREATE_GUILD_EXPRESSIONS or MANAGE_GUILD_EXPRESSIONS permission. For other stickers, requires the MANAGE_GUILD_EXPRESSIONS permission. Returns 204 No Content on success. Fires a Guild Stickers Update Gateway event.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+        """
+
+    // TODO(vxern): Implement.
+    be get_sku_subscriptions(sku_id: Snowflake, params: ParamsStub) => "/skus/" + sku_id.string() + "/subscriptions"
+        """
+        https://docs.discord.com/developers/resources/subscription#list-sku-subscriptions
+
+        Returns all subscriptions containing the SKU, filtered by user. Returns a list of subscription objects.
+        """
+
+    // TODO(vxern): Implement.
+    be get_sku_subscription(sku_id: Snowflake, subscription_id: Snowflake) => "/skus/" + sku_id.string() + "/subscriptions/" + subscription_id.string()
+        """
+        https://docs.discord.com/developers/resources/subscription#get-sku-subscription
+
+        Get a subscription by its ID. Returns a subscription object.
+        """
+
+    // TODO(vxern): Implement.
+    be get_current_user() => "/users/@me"
+        """
+        https://docs.discord.com/developers/resources/user#get-current-user
+
+        Returns the user object of the requester's account. For OAuth2, this requires the identify scope, which will return the object _without_ an email, and optionally the email scope, which returns the object _with_ an email if the user has one.
+        """
+
+    // TODO(vxern): Implement.
+    be get_user(user_id: Snowflake) => "/users/" + user_id.string()
+        """
+        https://docs.discord.com/developers/resources/user#get-user
+
+        Returns a user object for a given user ID.
+        """
+
+    // TODO(vxern): Implement.
+    be update_current_user(params: ParamsStub) => "/users/@me"
+        """
+        https://docs.discord.com/developers/resources/user#modify-current-user
+
+        Modify the requester's user account settings. Returns a user object on success. Fires a User Update Gateway event.
+
+        All parameters to this endpoint are optional.
+        """
+
+    // TODO(vxern): Implement.
+    be get_current_user_guilds(params: ParamsStub) => "/users/@me/guilds"
+        """
+        https://docs.discord.com/developers/resources/user#get-current-user-guilds
+
+        Returns a list of partial guild objects the current user is a member of. For OAuth2, requires the guilds scope.
+        """
+
+    // TODO(vxern): Implement.
+    be get_current_user_guild_member(guild_id: Snowflake) => "/users/@me/guilds/" + guild_id.string() + "/member"
+        """
+        https://docs.discord.com/developers/resources/user#get-current-user-guild-member
+
+        Returns a guild member object for the current user. Requires the guilds.members.read OAuth2 scope.
+        """
+
+    // TODO(vxern): Implement.
+    be leave_guild(guild_id: Snowflake) => "/users/@me/guilds/" + guild_id.string()
+        """
+        https://docs.discord.com/developers/resources/user#leave-guild
+
+        Leave a guild. Returns a 204 empty response on success. Fires a Guild Delete Gateway event and a Guild Member Remove Gateway event.
+        """
+
+    // TODO(vxern): Implement.
+    be create_dm(params: ParamsStub) => "/users/@me/channels"
+        """
+        https://docs.discord.com/developers/resources/user#create-dm
+
+        Create a new DM channel with a user. Returns a DM channel object (if one already exists, it will be returned instead).
+
+        You should not use this endpoint to DM everyone in a server about something. DMs should generally be initiated by a user action. If you open a significant amount of DMs too quickly, your bot may be rate limited or blocked from opening new ones.
+        """
+
+    // TODO(vxern): Implement.
+    be create_group_dm(params: ParamsStub) => "/users/@me/channels"
+        """
+        https://docs.discord.com/developers/resources/user#create-group-dm
+
+        Create a new group DM channel with multiple users. Returns a DM channel object. This endpoint was intended to be used with the now-deprecated GameBridge SDK. Fires a Channel Create Gateway event.
+
+        This endpoint is limited to 10 active group DMs.
+        """
+
+    // TODO(vxern): Implement.
+    be get_current_user_connections() => "/users/@me/connections"
+        """
+        https://docs.discord.com/developers/resources/user#get-current-user-connections
+
+        Returns a list of connection objects. Requires the connections OAuth2 scope.
+        """
+
+    // TODO(vxern): Implement.
+    be get_current_user_application_role_connection(application_id: Snowflake) => "/users/@me/applications/" + application_id.string() + "/role-connection"
+        """
+        https://docs.discord.com/developers/resources/user#get-current-user-application-role-connection
+
+        Returns the application role connection for the user. Requires an OAuth2 access token with role_connections.write scope for the application specified in the path.
+        """
+
+    // TODO(vxern): Implement.
+    be update_current_user_application_role_connection(application_id: Snowflake, params: ParamsStub) => "/users/@me/applications/" + application_id.string() + "/role-connection"
+        """
+        https://docs.discord.com/developers/resources/user#update-current-user-application-role-connection
+
+        Updates and returns the application role connection for the user. Requires an OAuth2 access token with role_connections.write scope for the application specified in the path.
+        """
+
+    // TODO(vxern): Implement.
+    be delete_current_user_application_role_connection(application_id: Snowflake) => "/users/@me/applications/" + application_id.string() + "/role-connection"
+        """
+        https://docs.discord.com/developers/resources/user#delete-current-user-application-role-connection
+
+        Deletes the application role connection for the user. Requires an OAuth2 access token with role_connections.write scope for the application specified in the path.
+        """
+
+    // TODO(vxern): Implement.
+    be get_voice_regions() => "/voice/regions"
+        """
+        https://docs.discord.com/developers/resources/voice#list-voice-regions
+
+        Returns an array of voice region objects that can be used when setting a voice or stage channel's rtc_region.
+        """
+
+    // TODO(vxern): Implement.
+    be get_current_user_voice_state(guild_id: Snowflake) => "/guilds/" + guild_id.string() + "/voice-states/@me"
+        """
+        https://docs.discord.com/developers/resources/voice#get-current-user-voice-state
+
+        Returns the current user's voice state in the guild.
+        """
+
+    // TODO(vxern): Implement.
+    be get_user_voice_state(guild_id: Snowflake, user_id: Snowflake) => "/guilds/" + guild_id.string() + "/voice-states/" + user_id.string()
+        """
+        https://docs.discord.com/developers/resources/voice#get-user-voice-state
+
+        Returns the specified user's voice state in the guild.
+
+        If the specified user is connected to a voice channel, the current user must have permission to connect to the channel.
+        """
+
+    // TODO(vxern): Implement.
+    be update_current_user_voice_state(guild_id: Snowflake, params: ParamsStub) => "/guilds/" + guild_id.string() + "/voice-states/@me"
+        """
+        https://docs.discord.com/developers/resources/voice#modify-current-user-voice-state
+
+        Updates the current user's voice state. Returns 204 No Content on success. Fires a Voice State Update Gateway event.
+        """
+
+    // TODO(vxern): Implement.
+    be update_user_voice_state(guild_id: Snowflake, user_id: Snowflake, params: ParamsStub) => "/guilds/" + guild_id.string() + "/voice-states/" + user_id.string()
+        """
+        https://docs.discord.com/developers/resources/voice#modify-user-voice-state
+
+        Updates another user's voice state. Returns 204 No Content on success. Fires a Voice State Update Gateway event.
+        """
+
+    // TODO(vxern): Implement.
+    be create_webhook(channel_id: Snowflake, params: ParamsStub, reason: Reason = None) => "/channels/" + channel_id.string() + "/webhooks"
+        """
+        https://docs.discord.com/developers/resources/webhook#create-webhook
+
+        Creates a new webhook and returns a webhook object on success. Requires the MANAGE_WEBHOOKS permission. Fires a Webhooks Update Gateway event.
+
+        An error will be returned if a webhook name (name) is not valid. A webhook name is valid if:
+
+        - It does not contain the substrings clyde or discord (case-insensitive)
+        - It follows the nickname guidelines in the Usernames and Nicknames documentation, with an exception that webhook names can be up to 80 characters
+
+        This endpoint supports the X-Audit-Log-Reason header.
+        """
+
+    // TODO(vxern): Implement.
+    be get_channel_webhooks(channel_id: Snowflake) => "/channels/" + channel_id.string() + "/webhooks"
+        """
+        https://docs.discord.com/developers/resources/webhook#get-channel-webhooks
+
+        Returns a list of channel webhook objects. Requires the MANAGE_WEBHOOKS permission.
+        """
+
+    // TODO(vxern): Implement.
+    be get_guild_webhooks(guild_id: Snowflake) => "/guilds/" + guild_id.string() + "/webhooks"
+        """
+        https://docs.discord.com/developers/resources/webhook#get-guild-webhooks
+
+        Returns a list of guild webhook objects. Requires the MANAGE_WEBHOOKS permission.
+        """
+
+    // TODO(vxern): Implement.
+    be get_webhook(webhook_id: Snowflake) => "/webhooks/" + webhook_id.string()
+        """
+        https://docs.discord.com/developers/resources/webhook#get-webhook
+
+        Returns the new webhook object for the given id.
+
+        This request requires the MANAGE_WEBHOOKS permission unless the application making the request owns the
+        webhook. (see: webhook.application_id)
+        """
+
+    // TODO(vxern): Implement.
+    be get_webhook_with_token(webhook_id: Snowflake, webhook_token: String) => "/webhooks/" + webhook_id.string() + "/" + webhook_token
+        """
+        https://docs.discord.com/developers/resources/webhook#get-webhook-with-token
+
+        Same as above, except this call does not require authentication and returns no user in the webhook object.
+        """
+
+    // TODO(vxern): Implement.
+    be update_webhook(webhook_id: Snowflake, params: ParamsStub, reason: Reason = None) => "/webhooks/" + webhook_id.string()
+        """
+        https://docs.discord.com/developers/resources/webhook#modify-webhook
+
+        Modify a webhook. Requires the MANAGE_WEBHOOKS permission. Returns the updated webhook object on success. Fires a Webhooks Update Gateway event.
+
+        All parameters to this endpoint are optional.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+        """
+
+    // TODO(vxern): Implement.
+    be update_webhook_with_token(webhook_id: Snowflake, webhook_token: String, params: ParamsStub) => "/webhooks/" + webhook_id.string() + "/" + webhook_token
+        """
+        https://docs.discord.com/developers/resources/webhook#modify-webhook-with-token
+
+        Same as above, except this call does not require authentication, does not accept a channel_id parameter in the body, and does not return a user in the webhook object.
+        """
+
+    // TODO(vxern): Implement.
+    be delete_webhook(webhook_id: Snowflake, reason: Reason = None) => "/webhooks/" + webhook_id.string()
+        """
+        https://docs.discord.com/developers/resources/webhook#delete-webhook
+
+        Delete a webhook permanently. Requires the MANAGE_WEBHOOKS permission. Returns a 204 No Content response on success. Fires a Webhooks Update Gateway event.
+
+        This endpoint supports the X-Audit-Log-Reason header.
+        """
+
+    // TODO(vxern): Implement.
+    be delete_webhook_with_token(webhook_id: Snowflake, webhook_token: String) => "/webhooks/" + webhook_id.string() + "/" + webhook_token
+        """
+        https://docs.discord.com/developers/resources/webhook#delete-webhook-with-token
+
+        Same as above, except this call does not require authentication.
+        """
+
+    // TODO(vxern): Implement.
+    be execute_webhook(webhook_id: Snowflake, webhook_token: String, params: ParamsStub) => "/webhooks/" + webhook_id.string() + "/" + webhook_token
+        """
+        https://docs.discord.com/developers/resources/webhook#execute-webhook
+
+        Refer to Uploading Files for details on attachments and multipart/form-data requests. Returns a message or 204 No Content depending on the wait query parameter.
+
+        Note that when sending a message, you must provide a value for at least one of content, embeds, components, file, or poll.
+
+        If the webhook channel is a forum or media channel, you must provide either thread_id in the query string params, or thread_name in the JSON/form params. If thread_id is provided, the message will send in that thread. If thread_name is provided, a thread with that name will be created in the channel.
+
+        Discord may strip certain characters from message content, like invalid unicode characters or characters which cause unexpected message formatting. If you are passing user-generated strings into message content, consider sanitizing the data to prevent unexpected behavior and using allowed_mentions to prevent unexpected mentions.
+        """
+
+    // TODO(vxern): Implement.
+    be execute_slack_compatible_webhook(webhook_id: Snowflake, webhook_token: String, params: ParamsStub) => "/webhooks/" + webhook_id.string() + "/" + webhook_token + "/slack"
+        """
+        https://docs.discord.com/developers/resources/webhook#execute-slack-compatible-webhook
+
+        Refer to Slack's documentation for more information. We do not support Slack's channel, icon_emoji, mrkdwn, or mrkdwn_in properties.
+        """
+
+    // TODO(vxern): Implement.
+    be execute_github_compatible_webhook(webhook_id: Snowflake, webhook_token: String, params: ParamsStub) => "/webhooks/" + webhook_id.string() + "/" + webhook_token + "/github"
+        """
+        https://docs.discord.com/developers/resources/webhook#execute-github-compatible-webhook
+
+        Add a new webhook to your GitHub repo (in the repo's settings), and use this endpoint as the "Payload URL." You can choose what events your Discord channel receives by choosing the "Let me select individual events" option and selecting individual events for the new webhook you're configuring. The supported events are commit_comment, create, delete, fork, issue_comment, issues, member, public, pull_request, pull_request_review, pull_request_review_comment, push, release, watch, check_run, check_suite, discussion, and discussion_comment.
+        """
+
+    // TODO(vxern): Implement.
+    be get_webhook_message(webhook_id: Snowflake, webhook_token: String, message_id: Snowflake, params: ParamsStub) => "/webhooks/" + webhook_id.string() + "/" + webhook_token + "/messages/" + message_id.string()
+        """
+        https://docs.discord.com/developers/resources/webhook#get-webhook-message
+
+        Returns a previously-sent webhook message from the same token. Returns a message object on success.
+        """
+
+    // TODO(vxern): Implement.
+    be update_webhook_message(webhook_id: Snowflake, webhook_token: String, message_id: Snowflake, params: ParamsStub) => "/webhooks/" + webhook_id.string() + "/" + webhook_token + "/messages/" + message_id.string()
+        """
+        https://docs.discord.com/developers/resources/webhook#edit-webhook-message
+
+        Edits a previously-sent webhook message from the same token. Returns a message object on success.
+
+        When the content field is edited, the arrays mentions and mention_roles and the boolean mention_everyone in the message object will be reconstructed from scratch based on the new content. When the message flag IS_COMPONENTS_V2 is set, the reconstructed arrays and boolean are based on the edited content in the components array. The allowed_mentions field of the edit request controls how this happens. If there is no explicit allowed_mentions in the edit request, the content will be parsed with _default_ allowances, that is, without regard to whether or not an allowed_mentions was present in the request that originally created the message.
+
+        Refer to Uploading Files for details on attachments and multipart/form-data requests.
+        Any provided files will be appended to the message. To remove or replace files you will have to supply the attachments field which specifies the files to retain on the message after edit.
+
+        Starting with API v10, the attachments array must contain all attachments that should be present after edit, including retained and new attachments provided in the request body.
+
+        All parameters to this endpoint are optional and nullable.
+        """
+
+    // TODO(vxern): Implement.
+    be delete_webhook_message(webhook_id: Snowflake, webhook_token: String, message_id: Snowflake, params: ParamsStub) => "/webhooks/" + webhook_id.string() + "/" + webhook_token + "/messages/" + message_id.string()
+        """
+        https://docs.discord.com/developers/resources/webhook#delete-webhook-message
+
+        Deletes a message that was created by the webhook. Returns a 204 No Content response on success.
+        """
+
+    // TODO(vxern): Implement.
+    be create_interaction_response(interaction_id: Snowflake, interaction_token: String, params: ParamsStub) => "/interactions/" + interaction_id.string() + "/" + interaction_token + "/callback"
+        """
+        https://docs.discord.com/developers/interactions/receiving-and-responding#create-interaction-response
+
+        Create a response to an Interaction. Body is an interaction response. Returns 204 unless with_response is set to true which returns 200 with the body as interaction callback response.
+
+        This endpoint also supports file attachments similar to the webhook endpoints. Refer to Uploading Files for details on uploading files and multipart/form-data requests.
+        """
+
+    // TODO(vxern): Implement.
+    be get_original_interaction_response(application_id: Snowflake, interaction_token: String, params: ParamsStub) => "/webhooks/" + application_id.string() + "/" + interaction_token + "/messages/@original"
+        """
+        https://docs.discord.com/developers/interactions/receiving-and-responding#get-original-interaction-response
+
+        Returns the initial Interaction response. Functions the same as Get Webhook Message.
+        """
+
+    // TODO(vxern): Implement.
+    be update_original_interaction_response(application_id: Snowflake, interaction_token: String, params: ParamsStub) => "/webhooks/" + application_id.string() + "/" + interaction_token + "/messages/@original"
+        """
+        https://docs.discord.com/developers/interactions/receiving-and-responding#edit-original-interaction-response
+
+        Edits the initial Interaction response. Functions the same as Edit Webhook Message.
+        """
+
+    // TODO(vxern): Implement.
+    be delete_original_interaction_response(application_id: Snowflake, interaction_token: String) => "/webhooks/" + application_id.string() + "/" + interaction_token + "/messages/@original"
+        """
+        https://docs.discord.com/developers/interactions/receiving-and-responding#delete-original-interaction-response
+
+        Deletes the initial Interaction response. Returns 204 No Content on success.
+        """
+
+    // TODO(vxern): Implement.
+    be create_followup_message(application_id: Snowflake, interaction_token: String, params: ParamsStub) => "/webhooks/" + application_id.string() + "/" + interaction_token
+        """
+        https://docs.discord.com/developers/interactions/receiving-and-responding#create-followup-message
+
+        Apps are limited to 5 followup messages per interaction if it was initiated from a user-installed app and isn't installed in the server (meaning the authorizing integration owners object only contains USER_INSTALL)
+
+        Create a followup message for an Interaction. Functions the same as Execute Webhook, but wait is always true. The thread_id, avatar_url, and username parameters are not supported when using this endpoint for interaction followups. You can use the EPHEMERAL message flag 1 << 6 (64) to send a message that only the user can see. You can also use the IS_COMPONENTS_V2 message flag 1 << 15 (32768) to send a component-based message.
+
+        When using this endpoint directly after responding to an interaction with DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE, this endpoint will function as Edit Original Interaction Response for backwards compatibility. In this case, no new message will be created, and the loading message will be edited instead. The ephemeral flag will be ignored, and the value you provided in the initial defer response will be preserved, as an existing message's ephemeral state cannot be changed. This behavior is deprecated, and you should use the Edit Original Interaction Response endpoint in this case instead.
+        """
+
+    // TODO(vxern): Implement.
+    be get_followup_message(application_id: Snowflake, interaction_token: String, message_id: Snowflake, params: ParamsStub) => "/webhooks/" + application_id.string() + "/" + interaction_token + "/messages/" + message_id.string()
+        """
+        https://docs.discord.com/developers/interactions/receiving-and-responding#get-followup-message
+
+        Returns a followup message for an Interaction. Functions the same as Get Webhook Message.
+        """
+
+    // TODO(vxern): Implement.
+    be update_followup_message(application_id: Snowflake, interaction_token: String, message_id: Snowflake, params: ParamsStub) => "/webhooks/" + application_id.string() + "/" + interaction_token + "/messages/" + message_id.string()
+        """
+        https://docs.discord.com/developers/interactions/receiving-and-responding#edit-followup-message
+
+        Edits a followup message for an Interaction. Functions the same as Edit Webhook Message.
+        """
+
+    // TODO(vxern): Implement.
+    be delete_followup_message(application_id: Snowflake, interaction_token: String, message_id: Snowflake) => "/webhooks/" + application_id.string() + "/" + interaction_token + "/messages/" + message_id.string()
+        """
+        https://docs.discord.com/developers/interactions/receiving-and-responding#delete-followup-message
+
+        Deletes a followup message for an Interaction. Returns 204 No Content on success.
+        """
+
+    // TODO(vxern): Implement.
+    be get_global_application_commands(application_id: Snowflake, params: ParamsStub) => "/applications/" + application_id.string() + "/commands"
+        """
+        https://docs.discord.com/developers/interactions/application-commands#get-global-application-commands
+
+        The objects returned by this endpoint may be augmented with additional fields if localization is active.
+
+        Fetch all of the global commands for your application. Returns an array of application command objects.
+        """
+
+    // TODO(vxern): Implement.
+    be create_global_application_command(application_id: Snowflake, params: ParamsStub) => "/applications/" + application_id.string() + "/commands"
+        """
+        https://docs.discord.com/developers/interactions/application-commands#create-global-application-command
+
+        Creating a command with the same name as an existing command for your application will overwrite the old command.
+
+        Create a new global command. Returns 201 if a command with the same name does not already exist, or a 200 if it does (in which case the previous command will be overwritten). Both responses include an application command object.
+        """
+
+    // TODO(vxern): Implement.
+    be get_global_application_command(application_id: Snowflake, command_id: Snowflake) => "/applications/" + application_id.string() + "/commands/" + command_id.string()
+        """
+        https://docs.discord.com/developers/interactions/application-commands#get-global-application-command
+
+        Fetch a global command for your application. Returns an application command object.
+        """
+
+    // TODO(vxern): Implement.
+    be update_global_application_command(application_id: Snowflake, command_id: Snowflake, params: ParamsStub) => "/applications/" + application_id.string() + "/commands/" + command_id.string()
+        """
+        https://docs.discord.com/developers/interactions/application-commands#edit-global-application-command
+
+        All parameters for this endpoint are optional.
+
+        Edit a global command. Returns 200 and an application command object. All fields are optional, but any fields provided will entirely overwrite the existing values of those fields.
+        """
+
+    // TODO(vxern): Implement.
+    be delete_global_application_command(application_id: Snowflake, command_id: Snowflake) => "/applications/" + application_id.string() + "/commands/" + command_id.string()
+        """
+        https://docs.discord.com/developers/interactions/application-commands#delete-global-application-command
+
+        Deletes a global command. Returns 204 No Content on success.
+        """
+
+    // TODO(vxern): Implement.
+    be bulk_overwrite_global_application_commands(application_id: Snowflake, params: ParamsStub) => "/applications/" + application_id.string() + "/commands"
+        """
+        https://docs.discord.com/developers/interactions/application-commands#bulk-overwrite-global-application-commands
+
+        Takes a list of application commands, overwriting the existing global command list for this application. Returns 200 and a list of application command objects. Commands that do not already exist will count toward daily application command create limits.
+
+        This will overwrite all types of application commands: slash commands, user commands, and message commands.
+        """
+
+    // TODO(vxern): Implement.
+    be get_guild_application_commands(application_id: Snowflake, guild_id: Snowflake, params: ParamsStub) => "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands"
+        """
+        https://docs.discord.com/developers/interactions/application-commands#get-guild-application-commands
+
+        The objects returned by this endpoint may be augmented with additional fields if localization is active.
+
+        Fetch all of the guild commands for your application for a specific guild. Returns an array of application command objects.
+        """
+
+    // TODO(vxern): Implement.
+    be create_guild_application_command(application_id: Snowflake, guild_id: Snowflake, params: ParamsStub) => "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands"
+        """
+        https://docs.discord.com/developers/interactions/application-commands#create-guild-application-command
+
+        Creating a command with the same name as an existing command for your application will overwrite the old command.
+
+        Create a new guild command. New guild commands will be available in the guild immediately. Returns 201 if a command with the same name does not already exist, or a 200 if it does (in which case the previous command will be overwritten). Both responses include an application command object.
+        """
+
+    // TODO(vxern): Implement.
+    be get_guild_application_command(application_id: Snowflake, guild_id: Snowflake, command_id: Snowflake) => "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/" + command_id.string()
+        """
+        https://docs.discord.com/developers/interactions/application-commands#get-guild-application-command
+
+        Fetch a guild command for your application. Returns an application command object.
+        """
+
+    // TODO(vxern): Implement.
+    be update_guild_application_command(application_id: Snowflake, guild_id: Snowflake, command_id: Snowflake, params: ParamsStub) => "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/" + command_id.string()
+        """
+        https://docs.discord.com/developers/interactions/application-commands#edit-guild-application-command
+
+        All parameters for this endpoint are optional.
+
+        Edit a guild command. Updates for guild commands will be available immediately. Returns 200 and an application command object. All fields are optional, but any fields provided will entirely overwrite the existing values of those fields.
+        """
+
+    // TODO(vxern): Implement.
+    be delete_guild_application_command(application_id: Snowflake, guild_id: Snowflake, command_id: Snowflake) => "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/" + command_id.string()
+        """
+        https://docs.discord.com/developers/interactions/application-commands#delete-guild-application-command
+
+        Delete a guild command. Returns 204 No Content on success.
+        """
+
+    // TODO(vxern): Implement.
+    be bulk_overwrite_guild_application_commands(application_id: Snowflake, guild_id: Snowflake, params: ParamsStub) => "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands"
+        """
+        https://docs.discord.com/developers/interactions/application-commands#bulk-overwrite-guild-application-commands
+
+        Takes a list of application commands, overwriting the existing command list for this application for the targeted guild. Returns 200 and a list of application command objects.
+
+        This will overwrite all types of application commands: slash commands, user commands, and message commands.
+        """
+
+    // TODO(vxern): Implement.
+    be get_guild_application_command_permissions(application_id: Snowflake, guild_id: Snowflake) => "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/permissions"
+        """
+        https://docs.discord.com/developers/interactions/application-commands#get-guild-application-command-permissions
+
+        Fetches permissions for all commands for your application in a guild. Returns an array of guild application command permissions objects.
+        """
+
+    // TODO(vxern): Implement.
+    be get_application_command_permissions(application_id: Snowflake, guild_id: Snowflake, command_id: Snowflake) => "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/" + command_id.string() + "/permissions"
+        """
+        https://docs.discord.com/developers/interactions/application-commands#get-application-command-permissions
+
+        Fetches permissions for a specific command for your application in a guild. Returns a guild application command permissions object.
+        """
+
+    // TODO(vxern): Implement.
+    be update_application_command_permissions(application_id: Snowflake, guild_id: Snowflake, command_id: Snowflake, params: ParamsStub) => "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/" + command_id.string() + "/permissions"
+        """
+        https://docs.discord.com/developers/interactions/application-commands#edit-application-command-permissions
+
+        This endpoint will overwrite existing permissions for the command in that guild
+
+        Edits command permissions for a specific command for your application in a guild and returns a guild application command permissions object. Fires an Application Command Permissions Update Gateway event.
+
+        You can add up to 100 permission overwrites for a command.
+
+        This endpoint requires authentication with a Bearer token that has permission to manage the guild and its roles. For more information, read above about application command permissions.
+
+        Deleting or renaming a command will permanently delete all permissions for the command
+        """
+
+    // TODO(vxern): Implement.
+    be batch_update_application_command_permissions(application_id: Snowflake, guild_id: Snowflake, params: ParamsStub) => "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/permissions"
+        """
+        https://docs.discord.com/developers/interactions/application-commands#batch-edit-application-command-permissions
+
+        This endpoint has been disabled with updates to command permissions (Permissions v2). Instead, you can edit each application command permissions (though you should be careful to handle any potential rate limits).
+        """
+
+    // TODO(vxern): Implement.
+    be get_current_bot_application_information() => "/oauth2/applications/@me"
+        """
+        https://docs.discord.com/developers/topics/oauth2#get-current-bot-application-information
+
+        Returns the bot's application object.
+        """
+
+    // TODO(vxern): Implement.
+    be get_current_authorization_information() => "/oauth2/@me"
+        """
+        https://docs.discord.com/developers/topics/oauth2#get-current-authorization-information
+
+        Returns info about the current authorization. Requires authentication with a bearer token.
+        """
+
+    // TODO(vxern): Implement.
+    be get_gateway() => "/gateway"
+        """
+        https://docs.discord.com/developers/events/gateway#get-gateway
+
+        This endpoint does not require authentication.
+
+        Returns an object with a valid WSS URL which the app can use when Connecting to the Gateway. Apps should cache this value and only call this endpoint to retrieve a new URL when they are unable to properly establish a connection using the cached one.
+        """
+
+    // TODO(vxern): Implement.
+    be get_gateway_bot() => "/gateway/bot"
+        """
+        https://docs.discord.com/developers/events/gateway#get-gateway-bot
+
+        This endpoint requires authentication using a valid bot token.
+
+        Returns an object based on the information in Get Gateway, plus additional metadata that can help during the operation of large or sharded bots. Unlike the Get Gateway, this route should not be cached for extended periods of time as the value is not guaranteed to be the same per-call, and changes as the bot joins/leaves guilds.
         """
 
 class val RestOptions
