@@ -1,0 +1,697 @@
+use collections = "collections"
+use json = "json"
+
+class val GuildScheduledEvent
+    """
+    https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-structure
+
+    A representation of a scheduled event in a guild.
+    """
+
+    let id: Snowflake
+        """
+        the id of the scheduled event
+        """
+
+    let guild_id: Snowflake
+        """
+        the guild id which the scheduled event belongs to
+        """
+
+    let channel_id: (Snowflake | None)
+        """
+        the channel id in which the scheduled event will be hosted, or null if scheduled entity type is EXTERNAL
+        """
+
+    let creator_id: (Snowflake | None)
+        """
+        the id of the user that created the scheduled event
+        """
+
+    let name: String
+        """
+        the name of the scheduled event (1-100 characters)
+        """
+
+    let description: (String | None)
+        """
+        the description of the scheduled event (1-1000 characters)
+        """
+
+    let scheduled_start_time: ISO8601
+        """
+        the time the scheduled event will start
+        """
+
+    let scheduled_end_time: (ISO8601 | None)
+        """
+        the time the scheduled event will end, required if entity_type is EXTERNAL
+        """
+
+    let privacy_level: GuildScheduledEventPrivacyLevel
+        """
+        the privacy level of the scheduled event
+        """
+
+    let status: GuildScheduledEventStatus
+        """
+        the status of the scheduled event
+        """
+
+    let entity_type: GuildScheduledEventEntityType
+        """
+        the type of the scheduled event
+        """
+
+    let entity_id: (Snowflake | None)
+        """
+        the id of an entity associated with a guild scheduled event
+        """
+
+    let entity_metadata: (GuildScheduledEventEntityMetadata | None)
+        """
+        additional metadata for the guild scheduled event
+        """
+
+    // TODO(vxern): Add `creator` (user object; the user that created the scheduled event) once `User` is implemented.
+
+    let user_count: (USize | None)
+        """
+        the number of users subscribed to the scheduled event
+        """
+
+    let image: (String | None)
+        """
+        the cover image hash of the scheduled event
+        """
+
+    let recurrence_rule: (GuildScheduledEventRecurrenceRule | None)
+        """
+        the definition for how often this event should recur
+        """
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var id': (Snowflake | None) = None
+        var guild_id': (Snowflake | None) = None
+        var channel_id': (Snowflake | None) = None
+        var creator_id': (Snowflake | None) = None
+        var name': (String | None) = None
+        var description': (String | None) = None
+        var scheduled_start_time': (ISO8601 | None) = None
+        var scheduled_end_time': (ISO8601 | None) = None
+        var privacy_level': (GuildScheduledEventPrivacyLevel | None) = None
+        var status': (GuildScheduledEventStatus | None) = None
+        var entity_type': (GuildScheduledEventEntityType | None) = None
+        var entity_id': (Snowflake | None) = None
+        var entity_metadata': (GuildScheduledEventEntityMetadata | None) = None
+        var user_count': (USize | None) = None
+        var image': (String | None) = None
+        var recurrence_rule': (GuildScheduledEventRecurrenceRule | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "id" => id' = Snowflake.from_json(value)?
+            | "guild_id" => guild_id' = Snowflake.from_json(value)?
+            | "channel_id" =>
+                match value | let string: String => channel_id' = Snowflake.from_json(string)? end
+            | "creator_id" =>
+                match value | let string: String => creator_id' = Snowflake.from_json(string)? end
+            | "name" => name' = value as String
+            | "description" =>
+                match value | let string: String => description' = string end
+            | "scheduled_start_time" => scheduled_start_time' = value as String
+            | "scheduled_end_time" =>
+                match value | let string: String => scheduled_end_time' = string end
+            | "privacy_level" => privacy_level' = GuildScheduledEventPrivacyLevels.from((value as I64).u8())?
+            | "status" => status' = GuildScheduledEventStatuses.from((value as I64).u8())?
+            | "entity_type" => entity_type' = GuildScheduledEventEntityTypes.from((value as I64).u8())?
+            | "entity_id" =>
+                match value | let string: String => entity_id' = Snowflake.from_json(string)? end
+            | "entity_metadata" =>
+                match value | let obj': json.JsonObject => entity_metadata' = GuildScheduledEventEntityMetadata.from_json(obj')? end
+            | "user_count" => user_count' = (value as I64).usize()
+            | "image" =>
+                match value | let string: String => image' = string end
+            | "recurrence_rule" =>
+                match value | let obj': json.JsonObject => recurrence_rule' = GuildScheduledEventRecurrenceRule.from_json(obj')? end
+            end
+        end
+
+        id = id' as Snowflake
+        guild_id = guild_id' as Snowflake
+        channel_id = channel_id'
+        creator_id = creator_id'
+        name = name' as String
+        description = description'
+        scheduled_start_time = scheduled_start_time' as ISO8601
+        scheduled_end_time = scheduled_end_time'
+        privacy_level = privacy_level' as GuildScheduledEventPrivacyLevel
+        status = status' as GuildScheduledEventStatus
+        entity_type = entity_type' as GuildScheduledEventEntityType
+        entity_id = entity_id'
+        entity_metadata = entity_metadata'
+        user_count = user_count'
+        image = image'
+        recurrence_rule = recurrence_rule'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+            .update("id", id.to_json())
+            .update("guild_id", guild_id.to_json())
+            .update("channel_id", match channel_id | let channel_id': Snowflake => channel_id'.to_json() end)
+            .update("name", name)
+            .update("scheduled_start_time", scheduled_start_time)
+            .update("scheduled_end_time", scheduled_end_time)
+            .update("privacy_level", privacy_level.value().i64())
+            .update("status", status.value().i64())
+            .update("entity_type", entity_type.value().i64())
+            .update("entity_id", match entity_id | let entity_id': Snowflake => entity_id'.to_json() end)
+            .update("entity_metadata", match entity_metadata | let entity_metadata': GuildScheduledEventEntityMetadata => entity_metadata'.to_json() end)
+            .update("recurrence_rule", match recurrence_rule | let recurrence_rule': GuildScheduledEventRecurrenceRule => recurrence_rule'.to_json() end)
+
+        match creator_id
+        | let creator_id': Snowflake => obj = obj.update("creator_id", creator_id'.to_json())
+        end
+
+        match description
+        | let description': String => obj = obj.update("description", description')
+        end
+
+        match user_count
+        | let user_count': USize => obj = obj.update("user_count", user_count'.i64())
+        end
+
+        match image
+        | let image': String => obj = obj.update("image", image')
+        end
+
+        obj
+
+trait val GuildScheduledEventPrivacyLevel is (collections.Hashable & Equatable[GuildScheduledEventPrivacyLevel])
+    """
+    https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-privacy-level
+    """
+
+    fun value(): U8
+
+    fun hash(): USize => value().hash()
+
+    fun eq(that: GuildScheduledEventPrivacyLevel): Bool => value() == that.value()
+primitive GuildOnlyGuildScheduledEventPrivacyLevel is GuildScheduledEventPrivacyLevel
+    """
+    the scheduled event is only accessible to guild members
+    """
+
+    fun value(): U8 => 2
+primitive GuildScheduledEventPrivacyLevels
+    fun from(value: U8): GuildScheduledEventPrivacyLevel ? =>
+        match value
+        | 2 => GuildOnlyGuildScheduledEventPrivacyLevel
+        else error
+        end
+
+trait val GuildScheduledEventEntityType is (collections.Hashable & Equatable[GuildScheduledEventEntityType])
+    """
+    https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-entity-types
+    """
+
+    fun value(): U8
+
+    fun hash(): USize => value().hash()
+
+    fun eq(that: GuildScheduledEventEntityType): Bool => value() == that.value()
+primitive StageInstanceGuildScheduledEventEntityType is GuildScheduledEventEntityType
+    """
+    the scheduled event is hosted in a stage channel
+
+    Requires `channel_id`. `entity_metadata` must be null and `scheduled_end_time` is optional.
+    """
+
+    fun value(): U8 => 1
+primitive VoiceGuildScheduledEventEntityType is GuildScheduledEventEntityType
+    """
+    the scheduled event is hosted in a voice channel
+
+    Requires `channel_id`. `entity_metadata` must be null and `scheduled_end_time` is optional.
+    """
+
+    fun value(): U8 => 2
+primitive ExternalGuildScheduledEventEntityType is GuildScheduledEventEntityType
+    """
+    the scheduled event is hosted externally to Discord
+
+    `channel_id` must be null, and `entity_metadata` and `scheduled_end_time` are both required.
+    """
+
+    fun value(): U8 => 3
+primitive GuildScheduledEventEntityTypes
+    fun from(value: U8): GuildScheduledEventEntityType ? =>
+        match value
+        | 1 => StageInstanceGuildScheduledEventEntityType
+        | 2 => VoiceGuildScheduledEventEntityType
+        | 3 => ExternalGuildScheduledEventEntityType
+        else error
+        end
+
+trait val GuildScheduledEventStatus is (collections.Hashable & Equatable[GuildScheduledEventStatus])
+    """
+    https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-status
+
+    Once `status` is set to COMPLETED or CANCELED, the `status` can no longer be updated.
+    """
+
+    fun value(): U8
+
+    fun hash(): USize => value().hash()
+
+    fun eq(that: GuildScheduledEventStatus): Bool => value() == that.value()
+primitive ScheduledGuildScheduledEventStatus is GuildScheduledEventStatus
+    fun value(): U8 => 1
+primitive ActiveGuildScheduledEventStatus is GuildScheduledEventStatus
+    fun value(): U8 => 2
+primitive CompletedGuildScheduledEventStatus is GuildScheduledEventStatus
+    fun value(): U8 => 3
+primitive CanceledGuildScheduledEventStatus is GuildScheduledEventStatus
+    fun value(): U8 => 4
+primitive GuildScheduledEventStatuses
+    fun from(value: U8): GuildScheduledEventStatus ? =>
+        match value
+        | 1 => ScheduledGuildScheduledEventStatus
+        | 2 => ActiveGuildScheduledEventStatus
+        | 3 => CompletedGuildScheduledEventStatus
+        | 4 => CanceledGuildScheduledEventStatus
+        else error
+        end
+
+class val GuildScheduledEventEntityMetadata
+    """
+    https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-entity-metadata
+
+    Additional metadata for the guild scheduled event.
+    """
+
+    let location: (String | None)
+        """
+        location of the event (1-100 characters)
+
+        Required for events with an `entity_type` of EXTERNAL.
+        """
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var location': (String | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "location" => location' = value as String
+            end
+        end
+
+        location = location'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match location
+        | let location': String => obj = obj.update("location", location')
+        end
+
+        obj
+
+class val GuildScheduledEventRecurrenceRule
+    """
+    https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-recurrence-rule-object-guild-scheduled-event-recurrence-rule-structure
+
+    Discord's recurrence rule is a subset of the behaviors defined in the iCalendar RFC and implemented by python's dateutil rrule.
+
+    There are currently many limitations on what you can set. These are documented alongside the individual fields.
+    """
+
+    let start: ISO8601
+        """
+        Starting time of the recurrence interval
+        """
+
+    let end': (ISO8601 | None)
+        """
+        Ending time of the recurrence interval
+        """
+
+    let frequency: GuildScheduledEventRecurrenceRuleFrequency
+        """
+        How often the event occurs
+        """
+
+    let interval: USize
+        """
+        The spacing between the events, defined by `frequency`. For example, `frequency` of WEEKLY and an `interval` of 2 would be "every-other week"
+        """
+
+    let by_weekday: (Array[GuildScheduledEventRecurrenceRuleWeekday] val | None)
+        """
+        Set of specific days within a week for the event to recur on
+        """
+
+    let by_n_weekday: (Array[GuildScheduledEventRecurrenceRuleNWeekday] val | None)
+        """
+        List of specific days within a specific week (1-5) to recur on
+        """
+
+    let by_month: (Array[GuildScheduledEventRecurrenceRuleMonth] val | None)
+        """
+        Set of specific months to recur on
+        """
+
+    let by_month_day: (Array[USize] val | None)
+        """
+        Set of specific dates within a month to recur on
+        """
+
+    let by_year_day: (Array[USize] val | None)
+        """
+        Set of days within a year to recur on (1-364)
+        """
+
+    let count: (USize | None)
+        """
+        The total amount of times that the event is allowed to recur before stopping
+        """
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var start': (ISO8601 | None) = None
+        var end'': (ISO8601 | None) = None
+        var frequency': (GuildScheduledEventRecurrenceRuleFrequency | None) = None
+        var interval': (USize | None) = None
+        var by_weekday': (Array[GuildScheduledEventRecurrenceRuleWeekday] val | None) = None
+        var by_n_weekday': (Array[GuildScheduledEventRecurrenceRuleNWeekday] val | None) = None
+        var by_month': (Array[GuildScheduledEventRecurrenceRuleMonth] val | None) = None
+        var by_month_day': (Array[USize] val | None) = None
+        var by_year_day': (Array[USize] val | None) = None
+        var count': (USize | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "start" => start' = value as String
+            | "end" =>
+                match value | let string: String => end'' = string end
+            | "frequency" => frequency' = GuildScheduledEventRecurrenceRuleFrequencies.from((value as I64).u8())?
+            | "interval" => interval' = (value as I64).usize()
+            | "by_weekday" =>
+                match value | let array: json.JsonArray => by_weekday' = _GuildScheduledEventRecurrenceRuleWeekdays(array)? end
+            | "by_n_weekday" =>
+                match value | let array: json.JsonArray => by_n_weekday' = _GuildScheduledEventRecurrenceRuleNWeekdays(array)? end
+            | "by_month" =>
+                match value | let array: json.JsonArray => by_month' = _GuildScheduledEventRecurrenceRuleMonths(array)? end
+            | "by_month_day" =>
+                match value | let array: json.JsonArray => by_month_day' = _USizes(array)? end
+            | "by_year_day" =>
+                match value | let array: json.JsonArray => by_year_day' = _USizes(array)? end
+            | "count" =>
+                match value | let integer: I64 => count' = integer.usize() end
+            end
+        end
+
+        start = start' as ISO8601
+        end' = end''
+        frequency = frequency' as GuildScheduledEventRecurrenceRuleFrequency
+        interval = interval' as USize
+        by_weekday = by_weekday'
+        by_n_weekday = by_n_weekday'
+        by_month = by_month'
+        by_month_day = by_month_day'
+        by_year_day = by_year_day'
+        count = count'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+            .update("start", start)
+            .update("end", end')
+            .update("frequency", frequency.value().i64())
+            .update("interval", interval.i64())
+            .update("by_weekday", match by_weekday | let by_weekday': Array[GuildScheduledEventRecurrenceRuleWeekday] val => _GuildScheduledEventRecurrenceRuleWeekdays.to_json(by_weekday') end)
+            .update("by_n_weekday", match by_n_weekday | let by_n_weekday': Array[GuildScheduledEventRecurrenceRuleNWeekday] val => _GuildScheduledEventRecurrenceRuleNWeekdays.to_json(by_n_weekday') end)
+            .update("by_month", match by_month | let by_month': Array[GuildScheduledEventRecurrenceRuleMonth] val => _GuildScheduledEventRecurrenceRuleMonths.to_json(by_month') end)
+            .update("by_month_day", match by_month_day | let by_month_day': Array[USize] val => _USizes.to_json(by_month_day') end)
+            .update("by_year_day", match by_year_day | let by_year_day': Array[USize] val => _USizes.to_json(by_year_day') end)
+            .update("count", match count | let count': USize => count'.i64() end)
+
+        obj
+
+trait val GuildScheduledEventRecurrenceRuleFrequency is (collections.Hashable & Equatable[GuildScheduledEventRecurrenceRuleFrequency])
+    """
+    https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-recurrence-rule-object-guild-scheduled-event-recurrence-rule-frequency
+    """
+
+    fun value(): U8
+
+    fun hash(): USize => value().hash()
+
+    fun eq(that: GuildScheduledEventRecurrenceRuleFrequency): Bool => value() == that.value()
+primitive YearlyGuildScheduledEventRecurrenceRuleFrequency is GuildScheduledEventRecurrenceRuleFrequency
+    fun value(): U8 => 0
+primitive MonthlyGuildScheduledEventRecurrenceRuleFrequency is GuildScheduledEventRecurrenceRuleFrequency
+    fun value(): U8 => 1
+primitive WeeklyGuildScheduledEventRecurrenceRuleFrequency is GuildScheduledEventRecurrenceRuleFrequency
+    fun value(): U8 => 2
+primitive DailyGuildScheduledEventRecurrenceRuleFrequency is GuildScheduledEventRecurrenceRuleFrequency
+    fun value(): U8 => 3
+primitive GuildScheduledEventRecurrenceRuleFrequencies
+    fun from(value: U8): GuildScheduledEventRecurrenceRuleFrequency ? =>
+        match value
+        | 0 => YearlyGuildScheduledEventRecurrenceRuleFrequency
+        | 1 => MonthlyGuildScheduledEventRecurrenceRuleFrequency
+        | 2 => WeeklyGuildScheduledEventRecurrenceRuleFrequency
+        | 3 => DailyGuildScheduledEventRecurrenceRuleFrequency
+        else error
+        end
+
+trait val GuildScheduledEventRecurrenceRuleWeekday is (collections.Hashable & Equatable[GuildScheduledEventRecurrenceRuleWeekday])
+    """
+    https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-recurrence-rule-object-guild-scheduled-event-recurrence-rule-weekday
+    """
+
+    fun value(): U8
+
+    fun hash(): USize => value().hash()
+
+    fun eq(that: GuildScheduledEventRecurrenceRuleWeekday): Bool => value() == that.value()
+primitive MondayGuildScheduledEventRecurrenceRuleWeekday is GuildScheduledEventRecurrenceRuleWeekday
+    fun value(): U8 => 0
+primitive TuesdayGuildScheduledEventRecurrenceRuleWeekday is GuildScheduledEventRecurrenceRuleWeekday
+    fun value(): U8 => 1
+primitive WednesdayGuildScheduledEventRecurrenceRuleWeekday is GuildScheduledEventRecurrenceRuleWeekday
+    fun value(): U8 => 2
+primitive ThursdayGuildScheduledEventRecurrenceRuleWeekday is GuildScheduledEventRecurrenceRuleWeekday
+    fun value(): U8 => 3
+primitive FridayGuildScheduledEventRecurrenceRuleWeekday is GuildScheduledEventRecurrenceRuleWeekday
+    fun value(): U8 => 4
+primitive SaturdayGuildScheduledEventRecurrenceRuleWeekday is GuildScheduledEventRecurrenceRuleWeekday
+    fun value(): U8 => 5
+primitive SundayGuildScheduledEventRecurrenceRuleWeekday is GuildScheduledEventRecurrenceRuleWeekday
+    fun value(): U8 => 6
+primitive GuildScheduledEventRecurrenceRuleWeekdays
+    fun from(value: U8): GuildScheduledEventRecurrenceRuleWeekday ? =>
+        match value
+        | 0 => MondayGuildScheduledEventRecurrenceRuleWeekday
+        | 1 => TuesdayGuildScheduledEventRecurrenceRuleWeekday
+        | 2 => WednesdayGuildScheduledEventRecurrenceRuleWeekday
+        | 3 => ThursdayGuildScheduledEventRecurrenceRuleWeekday
+        | 4 => FridayGuildScheduledEventRecurrenceRuleWeekday
+        | 5 => SaturdayGuildScheduledEventRecurrenceRuleWeekday
+        | 6 => SundayGuildScheduledEventRecurrenceRuleWeekday
+        else error
+        end
+
+primitive _GuildScheduledEventRecurrenceRuleWeekdays
+    fun apply(array: json.JsonArray): Array[GuildScheduledEventRecurrenceRuleWeekday] val ? =>
+        """
+        Decodes an array of weekdays.
+        """
+
+        recover val
+            let weekdays = Array[GuildScheduledEventRecurrenceRuleWeekday](array.size())
+            for weekday in array.values() do weekdays.push(GuildScheduledEventRecurrenceRuleWeekdays.from((weekday as I64).u8())?) end
+            weekdays
+        end
+
+    fun to_json(weekdays: Array[GuildScheduledEventRecurrenceRuleWeekday] val): json.JsonArray =>
+        var array = json.JsonArray
+        for weekday in weekdays.values() do array = array.push(weekday.value().i64()) end
+        array
+
+class val GuildScheduledEventRecurrenceRuleNWeekday
+    """
+    https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-recurrence-rule-object-guild-scheduled-event-recurrence-rule-nweekday-structure
+    """
+
+    let n: USize
+        """
+        The week to reoccur on. 1 - 5
+        """
+
+    let day: GuildScheduledEventRecurrenceRuleWeekday
+        """
+        The day within the week to reoccur on
+        """
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var n': (USize | None) = None
+        var day': (GuildScheduledEventRecurrenceRuleWeekday | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "n" => n' = (value as I64).usize()
+            | "day" => day' = GuildScheduledEventRecurrenceRuleWeekdays.from((value as I64).u8())?
+            end
+        end
+
+        n = n' as USize
+        day = day' as GuildScheduledEventRecurrenceRuleWeekday
+
+    fun to_json(): json.JsonObject =>
+        json.JsonObject
+            .update("n", n.i64())
+            .update("day", day.value().i64())
+
+primitive _GuildScheduledEventRecurrenceRuleNWeekdays
+    fun apply(array: json.JsonArray): Array[GuildScheduledEventRecurrenceRuleNWeekday] val ? =>
+        """
+        Decodes an array of nweekdays.
+        """
+
+        recover val
+            let nweekdays = Array[GuildScheduledEventRecurrenceRuleNWeekday](array.size())
+            for nweekday in array.values() do nweekdays.push(GuildScheduledEventRecurrenceRuleNWeekday.from_json(nweekday as json.JsonObject)?) end
+            nweekdays
+        end
+
+    fun to_json(nweekdays: Array[GuildScheduledEventRecurrenceRuleNWeekday] val): json.JsonArray =>
+        var array = json.JsonArray
+        for nweekday in nweekdays.values() do array = array.push(nweekday.to_json()) end
+        array
+
+trait val GuildScheduledEventRecurrenceRuleMonth is (collections.Hashable & Equatable[GuildScheduledEventRecurrenceRuleMonth])
+    """
+    https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-recurrence-rule-object-guild-scheduled-event-recurrence-rule-month
+    """
+
+    fun value(): U8
+
+    fun hash(): USize => value().hash()
+
+    fun eq(that: GuildScheduledEventRecurrenceRuleMonth): Bool => value() == that.value()
+primitive JanuaryGuildScheduledEventRecurrenceRuleMonth is GuildScheduledEventRecurrenceRuleMonth
+    fun value(): U8 => 1
+primitive FebruaryGuildScheduledEventRecurrenceRuleMonth is GuildScheduledEventRecurrenceRuleMonth
+    fun value(): U8 => 2
+primitive MarchGuildScheduledEventRecurrenceRuleMonth is GuildScheduledEventRecurrenceRuleMonth
+    fun value(): U8 => 3
+primitive AprilGuildScheduledEventRecurrenceRuleMonth is GuildScheduledEventRecurrenceRuleMonth
+    fun value(): U8 => 4
+primitive MayGuildScheduledEventRecurrenceRuleMonth is GuildScheduledEventRecurrenceRuleMonth
+    fun value(): U8 => 5
+primitive JuneGuildScheduledEventRecurrenceRuleMonth is GuildScheduledEventRecurrenceRuleMonth
+    fun value(): U8 => 6
+primitive JulyGuildScheduledEventRecurrenceRuleMonth is GuildScheduledEventRecurrenceRuleMonth
+    fun value(): U8 => 7
+primitive AugustGuildScheduledEventRecurrenceRuleMonth is GuildScheduledEventRecurrenceRuleMonth
+    fun value(): U8 => 8
+primitive SeptemberGuildScheduledEventRecurrenceRuleMonth is GuildScheduledEventRecurrenceRuleMonth
+    fun value(): U8 => 9
+primitive OctoberGuildScheduledEventRecurrenceRuleMonth is GuildScheduledEventRecurrenceRuleMonth
+    fun value(): U8 => 10
+primitive NovemberGuildScheduledEventRecurrenceRuleMonth is GuildScheduledEventRecurrenceRuleMonth
+    fun value(): U8 => 11
+primitive DecemberGuildScheduledEventRecurrenceRuleMonth is GuildScheduledEventRecurrenceRuleMonth
+    fun value(): U8 => 12
+primitive GuildScheduledEventRecurrenceRuleMonths
+    fun from(value: U8): GuildScheduledEventRecurrenceRuleMonth ? =>
+        match value
+        | 1 => JanuaryGuildScheduledEventRecurrenceRuleMonth
+        | 2 => FebruaryGuildScheduledEventRecurrenceRuleMonth
+        | 3 => MarchGuildScheduledEventRecurrenceRuleMonth
+        | 4 => AprilGuildScheduledEventRecurrenceRuleMonth
+        | 5 => MayGuildScheduledEventRecurrenceRuleMonth
+        | 6 => JuneGuildScheduledEventRecurrenceRuleMonth
+        | 7 => JulyGuildScheduledEventRecurrenceRuleMonth
+        | 8 => AugustGuildScheduledEventRecurrenceRuleMonth
+        | 9 => SeptemberGuildScheduledEventRecurrenceRuleMonth
+        | 10 => OctoberGuildScheduledEventRecurrenceRuleMonth
+        | 11 => NovemberGuildScheduledEventRecurrenceRuleMonth
+        | 12 => DecemberGuildScheduledEventRecurrenceRuleMonth
+        else error
+        end
+
+primitive _GuildScheduledEventRecurrenceRuleMonths
+    fun apply(array: json.JsonArray): Array[GuildScheduledEventRecurrenceRuleMonth] val ? =>
+        """
+        Decodes an array of months.
+        """
+
+        recover val
+            let months = Array[GuildScheduledEventRecurrenceRuleMonth](array.size())
+            for month in array.values() do months.push(GuildScheduledEventRecurrenceRuleMonths.from((month as I64).u8())?) end
+            months
+        end
+
+    fun to_json(months: Array[GuildScheduledEventRecurrenceRuleMonth] val): json.JsonArray =>
+        var array = json.JsonArray
+        for month in months.values() do array = array.push(month.value().i64()) end
+        array
+
+class val GuildScheduledEventUser
+    """
+    https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-user-object-guild-scheduled-event-user-structure
+    """
+
+    let guild_scheduled_event_id: Snowflake
+        """
+        the scheduled event id which the user subscribed to
+        """
+
+    // TODO(vxern): Add `user` (user object; user which subscribed to an event) once `User` is implemented.
+
+    let member: (GuildMember | None)
+        """
+        guild member data for this user for the guild which this event belongs to, if any
+        """
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var guild_scheduled_event_id': (Snowflake | None) = None
+        var member': (GuildMember | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "guild_scheduled_event_id" => guild_scheduled_event_id' = Snowflake.from_json(value)?
+            | "member" => member' = GuildMember.from_json(value as json.JsonObject)?
+            end
+        end
+
+        guild_scheduled_event_id = guild_scheduled_event_id' as Snowflake
+        member = member'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+            .update("guild_scheduled_event_id", guild_scheduled_event_id.to_json())
+
+        match member
+        | let member': GuildMember => obj = obj.update("member", member'.to_json())
+        end
+
+        obj
+
+primitive _USizes
+    fun apply(array: json.JsonArray): Array[USize] val ? =>
+        """
+        Decodes an array of non-negative integers.
+        """
+
+        recover val
+            let integers = Array[USize](array.size())
+            for integer in array.values() do integers.push((integer as I64).usize()) end
+            integers
+        end
+
+    fun to_json(integers: Array[USize] val): json.JsonArray =>
+        var array = json.JsonArray
+        for integer in integers.values() do array = array.push(integer.i64()) end
+        array
