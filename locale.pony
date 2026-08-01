@@ -1,5 +1,11 @@
-trait Locale
+use collections = "collections"
+
+trait val Locale is (collections.Hashable & Equatable[Locale])
     fun value(): String
+
+    fun hash(): USize => value().hash()
+
+    fun eq(that: Locale): Bool => value() == that.value()
 primitive LocaleIndonesian is Locale
     fun value(): String => "id"
 primitive LocaleDanish is Locale
@@ -64,3 +70,40 @@ primitive LocaleChineseTW is Locale
     fun value(): String => "zh-TW"
 primitive LocaleKorean is Locale
     fun value(): String => "ko"
+primitive Locales
+    fun from(v: String): Locale ? =>
+        match v
+        | "id" => LocaleIndonesian
+        | "da" => LocaleDanish
+        | "de" => LocaleGerman
+        | "en-GB" => LocaleEnglishUK
+        | "en-US" => LocaleEnglishUS
+        | "es-ES" => LocaleSpanishES
+        | "es-419" => LocaleSpanishLATAM
+        | "fr" => LocaleFrench
+        | "hr" => LocaleCroatian
+        | "it" => LocaleItalian
+        | "lt" => LocaleLithuanian
+        | "hu" => LocaleHungarian
+        | "nl" => LocaleDutch
+        | "no" => LocaleNorwegian
+        | "pl" => LocalePolish
+        | "pt-BR" => LocalePortugueseBR
+        | "ro" => LocaleRomanian
+        | "fi" => LocaleFinnish
+        | "sv-SE" => LocaleSwedish
+        | "vi" => LocaleVietnamese
+        | "tr" => LocaleTurkish
+        | "cs" => LocaleCzech
+        | "el" => LocaleGreek
+        | "bg" => LocaleBulgarian
+        | "ru" => LocaleRussian
+        | "uk" => LocaleUkrainian
+        | "hi" => LocaleHindi
+        | "th" => LocaleThai
+        | "zh-CN" => LocaleChineseCN
+        | "ja" => LocaleJapanese
+        | "zh-TW" => LocaleChineseTW
+        | "ko" => LocaleKorean
+        else error
+        end

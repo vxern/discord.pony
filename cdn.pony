@@ -4,7 +4,9 @@ trait val ImageFormat is (collections.Hashable & Equatable[ImageFormat])
     fun value(): String
 
     fun extension(): String => "." + value()
+
     fun hash(): USize => value().hash()
+
     fun eq(that: ImageFormat): Bool => value() == that.value()
 primitive ImageFormatJPEG is ImageFormat
     fun value(): String => "jpeg"

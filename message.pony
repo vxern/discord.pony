@@ -213,77 +213,103 @@ class Message
 
 trait val MessageType is (collections.Hashable & Equatable[MessageType])
     fun value(): U8
+
 	fun deletable(): Bool
+
     fun hash(): USize => value().hash()
+
     fun eq(that: MessageType): Bool => value() == that.value()
 primitive DefaultMessageType is MessageType
     fun value(): U8 => 0
+
 	fun deletable(): Bool => true
 primitive RecipientAddMessageType is MessageType
     fun value(): U8 => 1
+
 	fun deletable(): Bool => false
 primitive RecipientRemoveMessageType is MessageType
     fun value(): U8 => 2
+
 	fun deletable(): Bool => false
 primitive CallMessageType is MessageType
     fun value(): U8 => 3
+
 	fun deletable(): Bool => false
 primitive ChannelNameChangeMessageType is MessageType
     fun value(): U8 => 4
+
 	fun deletable(): Bool => false
 primitive ChannelIconChangeMessageType is MessageType
     fun value(): U8 => 5
+
 	fun deletable(): Bool => false
 primitive ChannelPinnedMessageMessageType is MessageType
     fun value(): U8 => 6
+
 	fun deletable(): Bool => true
 primitive UserJoinMessageType is MessageType
     fun value(): U8 => 7
+
 	fun deletable(): Bool => true
 primitive GuildBoostMessageType is MessageType
     fun value(): U8 => 8
+
 	fun deletable(): Bool => true
 primitive GuildBoostTier1MessageType is MessageType
     fun value(): U8 => 9
+
 	fun deletable(): Bool => true
 primitive GuildBoostTier2MessageType is MessageType
     fun value(): U8 => 10
+
 	fun deletable(): Bool => true
 primitive GuildBoostTier3MessageType is MessageType
     fun value(): U8 => 11
+
 	fun deletable(): Bool => true
 primitive ChannelFollowAddMessageType is MessageType
     fun value(): U8 => 12
+
 	fun deletable(): Bool => true
 primitive GuildDiscoveryDisqualifiedMessageType is MessageType
     fun value(): U8 => 14
+
 	fun deletable(): Bool => true
 primitive GuildDiscoveryRequalifiedMessageType is MessageType
     fun value(): U8 => 15
+
 	fun deletable(): Bool => true
 primitive GuildDiscoveryGracePeriodInitialWarningMessageType is MessageType
     fun value(): U8 => 16
+
 	fun deletable(): Bool => true
 primitive GuildDiscoveryGracePeriodFinalWarningMessageType is MessageType
     fun value(): U8 => 17
+
 	fun deletable(): Bool => true
 primitive ThreadCreatedMessageType is MessageType
     fun value(): U8 => 18
+
 	fun deletable(): Bool => true
 primitive ReplyMessageType is MessageType
     fun value(): U8 => 19
+
 	fun deletable(): Bool => true
 primitive ChatInputCommandMessageType is MessageType
     fun value(): U8 => 20
+
 	fun deletable(): Bool => true
 primitive ThreadStarterMessageType is MessageType
     fun value(): U8 => 21
+
 	fun deletable(): Bool => false
 primitive GuildInviteReminderMessageType is MessageType
     fun value(): U8 => 22
+
 	fun deletable(): Bool => true
 primitive ContextMenuCommandMessageType is MessageType
     fun value(): U8 => 23
+
 	fun deletable(): Bool => true
 primitive AutoModerationActionMessageType is MessageType
     """
@@ -291,45 +317,59 @@ primitive AutoModerationActionMessageType is MessageType
     """
 
     fun value(): U8 => 24
+
 	fun deletable(): Bool => true
 primitive RoleSubscriptionPurchaseMessageType is MessageType
     fun value(): U8 => 25
+
 	fun deletable(): Bool => true
 primitive InteractionPremiumUpsellMessageType is MessageType
     fun value(): U8 => 26
+
 	fun deletable(): Bool => true
 primitive StageStartMessageType is MessageType
     fun value(): U8 => 27
+
 	fun deletable(): Bool => true
 primitive StageEndMessageType is MessageType
     fun value(): U8 => 28
+
 	fun deletable(): Bool => true
 primitive StageSpeakerMessageType is MessageType
     fun value(): U8 => 29
+
 	fun deletable(): Bool => true
 primitive StageTopicMessageType is MessageType
     fun value(): U8 => 31
+
 	fun deletable(): Bool => true
 primitive GuildApplicationPremiumSubscriptionMessageType is MessageType
     fun value(): U8 => 32
+
 	fun deletable(): Bool => true
 primitive GuildIncidentAlertModeEnabledMessageType is MessageType
     fun value(): U8 => 36
+
 	fun deletable(): Bool => true
 primitive GuildIncidentAlertModeDisabledMessageType is MessageType
     fun value(): U8 => 37
+
 	fun deletable(): Bool => true
 primitive GuildIncidentReportRaidMessageType is MessageType
     fun value(): U8 => 38
+
 	fun deletable(): Bool => true
 primitive GuildIncidentReportFalseAlartMessageType is MessageType
     fun value(): U8 => 39
+
 	fun deletable(): Bool => true
 primitive PurchaseNotificationMessageType is MessageType
     fun value(): U8 => 44
+
 	fun deletable(): Bool => true
 primitive PollResultMessageType is MessageType
     fun value(): U8 => 46
+
 	fun deletable(): Bool => true
 
 class MessageActivity
@@ -343,7 +383,7 @@ class MessageActivity
     """
     let party_id: String
 
-trait val MessageActivityType is (Hashable & Equatable[MessageActivityType])
+trait val MessageActivityType is (collections.Hashable & Equatable[MessageActivityType])
     fun value(): U8
     fun hash(): USize => value().hash()
     fun eq(that: MessageActivityType): Bool => value() == that.value()
@@ -356,12 +396,14 @@ primitive ListenMessageActivityType is MessageActivityType
 primitive JoinRequestMessageActivityType is MessageActivityType
     fun value(): U8 => 5
 
-trait val MessageFlag is (Hashable & Equatable[MessageFlag])
+trait val MessageFlag is (collections.Hashable & Equatable[MessageFlag])
     fun value(): U8
         """
         Represents the bit-shift value. Unshift by this value to get the flag.
         """
+
     fun hash(): USize => value().hash()
+
     fun eq(that: MessageFlag): Bool => value() == that.value()
 primitive CrosspostedMessageFlag is MessageFlag
     """
@@ -472,13 +514,15 @@ class MessageReference
     // TODO(vxern): Implement.
 
 // TODO(vxern): Do these need to have the 'Coupled Message Field'?
-trait val MessageReferenceType is (Hashable & Equatable[MessageReferenceType])
+trait val MessageReferenceType is (collections.Hashable & Equatable[MessageReferenceType])
     """
     Determines how associated data is populated.
     """
 
     fun value(): U8
+
     fun hash(): USize => value().hash()
+
     fun eq(that: MessageReferenceType): Bool => value() == that.value()
 primitive DefaultMessageReferenceType
     """
@@ -545,7 +589,7 @@ trait MessageAttachmentFlag
 class ChannelMention
     // TODO(vxern): Implement.
 
-trait val AllowedMention is (Hashable & Equatable[AllowedMention])
+trait val AllowedMention is (collections.Hashable & Equatable[AllowedMention])
     """
     Setting the allowed_mentions field lets you determine whether users will receive notifications when you include mentions in the message content, or the content of components attached to that message. This field is always validated against your permissions and the presence of said mentions in the message, to avoid “phantom” pings where users receive a notification without a visible mention in the message. For example, if you want to ping everyone, including it in the allowed_mentions field is not enough, the mention format (@everyone) must also be present in the content of the message or its components. It is important to note that setting this field does not guarantee a push notification will be sent, as additional factors can influence this:
     - To mention roles and notify their members, the role’s mentionable field must be set to true, or the bot must have the MENTION_EVERYONE permission
@@ -555,7 +599,9 @@ trait val AllowedMention is (Hashable & Equatable[AllowedMention])
     """
 
     fun value(): String
+
     fun hash(): USize => value().hash()
+
     fun eq(that: AllowedMention): Bool => value() == that.value()
 primitive AllowedMentionRole is AllowedMention
     """

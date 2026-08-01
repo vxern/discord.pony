@@ -69,7 +69,9 @@ primitive FormattingDefaults
 
 trait val TimestampStyle is (collections.Hashable & Equatable[TimestampStyle])
     fun value(): String
+
     fun hash(): USize => value().hash()
+
     fun eq(that: TimestampStyle): Bool => value() == that.value()
 primitive TimestampStyleShortTime is TimestampStyle
     """

@@ -6,7 +6,9 @@ trait val GatewayOpcode is (collections.Hashable & Equatable[GatewayOpcode])
     """
 
     fun value(): U8
+
     fun hash(): USize => value().hash()
+
     fun eq(that: GatewayOpcode): Bool => value() == that.value()
 primitive GatewayOpcodeDispatch is GatewayOpcode
     """
@@ -119,8 +121,11 @@ trait val GatewayCloseEventCode is (collections.Hashable & Equatable[GatewayClos
     """
 
     fun value(): U16
+
     fun reconnect(): Bool
+
     fun hash(): USize => value().hash()
+
     fun eq(that: GatewayCloseEventCode): Bool => value() == that.value()
 primitive GatewayCloseEventCodeUnknownError is GatewayCloseEventCode
     """
@@ -128,6 +133,7 @@ primitive GatewayCloseEventCodeUnknownError is GatewayCloseEventCode
     """
 
     fun value(): U16 => 4000
+
     fun reconnect(): Bool => true
 primitive GatewayCloseEventCodeUnknownOpcode is GatewayCloseEventCode
     """
@@ -135,6 +141,7 @@ primitive GatewayCloseEventCodeUnknownOpcode is GatewayCloseEventCode
     """
 
     fun value(): U16 => 4001
+
     fun reconnect(): Bool => true
 primitive GatewayCloseEventCodeDecodeError is GatewayCloseEventCode
     """
@@ -142,6 +149,7 @@ primitive GatewayCloseEventCodeDecodeError is GatewayCloseEventCode
     """
 
     fun value(): U16 => 4002
+
     fun reconnect(): Bool => true
 primitive GatewayCloseEventCodeNotAuthenticated is GatewayCloseEventCode
     """
@@ -149,6 +157,7 @@ primitive GatewayCloseEventCodeNotAuthenticated is GatewayCloseEventCode
     """
 
     fun value(): U16 => 4003
+
     fun reconnect(): Bool => true
 primitive GatewayCloseEventCodeAuthenticationFailed is GatewayCloseEventCode
     """
@@ -156,6 +165,7 @@ primitive GatewayCloseEventCodeAuthenticationFailed is GatewayCloseEventCode
     """
 
     fun value(): U16 => 4004
+
     fun reconnect(): Bool => false
 primitive GatewayCloseEventCodeAlreadyAuthenticated is GatewayCloseEventCode
     """
@@ -163,6 +173,7 @@ primitive GatewayCloseEventCodeAlreadyAuthenticated is GatewayCloseEventCode
     """
 
     fun value(): U16 => 4005
+
     fun reconnect(): Bool => true
 primitive GatewayCloseEventCodeInvalidSequence is GatewayCloseEventCode
     """
@@ -170,6 +181,7 @@ primitive GatewayCloseEventCodeInvalidSequence is GatewayCloseEventCode
     """
 
     fun value(): U16 => 4007
+
     fun reconnect(): Bool => true
 primitive GatewayCloseEventCodeRateLimited is GatewayCloseEventCode
     """
@@ -177,6 +189,7 @@ primitive GatewayCloseEventCodeRateLimited is GatewayCloseEventCode
     """
 
     fun value(): U16 => 4008
+
     fun reconnect(): Bool => true
 primitive GatewayCloseEventCodeSessionTimedOut is GatewayCloseEventCode
     """
@@ -184,6 +197,7 @@ primitive GatewayCloseEventCodeSessionTimedOut is GatewayCloseEventCode
     """
 
     fun value(): U16 => 4009
+
     fun reconnect(): Bool => true
 primitive GatewayCloseEventCodeInvalidShard is GatewayCloseEventCode
     """
@@ -191,6 +205,7 @@ primitive GatewayCloseEventCodeInvalidShard is GatewayCloseEventCode
     """
 
     fun value(): U16 => 4010
+
     fun reconnect(): Bool => false
 primitive GatewayCloseEventCodeShardingRequired is GatewayCloseEventCode
     """
@@ -198,6 +213,7 @@ primitive GatewayCloseEventCodeShardingRequired is GatewayCloseEventCode
     """
 
     fun value(): U16 => 4011
+
     fun reconnect(): Bool => false
 primitive GatewayCloseEventCodeInvalidAPIVersion is GatewayCloseEventCode
     """
@@ -205,6 +221,7 @@ primitive GatewayCloseEventCodeInvalidAPIVersion is GatewayCloseEventCode
     """
 
     fun value(): U16 => 4012
+
     fun reconnect(): Bool => false
 primitive GatewayCloseEventCodeInvalidIntents is GatewayCloseEventCode
     """
@@ -212,6 +229,7 @@ primitive GatewayCloseEventCodeInvalidIntents is GatewayCloseEventCode
     """
 
     fun value(): U16 => 4013
+
     fun reconnect(): Bool => false
 primitive GatewayCloseEventCodeDisallowedIntents is GatewayCloseEventCode
     """
@@ -219,6 +237,7 @@ primitive GatewayCloseEventCodeDisallowedIntents is GatewayCloseEventCode
     """
 
     fun value(): U16 => 4014
+
     fun reconnect(): Bool => false
 
 // TODO(vxern): (Maybe) add RPC error codes
