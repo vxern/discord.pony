@@ -138,7 +138,7 @@ class val Channel
         default duration, copied onto newly created threads, in minutes, threads will stop showing in the channel list after the specified period of inactivity, can be set to: 60, 1440, 4320, 10080
         """
 
-    let permissions: (String | None)
+    let permissions: (Array[Permission] val | None)
         """
         computed permissions for the invoking user in the channel, including overwrites, only included when part of the resolved data received on a slash command interaction. This does not include implicit permissions, which may need to be checked separately
         """
@@ -210,7 +210,7 @@ class val Channel
         var thread_metadata': (ThreadMetadata | None) = None
         var member': (ThreadMember | None) = None
         var default_auto_archive_duration': (USize | None) = None
-        var permissions': (String | None) = None
+        var permissions': (Array[Permission] val | None) = None
         var flags': (Array[ChannelFlag] val | None) = None
         var total_message_sent': (USize | None) = None
         var available_tags': (Array[ForumTag] val | None) = None
@@ -255,7 +255,7 @@ class val Channel
             | "thread_metadata" => thread_metadata' = ThreadMetadata.from_json(value as json.JsonObject)?
             | "member" => member' = ThreadMember.from_json(value as json.JsonObject)?
             | "default_auto_archive_duration" => default_auto_archive_duration' = (value as I64).usize()
-            | "permissions" => permissions' = value as String
+            | "permissions" => permissions' = _Permissions(value)?
             | "flags" => flags' = _ChannelFlags((value as I64).u64())
             | "total_message_sent" => total_message_sent' = (value as I64).usize()
             | "available_tags" => available_tags' = _ForumTags(value)?
@@ -407,7 +407,7 @@ class val Channel
         end
 
         match permissions
-        | let permissions': String => obj = obj.update("permissions", permissions')
+        | let permissions': Array[Permission] val => obj = obj.update("permissions", _Permissions.to_json(permissions'))
         end
 
         match flags
@@ -773,12 +773,12 @@ class val PermissionOverwrite
         either 0 (role) or 1 (member)
         """
 
-    let allow: String
+    let allow: Array[Permission] val
         """
         permission bit set
         """
 
-    let deny: String
+    let deny: Array[Permission] val
         """
         permission bit set
         """
@@ -786,29 +786,29 @@ class val PermissionOverwrite
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
         var type'': (PermissionOverwriteType | None) = None
-        var allow': (String | None) = None
-        var deny': (String | None) = None
+        var allow': (Array[Permission] val | None) = None
+        var deny': (Array[Permission] val | None) = None
 
         for (key, value) in obj.pairs() do
             match key
             | "id" => id' = Snowflake.from_json(value)?
             | "type" => type'' = PermissionOverwriteTypes.from((value as I64).u8())?
-            | "allow" => allow' = value as String
-            | "deny" => deny' = value as String
+            | "allow" => allow' = _Permissions(value)?
+            | "deny" => deny' = _Permissions(value)?
             end
         end
 
         id = id' as Snowflake
         type' = type'' as PermissionOverwriteType
-        allow = allow' as String
-        deny = deny' as String
+        allow = allow' as Array[Permission] val
+        deny = deny' as Array[Permission] val
 
     fun to_json(): json.JsonObject =>
         json.JsonObject
             .update("id", id.to_json())
             .update("type", type'.value().i64())
-            .update("allow", allow)
-            .update("deny", deny)
+            .update("allow", _Permissions.to_json(allow))
+            .update("deny", _Permissions.to_json(deny))
 
 primitive _PermissionOverwrites
     fun apply(value: json.JsonValue): Array[PermissionOverwrite] val ? =>

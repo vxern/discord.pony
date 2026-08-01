@@ -619,30 +619,29 @@ class val InstallParams
         Scopes to add the application to the server with
         """
 
-    // TODO(vxern): Represent as permission flags once `Permission` is implemented.
-    let permissions: String
+    let permissions: Array[Permission] val
         """
         Permissions to request for the bot role
         """
 
     new val from_json(obj: json.JsonObject) ? =>
         var scopes': (Array[String] val | None) = None
-        var permissions': (String | None) = None
+        var permissions': (Array[Permission] val | None) = None
 
         for (key, value) in obj.pairs() do
             match key
             | "scopes" => scopes' = _Strings(value)?
-            | "permissions" => permissions' = value as String
+            | "permissions" => permissions' = _Permissions(value)?
             end
         end
 
         scopes = scopes' as Array[String] val
-        permissions = permissions' as String
+        permissions = permissions' as Array[Permission] val
 
     fun to_json(): json.JsonObject =>
         json.JsonObject
             .update("scopes", _Strings.to_json(scopes))
-            .update("permissions", permissions)
+            .update("permissions", _Permissions.to_json(permissions))
 
 class val ActivityInstance
     """

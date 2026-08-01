@@ -48,7 +48,7 @@ class val Guild
         id of owner
         """
 
-    let permissions: (String | None)
+    let permissions: (Array[Permission] val | None)
         """
         total permissions for the user in the guild (excludes overwrites and implicit permissions)
         """
@@ -88,7 +88,10 @@ class val Guild
         explicit content filter level
         """
 
-    // TODO(vxern): Add `roles` (array of role objects; roles in the guild) once `Role` is implemented.
+    let roles: Array[Role] val
+        """
+        roles in the guild
+        """
 
     let emojis: Array[Emoji] val
         """
@@ -231,7 +234,7 @@ class val Guild
         var discovery_splash': (String | None) = None
         var owner': (Bool | None) = None
         var owner_id': (Snowflake | None) = None
-        var permissions': (String | None) = None
+        var permissions': (Array[Permission] val | None) = None
         var afk_channel_id': (Snowflake | None) = None
         var afk_timeout': (USize | None) = None
         var widget_enabled': (Bool | None) = None
@@ -239,6 +242,7 @@ class val Guild
         var verification_level': (VerificationLevel | None) = None
         var default_message_notifications': (DefaultMessageNotificationLevel | None) = None
         var explicit_content_filter': (ExplicitContentFilterLevel | None) = None
+        var roles': (Array[Role] val | None) = None
         var emojis': (Array[Emoji] val | None) = None
         var features': (Array[String] val | None) = None
         var mfa_level': (MFALevel | None) = None
@@ -280,7 +284,7 @@ class val Guild
                 match value | let string: String => discovery_splash' = string end
             | "owner" => owner' = value as Bool
             | "owner_id" => owner_id' = Snowflake.from_json(value)?
-            | "permissions" => permissions' = value as String
+            | "permissions" => permissions' = _Permissions(value)?
             | "afk_channel_id" =>
                 match value | let string: String => afk_channel_id' = Snowflake.from_json(string)? end
             | "afk_timeout" => afk_timeout' = (value as I64).usize()
@@ -290,6 +294,7 @@ class val Guild
             | "verification_level" => verification_level' = VerificationLevels.from((value as I64).u8())?
             | "default_message_notifications" => default_message_notifications' = DefaultMessageNotificationLevels.from((value as I64).u8())?
             | "explicit_content_filter" => explicit_content_filter' = ExplicitContentFilterLevels.from((value as I64).u8())?
+            | "roles" => roles' = _Roles(value)?
             | "emojis" => emojis' = _Emojis(value)?
             | "features" => features' = _Strings(value)?
             | "mfa_level" => mfa_level' = MFALevels.from((value as I64).u8())?
@@ -345,6 +350,7 @@ class val Guild
         verification_level = verification_level' as VerificationLevel
         default_message_notifications = default_message_notifications' as DefaultMessageNotificationLevel
         explicit_content_filter = explicit_content_filter' as ExplicitContentFilterLevel
+        roles = roles' as Array[Role] val
         emojis = emojis' as Array[Emoji] val
         features = features' as Array[String] val
         mfa_level = mfa_level' as MFALevel
@@ -385,6 +391,7 @@ class val Guild
             .update("verification_level", verification_level.value().i64())
             .update("default_message_notifications", default_message_notifications.value().i64())
             .update("explicit_content_filter", explicit_content_filter.value().i64())
+            .update("roles", _Roles.to_json(roles))
             .update("emojis", _Emojis.to_json(emojis))
             .update("features", _Strings.to_json(features))
             .update("mfa_level", mfa_level.value().i64())
@@ -412,7 +419,7 @@ class val Guild
         end
 
         match permissions
-        | let permissions': String => obj = obj.update("permissions", permissions')
+        | let permissions': Array[Permission] val => obj = obj.update("permissions", _Permissions.to_json(permissions'))
         end
 
         match widget_enabled
@@ -1042,7 +1049,7 @@ class val GuildMember
         whether the user has not yet passed the guild's Membership Screening requirements
         """
 
-    let permissions: (String | None)
+    let permissions: (Array[Permission] val | None)
         """
         total permissions of the member in the channel, including overwrites, returned when in the interaction object
         """
@@ -1069,7 +1076,7 @@ class val GuildMember
         var mute': (Bool | None) = None
         var flags': (Array[GuildMemberFlag] val | None) = None
         var pending': (Bool | None) = None
-        var permissions': (String | None) = None
+        var permissions': (Array[Permission] val | None) = None
         var communication_disabled_until': (ISO8601 | None) = None
         var avatar_decoration_data': (AvatarDecorationData | None) = None
 
@@ -1090,7 +1097,7 @@ class val GuildMember
             | "mute" => mute' = value as Bool
             | "flags" => flags' = _GuildMemberFlags((value as I64).u64())
             | "pending" => pending' = value as Bool
-            | "permissions" => permissions' = value as String
+            | "permissions" => permissions' = _Permissions(value)?
             | "communication_disabled_until" =>
                 match value | let string: String => communication_disabled_until' = string end
             | "avatar_decoration_data" =>
@@ -1146,7 +1153,7 @@ class val GuildMember
         end
 
         match permissions
-        | let permissions': String => obj = obj.update("permissions", permissions')
+        | let permissions': Array[Permission] val => obj = obj.update("permissions", _Permissions.to_json(permissions'))
         end
 
         match communication_disabled_until
