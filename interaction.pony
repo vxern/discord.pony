@@ -79,7 +79,7 @@ class val Interaction
 
     // TODO(vxern): Add `message` (message object; For components, the message they were attached to) once `Message` supports JSON conversion.
 
-    let app_permissions: String
+    let app_permissions: Array[Permission] val
         """
         Bitwise set of permissions the app has in the source location of the interaction
         """
@@ -126,7 +126,7 @@ class val Interaction
         var user': (User | None) = None
         var token': (String | None) = None
         var version': (USize | None) = None
-        var app_permissions': (String | None) = None
+        var app_permissions': (Array[Permission] val | None) = None
         var locale': (Locale | None) = None
         var guild_locale': (Locale | None) = None
         var entitlements': (Array[Entitlement] val | None) = None
@@ -149,7 +149,7 @@ class val Interaction
             | "user" => user' = User.from_json(value as json.JsonObject)?
             | "token" => token' = value as String
             | "version" => version' = (value as I64).usize()
-            | "app_permissions" => app_permissions' = value as String
+            | "app_permissions" => app_permissions' = _Permissions(value)?
             | "locale" => locale' = Locales.from(value as String)?
             | "guild_locale" => guild_locale' = Locales.from(value as String)?
             | "entitlements" => entitlements' = _Entitlements(value)?
@@ -168,7 +168,7 @@ class val Interaction
         user = user'
         token = token' as String
         version = version' as USize
-        app_permissions = app_permissions' as String
+        app_permissions = app_permissions' as Array[Permission] val
         locale = locale'
         guild_locale = guild_locale'
         entitlements = entitlements' as Array[Entitlement] val
@@ -191,7 +191,7 @@ class val Interaction
             .update("type", type'.value().i64())
             .update("token", token)
             .update("version", version.i64())
-            .update("app_permissions", app_permissions)
+            .update("app_permissions", _Permissions.to_json(app_permissions))
             .update("entitlements", _Entitlements.to_json(entitlements))
             .update("authorizing_integration_owners", _AuthorizingIntegrationOwners.to_json(authorizing_integration_owners))
             .update("attachment_size_limit", attachment_size_limit.i64())
@@ -496,7 +496,10 @@ class val ResolvedData
 
     // TODO(vxern): Add `members` (map of snowflakes to partial member objects; the ids and partial Member objects) once a partial variant of `GuildMember` is implemented. Discord omits `user`, `deaf` and `mute` here, and `GuildMember` requires the latter two.
 
-    // TODO(vxern): Add `roles` (map of snowflakes to role objects; the ids and Role objects) once `Role` is implemented.
+    let roles: (collections.Map[Snowflake, Role] | None)
+        """
+        the ids and Role objects
+        """
 
     let channels: (collections.Map[Snowflake, Channel] | None)
         """
@@ -511,16 +514,19 @@ class val ResolvedData
 
     new val from_json(obj: json.JsonObject) ? =>
         var users': (collections.Map[Snowflake, User] | None) = None
+        var roles': (collections.Map[Snowflake, Role] | None) = None
         var channels': (collections.Map[Snowflake, Channel] | None) = None
 
         for (key, value) in obj.pairs() do
             match key
             | "users" => users' = _ResolvedUsers(value)?
+            | "roles" => roles' = _ResolvedRoles(value)?
             | "channels" => channels' = _ResolvedChannels(value)?
             end
         end
 
         users = users'
+        roles = roles'
         channels = channels'
 
     fun to_json(): json.JsonObject =>
@@ -528,6 +534,10 @@ class val ResolvedData
 
         match users
         | let users': collections.Map[Snowflake, User] box => obj = obj.update("users", _ResolvedUsers.to_json(users'))
+        end
+
+        match roles
+        | let roles': collections.Map[Snowflake, Role] box => obj = obj.update("roles", _ResolvedRoles.to_json(roles'))
         end
 
         match channels
@@ -552,6 +562,24 @@ primitive _ResolvedUsers
     fun to_json(map: collections.Map[Snowflake, User] box): json.JsonObject =>
         var obj = json.JsonObject
         for (id, user) in map.pairs() do obj = obj.update(id.string(), user.to_json()) end
+        obj
+
+primitive _ResolvedRoles
+    fun apply(value: json.JsonValue): collections.Map[Snowflake, Role] ? =>
+        """
+        Decodes a mapping of snowflakes to roles.
+        """
+
+        let obj = value as json.JsonObject
+        let map = collections.Map[Snowflake, Role](obj.size())
+        for (key, value') in obj.pairs() do
+            map(Snowflake.from_json(key)?) = Role.from_json(value' as json.JsonObject)?
+        end
+        map
+
+    fun to_json(map: collections.Map[Snowflake, Role] box): json.JsonObject =>
+        var obj = json.JsonObject
+        for (id, role) in map.pairs() do obj = obj.update(id.string(), role.to_json()) end
         obj
 
 primitive _ResolvedChannels
