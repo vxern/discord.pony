@@ -202,7 +202,10 @@ class val Guild
         guild NSFW level
         """
 
-    // TODO(vxern): Add `stickers` (array of sticker objects; custom guild stickers) once `Sticker` is implemented.
+    let stickers: (Array[Sticker] val | None)
+        """
+        custom guild stickers
+        """
 
     let premium_progress_bar_enabled: Bool
         """
@@ -258,6 +261,7 @@ class val Guild
         var approximate_presence_count': (USize | None) = None
         var welcome_screen': (WelcomeScreen | None) = None
         var nsfw_level': (GuildNSFWLevel | None) = None
+        var stickers': (Array[Sticker] val | None) = None
         var premium_progress_bar_enabled': (Bool | None) = None
         var safety_alerts_channel_id': (Snowflake | None) = None
         var incidents_data': (IncidentsData | None) = None
@@ -316,6 +320,7 @@ class val Guild
             | "approximate_presence_count" => approximate_presence_count' = (value as I64).usize()
             | "welcome_screen" => welcome_screen' = WelcomeScreen.from_json(value as json.JsonObject)?
             | "nsfw_level" => nsfw_level' = GuildNSFWLevels.from((value as I64).u8())?
+            | "stickers" => stickers' = _Stickers(value)?
             | "premium_progress_bar_enabled" => premium_progress_bar_enabled' = value as Bool
             | "safety_alerts_channel_id" =>
                 match value | let string: String => safety_alerts_channel_id' = Snowflake.from_json(string)? end
@@ -362,6 +367,7 @@ class val Guild
         approximate_presence_count = approximate_presence_count'
         welcome_screen = welcome_screen'
         nsfw_level = nsfw_level' as GuildNSFWLevel
+        stickers = stickers'
         premium_progress_bar_enabled = premium_progress_bar_enabled' as Bool
         safety_alerts_channel_id = safety_alerts_channel_id'
         incidents_data = incidents_data'
@@ -447,6 +453,10 @@ class val Guild
 
         match welcome_screen
         | let welcome_screen': WelcomeScreen => obj = obj.update("welcome_screen", welcome_screen'.to_json())
+        end
+
+        match stickers
+        | let stickers': Array[Sticker] val => obj = obj.update("stickers", _Stickers.to_json(stickers'))
         end
 
         obj
@@ -803,7 +813,10 @@ class val GuildPreview
         the description for the guild
         """
 
-    // TODO(vxern): Add `stickers` (array of sticker objects; custom guild stickers) once `Sticker` is implemented.
+    let stickers: Array[Sticker] val
+        """
+        custom guild stickers
+        """
 
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
@@ -816,6 +829,7 @@ class val GuildPreview
         var approximate_member_count': (USize | None) = None
         var approximate_presence_count': (USize | None) = None
         var description': (String | None) = None
+        var stickers': (Array[Sticker] val | None) = None
 
         for (key, value) in obj.pairs() do
             match key
@@ -833,6 +847,7 @@ class val GuildPreview
             | "approximate_presence_count" => approximate_presence_count' = (value as I64).usize()
             | "description" =>
                 match value | let string: String => description' = string end
+            | "stickers" => stickers' = _Stickers(value)?
             end
         end
 
@@ -846,6 +861,7 @@ class val GuildPreview
         approximate_member_count = approximate_member_count' as USize
         approximate_presence_count = approximate_presence_count' as USize
         description = description'
+        stickers = stickers' as Array[Sticker] val
 
     fun to_json(): json.JsonObject =>
         json.JsonObject
@@ -859,6 +875,7 @@ class val GuildPreview
             .update("approximate_member_count", approximate_member_count.i64())
             .update("approximate_presence_count", approximate_presence_count.i64())
             .update("description", description)
+            .update("stickers", _Stickers.to_json(stickers))
 
 class val GuildWidgetSettings
     """
@@ -915,9 +932,14 @@ class val GuildWidget
         instant invite for the guilds specified widget invite channel
         """
 
-    // TODO(vxern): Add `channels` (array of partial channel objects; voice and stage channels which are accessible by @everyone) once `Channel` is implemented.
+    // TODO(vxern): Add `channels` (array of partial channel objects; voice and stage channels which are accessible by @everyone) once a partial variant of `Channel` is implemented. The widget carries only `id`, `name` and `position`, so `Channel` — which requires `type` — cannot decode them.
 
-    // TODO(vxern): Add `members` (array of partial user objects; special widget user objects that includes users presence (Limit 100)) once `User` is implemented.
+    let members: Array[User] val
+        """
+        special widget user objects that includes users presence (Limit 100)
+
+        These are anonymised: the `id`, `discriminator` and `avatar` fields are placeholders. They also carry `status` and `avatar_url` fields that `User` does not model, so those are dropped on decode.
+        """
 
     let presence_count: USize
         """
@@ -928,6 +950,7 @@ class val GuildWidget
         var id': (Snowflake | None) = None
         var name': (String | None) = None
         var instant_invite': (String | None) = None
+        var members': (Array[User] val | None) = None
         var presence_count': (USize | None) = None
 
         for (key, value) in obj.pairs() do
@@ -936,6 +959,7 @@ class val GuildWidget
             | "name" => name' = value as String
             | "instant_invite" =>
                 match value | let string: String => instant_invite' = string end
+            | "members" => members' = _Users(value)?
             | "presence_count" => presence_count' = (value as I64).usize()
             end
         end
@@ -943,6 +967,7 @@ class val GuildWidget
         id = id' as Snowflake
         name = name' as String
         instant_invite = instant_invite'
+        members = members' as Array[User] val
         presence_count = presence_count' as USize
 
     fun to_json(): json.JsonObject =>
@@ -950,6 +975,7 @@ class val GuildWidget
             .update("id", id.to_json())
             .update("name", name)
             .update("instant_invite", instant_invite)
+            .update("members", _Users.to_json(members))
             .update("presence_count", presence_count.i64())
 
 class val GuildMember
@@ -961,7 +987,10 @@ class val GuildMember
     In GUILD_ events, `pending` will always be included as true or false. In non `GUILD_` events which can only be triggered by non-`pending` users, `pending` will not be included.
     """
 
-    // TODO(vxern): Add `user` (user object; the user this guild member represents) once `User` is implemented.
+    let user: (User | None)
+        """
+        the user this guild member represents
+        """
 
     let nick: (String | None)
         """
@@ -1023,9 +1052,13 @@ class val GuildMember
         when the user's timeout will expire and the user will be able to communicate in the guild again, null or a time in the past if the user is not timed out
         """
 
-    // TODO(vxern): Add `avatar_decoration_data` (avatar decoration data object; data for the member's guild avatar decoration) once `AvatarDecorationData` is implemented.
+    let avatar_decoration_data: (AvatarDecorationData | None)
+        """
+        data for the member's guild avatar decoration
+        """
 
     new val from_json(obj: json.JsonObject) ? =>
+        var user': (User | None) = None
         var nick': (String | None) = None
         var avatar': (String | None) = None
         var banner': (String | None) = None
@@ -1038,9 +1071,11 @@ class val GuildMember
         var pending': (Bool | None) = None
         var permissions': (String | None) = None
         var communication_disabled_until': (ISO8601 | None) = None
+        var avatar_decoration_data': (AvatarDecorationData | None) = None
 
         for (key, value) in obj.pairs() do
             match key
+            | "user" => user' = User.from_json(value as json.JsonObject)?
             | "nick" =>
                 match value | let string: String => nick' = string end
             | "avatar" =>
@@ -1058,9 +1093,12 @@ class val GuildMember
             | "permissions" => permissions' = value as String
             | "communication_disabled_until" =>
                 match value | let string: String => communication_disabled_until' = string end
+            | "avatar_decoration_data" =>
+                match value | let obj': json.JsonObject => avatar_decoration_data' = AvatarDecorationData.from_json(obj')? end
             end
         end
 
+        user = user'
         nick = nick'
         avatar = avatar'
         banner = banner'
@@ -1073,6 +1111,7 @@ class val GuildMember
         pending = pending'
         permissions = permissions'
         communication_disabled_until = communication_disabled_until'
+        avatar_decoration_data = avatar_decoration_data'
 
     fun to_json(): json.JsonObject =>
         var obj = json.JsonObject
@@ -1081,6 +1120,10 @@ class val GuildMember
             .update("deaf", deaf)
             .update("mute", mute)
             .update("flags", _GuildMemberFlags.to_json(flags))
+
+        match user
+        | let user': User => obj = obj.update("user", user'.to_json())
+        end
 
         match nick
         | let nick': String => obj = obj.update("nick", nick')
@@ -1108,6 +1151,10 @@ class val GuildMember
 
         match communication_disabled_until
         | let communication_disabled_until': ISO8601 => obj = obj.update("communication_disabled_until", communication_disabled_until')
+        end
+
+        match avatar_decoration_data
+        | let avatar_decoration_data': AvatarDecorationData => obj = obj.update("avatar_decoration_data", avatar_decoration_data'.to_json())
         end
 
         obj
@@ -1280,7 +1327,10 @@ class val Integration
         the grace period (days) before expiring subscribers
         """
 
-    // TODO(vxern): Add `user` (user object; user for this integration) once `User` is implemented.
+    let user: (User | None)
+        """
+        user for this integration
+        """
 
     let account: IntegrationAccount
         """
@@ -1322,6 +1372,7 @@ class val Integration
         var enable_emoticons': (Bool | None) = None
         var expire_behavior': (IntegrationExpireBehavior | None) = None
         var expire_grace_period': (USize | None) = None
+        var user': (User | None) = None
         var account': (IntegrationAccount | None) = None
         var synced_at': (ISO8601 | None) = None
         var subscriber_count': (USize | None) = None
@@ -1340,6 +1391,7 @@ class val Integration
             | "enable_emoticons" => enable_emoticons' = value as Bool
             | "expire_behavior" => expire_behavior' = IntegrationExpireBehaviors.from((value as I64).u8())?
             | "expire_grace_period" => expire_grace_period' = (value as I64).usize()
+            | "user" => user' = User.from_json(value as json.JsonObject)?
             | "account" => account' = IntegrationAccount.from_json(value as json.JsonObject)?
             | "synced_at" => synced_at' = value as String
             | "subscriber_count" => subscriber_count' = (value as I64).usize()
@@ -1358,6 +1410,7 @@ class val Integration
         enable_emoticons = enable_emoticons'
         expire_behavior = expire_behavior'
         expire_grace_period = expire_grace_period'
+        user = user'
         account = account' as IntegrationAccount
         synced_at = synced_at'
         subscriber_count = subscriber_count'
@@ -1393,6 +1446,10 @@ class val Integration
         | let expire_grace_period': USize => obj = obj.update("expire_grace_period", expire_grace_period'.i64())
         end
 
+        match user
+        | let user': User => obj = obj.update("user", user'.to_json())
+        end
+
         match synced_at
         | let synced_at': ISO8601 => obj = obj.update("synced_at", synced_at')
         end
@@ -1414,6 +1471,24 @@ class val Integration
         end
 
         obj
+
+primitive _Integrations
+    fun apply(value: json.JsonValue): Array[Integration] val ? =>
+        """
+        Decodes an array of integrations.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let integrations = Array[Integration](array.size())
+            for integration in array.values() do integrations.push(Integration.from_json(integration as json.JsonObject)?) end
+            integrations
+        end
+
+    fun to_json(integrations: Array[Integration] val): json.JsonArray =>
+        var array = json.JsonArray
+        for integration in integrations.values() do array = array.push(integration.to_json()) end
+        array
 
 trait val IntegrationExpireBehavior is (collections.Hashable & Equatable[IntegrationExpireBehavior])
     """
@@ -1496,13 +1571,17 @@ class val IntegrationApplication
         the description of the app
         """
 
-    // TODO(vxern): Add `bot` (user object; the bot associated with this application) once `User` is implemented.
+    let bot: (User | None)
+        """
+        the bot associated with this application
+        """
 
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
         var name': (String | None) = None
         var icon': (String | None) = None
         var description': (String | None) = None
+        var bot': (User | None) = None
 
         for (key, value) in obj.pairs() do
             match key
@@ -1511,6 +1590,7 @@ class val IntegrationApplication
             | "icon" =>
                 match value | let string: String => icon' = string end
             | "description" => description' = value as String
+            | "bot" => bot' = User.from_json(value as json.JsonObject)?
             end
         end
 
@@ -1518,13 +1598,20 @@ class val IntegrationApplication
         name = name' as String
         icon = icon'
         description = description' as String
+        bot = bot'
 
     fun to_json(): json.JsonObject =>
-        json.JsonObject
+        var obj = json.JsonObject
             .update("id", id.to_json())
             .update("name", name)
             .update("icon", icon)
             .update("description", description)
+
+        match bot
+        | let bot': User => obj = obj.update("bot", bot'.to_json())
+        end
+
+        obj
 
 class val Ban
     """
@@ -1536,23 +1623,30 @@ class val Ban
         the reason for the ban
         """
 
-    // TODO(vxern): Add `user` (user object; the banned user) once `User` is implemented.
+    let user: User
+        """
+        the banned user
+        """
 
-    new val from_json(obj: json.JsonObject) =>
+    new val from_json(obj: json.JsonObject) ? =>
         var reason': (String | None) = None
+        var user': (User | None) = None
 
         for (key, value) in obj.pairs() do
             match key
             | "reason" =>
                 match value | let string: String => reason' = string end
+            | "user" => user' = User.from_json(value as json.JsonObject)?
             end
         end
 
         reason = reason'
+        user = user' as User
 
     fun to_json(): json.JsonObject =>
         json.JsonObject
             .update("reason", reason)
+            .update("user", user.to_json())
 
 class val WelcomeScreen
     """

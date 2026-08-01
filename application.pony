@@ -43,7 +43,10 @@ class val Application
         When true, the app’s bot will only join upon completion of the full OAuth2 code grant flow
         """
 
-    // TODO(vxern): Add `bot` (partial user object; Partial user object for the bot user associated with the app) once `User` supports JSON conversion.
+    let bot: (User | None)
+        """
+        Partial user object for the bot user associated with the app
+        """
 
     let terms_of_service_url: (String | None)
         """
@@ -55,7 +58,10 @@ class val Application
         URL of the app’s Privacy Policy
         """
 
-    // TODO(vxern): Add `owner` (partial user object; Partial user object for the owner of the app) once `User` supports JSON conversion.
+    let owner: (User | None)
+        """
+        Partial user object for the owner of the app
+        """
 
     let verify_key: String
         """
@@ -166,6 +172,8 @@ class val Application
         var rpc_origins': (Array[String] val | None) = None
         var bot_public': (Bool | None) = None
         var bot_require_code_grant': (Bool | None) = None
+        var bot': (User | None) = None
+        var owner': (User | None) = None
         var terms_of_service_url': (String | None) = None
         var privacy_policy_url': (String | None) = None
         var verify_key': (String | None) = None
@@ -199,6 +207,8 @@ class val Application
             | "rpc_origins" => rpc_origins' = _Strings(value)?
             | "bot_public" => bot_public' = value as Bool
             | "bot_require_code_grant" => bot_require_code_grant' = value as Bool
+            | "bot" => bot' = User.from_json(value as json.JsonObject)?
+            | "owner" => owner' = User.from_json(value as json.JsonObject)?
             | "terms_of_service_url" => terms_of_service_url' = value as String
             | "privacy_policy_url" => privacy_policy_url' = value as String
             | "verify_key" => verify_key' = value as String
@@ -234,6 +244,8 @@ class val Application
         rpc_origins = rpc_origins'
         bot_public = bot_public' as Bool
         bot_require_code_grant = bot_require_code_grant' as Bool
+        bot = bot'
+        owner = owner'
         terms_of_service_url = terms_of_service_url'
         privacy_policy_url = privacy_policy_url'
         verify_key = verify_key' as String
@@ -272,6 +284,14 @@ class val Application
 
         match rpc_origins
         | let rpc_origins': Array[String] val => obj = obj.update("rpc_origins", _Strings.to_json(rpc_origins'))
+        end
+
+        match bot
+        | let bot': User => obj = obj.update("bot", bot'.to_json())
+        end
+
+        match owner
+        | let owner': User => obj = obj.update("owner", owner'.to_json())
         end
 
         match terms_of_service_url
