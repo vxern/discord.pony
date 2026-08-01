@@ -197,6 +197,24 @@ class val GuildScheduledEvent
 
         obj
 
+primitive _GuildScheduledEvents
+    fun apply(value: json.JsonValue): Array[GuildScheduledEvent] val ? =>
+        """
+        Decodes an array of guild scheduled events.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let guild_scheduled_events = Array[GuildScheduledEvent](array.size())
+            for guild_scheduled_event in array.values() do guild_scheduled_events.push(GuildScheduledEvent.from_json(guild_scheduled_event as json.JsonObject)?) end
+            guild_scheduled_events
+        end
+
+    fun to_json(guild_scheduled_events: Array[GuildScheduledEvent] val): json.JsonArray =>
+        var array = json.JsonArray
+        for guild_scheduled_event in guild_scheduled_events.values() do array = array.push(guild_scheduled_event.to_json()) end
+        array
+
 trait val GuildScheduledEventPrivacyLevel is (collections.Hashable & Equatable[GuildScheduledEventPrivacyLevel])
     """
     https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-privacy-level
