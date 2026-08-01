@@ -43,7 +43,7 @@ class val Application
         When true, the app’s bot will only join upon completion of the full OAuth2 code grant flow
         """
 
-    // TODO(vxern): Add `bot` (partial user object; partial user object for the bot user associated with the app) once `User` supports JSON conversion.
+    // TODO(vxern): Add `bot` (partial user object; Partial user object for the bot user associated with the app) once `User` supports JSON conversion.
 
     let terms_of_service_url: (String | None)
         """
@@ -55,21 +55,21 @@ class val Application
         URL of the app’s Privacy Policy
         """
 
-    // TODO(vxern): Add `owner` (partial user object; partial user object for the owner of the app) once `User` supports JSON conversion.
+    // TODO(vxern): Add `owner` (partial user object; Partial user object for the owner of the app) once `User` supports JSON conversion.
 
     let verify_key: String
         """
         Hex encoded key for verification in interactions and the GameSDK’s GetTicket
         """
 
-    // TODO(vxern): Add `team` (team object; if the app belongs to a team, this will be a list of the members of that team) once `Team` is implemented.
+    // TODO(vxern): Add `team` (team object; If the app belongs to a team, this will be a list of the members of that team) once `Team` is implemented.
 
     let guild_id: (Snowflake | None)
         """
         Guild associated with the app. For example, a developer support server.
         """
 
-    // TODO(vxern): Add `guild` (partial guild object; partial object of the associated guild) once `Guild` is implemented.
+    // TODO(vxern): Add `guild` (partial guild object; Partial object of the associated guild) once `Guild` is implemented.
 
     let primary_sku_id: (Snowflake | None)
         """
@@ -194,7 +194,7 @@ class val Application
             | "id" => id' = Snowflake.from_json(value)?
             | "name" => name' = value as String
             | "icon" =>
-                match value | let s: String => icon' = s end
+                match value | let string: String => icon' = string end
             | "description" => description' = value as String
             | "rpc_origins" => rpc_origins' = _Strings(value)?
             | "bot_public" => bot_public' = value as Bool
@@ -213,11 +213,11 @@ class val Application
             | "approximate_user_authorization_count" => approximate_user_authorization_count' = (value as I64).usize()
             | "redirect_uris" => redirect_uris' = _Strings(value)?
             | "interactions_endpoint_url" =>
-                match value | let s: String => interactions_endpoint_url' = s end
+                match value | let string: String => interactions_endpoint_url' = string end
             | "role_connections_verification_url" =>
-                match value | let s: String => role_connections_verification_url' = s end
+                match value | let string: String => role_connections_verification_url' = string end
             | "event_webhooks_url" =>
-                match value | let s: String => event_webhooks_url' = s end
+                match value | let string: String => event_webhooks_url' = string end
             | "event_webhooks_status" => event_webhooks_status' = ApplicationEventWebhookStatuses.from((value as I64).u8())?
             | "event_webhooks_types" => event_webhooks_types' = _Strings(value)?
             | "tags" => tags' = _Strings(value)?
@@ -271,89 +271,89 @@ class val Application
             .update("verify_key", verify_key)
 
         match rpc_origins
-        | let s: Array[String] val => obj = obj.update("rpc_origins", _Strings.to_json(s))
+        | let rpc_origins': Array[String] val => obj = obj.update("rpc_origins", _Strings.to_json(rpc_origins'))
         end
 
         match terms_of_service_url
-        | let s: String => obj = obj.update("terms_of_service_url", s)
+        | let terms_of_service_url': String => obj = obj.update("terms_of_service_url", terms_of_service_url')
         end
 
         match privacy_policy_url
-        | let s: String => obj = obj.update("privacy_policy_url", s)
+        | let privacy_policy_url': String => obj = obj.update("privacy_policy_url", privacy_policy_url')
         end
 
         match guild_id
-        | let s: Snowflake => obj = obj.update("guild_id", s.to_json())
+        | let guild_id': Snowflake => obj = obj.update("guild_id", guild_id'.to_json())
         end
 
         match primary_sku_id
-        | let s: Snowflake => obj = obj.update("primary_sku_id", s.to_json())
+        | let primary_sku_id': Snowflake => obj = obj.update("primary_sku_id", primary_sku_id'.to_json())
         end
 
         match slug
-        | let s: String => obj = obj.update("slug", s)
+        | let slug': String => obj = obj.update("slug", slug')
         end
 
         match cover_image
-        | let s: String => obj = obj.update("cover_image", s)
+        | let cover_image': String => obj = obj.update("cover_image", cover_image')
         end
 
         // `flags_new` is for response serialization only; requests that accept flag values are expected to use `flags`.
         match flags
-        | let f: Array[ApplicationFlag] val => obj = obj.update("flags", _ApplicationFlags.to_json(f))
+        | let flags': Array[ApplicationFlag] val => obj = obj.update("flags", _ApplicationFlags.to_json(flags'))
         end
 
         match approximate_guild_count
-        | let n: USize => obj = obj.update("approximate_guild_count", n.i64())
+        | let approximate_guild_count': USize => obj = obj.update("approximate_guild_count", approximate_guild_count'.i64())
         end
 
         match approximate_user_install_count
-        | let n: USize => obj = obj.update("approximate_user_install_count", n.i64())
+        | let approximate_user_install_count': USize => obj = obj.update("approximate_user_install_count", approximate_user_install_count'.i64())
         end
 
         match approximate_user_authorization_count
-        | let n: USize => obj = obj.update("approximate_user_authorization_count", n.i64())
+        | let approximate_user_authorization_count': USize => obj = obj.update("approximate_user_authorization_count", approximate_user_authorization_count'.i64())
         end
 
         match redirect_uris
-        | let s: Array[String] val => obj = obj.update("redirect_uris", _Strings.to_json(s))
+        | let redirect_uris': Array[String] val => obj = obj.update("redirect_uris", _Strings.to_json(redirect_uris'))
         end
 
         match interactions_endpoint_url
-        | let s: String => obj = obj.update("interactions_endpoint_url", s)
+        | let interactions_endpoint_url': String => obj = obj.update("interactions_endpoint_url", interactions_endpoint_url')
         end
 
         match role_connections_verification_url
-        | let s: String => obj = obj.update("role_connections_verification_url", s)
+        | let role_connections_verification_url': String => obj = obj.update("role_connections_verification_url", role_connections_verification_url')
         end
 
         match event_webhooks_url
-        | let s: String => obj = obj.update("event_webhooks_url", s)
+        | let event_webhooks_url': String => obj = obj.update("event_webhooks_url", event_webhooks_url')
         end
 
         match event_webhooks_status
-        | let s: ApplicationEventWebhookStatus => obj = obj.update("event_webhooks_status", s.value().i64())
+        | let event_webhooks_status': ApplicationEventWebhookStatus => obj = obj.update("event_webhooks_status", event_webhooks_status'.value().i64())
         end
 
         match event_webhooks_types
-        | let s: Array[String] val => obj = obj.update("event_webhooks_types", _Strings.to_json(s))
+        | let event_webhooks_types': Array[String] val => obj = obj.update("event_webhooks_types", _Strings.to_json(event_webhooks_types'))
         end
 
         match tags
-        | let s: Array[String] val => obj = obj.update("tags", _Strings.to_json(s))
+        | let tags': Array[String] val => obj = obj.update("tags", _Strings.to_json(tags'))
         end
 
         match install_params
-        | let p: InstallParams => obj = obj.update("install_params", p.to_json())
+        | let install_params': InstallParams => obj = obj.update("install_params", install_params'.to_json())
         end
 
         match integration_types_config
-        | let m: collections.Map[ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration] box =>
-            obj = obj.update("integration_types_config", _IntegrationTypesConfiguration.to_json(m))
+        | let integration_types_config': collections.Map[ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration] box =>
+            obj = obj.update("integration_types_config", _IntegrationTypesConfiguration.to_json(integration_types_config'))
         end
 
         match custom_install_url
-        | let s: String => obj = obj.update("custom_install_url", s)
+        | let custom_install_url': String => obj = obj.update("custom_install_url", custom_install_url')
         end
 
         obj
@@ -383,8 +383,8 @@ primitive UserInstallApplicationIntegrationType is ApplicationIntegrationType
 
     fun value(): U8 => 1
 primitive ApplicationIntegrationTypes
-    fun from(v: U8): ApplicationIntegrationType ? =>
-        match v
+    fun from(value: U8): ApplicationIntegrationType ? =>
+        match value
         | 0 => GuildInstallApplicationIntegrationType
         | 1 => UserInstallApplicationIntegrationType
         else error
@@ -415,7 +415,7 @@ class val ApplicationIntegrationTypeConfiguration
         var obj = json.JsonObject
 
         match oauth2_install_params
-        | let p: InstallParams => obj = obj.update("oauth2_install_params", p.to_json())
+        | let oauth2_install_params': InstallParams => obj = obj.update("oauth2_install_params", oauth2_install_params'.to_json())
         end
 
         obj
@@ -471,8 +471,8 @@ primitive DisabledByDiscordApplicationEventWebhookStatus is ApplicationEventWebh
 
     fun value(): U8 => 3
 primitive ApplicationEventWebhookStatuses
-    fun from(v: U8): ApplicationEventWebhookStatus ? =>
-        match v
+    fun from(value: U8): ApplicationEventWebhookStatus ? =>
+        match value
         | 1 => DisabledApplicationEventWebhookStatus
         | 2 => EnabledApplicationEventWebhookStatus
         | 3 => DisabledByDiscordApplicationEventWebhookStatus
@@ -514,13 +514,13 @@ primitive GatewayPresenceLimitedApplicationFlag is ApplicationFlag
     fun value(): U8 => 13
 primitive GatewayGuildMembersApplicationFlag is ApplicationFlag
     """
-    Intent required for bots in 100 or more servers to receive member-related events like guild_member_add
+    Intent required for bots in 100 or more servers to receive member-related events like guild_member_add. See the list of member-related events under GUILD_MEMBERS
     """
 
     fun value(): U8 => 14
 primitive GatewayGuildMembersLimitedApplicationFlag is ApplicationFlag
     """
-    Intent required for bots in under 100 servers to receive member-related events like guild_member_add, found on the Bot page in your app’s settings
+    Intent required for bots in under 100 servers to receive member-related events like guild_member_add, found on the Bot page in your app’s settings. See the list of member-related events under GUILD_MEMBERS
     """
 
     fun value(): U8 => 15
@@ -555,8 +555,8 @@ primitive ApplicationCommandBadgeApplicationFlag is ApplicationFlag
 
     fun value(): U8 => 23
 primitive ApplicationFlags
-    fun from(v: U8): ApplicationFlag ? =>
-        match v
+    fun from(value: U8): ApplicationFlag ? =>
+        match value
         | 6 => ApplicationAutoModerationRuleCreateBadgeApplicationFlag
         | 12 => GatewayPresenceApplicationFlag
         | 13 => GatewayPresenceLimitedApplicationFlag
@@ -623,6 +623,159 @@ class val InstallParams
         json.JsonObject
             .update("scopes", _Strings.to_json(scopes))
             .update("permissions", permissions)
+
+class val ActivityInstance
+    """
+    https://docs.discord.com/developers/resources/application#get-application-activity-instance-activity-instance-object
+
+    A serialized activity instance. Useful for preventing unwanted activity sessions.
+    """
+
+    let application_id: Snowflake
+        """
+        Application ID
+        """
+
+    let instance_id: String
+        """
+        Activity Instance ID
+        """
+
+    let launch_id: Snowflake
+        """
+        Unique identifier for the launch
+        """
+
+    let location: ActivityLocation
+        """
+        Location the instance is running in
+        """
+
+    let users: Array[Snowflake] val
+        """
+        IDs of the Users currently connected to the instance
+        """
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var application_id': (Snowflake | None) = None
+        var instance_id': (String | None) = None
+        var launch_id': (Snowflake | None) = None
+        var location': (ActivityLocation | None) = None
+        var users': (Array[Snowflake] val | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "application_id" => application_id' = Snowflake.from_json(value)?
+            | "instance_id" => instance_id' = value as String
+            | "launch_id" => launch_id' = Snowflake.from_json(value)?
+            | "location" => location' = ActivityLocation.from_json(value as json.JsonObject)?
+            | "users" => users' = _Snowflakes(value)?
+            end
+        end
+
+        application_id = application_id' as Snowflake
+        instance_id = instance_id' as String
+        launch_id = launch_id' as Snowflake
+        location = location' as ActivityLocation
+        users = users' as Array[Snowflake] val
+
+    fun to_json(): json.JsonObject =>
+        json.JsonObject
+            .update("application_id", application_id.to_json())
+            .update("instance_id", instance_id)
+            .update("launch_id", launch_id.to_json())
+            .update("location", location.to_json())
+            .update("users", _Snowflakes.to_json(users))
+
+class val ActivityLocation
+    """
+    https://docs.discord.com/developers/resources/application#get-application-activity-instance-activity-location-object
+
+    The Activity Location is an object that describes the location in which an activity instance is running.
+    """
+
+    let id: String
+        """
+        Unique identifier for the location
+        """
+
+    let kind: ActivityLocationKind
+        """
+        Enum describing kind of location
+        """
+
+    let channel_id: Snowflake
+        """
+        ID of the Channel
+        """
+
+    let guild_id: (Snowflake | None)
+        """
+        ID of the Guild
+        """
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var id': (String | None) = None
+        var kind': (ActivityLocationKind | None) = None
+        var channel_id': (Snowflake | None) = None
+        var guild_id': (Snowflake | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "id" => id' = value as String
+            | "kind" => kind' = ActivityLocationKinds.from(value as String)?
+            | "channel_id" => channel_id' = Snowflake.from_json(value)?
+            | "guild_id" =>
+                match value | let string: String => guild_id' = Snowflake.from_json(string)? end
+            end
+        end
+
+        id = id' as String
+        kind = kind' as ActivityLocationKind
+        channel_id = channel_id' as Snowflake
+        guild_id = guild_id'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+            .update("id", id)
+            .update("kind", kind.value())
+            .update("channel_id", channel_id.to_json())
+
+        match guild_id
+        | let guild_id': Snowflake => obj = obj.update("guild_id", guild_id'.to_json())
+        end
+
+        obj
+
+trait val ActivityLocationKind is (collections.Hashable & Equatable[ActivityLocationKind])
+    """
+    https://docs.discord.com/developers/resources/application#get-application-activity-instance-activity-location-kind-enum
+    """
+
+    fun value(): String
+
+    fun hash(): USize => value().hash()
+
+    fun eq(that: ActivityLocationKind): Bool => value() == that.value()
+primitive GuildChannelActivityLocationKind is ActivityLocationKind
+    """
+    Location is a Guild Channel
+    """
+
+    fun value(): String => "gc"
+primitive PrivateChannelActivityLocationKind is ActivityLocationKind
+    """
+    Location is a Private Channel, such as a DM or GDM
+    """
+
+    fun value(): String => "pc"
+primitive ActivityLocationKinds
+    fun from(value: String): ActivityLocationKind ? =>
+        match value
+        | "gc" => GuildChannelActivityLocationKind
+        | "pc" => PrivateChannelActivityLocationKind
+        else error
+        end
 
 primitive _Strings
     fun apply(value: json.JsonValue): Array[String] val ? =>
