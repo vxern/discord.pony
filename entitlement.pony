@@ -205,3 +205,21 @@ primitive EntitlementTypes
         | 8 => ApplicationSubscriptionEntitlementType
         else error
         end
+
+primitive _Entitlements
+    fun apply(value: json.JsonValue): Array[Entitlement] val ? =>
+        """
+        Decodes an array of entitlements.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let entitlements = Array[Entitlement](array.size())
+            for entitlement in array.values() do entitlements.push(Entitlement.from_json(entitlement as json.JsonObject)?) end
+            entitlements
+        end
+
+    fun to_json(entitlements: Array[Entitlement] val): json.JsonArray =>
+        var array = json.JsonArray
+        for entitlement in entitlements.values() do array = array.push(entitlement.to_json()) end
+        array
