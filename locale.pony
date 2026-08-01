@@ -1,4 +1,5 @@
 use collections = "collections"
+use json = "json"
 
 trait val Locale is (collections.Hashable & Equatable[Locale])
     fun value(): String
@@ -107,3 +108,21 @@ primitive Locales
         | "ko" => LocaleKorean
         else error
         end
+
+primitive _Localizations
+    fun apply(value: json.JsonValue): (collections.Map[Locale, String] | None) ? =>
+        match value
+        | let obj: json.JsonObject =>
+            let map = collections.Map[Locale, String](obj.size())
+            for (key, value') in obj.pairs() do
+                match (Locales.from(key)?, value')
+                | (let locale: Locale, let string: String) => map(locale) = string
+                end
+            end
+            map
+        end
+
+    fun to_json(map: collections.Map[Locale, String] box): json.JsonObject =>
+        var obj = json.JsonObject
+        for (locale, string) in map.pairs() do obj = obj.update(locale.value(), string) end
+        obj
