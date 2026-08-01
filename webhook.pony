@@ -132,6 +132,24 @@ class val Webhook
 
         obj
 
+primitive _Webhooks
+    fun apply(value: json.JsonValue): Array[Webhook] val ? =>
+        """
+        Decodes an array of webhooks.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let webhooks = Array[Webhook](array.size())
+            for webhook in array.values() do webhooks.push(Webhook.from_json(webhook as json.JsonObject)?) end
+            webhooks
+        end
+
+    fun to_json(webhooks: Array[Webhook] val): json.JsonArray =>
+        var array = json.JsonArray
+        for webhook in webhooks.values() do array = array.push(webhook.to_json()) end
+        array
+
 trait val WebhookType is (collections.Hashable & Equatable[WebhookType])
     """
     https://docs.discord.com/developers/resources/webhook#webhook-object-webhook-types
