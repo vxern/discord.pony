@@ -73,7 +73,10 @@ class val GuildScheduledEvent
         additional metadata for the guild scheduled event
         """
 
-    // TODO(vxern): Add `creator` (user object; the user that created the scheduled event) once `User` is implemented.
+    let creator: (User | None)
+        """
+        the user that created the scheduled event
+        """
 
     let user_count: (USize | None)
         """
@@ -104,6 +107,7 @@ class val GuildScheduledEvent
         var entity_type': (GuildScheduledEventEntityType | None) = None
         var entity_id': (Snowflake | None) = None
         var entity_metadata': (GuildScheduledEventEntityMetadata | None) = None
+        var creator': (User | None) = None
         var user_count': (USize | None) = None
         var image': (String | None) = None
         var recurrence_rule': (GuildScheduledEventRecurrenceRule | None) = None
@@ -129,6 +133,7 @@ class val GuildScheduledEvent
                 match value | let string: String => entity_id' = Snowflake.from_json(string)? end
             | "entity_metadata" =>
                 match value | let obj': json.JsonObject => entity_metadata' = GuildScheduledEventEntityMetadata.from_json(obj')? end
+            | "creator" => creator' = User.from_json(value as json.JsonObject)?
             | "user_count" => user_count' = (value as I64).usize()
             | "image" =>
                 match value | let string: String => image' = string end
@@ -150,6 +155,7 @@ class val GuildScheduledEvent
         entity_type = entity_type' as GuildScheduledEventEntityType
         entity_id = entity_id'
         entity_metadata = entity_metadata'
+        creator = creator'
         user_count = user_count'
         image = image'
         recurrence_rule = recurrence_rule'
@@ -175,6 +181,10 @@ class val GuildScheduledEvent
 
         match description
         | let description': String => obj = obj.update("description", description')
+        end
+
+        match creator
+        | let creator': User => obj = obj.update("creator", creator'.to_json())
         end
 
         match user_count
@@ -648,7 +658,10 @@ class val GuildScheduledEventUser
         the scheduled event id which the user subscribed to
         """
 
-    // TODO(vxern): Add `user` (user object; user which subscribed to an event) once `User` is implemented.
+    let user: User
+        """
+        user which subscribed to an event
+        """
 
     let member: (GuildMember | None)
         """
@@ -657,21 +670,25 @@ class val GuildScheduledEventUser
 
     new val from_json(obj: json.JsonObject) ? =>
         var guild_scheduled_event_id': (Snowflake | None) = None
+        var user': (User | None) = None
         var member': (GuildMember | None) = None
 
         for (key, value) in obj.pairs() do
             match key
             | "guild_scheduled_event_id" => guild_scheduled_event_id' = Snowflake.from_json(value)?
+            | "user" => user' = User.from_json(value as json.JsonObject)?
             | "member" => member' = GuildMember.from_json(value as json.JsonObject)?
             end
         end
 
         guild_scheduled_event_id = guild_scheduled_event_id' as Snowflake
+        user = user' as User
         member = member'
 
     fun to_json(): json.JsonObject =>
         var obj = json.JsonObject
             .update("guild_scheduled_event_id", guild_scheduled_event_id.to_json())
+            .update("user", user.to_json())
 
         match member
         | let member': GuildMember => obj = obj.update("member", member'.to_json())
