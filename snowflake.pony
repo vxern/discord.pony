@@ -1,9 +1,10 @@
 """
 https://docs.discord.com/developers/reference#snowflakes
 """
+use collections = "collections"
 use json = "json"
 
-class val Snowflake is Stringable
+class val Snowflake is (Stringable & collections.Hashable & Equatable[Snowflake])
     let value: U64
 
     new val from_timestamp(value': U64) => value = (value' - SnowflakeDefaults.discord_epoch_ms()) << 22
@@ -24,6 +25,10 @@ class val Snowflake is Stringable
     fun process_id(): U64 => (value and 0x1F000) >> 12
 
     fun increment(): U64 => value and 0xFFF
+
+    fun hash(): USize => value.hash()
+
+    fun eq(that: Snowflake): Bool => value == that.value
 
     fun string(): String iso^ => value.string()
 
