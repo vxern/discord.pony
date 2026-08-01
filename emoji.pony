@@ -113,3 +113,21 @@ class val Emoji
         end
 
         obj
+
+primitive _Emojis
+    fun apply(value: json.JsonValue): Array[Emoji] val ? =>
+        """
+        Decodes an array of emojis.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let emojis = Array[Emoji](array.size())
+            for emoji in array.values() do emojis.push(Emoji.from_json(emoji as json.JsonObject)?) end
+            emojis
+        end
+
+    fun to_json(emojis: Array[Emoji] val): json.JsonArray =>
+        var array = json.JsonArray
+        for emoji in emojis.values() do array = array.push(emoji.to_json()) end
+        array
