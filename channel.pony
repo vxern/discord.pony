@@ -569,6 +569,24 @@ primitive ChannelTypes
         else error
         end
 
+primitive _ChannelTypes
+    fun apply(value: json.JsonValue): Array[ChannelType] val ? =>
+        """
+        Decodes an array of channel types.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let types = Array[ChannelType](array.size())
+            for type' in array.values() do types.push(ChannelTypes.from((type' as I64).u8())?) end
+            types
+        end
+
+    fun to_json(types: Array[ChannelType] val): json.JsonArray =>
+        var array = json.JsonArray
+        for type' in types.values() do array = array.push(type'.value().i64()) end
+        array
+
 trait val VideoQualityMode is (collections.Hashable & Equatable[VideoQualityMode])
     """
     https://docs.discord.com/developers/resources/channel#channel-object-video-quality-modes
