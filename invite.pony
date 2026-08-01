@@ -105,7 +105,9 @@ class val Invite
         type' = type'' as InviteType
         code = code' as String
         guild = guild'
+        inviter = inviter'
         target_type = target_type'
+        target_user = target_user'
         target_application = target_application'
         approximate_presence_count = approximate_presence_count'
         approximate_member_count = approximate_member_count'
@@ -122,8 +124,16 @@ class val Invite
         | let guild': Guild => obj = obj.update("guild", guild'.to_json())
         end
 
+        match inviter
+        | let inviter': User => obj = obj.update("inviter", inviter'.to_json())
+        end
+
         match target_type
         | let target_type': InviteTargetType => obj = obj.update("target_type", target_type'.value().i64())
+        end
+
+        match target_user
+        | let target_user': User => obj = obj.update("target_user", target_user'.to_json())
         end
 
         match target_application
