@@ -4,6 +4,27 @@ use json = "json"
 
 type Reason is (String | None)
 
+type ResponseHandler[A: Any val] is {(A)} val
+    """
+    Receives the decoded payload of a route that responds with content.
+
+    The payload type is whatever the route documents itself as returning, so
+    `create_message` hands back a `Message`, `get_channel_messages` an
+    `Array[Message] val`, and so on.
+    """
+
+type EmptyResponseHandler is {()} val
+    """
+    Receives notification that a route documented as returning no content —
+    typically a `204 No Content` — has completed.
+    """
+
+type RawResponseHandler is {(courier.HTTPRequest val, courier.HTTPResponse val)} val
+    """
+    Receives an undecoded response. This is what `RestApi` itself deals in; the
+    typed handlers above are adapted down to it by `_Decode`.
+    """
+
 primitive Null
     """
     https://docs.discord.com/developers/reference#nullable-and-optional-resource-fields
@@ -48,13 +69,13 @@ actor RestApi
 
     new create(options': RestOptions) => options = options'
 
-    be send_request(request: courier.HTTPRequest val, handler: ResponseReceiver) =>
+    be send_request(request: courier.HTTPRequest val, handler: RawResponseHandler) =>
         """
         Dispatches `request` and hands the response to `handler`.
         """
 
         // TODO(vxern): Send the request to `RestConstants.url()`, authorising it with the bot token and respecting rate limits. Until then, every request is answered with an empty `200 OK`.
-        handler.on_response_received(request, courier.HTTPResponse(courier.HTTP11, 200, "OK", recover val courier.Headers end, recover val Array[U8] end))
+        handler(request, courier.HTTPResponse(courier.HTTP11, 200, "OK", recover val courier.Headers end, recover val Array[U8] end))
 
 primitive RestConstants
     fun url(): String => "https://discord.com/api"

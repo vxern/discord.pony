@@ -12,10 +12,7 @@ class Queue[A: Any #send]
 
     fun ref dequeue(): A^ ? => _queue.shift()?
 
-interface tag ResponseReceiver
-    be on_response_received(request: courier.HTTPRequest, response: courier.HTTPResponse)
-
-actor Bucket is ResponseReceiver
+actor Bucket
     let _api: RestApi
     let _id: String
     embed _queue: Queue[courier.HTTPRequest] = Queue[courier.HTTPRequest]
@@ -40,7 +37,10 @@ actor Bucket is ResponseReceiver
                 _requests_in_flight = _requests_in_flight + 1
                 _requests_remaining = _requests_remaining - 1
 
-                _api.send_request(request, this)
+                let self: Bucket tag = this
+                _api.send_request(request, {(request': courier.HTTPRequest val, response': courier.HTTPResponse val) =>
+                    self.on_response_received(request', response')
+                })
             else
                 break
             end
