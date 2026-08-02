@@ -1092,3 +1092,73 @@ primitive _AuditLogChanges
         var array = json.JsonArray
         for change in changes.values() do array = array.push(change.to_json()) end
         array
+
+class val GetAuditLogParams
+    """
+    https://docs.discord.com/developers/resources/audit-log#get-guild-audit-log-query-string-params
+
+    The returned list of audit log entries is ordered based on whether `before` or `after` is used.
+    """
+
+    let user_id: (Snowflake | None)
+        """
+        Entries from a specific user ID
+        """
+
+    let action_type: (AuditLogEvent | None)
+        """
+        Entries for a specific audit log event
+        """
+
+    let before: (Snowflake | None)
+        """
+        Entries with ID less than a specific audit log entry ID
+        """
+
+    let after: (Snowflake | None)
+        """
+        Entries with ID greater than a specific audit log entry ID
+        """
+
+    let limit: (USize | None)
+        """
+        Maximum number of entries (between 1-100) to return, defaults to 50
+        """
+
+    new val create(
+        user_id': (Snowflake | None) = None,
+        action_type': (AuditLogEvent | None) = None,
+        before': (Snowflake | None) = None,
+        after': (Snowflake | None) = None,
+        limit': (USize | None) = None
+    ) =>
+        user_id = user_id'
+        action_type = action_type'
+        before = before'
+        after = after'
+        limit = limit'
+
+    fun to_query(): RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match user_id
+        | let user_id': Snowflake => query.push(("user_id", user_id'.string()))
+        end
+
+        match action_type
+        | let action_type': AuditLogEvent => query.push(("action_type", action_type'.value().string()))
+        end
+
+        match before
+        | let before': Snowflake => query.push(("before", before'.string()))
+        end
+
+        match after
+        | let after': Snowflake => query.push(("after", after'.string()))
+        end
+
+        match limit
+        | let limit': USize => query.push(("limit", limit'.string()))
+        end
+
+        consume query

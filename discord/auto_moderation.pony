@@ -558,3 +558,188 @@ class val AutoModerationActionMetadata
         end
 
         obj
+
+class val CreateAutoModerationRuleParams
+    """
+    https://docs.discord.com/developers/resources/auto-moderation#create-auto-moderation-rule-json-params
+    """
+
+    let name: String
+        """
+        the rule name
+        """
+
+    let event_type: AutoModerationEventType
+        """
+        the event type
+        """
+
+    let trigger_type: AutoModerationTriggerType
+        """
+        the trigger type
+        """
+
+    let actions: Array[AutoModerationAction] val
+        """
+        the actions which will execute when the rule is triggered
+        """
+
+    let trigger_metadata: (AutoModerationTriggerMetadata | None)
+        """
+        the trigger metadata
+
+        Can be omitted based on `trigger_type`.
+        """
+
+    let enabled: (Bool | None)
+        """
+        whether the rule is enabled (False by default)
+        """
+
+    let exempt_roles: (Array[Snowflake] val | None)
+        """
+        the role ids that should not be affected by the rule (Maximum of 20)
+        """
+
+    let exempt_channels: (Array[Snowflake] val | None)
+        """
+        the channel ids that should not be affected by the rule (Maximum of 50)
+        """
+
+    new val create(
+        name': String,
+        event_type': AutoModerationEventType,
+        trigger_type': AutoModerationTriggerType,
+        actions': Array[AutoModerationAction] val,
+        trigger_metadata': (AutoModerationTriggerMetadata | None) = None,
+        enabled': (Bool | None) = None,
+        exempt_roles': (Array[Snowflake] val | None) = None,
+        exempt_channels': (Array[Snowflake] val | None) = None
+    ) =>
+        name = name'
+        event_type = event_type'
+        trigger_type = trigger_type'
+        actions = actions'
+        trigger_metadata = trigger_metadata'
+        enabled = enabled'
+        exempt_roles = exempt_roles'
+        exempt_channels = exempt_channels'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+            .update("name", name)
+            .update("event_type", event_type.value().i64())
+            .update("trigger_type", trigger_type.value().i64())
+            .update("actions", _AutoModerationActions.to_json(actions))
+
+        match trigger_metadata
+        | let trigger_metadata': AutoModerationTriggerMetadata => obj = obj.update("trigger_metadata", trigger_metadata'.to_json())
+        end
+
+        match enabled
+        | let enabled': Bool => obj = obj.update("enabled", enabled')
+        end
+
+        match exempt_roles
+        | let exempt_roles': Array[Snowflake] val => obj = obj.update("exempt_roles", _Snowflakes.to_json(exempt_roles'))
+        end
+
+        match exempt_channels
+        | let exempt_channels': Array[Snowflake] val => obj = obj.update("exempt_channels", _Snowflakes.to_json(exempt_channels'))
+        end
+
+        obj
+
+class val UpdateAutoModerationRuleParams
+    """
+    https://docs.discord.com/developers/resources/auto-moderation#modify-auto-moderation-rule-json-params
+
+    All parameters for this endpoint are optional.
+    """
+
+    let name: (String | None)
+        """
+        the rule name
+        """
+
+    let event_type: (AutoModerationEventType | None)
+        """
+        the event type
+        """
+
+    let trigger_metadata: (AutoModerationTriggerMetadata | None)
+        """
+        the trigger metadata
+
+        Can be omitted based on `trigger_type`.
+        """
+
+    let actions: (Array[AutoModerationAction] val | None)
+        """
+        the actions which will execute when the rule is triggered
+        """
+
+    let enabled: (Bool | None)
+        """
+        whether the rule is enabled
+        """
+
+    let exempt_roles: (Array[Snowflake] val | None)
+        """
+        the role ids that should not be affected by the rule (Maximum of 20)
+        """
+
+    let exempt_channels: (Array[Snowflake] val | None)
+        """
+        the channel ids that should not be affected by the rule (Maximum of 50)
+        """
+
+    new val create(
+        name': (String | None) = None,
+        event_type': (AutoModerationEventType | None) = None,
+        trigger_metadata': (AutoModerationTriggerMetadata | None) = None,
+        actions': (Array[AutoModerationAction] val | None) = None,
+        enabled': (Bool | None) = None,
+        exempt_roles': (Array[Snowflake] val | None) = None,
+        exempt_channels': (Array[Snowflake] val | None) = None
+    ) =>
+        name = name'
+        event_type = event_type'
+        trigger_metadata = trigger_metadata'
+        actions = actions'
+        enabled = enabled'
+        exempt_roles = exempt_roles'
+        exempt_channels = exempt_channels'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match name
+        | let name': String => obj = obj.update("name", name')
+        end
+
+        match event_type
+        | let event_type': AutoModerationEventType => obj = obj.update("event_type", event_type'.value().i64())
+        end
+
+        match trigger_metadata
+        | let trigger_metadata': AutoModerationTriggerMetadata => obj = obj.update("trigger_metadata", trigger_metadata'.to_json())
+        end
+
+        match actions
+        | let actions': Array[AutoModerationAction] val => obj = obj.update("actions", _AutoModerationActions.to_json(actions'))
+        end
+
+        match enabled
+        | let enabled': Bool => obj = obj.update("enabled", enabled')
+        end
+
+        match exempt_roles
+        | let exempt_roles': Array[Snowflake] val => obj = obj.update("exempt_roles", _Snowflakes.to_json(exempt_roles'))
+        end
+
+        match exempt_channels
+        | let exempt_channels': Array[Snowflake] val => obj = obj.update("exempt_channels", _Snowflakes.to_json(exempt_channels'))
+        end
+
+        obj

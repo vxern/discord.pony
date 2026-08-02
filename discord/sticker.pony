@@ -365,3 +365,91 @@ primitive _StickerItems
         var array = json.JsonArray
         for item in items.values() do array = array.push(item.to_json()) end
         array
+
+class val CreateGuildStickerParams
+    """
+    https://docs.discord.com/developers/resources/sticker#create-guild-sticker-form-params
+
+    Every guild has five free sticker slots by default, and each Boost level will grant access to more slots.
+
+    Lottie stickers can only be uploaded on guilds that have either the `VERIFIED` and/or the `PARTNERED` guild feature.
+
+    Uploaded stickers are constrained to 5 seconds in length for animated stickers, and 320 x 320 pixels.
+
+    This endpoint is a `multipart/form-data` endpoint: the sticker `file` itself is uploaded as a separate part alongside the fields serialised here.
+    """
+
+    let name: String
+        """
+        name of the sticker (2-30 characters)
+        """
+
+    let description: String
+        """
+        description of the sticker (empty or 2-100 characters)
+        """
+
+    let tags: String
+        """
+        autocomplete/suggestion tags for the sticker (max 200 characters)
+        """
+
+    new val create(name': String, description': String, tags': String) =>
+        name = name'
+        description = description'
+        tags = tags'
+
+    fun to_json(): json.JsonObject =>
+        json.JsonObject
+            .update("name", name)
+            .update("description", description)
+            .update("tags", tags)
+
+class val UpdateGuildStickerParams
+    """
+    https://docs.discord.com/developers/resources/sticker#modify-guild-sticker-json-params
+
+    All parameters to this endpoint are optional.
+    """
+
+    let name: (String | None)
+        """
+        name of the sticker (2-30 characters)
+        """
+
+    let description: Nullable[String]
+        """
+        description of the sticker (2-100 characters)
+        """
+
+    let tags: (String | None)
+        """
+        autocomplete/suggestion tags for the sticker (max 200 characters)
+        """
+
+    new val create(
+        name': (String | None) = None,
+        description': Nullable[String] = None,
+        tags': (String | None) = None
+    ) =>
+        name = name'
+        description = description'
+        tags = tags'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match name
+        | let name': String => obj = obj.update("name", name')
+        end
+
+        match description
+        | let description': String => obj = obj.update("description", description')
+        | Null => obj = obj.update("description", None)
+        end
+
+        match tags
+        | let tags': String => obj = obj.update("tags", tags')
+        end
+
+        obj

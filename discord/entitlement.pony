@@ -223,3 +223,167 @@ primitive _Entitlements
         var array = json.JsonArray
         for entitlement in entitlements.values() do array = array.push(entitlement.to_json()) end
         array
+
+class val GetEntitlementsParams
+    """
+    https://docs.discord.com/developers/resources/entitlement#list-entitlements-query-string-params
+    """
+
+    let user_id: (Snowflake | None)
+        """
+        User ID to look up entitlements for
+        """
+
+    let sku_ids: (Array[Snowflake] val | None)
+        """
+        Optional list of SKU IDs to check entitlements for
+        """
+
+    let before: (Snowflake | None)
+        """
+        Retrieve entitlements before this entitlement ID
+        """
+
+    let after: (Snowflake | None)
+        """
+        Retrieve entitlements after this entitlement ID
+        """
+
+    let limit: (USize | None)
+        """
+        Number of entitlements to return, 1-100, default 100
+        """
+
+    let guild_id: (Snowflake | None)
+        """
+        Guild ID to look up entitlements for
+        """
+
+    let exclude_ended: (Bool | None)
+        """
+        Whether or not ended entitlements should be omitted. Defaults to false, ended entitlements are included by default.
+        """
+
+    let exclude_deleted: (Bool | None)
+        """
+        Whether or not deleted entitlements should be omitted. Defaults to true, deleted entitlements are not included by default.
+        """
+
+    new val create(
+        user_id': (Snowflake | None) = None,
+        sku_ids': (Array[Snowflake] val | None) = None,
+        before': (Snowflake | None) = None,
+        after': (Snowflake | None) = None,
+        limit': (USize | None) = None,
+        guild_id': (Snowflake | None) = None,
+        exclude_ended': (Bool | None) = None,
+        exclude_deleted': (Bool | None) = None
+    ) =>
+        user_id = user_id'
+        sku_ids = sku_ids'
+        before = before'
+        after = after'
+        limit = limit'
+        guild_id = guild_id'
+        exclude_ended = exclude_ended'
+        exclude_deleted = exclude_deleted'
+
+    fun to_query(): RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match user_id
+        | let user_id': Snowflake => query.push(("user_id", user_id'.string()))
+        end
+
+        match sku_ids
+        | let sku_ids': Array[Snowflake] val => query.push(("sku_ids", _CommaSeparated(sku_ids')))
+        end
+
+        match before
+        | let before': Snowflake => query.push(("before", before'.string()))
+        end
+
+        match after
+        | let after': Snowflake => query.push(("after", after'.string()))
+        end
+
+        match limit
+        | let limit': USize => query.push(("limit", limit'.string()))
+        end
+
+        match guild_id
+        | let guild_id': Snowflake => query.push(("guild_id", guild_id'.string()))
+        end
+
+        match exclude_ended
+        | let exclude_ended': Bool => query.push(("exclude_ended", exclude_ended'.string()))
+        end
+
+        match exclude_deleted
+        | let exclude_deleted': Bool => query.push(("exclude_deleted", exclude_deleted'.string()))
+        end
+
+        consume query
+
+class val CreateTestEntitlementParams
+    """
+    https://docs.discord.com/developers/resources/entitlement#create-test-entitlement-json-params
+    """
+
+    let sku_id: Snowflake
+        """
+        ID of the SKU to grant the entitlement to
+        """
+
+    let owner_id: Snowflake
+        """
+        ID of the guild or user to grant the entitlement to
+        """
+
+    let owner_type: TestEntitlementOwnerType
+        """
+        `1` for a guild subscription, `2` for a user subscription
+        """
+
+    new val create(sku_id': Snowflake, owner_id': Snowflake, owner_type': TestEntitlementOwnerType) =>
+        sku_id = sku_id'
+        owner_id = owner_id'
+        owner_type = owner_type'
+
+    fun to_json(): json.JsonObject =>
+        json.JsonObject
+            .update("sku_id", sku_id.to_json())
+            .update("owner_id", owner_id.to_json())
+            .update("owner_type", owner_type.value().i64())
+
+trait val TestEntitlementOwnerType is (collections.Hashable & Equatable[TestEntitlementOwnerType])
+    """
+    https://docs.discord.com/developers/resources/entitlement#create-test-entitlement
+
+    Whether a test entitlement is granted to a guild or to a user.
+    """
+
+    fun value(): U8
+
+    fun hash(): USize => value().hash()
+
+    fun eq(that: TestEntitlementOwnerType): Bool => value() == that.value()
+primitive GuildSubscriptionTestEntitlementOwnerType is TestEntitlementOwnerType
+    """
+    A guild subscription
+    """
+
+    fun value(): U8 => 1
+primitive UserSubscriptionTestEntitlementOwnerType is TestEntitlementOwnerType
+    """
+    A user subscription
+    """
+
+    fun value(): U8 => 2
+primitive TestEntitlementOwnerTypes
+    fun from(value: U8): TestEntitlementOwnerType ? =>
+        match value
+        | 1 => GuildSubscriptionTestEntitlementOwnerType
+        | 2 => UserSubscriptionTestEntitlementOwnerType
+        else error
+        end

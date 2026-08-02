@@ -1151,3 +1151,923 @@ primitive _ForumTags
         var array = json.JsonArray
         for forum_tag in tags.values() do array = array.push(forum_tag.to_json()) end
         array
+
+class val ForumTagParams
+    """
+    https://docs.discord.com/developers/resources/channel#forum-tag-object
+
+    A tag to be applied to a `GUILD_FORUM` or `GUILD_MEDIA` channel's `available_tags`.
+
+    Unlike the forum tag objects the API returns, only `name` is required here: `id` identifies an existing tag to keep or rename, and is omitted to create a new one.
+    """
+
+    let name: String
+        """
+        the name of the tag (0-20 characters)
+        """
+
+    let id: (Snowflake | None)
+        """
+        the id of an existing tag to update, omitted when creating a new tag
+        """
+
+    let moderated: (Bool | None)
+        """
+        whether this tag can only be added to or removed from threads by a member with the MANAGE_THREADS permission
+        """
+
+    let emoji_id: Nullable[Snowflake]
+        """
+        the id of a guild's custom emoji
+        """
+
+    let emoji_name: Nullable[String]
+        """
+        the unicode character of the emoji
+        """
+
+    new val create(
+        name': String,
+        id': (Snowflake | None) = None,
+        moderated': (Bool | None) = None,
+        emoji_id': Nullable[Snowflake] = None,
+        emoji_name': Nullable[String] = None
+    ) =>
+        name = name'
+        id = id'
+        moderated = moderated'
+        emoji_id = emoji_id'
+        emoji_name = emoji_name'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject.update("name", name)
+
+        match id
+        | let id': Snowflake => obj = obj.update("id", id'.to_json())
+        end
+
+        match moderated
+        | let moderated': Bool => obj = obj.update("moderated", moderated')
+        end
+
+        match emoji_id
+        | let emoji_id': Snowflake => obj = obj.update("emoji_id", emoji_id'.to_json())
+        | Null => obj = obj.update("emoji_id", None)
+        end
+
+        match emoji_name
+        | let emoji_name': String => obj = obj.update("emoji_name", emoji_name')
+        | Null => obj = obj.update("emoji_name", None)
+        end
+
+        obj
+
+primitive _ForumTagParams
+    fun to_json(tags: Array[ForumTagParams] val): json.JsonArray =>
+        var array = json.JsonArray
+        for forum_tag in tags.values() do array = array.push(forum_tag.to_json()) end
+        array
+
+class val UpdateChannelParams
+    """
+    https://docs.discord.com/developers/resources/channel#modify-channel
+
+    The fields accepted depend on the channel being modified. Group DM channels accept only `name` and `icon`. Threads accept `name`, `archived`, `auto_archive_duration`, `locked`, `invitable`, `rate_limit_per_user`, `flags` and `applied_tags`. All other guild channels accept the remaining fields.
+
+    All parameters to this endpoint are optional.
+    """
+
+    let name: (String | None)
+        """
+        1-100 character channel name
+        """
+
+    let icon: (ImageData | None)
+        """
+        base64 encoded icon (group DM only)
+        """
+
+    let type': (ChannelType | None)
+        """
+        the type of channel; only conversion between text and announcement is supported and only in guilds with the "NEWS" feature
+        """
+
+    let position: Nullable[USize]
+        """
+        the position of the channel in the left-hand listing
+        """
+
+    let topic: Nullable[String]
+        """
+        0-1024 character channel topic (0-4096 characters for GUILD_FORUM and GUILD_MEDIA channels)
+        """
+
+    let nsfw: Nullable[Bool]
+        """
+        whether the channel is nsfw
+        """
+
+    let rate_limit_per_user: Nullable[USize]
+        """
+        amount of seconds a user has to wait before sending another message (0-21600)
+        """
+
+    let bitrate: Nullable[USize]
+        """
+        the bitrate (in bits) of the voice or stage channel; min 8000
+        """
+
+    let user_limit: Nullable[USize]
+        """
+        the user limit of the voice or stage channel, max 99 for voice channels and 10000 for stage channels (0 refers to no limit)
+        """
+
+    let permission_overwrites: Nullable[Array[PermissionOverwrite] val]
+        """
+        channel or category-specific permissions
+        """
+
+    let parent_id: Nullable[Snowflake]
+        """
+        id of the new parent category for a channel
+        """
+
+    let rtc_region: Nullable[String]
+        """
+        channel voice region id, automatic when set to null
+        """
+
+    let video_quality_mode: Nullable[VideoQualityMode]
+        """
+        the camera video quality mode of the voice channel
+        """
+
+    let default_auto_archive_duration: Nullable[USize]
+        """
+        the default duration that the clients use (not the API) for newly created threads in the channel, in minutes, to automatically archive the thread after recent activity
+        """
+
+    let flags: (Array[ChannelFlag] val | None)
+        """
+        channel flags combined as a bitfield. Currently only `REQUIRE_TAG` (`1 << 4`) is supported by GUILD_FORUM and GUILD_MEDIA channels. `HIDE_MEDIA_DOWNLOAD_OPTIONS` (`1 << 15`) is supported only by GUILD_MEDIA channels
+        """
+
+    let available_tags: (Array[ForumTagParams] val | None)
+        """
+        the set of tags that can be used in a GUILD_FORUM or a GUILD_MEDIA channel; limited to 20
+        """
+
+    let default_reaction_emoji: Nullable[DefaultReaction]
+        """
+        the emoji to show in the add reaction button on a thread in a GUILD_FORUM or a GUILD_MEDIA channel
+        """
+
+    let default_thread_rate_limit_per_user: (USize | None)
+        """
+        the initial rate_limit_per_user to set on newly created threads in a channel. this field is copied to the thread at creation time and does not live update
+        """
+
+    let default_sort_order: Nullable[SortOrderType]
+        """
+        the default sort order type used to order posts in GUILD_FORUM and GUILD_MEDIA channels
+        """
+
+    let default_forum_layout: (ForumLayoutType | None)
+        """
+        the default forum layout type used to display posts in GUILD_FORUM channels
+        """
+
+    let archived: (Bool | None)
+        """
+        whether the thread is archived
+        """
+
+    let auto_archive_duration: (USize | None)
+        """
+        the thread will stop showing in the channel list after auto_archive_duration minutes of inactivity, can be set to: 60, 1440, 4320, 10080
+        """
+
+    let locked: (Bool | None)
+        """
+        whether the thread is locked; when a thread is locked, only users with MANAGE_THREADS can unarchive it
+        """
+
+    let invitable: (Bool | None)
+        """
+        whether non-moderators can add other non-moderators to a thread; only available on private threads
+        """
+
+    let applied_tags: (Array[Snowflake] val | None)
+        """
+        the IDs of the set of tags that have been applied to a thread in a GUILD_FORUM or a GUILD_MEDIA channel; limited to 5
+        """
+
+    new val create(
+        name': (String | None) = None,
+        icon': (ImageData | None) = None,
+        type'': (ChannelType | None) = None,
+        position': Nullable[USize] = None,
+        topic': Nullable[String] = None,
+        nsfw': Nullable[Bool] = None,
+        rate_limit_per_user': Nullable[USize] = None,
+        bitrate': Nullable[USize] = None,
+        user_limit': Nullable[USize] = None,
+        permission_overwrites': Nullable[Array[PermissionOverwrite] val] = None,
+        parent_id': Nullable[Snowflake] = None,
+        rtc_region': Nullable[String] = None,
+        video_quality_mode': Nullable[VideoQualityMode] = None,
+        default_auto_archive_duration': Nullable[USize] = None,
+        flags': (Array[ChannelFlag] val | None) = None,
+        available_tags': (Array[ForumTagParams] val | None) = None,
+        default_reaction_emoji': Nullable[DefaultReaction] = None,
+        default_thread_rate_limit_per_user': (USize | None) = None,
+        default_sort_order': Nullable[SortOrderType] = None,
+        default_forum_layout': (ForumLayoutType | None) = None,
+        archived': (Bool | None) = None,
+        auto_archive_duration': (USize | None) = None,
+        locked': (Bool | None) = None,
+        invitable': (Bool | None) = None,
+        applied_tags': (Array[Snowflake] val | None) = None
+    ) =>
+        name = name'
+        icon = icon'
+        type' = type''
+        position = position'
+        topic = topic'
+        nsfw = nsfw'
+        rate_limit_per_user = rate_limit_per_user'
+        bitrate = bitrate'
+        user_limit = user_limit'
+        permission_overwrites = permission_overwrites'
+        parent_id = parent_id'
+        rtc_region = rtc_region'
+        video_quality_mode = video_quality_mode'
+        default_auto_archive_duration = default_auto_archive_duration'
+        flags = flags'
+        available_tags = available_tags'
+        default_reaction_emoji = default_reaction_emoji'
+        default_thread_rate_limit_per_user = default_thread_rate_limit_per_user'
+        default_sort_order = default_sort_order'
+        default_forum_layout = default_forum_layout'
+        archived = archived'
+        auto_archive_duration = auto_archive_duration'
+        locked = locked'
+        invitable = invitable'
+        applied_tags = applied_tags'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match name
+        | let name': String => obj = obj.update("name", name')
+        end
+
+        match icon
+        | let icon': ImageData => obj = obj.update("icon", icon')
+        end
+
+        match type'
+        | let type'': ChannelType => obj = obj.update("type", type''.value().i64())
+        end
+
+        match position
+        | let position': USize => obj = obj.update("position", position'.i64())
+        | Null => obj = obj.update("position", None)
+        end
+
+        match topic
+        | let topic': String => obj = obj.update("topic", topic')
+        | Null => obj = obj.update("topic", None)
+        end
+
+        match nsfw
+        | let nsfw': Bool => obj = obj.update("nsfw", nsfw')
+        | Null => obj = obj.update("nsfw", None)
+        end
+
+        match rate_limit_per_user
+        | let rate_limit_per_user': USize => obj = obj.update("rate_limit_per_user", rate_limit_per_user'.i64())
+        | Null => obj = obj.update("rate_limit_per_user", None)
+        end
+
+        match bitrate
+        | let bitrate': USize => obj = obj.update("bitrate", bitrate'.i64())
+        | Null => obj = obj.update("bitrate", None)
+        end
+
+        match user_limit
+        | let user_limit': USize => obj = obj.update("user_limit", user_limit'.i64())
+        | Null => obj = obj.update("user_limit", None)
+        end
+
+        match permission_overwrites
+        | let permission_overwrites': Array[PermissionOverwrite] val => obj = obj.update("permission_overwrites", _PermissionOverwrites.to_json(permission_overwrites'))
+        | Null => obj = obj.update("permission_overwrites", None)
+        end
+
+        match parent_id
+        | let parent_id': Snowflake => obj = obj.update("parent_id", parent_id'.to_json())
+        | Null => obj = obj.update("parent_id", None)
+        end
+
+        match rtc_region
+        | let rtc_region': String => obj = obj.update("rtc_region", rtc_region')
+        | Null => obj = obj.update("rtc_region", None)
+        end
+
+        match video_quality_mode
+        | let video_quality_mode': VideoQualityMode => obj = obj.update("video_quality_mode", video_quality_mode'.value().i64())
+        | Null => obj = obj.update("video_quality_mode", None)
+        end
+
+        match default_auto_archive_duration
+        | let default_auto_archive_duration': USize => obj = obj.update("default_auto_archive_duration", default_auto_archive_duration'.i64())
+        | Null => obj = obj.update("default_auto_archive_duration", None)
+        end
+
+        match flags
+        | let flags': Array[ChannelFlag] val => obj = obj.update("flags", _ChannelFlags.to_json(flags'))
+        end
+
+        match available_tags
+        | let available_tags': Array[ForumTagParams] val => obj = obj.update("available_tags", _ForumTagParams.to_json(available_tags'))
+        end
+
+        match default_reaction_emoji
+        | let default_reaction_emoji': DefaultReaction => obj = obj.update("default_reaction_emoji", default_reaction_emoji'.to_json())
+        | Null => obj = obj.update("default_reaction_emoji", None)
+        end
+
+        match default_thread_rate_limit_per_user
+        | let default_thread_rate_limit_per_user': USize => obj = obj.update("default_thread_rate_limit_per_user", default_thread_rate_limit_per_user'.i64())
+        end
+
+        match default_sort_order
+        | let default_sort_order': SortOrderType => obj = obj.update("default_sort_order", default_sort_order'.value().i64())
+        | Null => obj = obj.update("default_sort_order", None)
+        end
+
+        match default_forum_layout
+        | let default_forum_layout': ForumLayoutType => obj = obj.update("default_forum_layout", default_forum_layout'.value().i64())
+        end
+
+        match archived
+        | let archived': Bool => obj = obj.update("archived", archived')
+        end
+
+        match auto_archive_duration
+        | let auto_archive_duration': USize => obj = obj.update("auto_archive_duration", auto_archive_duration'.i64())
+        end
+
+        match locked
+        | let locked': Bool => obj = obj.update("locked", locked')
+        end
+
+        match invitable
+        | let invitable': Bool => obj = obj.update("invitable", invitable')
+        end
+
+        match applied_tags
+        | let applied_tags': Array[Snowflake] val => obj = obj.update("applied_tags", _Snowflakes.to_json(applied_tags'))
+        end
+
+        obj
+
+class val SetVoiceChannelStatusParams
+    """
+    https://docs.discord.com/developers/resources/channel#set-voice-channel-status-json-params
+    """
+
+    let status: Nullable[String]
+        """
+        the new voice channel status, 0-500 characters
+        """
+
+    new val create(status': Nullable[String] = None) =>
+        status = status'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match status
+        | let status': String => obj = obj.update("status", status')
+        | Null => obj = obj.update("status", None)
+        end
+
+        obj
+
+class val UpdateChannelPermissionsParams
+    """
+    https://docs.discord.com/developers/resources/channel#edit-channel-permissions-json-params
+    """
+
+    let type': PermissionOverwriteType
+        """
+        0 for a role or 1 for a member
+        """
+
+    let allow: Nullable[Array[Permission] val]
+        """
+        the bitwise value of all allowed permissions (default `"0"`)
+        """
+
+    let deny: Nullable[Array[Permission] val]
+        """
+        the bitwise value of all disallowed permissions (default `"0"`)
+        """
+
+    new val create(
+        type'': PermissionOverwriteType,
+        allow': Nullable[Array[Permission] val] = None,
+        deny': Nullable[Array[Permission] val] = None
+    ) =>
+        type' = type''
+        allow = allow'
+        deny = deny'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject.update("type", type'.value().i64())
+
+        match allow
+        | let allow': Array[Permission] val => obj = obj.update("allow", _Permissions.to_json(allow'))
+        | Null => obj = obj.update("allow", None)
+        end
+
+        match deny
+        | let deny': Array[Permission] val => obj = obj.update("deny", _Permissions.to_json(deny'))
+        | Null => obj = obj.update("deny", None)
+        end
+
+        obj
+
+class val CreateChannelInviteParams
+    """
+    https://docs.discord.com/developers/resources/channel#create-channel-invite-json-params
+
+    All JSON parameters for this route are optional, however the request body is not. If you are not sending any fields, you still have to send an empty JSON object (`{}`).
+    """
+
+    let max_age: (USize | None)
+        """
+        duration of invite in seconds before expiry, or 0 for never. between 0 and 604800 (7 days). Defaults to 86400 (24 hours)
+        """
+
+    let max_uses: (USize | None)
+        """
+        max number of uses or 0 for unlimited. between 0 and 100. Defaults to 0
+        """
+
+    let temporary: (Bool | None)
+        """
+        whether this invite only grants temporary membership. Defaults to false
+        """
+
+    let unique: (Bool | None)
+        """
+        if true, don't try to reuse a similar invite (useful for creating many unique one time use invites). Defaults to false
+        """
+
+    let target_type: (InviteTargetType | None)
+        """
+        the type of target for this voice channel invite
+        """
+
+    let target_user_id: (Snowflake | None)
+        """
+        the id of the user whose stream to display for this invite, required if `target_type` is 1, the user must be streaming in the channel
+        """
+
+    let target_application_id: (Snowflake | None)
+        """
+        the id of the embedded application to open for this invite, required if `target_type` is 2, the application must have the EMBEDDED flag
+        """
+
+    new val create(
+        max_age': (USize | None) = None,
+        max_uses': (USize | None) = None,
+        temporary': (Bool | None) = None,
+        unique': (Bool | None) = None,
+        target_type': (InviteTargetType | None) = None,
+        target_user_id': (Snowflake | None) = None,
+        target_application_id': (Snowflake | None) = None
+    ) =>
+        max_age = max_age'
+        max_uses = max_uses'
+        temporary = temporary'
+        unique = unique'
+        target_type = target_type'
+        target_user_id = target_user_id'
+        target_application_id = target_application_id'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match max_age
+        | let max_age': USize => obj = obj.update("max_age", max_age'.i64())
+        end
+
+        match max_uses
+        | let max_uses': USize => obj = obj.update("max_uses", max_uses'.i64())
+        end
+
+        match temporary
+        | let temporary': Bool => obj = obj.update("temporary", temporary')
+        end
+
+        match unique
+        | let unique': Bool => obj = obj.update("unique", unique')
+        end
+
+        match target_type
+        | let target_type': InviteTargetType => obj = obj.update("target_type", target_type'.value().i64())
+        end
+
+        match target_user_id
+        | let target_user_id': Snowflake => obj = obj.update("target_user_id", target_user_id'.to_json())
+        end
+
+        match target_application_id
+        | let target_application_id': Snowflake => obj = obj.update("target_application_id", target_application_id'.to_json())
+        end
+
+        obj
+
+class val FollowAnnouncementChannelParams
+    """
+    https://docs.discord.com/developers/resources/channel#follow-announcement-channel-json-params
+    """
+
+    let webhook_channel_id: Snowflake
+        """
+        id of target channel
+        """
+
+    new val create(webhook_channel_id': Snowflake) =>
+        webhook_channel_id = webhook_channel_id'
+
+    fun to_json(): json.JsonObject =>
+        json.JsonObject.update("webhook_channel_id", webhook_channel_id.to_json())
+
+class val AddGroupDMRecipientParams
+    """
+    https://docs.discord.com/developers/resources/channel#group-dm-add-recipient-json-params
+    """
+
+    let access_token: String
+        """
+        access token of a user that has granted your app the `gdm.join` scope
+        """
+
+    let nick: (String | None)
+        """
+        nickname of the user being added
+        """
+
+    new val create(access_token': String, nick': (String | None) = None) =>
+        access_token = access_token'
+        nick = nick'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject.update("access_token", access_token)
+
+        match nick
+        | let nick': String => obj = obj.update("nick", nick')
+        end
+
+        obj
+
+class val StartThreadFromMessageParams
+    """
+    https://docs.discord.com/developers/resources/channel#start-thread-from-message-json-params
+    """
+
+    let name: String
+        """
+        1-100 character channel name
+        """
+
+    let auto_archive_duration: (USize | None)
+        """
+        the thread will stop showing in the channel list after auto_archive_duration minutes of inactivity, can be set to: 60, 1440, 4320, 10080
+        """
+
+    let rate_limit_per_user: (USize | None)
+        """
+        amount of seconds a user has to wait before sending another message (0-21600)
+        """
+
+    new val create(
+        name': String,
+        auto_archive_duration': (USize | None) = None,
+        rate_limit_per_user': (USize | None) = None
+    ) =>
+        name = name'
+        auto_archive_duration = auto_archive_duration'
+        rate_limit_per_user = rate_limit_per_user'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject.update("name", name)
+
+        match auto_archive_duration
+        | let auto_archive_duration': USize => obj = obj.update("auto_archive_duration", auto_archive_duration'.i64())
+        end
+
+        match rate_limit_per_user
+        | let rate_limit_per_user': USize => obj = obj.update("rate_limit_per_user", rate_limit_per_user'.i64())
+        end
+
+        obj
+
+class val StartThreadWithoutMessageParams
+    """
+    https://docs.discord.com/developers/resources/channel#start-thread-without-message-json-params
+    """
+
+    let name: String
+        """
+        1-100 character channel name
+        """
+
+    let auto_archive_duration: (USize | None)
+        """
+        the thread will stop showing in the channel list after auto_archive_duration minutes of inactivity, can be set to: 60, 1440, 4320, 10080
+        """
+
+    let type': (ChannelType | None)
+        """
+        the type of thread to create
+
+        Defaults to `PRIVATE_THREAD`.
+        """
+
+    let invitable: (Bool | None)
+        """
+        whether non-moderators can add other non-moderators to a thread; only available when creating a private thread
+        """
+
+    let rate_limit_per_user: (USize | None)
+        """
+        amount of seconds a user has to wait before sending another message (0-21600)
+        """
+
+    new val create(
+        name': String,
+        auto_archive_duration': (USize | None) = None,
+        type'': (ChannelType | None) = None,
+        invitable': (Bool | None) = None,
+        rate_limit_per_user': (USize | None) = None
+    ) =>
+        name = name'
+        auto_archive_duration = auto_archive_duration'
+        type' = type''
+        invitable = invitable'
+        rate_limit_per_user = rate_limit_per_user'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject.update("name", name)
+
+        match auto_archive_duration
+        | let auto_archive_duration': USize => obj = obj.update("auto_archive_duration", auto_archive_duration'.i64())
+        end
+
+        match type'
+        | let type'': ChannelType => obj = obj.update("type", type''.value().i64())
+        end
+
+        match invitable
+        | let invitable': Bool => obj = obj.update("invitable", invitable')
+        end
+
+        match rate_limit_per_user
+        | let rate_limit_per_user': USize => obj = obj.update("rate_limit_per_user", rate_limit_per_user'.i64())
+        end
+
+        obj
+
+class val StartThreadInForumOrMediaChannelParams
+    """
+    https://docs.discord.com/developers/resources/channel#start-thread-in-forum-or-media-channel-json/form-params
+    """
+
+    let name: String
+        """
+        1-100 character channel name
+        """
+
+    let message: ForumThreadMessageParams
+        """
+        contents of the first message in the forum/media thread
+        """
+
+    let auto_archive_duration: (USize | None)
+        """
+        duration in minutes to automatically archive the thread after recent activity, can be set to: 60, 1440, 4320, 10080
+        """
+
+    let rate_limit_per_user: (USize | None)
+        """
+        amount of seconds a user has to wait before sending another message (0-21600)
+        """
+
+    let applied_tags: (Array[Snowflake] val | None)
+        """
+        the IDs of the set of tags that have been applied to a thread in a GUILD_FORUM or a GUILD_MEDIA channel
+        """
+
+    new val create(
+        name': String,
+        message': ForumThreadMessageParams,
+        auto_archive_duration': (USize | None) = None,
+        rate_limit_per_user': (USize | None) = None,
+        applied_tags': (Array[Snowflake] val | None) = None
+    ) =>
+        name = name'
+        message = message'
+        auto_archive_duration = auto_archive_duration'
+        rate_limit_per_user = rate_limit_per_user'
+        applied_tags = applied_tags'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+            .update("name", name)
+            .update("message", message.to_json())
+
+        match auto_archive_duration
+        | let auto_archive_duration': USize => obj = obj.update("auto_archive_duration", auto_archive_duration'.i64())
+        end
+
+        match rate_limit_per_user
+        | let rate_limit_per_user': USize => obj = obj.update("rate_limit_per_user", rate_limit_per_user'.i64())
+        end
+
+        match applied_tags
+        | let applied_tags': Array[Snowflake] val => obj = obj.update("applied_tags", _Snowflakes.to_json(applied_tags'))
+        end
+
+        obj
+
+class val GetThreadMemberParams
+    """
+    https://docs.discord.com/developers/resources/channel#get-thread-member-query-string-params
+    """
+
+    let with_member: (Bool | None)
+        """
+        Whether to include a guild member object for the thread member
+        """
+
+    new val create(with_member': (Bool | None) = None) =>
+        with_member = with_member'
+
+    fun to_query(): RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match with_member
+        | let with_member': Bool => query.push(("with_member", with_member'.string()))
+        end
+
+        consume query
+
+class val GetThreadMembersParams
+    """
+    https://docs.discord.com/developers/resources/channel#list-thread-members-query-string-params
+
+    Requires the `GUILD_MEMBERS` privileged intent to be enabled for the application.
+    """
+
+    let with_member: (Bool | None)
+        """
+        Whether to include a guild member object for each thread member
+        """
+
+    let after: (Snowflake | None)
+        """
+        Get thread members after this user ID
+        """
+
+    let limit: (USize | None)
+        """
+        Max number of thread members to return (1-100). Defaults to 100.
+        """
+
+    new val create(
+        with_member': (Bool | None) = None,
+        after': (Snowflake | None) = None,
+        limit': (USize | None) = None
+    ) =>
+        with_member = with_member'
+        after = after'
+        limit = limit'
+
+    fun to_query(): RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match with_member
+        | let with_member': Bool => query.push(("with_member", with_member'.string()))
+        end
+
+        match after
+        | let after': Snowflake => query.push(("after", after'.string()))
+        end
+
+        match limit
+        | let limit': USize => query.push(("limit", limit'.string()))
+        end
+
+        consume query
+
+class val GetPublicArchivedThreadsParams
+    """
+    https://docs.discord.com/developers/resources/channel#list-public-archived-threads-query-string-params
+    """
+
+    let before: (ISO8601 | None)
+        """
+        returns threads archived before this timestamp
+        """
+
+    let limit: (USize | None)
+        """
+        optional maximum number of threads to return
+        """
+
+    new val create(before': (ISO8601 | None) = None, limit': (USize | None) = None) =>
+        before = before'
+        limit = limit'
+
+    fun to_query(): RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match before
+        | let before': ISO8601 => query.push(("before", before'))
+        end
+
+        match limit
+        | let limit': USize => query.push(("limit", limit'.string()))
+        end
+
+        consume query
+
+class val GetPrivateArchivedThreadsParams
+    """
+    https://docs.discord.com/developers/resources/channel#list-private-archived-threads-query-string-params
+    """
+
+    let before: (ISO8601 | None)
+        """
+        returns threads archived before this timestamp
+        """
+
+    let limit: (USize | None)
+        """
+        optional maximum number of threads to return
+        """
+
+    new val create(before': (ISO8601 | None) = None, limit': (USize | None) = None) =>
+        before = before'
+        limit = limit'
+
+    fun to_query(): RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match before
+        | let before': ISO8601 => query.push(("before", before'))
+        end
+
+        match limit
+        | let limit': USize => query.push(("limit", limit'.string()))
+        end
+
+        consume query
+
+class val GetJoinedPrivateArchivedThreadsParams
+    """
+    https://docs.discord.com/developers/resources/channel#list-joined-private-archived-threads-query-string-params
+    """
+
+    let before: (Snowflake | None)
+        """
+        returns threads before this id
+        """
+
+    let limit: (USize | None)
+        """
+        optional maximum number of threads to return
+        """
+
+    new val create(before': (Snowflake | None) = None, limit': (USize | None) = None) =>
+        before = before'
+        limit = limit'
+
+    fun to_query(): RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match before
+        | let before': Snowflake => query.push(("before", before'.string()))
+        end
+
+        match limit
+        | let limit': USize => query.push(("limit", limit'.string()))
+        end
+
+        consume query

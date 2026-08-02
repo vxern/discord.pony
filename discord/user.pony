@@ -806,3 +806,209 @@ class val ApplicationRoleConnection
         end
 
         obj
+
+class val UpdateCurrentUserParams
+    """
+    https://docs.discord.com/developers/resources/user#modify-current-user-json-params
+
+    All parameters to this endpoint are optional.
+    """
+
+    let username: (String | None)
+        """
+        user's username, if changed may cause the user's discriminator to be randomized
+        """
+
+    let avatar: Nullable[ImageData]
+        """
+        if passed, modifies the user's avatar
+        """
+
+    let banner: Nullable[ImageData]
+        """
+        if passed, modifies the user's banner
+        """
+
+    new val create(
+        username': (String | None) = None,
+        avatar': Nullable[ImageData] = None,
+        banner': Nullable[ImageData] = None
+    ) =>
+        username = username'
+        avatar = avatar'
+        banner = banner'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match username
+        | let username': String => obj = obj.update("username", username')
+        end
+
+        match avatar
+        | let avatar': ImageData => obj = obj.update("avatar", avatar')
+        | Null => obj = obj.update("avatar", None)
+        end
+
+        match banner
+        | let banner': ImageData => obj = obj.update("banner", banner')
+        | Null => obj = obj.update("banner", None)
+        end
+
+        obj
+
+class val GetCurrentUserGuildsParams
+    """
+    https://docs.discord.com/developers/resources/user#get-current-user-guilds-query-string-params
+
+    This endpoint returns 200 guilds by default, which is the maximum number of guilds a non-bot user can join. Therefore, pagination is not needed for integrations that need to get a list of the users' guilds.
+
+    The `before` and `after` parameters are mutually exclusive, only one may be passed at a time.
+    """
+
+    let before: (Snowflake | None)
+        """
+        get guilds before this guild ID
+        """
+
+    let after: (Snowflake | None)
+        """
+        get guilds after this guild ID
+        """
+
+    let limit: (USize | None)
+        """
+        max number of guilds to return (1-200). Defaults to 200.
+        """
+
+    let with_counts: (Bool | None)
+        """
+        include approximate member and presence counts in response. Defaults to false.
+        """
+
+    new val create(
+        before': (Snowflake | None) = None,
+        after': (Snowflake | None) = None,
+        limit': (USize | None) = None,
+        with_counts': (Bool | None) = None
+    ) =>
+        before = before'
+        after = after'
+        limit = limit'
+        with_counts = with_counts'
+
+    fun to_query(): RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match before
+        | let before': Snowflake => query.push(("before", before'.string()))
+        end
+
+        match after
+        | let after': Snowflake => query.push(("after", after'.string()))
+        end
+
+        match limit
+        | let limit': USize => query.push(("limit", limit'.string()))
+        end
+
+        match with_counts
+        | let with_counts': Bool => query.push(("with_counts", with_counts'.string()))
+        end
+
+        consume query
+
+class val CreateDMParams
+    """
+    https://docs.discord.com/developers/resources/user#create-dm-json-params
+
+    You should not use this endpoint to DM everyone in a server about something. DMs should generally be initiated by a user action. If you open a significant amount of DMs too quickly, your bot may be rate limited or blocked from opening new ones.
+    """
+
+    let recipient_id: Snowflake
+        """
+        the recipient to open a DM channel with
+        """
+
+    new val create(recipient_id': Snowflake) =>
+        recipient_id = recipient_id'
+
+    fun to_json(): json.JsonObject =>
+        json.JsonObject.update("recipient_id", recipient_id.to_json())
+
+class val CreateGroupDMParams
+    """
+    https://docs.discord.com/developers/resources/user#create-group-dm-json-params
+
+    This endpoint is limited to 10 active group DMs.
+    """
+
+    let access_tokens: Array[String] val
+        """
+        access tokens of users that have granted your app the `gdm.join` scope
+        """
+
+    let nicks: collections.Map[Snowflake, String] val
+        """
+        a dictionary of user ids to their respective nicknames
+        """
+
+    new val create(access_tokens': Array[String] val, nicks': collections.Map[Snowflake, String] val) =>
+        access_tokens = access_tokens'
+        nicks = nicks'
+
+    fun to_json(): json.JsonObject =>
+        var nicks' = json.JsonObject
+        for (id, nick) in nicks.pairs() do nicks' = nicks'.update(id.string(), nick) end
+
+        json.JsonObject
+            .update("access_tokens", _Strings.to_json(access_tokens))
+            .update("nicks", nicks')
+
+class val UpdateCurrentUserApplicationRoleConnectionParams
+    """
+    https://docs.discord.com/developers/resources/user#update-current-user-application-role-connection-json-params
+
+    All parameters to this endpoint are optional.
+    """
+
+    let platform_name: (String | None)
+        """
+        the vanity name of the platform a bot has connected (max 50 characters)
+        """
+
+    let platform_username: (String | None)
+        """
+        the username on the platform a bot has connected (max 100 characters)
+        """
+
+    let metadata: (collections.Map[String, String] val | None)
+        """
+        object mapping application role connection metadata keys to their string-ified value (max 100 characters) for the user on the platform a bot has connected
+        """
+
+    new val create(
+        platform_name': (String | None) = None,
+        platform_username': (String | None) = None,
+        metadata': (collections.Map[String, String] val | None) = None
+    ) =>
+        platform_name = platform_name'
+        platform_username = platform_username'
+        metadata = metadata'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match platform_name
+        | let platform_name': String => obj = obj.update("platform_name", platform_name')
+        end
+
+        match platform_username
+        | let platform_username': String => obj = obj.update("platform_username", platform_username')
+        end
+
+        match metadata
+        | let metadata': collections.Map[String, String] val => obj = obj.update("metadata", _Metadata.to_json(metadata'))
+        end
+
+        obj

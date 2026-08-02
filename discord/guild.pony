@@ -2171,3 +2171,1556 @@ class val IncidentsData
         end
 
         obj
+
+class val GetGuildParams
+    """
+    https://docs.discord.com/developers/resources/guild#get-guild-query-string-params
+    """
+
+    let with_counts: (Bool | None)
+        """
+        when true, will return approximate member and presence counts for the guild
+        """
+
+    new val create(with_counts': (Bool | None) = None) =>
+        with_counts = with_counts'
+
+    fun to_query(): RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match with_counts
+        | let with_counts': Bool => query.push(("with_counts", with_counts'.string()))
+        end
+
+        consume query
+
+class val UpdateGuildParams
+    """
+    https://docs.discord.com/developers/resources/guild#modify-guild-json-params
+
+    All parameters to this endpoint are optional.
+
+    Attempting to add or remove the `COMMUNITY` guild feature requires the `ADMINISTRATOR` permission.
+    """
+
+    let name: (String | None)
+        """
+        guild name
+        """
+
+    let verification_level: Nullable[VerificationLevel]
+        """
+        verification level
+        """
+
+    let default_message_notifications: Nullable[DefaultMessageNotificationLevel]
+        """
+        default message notification level
+        """
+
+    let explicit_content_filter: Nullable[ExplicitContentFilterLevel]
+        """
+        explicit content filter level
+        """
+
+    let afk_channel_id: Nullable[Snowflake]
+        """
+        id for afk channel
+        """
+
+    let afk_timeout: (USize | None)
+        """
+        afk timeout in seconds, can be set to: 60, 300, 900, 1800, 3600
+        """
+
+    let icon: Nullable[ImageData]
+        """
+        base64 1024x1024 png/jpeg/gif image for the guild icon (can be animated gif when the server has the `ANIMATED_ICON` feature)
+        """
+
+    let owner_id: (Snowflake | None)
+        """
+        user id to transfer guild ownership to (must be owner)
+        """
+
+    let splash: Nullable[ImageData]
+        """
+        base64 16:9 png/jpeg image for the guild splash (when the server has the `INVITE_SPLASH` feature)
+        """
+
+    let discovery_splash: Nullable[ImageData]
+        """
+        base64 16:9 png/jpeg image for the guild discovery splash (when the server has the `DISCOVERABLE` feature)
+        """
+
+    let banner: Nullable[ImageData]
+        """
+        base64 16:9 png/jpeg image for the guild banner (when the server has the `BANNER` feature; can be animated gif when the server has the `ANIMATED_BANNER` feature)
+        """
+
+    let system_channel_id: Nullable[Snowflake]
+        """
+        the id of the channel where guild notices such as welcome messages and boost events are posted
+        """
+
+    let system_channel_flags: (Array[SystemChannelFlag] val | None)
+        """
+        system channel flags
+        """
+
+    let rules_channel_id: Nullable[Snowflake]
+        """
+        the id of the channel where Community guilds display rules and/or guidelines
+        """
+
+    let public_updates_channel_id: Nullable[Snowflake]
+        """
+        the id of the channel where admins and moderators of Community guilds receive notices from Discord
+        """
+
+    let preferred_locale: Nullable[Locale]
+        """
+        the preferred locale of a Community guild used in server discovery and notices from Discord; defaults to "en-US"
+        """
+
+    let features: (Array[String] val | None)
+        """
+        enabled guild features
+        """
+
+    let description: Nullable[String]
+        """
+        the description for the guild
+        """
+
+    let premium_progress_bar_enabled: (Bool | None)
+        """
+        whether the guild's boost progress bar should be enabled
+        """
+
+    let safety_alerts_channel_id: Nullable[Snowflake]
+        """
+        the id of the channel where admins and moderators of Community guilds receive safety alerts from Discord
+        """
+
+    new val create(
+        name': (String | None) = None,
+        verification_level': Nullable[VerificationLevel] = None,
+        default_message_notifications': Nullable[DefaultMessageNotificationLevel] = None,
+        explicit_content_filter': Nullable[ExplicitContentFilterLevel] = None,
+        afk_channel_id': Nullable[Snowflake] = None,
+        afk_timeout': (USize | None) = None,
+        icon': Nullable[ImageData] = None,
+        owner_id': (Snowflake | None) = None,
+        splash': Nullable[ImageData] = None,
+        discovery_splash': Nullable[ImageData] = None,
+        banner': Nullable[ImageData] = None,
+        system_channel_id': Nullable[Snowflake] = None,
+        system_channel_flags': (Array[SystemChannelFlag] val | None) = None,
+        rules_channel_id': Nullable[Snowflake] = None,
+        public_updates_channel_id': Nullable[Snowflake] = None,
+        preferred_locale': Nullable[Locale] = None,
+        features': (Array[String] val | None) = None,
+        description': Nullable[String] = None,
+        premium_progress_bar_enabled': (Bool | None) = None,
+        safety_alerts_channel_id': Nullable[Snowflake] = None
+    ) =>
+        name = name'
+        verification_level = verification_level'
+        default_message_notifications = default_message_notifications'
+        explicit_content_filter = explicit_content_filter'
+        afk_channel_id = afk_channel_id'
+        afk_timeout = afk_timeout'
+        icon = icon'
+        owner_id = owner_id'
+        splash = splash'
+        discovery_splash = discovery_splash'
+        banner = banner'
+        system_channel_id = system_channel_id'
+        system_channel_flags = system_channel_flags'
+        rules_channel_id = rules_channel_id'
+        public_updates_channel_id = public_updates_channel_id'
+        preferred_locale = preferred_locale'
+        features = features'
+        description = description'
+        premium_progress_bar_enabled = premium_progress_bar_enabled'
+        safety_alerts_channel_id = safety_alerts_channel_id'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match name
+        | let name': String => obj = obj.update("name", name')
+        end
+
+        match verification_level
+        | let verification_level': VerificationLevel => obj = obj.update("verification_level", verification_level'.value().i64())
+        | Null => obj = obj.update("verification_level", None)
+        end
+
+        match default_message_notifications
+        | let default_message_notifications': DefaultMessageNotificationLevel => obj = obj.update("default_message_notifications", default_message_notifications'.value().i64())
+        | Null => obj = obj.update("default_message_notifications", None)
+        end
+
+        match explicit_content_filter
+        | let explicit_content_filter': ExplicitContentFilterLevel => obj = obj.update("explicit_content_filter", explicit_content_filter'.value().i64())
+        | Null => obj = obj.update("explicit_content_filter", None)
+        end
+
+        match afk_channel_id
+        | let afk_channel_id': Snowflake => obj = obj.update("afk_channel_id", afk_channel_id'.to_json())
+        | Null => obj = obj.update("afk_channel_id", None)
+        end
+
+        match afk_timeout
+        | let afk_timeout': USize => obj = obj.update("afk_timeout", afk_timeout'.i64())
+        end
+
+        match icon
+        | let icon': ImageData => obj = obj.update("icon", icon')
+        | Null => obj = obj.update("icon", None)
+        end
+
+        match owner_id
+        | let owner_id': Snowflake => obj = obj.update("owner_id", owner_id'.to_json())
+        end
+
+        match splash
+        | let splash': ImageData => obj = obj.update("splash", splash')
+        | Null => obj = obj.update("splash", None)
+        end
+
+        match discovery_splash
+        | let discovery_splash': ImageData => obj = obj.update("discovery_splash", discovery_splash')
+        | Null => obj = obj.update("discovery_splash", None)
+        end
+
+        match banner
+        | let banner': ImageData => obj = obj.update("banner", banner')
+        | Null => obj = obj.update("banner", None)
+        end
+
+        match system_channel_id
+        | let system_channel_id': Snowflake => obj = obj.update("system_channel_id", system_channel_id'.to_json())
+        | Null => obj = obj.update("system_channel_id", None)
+        end
+
+        match system_channel_flags
+        | let system_channel_flags': Array[SystemChannelFlag] val => obj = obj.update("system_channel_flags", _SystemChannelFlags.to_json(system_channel_flags'))
+        end
+
+        match rules_channel_id
+        | let rules_channel_id': Snowflake => obj = obj.update("rules_channel_id", rules_channel_id'.to_json())
+        | Null => obj = obj.update("rules_channel_id", None)
+        end
+
+        match public_updates_channel_id
+        | let public_updates_channel_id': Snowflake => obj = obj.update("public_updates_channel_id", public_updates_channel_id'.to_json())
+        | Null => obj = obj.update("public_updates_channel_id", None)
+        end
+
+        match preferred_locale
+        | let preferred_locale': Locale => obj = obj.update("preferred_locale", preferred_locale'.value())
+        | Null => obj = obj.update("preferred_locale", None)
+        end
+
+        match features
+        | let features': Array[String] val => obj = obj.update("features", _Strings.to_json(features'))
+        end
+
+        match description
+        | let description': String => obj = obj.update("description", description')
+        | Null => obj = obj.update("description", None)
+        end
+
+        match premium_progress_bar_enabled
+        | let premium_progress_bar_enabled': Bool => obj = obj.update("premium_progress_bar_enabled", premium_progress_bar_enabled')
+        end
+
+        match safety_alerts_channel_id
+        | let safety_alerts_channel_id': Snowflake => obj = obj.update("safety_alerts_channel_id", safety_alerts_channel_id'.to_json())
+        | Null => obj = obj.update("safety_alerts_channel_id", None)
+        end
+
+        obj
+
+class val CreateGuildChannelParams
+    """
+    https://docs.discord.com/developers/resources/guild#create-guild-channel-json-params
+
+    All parameters to this endpoint are optional excluding `name`.
+    """
+
+    let name: String
+        """
+        channel name (1-100 characters)
+        """
+
+    let type': (ChannelType | None)
+        """
+        the type of channel
+        """
+
+    let topic: (String | None)
+        """
+        channel topic (0-1024 characters)
+        """
+
+    let bitrate: (USize | None)
+        """
+        the bitrate (in bits) of the voice or stage channel; min 8000
+        """
+
+    let user_limit: (USize | None)
+        """
+        the user limit of the voice channel
+        """
+
+    let rate_limit_per_user: (USize | None)
+        """
+        amount of seconds a user has to wait before sending another message (0-21600)
+        """
+
+    let position: (USize | None)
+        """
+        sorting position of the channel (channels with the same position are sorted by id)
+        """
+
+    let permission_overwrites: (Array[PermissionOverwrite] val | None)
+        """
+        the channel's permission overwrites
+        """
+
+    let parent_id: (Snowflake | None)
+        """
+        id of the parent category for a channel
+        """
+
+    let nsfw: (Bool | None)
+        """
+        whether the channel is nsfw
+        """
+
+    let rtc_region: (String | None)
+        """
+        channel voice region id of the voice or stage channel, automatic when set to null
+        """
+
+    let video_quality_mode: (VideoQualityMode | None)
+        """
+        the camera video quality mode of the voice channel
+        """
+
+    let default_auto_archive_duration: (USize | None)
+        """
+        the default duration that the clients use (not the API) for newly created threads in the channel, in minutes, to automatically archive the thread after recent activity
+        """
+
+    let default_reaction_emoji: (DefaultReaction | None)
+        """
+        emoji to show in the add reaction button on a thread in a GUILD_FORUM or a GUILD_MEDIA channel
+        """
+
+    let available_tags: (Array[ForumTagParams] val | None)
+        """
+        set of tags that can be used in a GUILD_FORUM or a GUILD_MEDIA channel
+        """
+
+    let default_sort_order: (SortOrderType | None)
+        """
+        the default sort order type used to order posts in GUILD_FORUM and GUILD_MEDIA channels
+        """
+
+    let default_forum_layout: (ForumLayoutType | None)
+        """
+        the default forum layout view used to display posts in GUILD_FORUM channels
+        """
+
+    let default_thread_rate_limit_per_user: (USize | None)
+        """
+        the initial rate_limit_per_user to set on newly created threads in a channel. this field is copied to the thread at creation time and does not live update
+        """
+
+    new val create(
+        name': String,
+        type'': (ChannelType | None) = None,
+        topic': (String | None) = None,
+        bitrate': (USize | None) = None,
+        user_limit': (USize | None) = None,
+        rate_limit_per_user': (USize | None) = None,
+        position': (USize | None) = None,
+        permission_overwrites': (Array[PermissionOverwrite] val | None) = None,
+        parent_id': (Snowflake | None) = None,
+        nsfw': (Bool | None) = None,
+        rtc_region': (String | None) = None,
+        video_quality_mode': (VideoQualityMode | None) = None,
+        default_auto_archive_duration': (USize | None) = None,
+        default_reaction_emoji': (DefaultReaction | None) = None,
+        available_tags': (Array[ForumTagParams] val | None) = None,
+        default_sort_order': (SortOrderType | None) = None,
+        default_forum_layout': (ForumLayoutType | None) = None,
+        default_thread_rate_limit_per_user': (USize | None) = None
+    ) =>
+        name = name'
+        type' = type''
+        topic = topic'
+        bitrate = bitrate'
+        user_limit = user_limit'
+        rate_limit_per_user = rate_limit_per_user'
+        position = position'
+        permission_overwrites = permission_overwrites'
+        parent_id = parent_id'
+        nsfw = nsfw'
+        rtc_region = rtc_region'
+        video_quality_mode = video_quality_mode'
+        default_auto_archive_duration = default_auto_archive_duration'
+        default_reaction_emoji = default_reaction_emoji'
+        available_tags = available_tags'
+        default_sort_order = default_sort_order'
+        default_forum_layout = default_forum_layout'
+        default_thread_rate_limit_per_user = default_thread_rate_limit_per_user'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject.update("name", name)
+
+        match type'
+        | let type'': ChannelType => obj = obj.update("type", type''.value().i64())
+        end
+
+        match topic
+        | let topic': String => obj = obj.update("topic", topic')
+        end
+
+        match bitrate
+        | let bitrate': USize => obj = obj.update("bitrate", bitrate'.i64())
+        end
+
+        match user_limit
+        | let user_limit': USize => obj = obj.update("user_limit", user_limit'.i64())
+        end
+
+        match rate_limit_per_user
+        | let rate_limit_per_user': USize => obj = obj.update("rate_limit_per_user", rate_limit_per_user'.i64())
+        end
+
+        match position
+        | let position': USize => obj = obj.update("position", position'.i64())
+        end
+
+        match permission_overwrites
+        | let permission_overwrites': Array[PermissionOverwrite] val => obj = obj.update("permission_overwrites", _PermissionOverwrites.to_json(permission_overwrites'))
+        end
+
+        match parent_id
+        | let parent_id': Snowflake => obj = obj.update("parent_id", parent_id'.to_json())
+        end
+
+        match nsfw
+        | let nsfw': Bool => obj = obj.update("nsfw", nsfw')
+        end
+
+        match rtc_region
+        | let rtc_region': String => obj = obj.update("rtc_region", rtc_region')
+        end
+
+        match video_quality_mode
+        | let video_quality_mode': VideoQualityMode => obj = obj.update("video_quality_mode", video_quality_mode'.value().i64())
+        end
+
+        match default_auto_archive_duration
+        | let default_auto_archive_duration': USize => obj = obj.update("default_auto_archive_duration", default_auto_archive_duration'.i64())
+        end
+
+        match default_reaction_emoji
+        | let default_reaction_emoji': DefaultReaction => obj = obj.update("default_reaction_emoji", default_reaction_emoji'.to_json())
+        end
+
+        match available_tags
+        | let available_tags': Array[ForumTagParams] val => obj = obj.update("available_tags", _ForumTagParams.to_json(available_tags'))
+        end
+
+        match default_sort_order
+        | let default_sort_order': SortOrderType => obj = obj.update("default_sort_order", default_sort_order'.value().i64())
+        end
+
+        match default_forum_layout
+        | let default_forum_layout': ForumLayoutType => obj = obj.update("default_forum_layout", default_forum_layout'.value().i64())
+        end
+
+        match default_thread_rate_limit_per_user
+        | let default_thread_rate_limit_per_user': USize => obj = obj.update("default_thread_rate_limit_per_user", default_thread_rate_limit_per_user'.i64())
+        end
+
+        obj
+
+class val GuildChannelPosition
+    """
+    https://docs.discord.com/developers/resources/guild#modify-guild-channel-positions-json-params
+
+    A single entry of the array body sent to Modify Guild Channel Positions.
+    """
+
+    let id: Snowflake
+        """
+        channel id
+        """
+
+    let position: Nullable[USize]
+        """
+        sorting position of the channel (channels with the same position are sorted by id)
+        """
+
+    let lock_permissions: Nullable[Bool]
+        """
+        syncs the permission overwrites with the new parent, if moving to a new category
+        """
+
+    let parent_id: Nullable[Snowflake]
+        """
+        the new parent ID for the channel that is moved
+        """
+
+    new val create(
+        id': Snowflake,
+        position': Nullable[USize] = None,
+        lock_permissions': Nullable[Bool] = None,
+        parent_id': Nullable[Snowflake] = None
+    ) =>
+        id = id'
+        position = position'
+        lock_permissions = lock_permissions'
+        parent_id = parent_id'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject.update("id", id.to_json())
+
+        match position
+        | let position': USize => obj = obj.update("position", position'.i64())
+        | Null => obj = obj.update("position", None)
+        end
+
+        match lock_permissions
+        | let lock_permissions': Bool => obj = obj.update("lock_permissions", lock_permissions')
+        | Null => obj = obj.update("lock_permissions", None)
+        end
+
+        match parent_id
+        | let parent_id': Snowflake => obj = obj.update("parent_id", parent_id'.to_json())
+        | Null => obj = obj.update("parent_id", None)
+        end
+
+        obj
+
+class val UpdateGuildChannelPositionsParams
+    """
+    https://docs.discord.com/developers/resources/guild#modify-guild-channel-positions
+
+    This endpoint takes a JSON array of parameters.
+    """
+
+    let positions: Array[GuildChannelPosition] val
+        """
+        the channels to reposition
+        """
+
+    new val create(positions': Array[GuildChannelPosition] val) =>
+        positions = positions'
+
+    fun to_json(): json.JsonArray =>
+        var array = json.JsonArray
+        for position in positions.values() do array = array.push(position.to_json()) end
+        array
+
+class val GetGuildMembersParams
+    """
+    https://docs.discord.com/developers/resources/guild#list-guild-members-query-string-params
+
+    This endpoint is restricted according to whether the `GUILD_MEMBERS` Privileged Intent is enabled for your application.
+    """
+
+    let limit: (USize | None)
+        """
+        max number of members to return (1-1000), defaults to 1
+        """
+
+    let after: (Snowflake | None)
+        """
+        the highest user id in the previous page, defaults to 0
+        """
+
+    new val create(limit': (USize | None) = None, after': (Snowflake | None) = None) =>
+        limit = limit'
+        after = after'
+
+    fun to_query(): RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match limit
+        | let limit': USize => query.push(("limit", limit'.string()))
+        end
+
+        match after
+        | let after': Snowflake => query.push(("after", after'.string()))
+        end
+
+        consume query
+
+class val SearchGuildMembersParams
+    """
+    https://docs.discord.com/developers/resources/guild#search-guild-members-query-string-params
+    """
+
+    let query: String
+        """
+        Query string to match username(s) and nickname(s) against.
+        """
+
+    let limit: (USize | None)
+        """
+        max number of members to return (1-1000), defaults to 1
+        """
+
+    new val create(query': String, limit': (USize | None) = None) =>
+        query = query'
+        limit = limit'
+
+    fun to_query(): RequestQuery =>
+        let params = recover iso Array[(String, String)] end
+
+        params.push(("query", query))
+
+        match limit
+        | let limit': USize => params.push(("limit", limit'.string()))
+        end
+
+        consume params
+
+class val AddGuildMemberParams
+    """
+    https://docs.discord.com/developers/resources/guild#add-guild-member-json-params
+
+    For guilds with Membership Screening enabled, this endpoint will default to adding new members as `pending` in the guild member object. Members that are `pending` will have to complete membership screening before they become full members that can talk.
+    """
+
+    let access_token: String
+        """
+        an oauth2 access token granted with the `guilds.join` to the bot's application for the user you want to add to the guild
+        """
+
+    let nick: (String | None)
+        """
+        value to set user's nickname to
+        """
+
+    let roles: (Array[Snowflake] val | None)
+        """
+        array of role ids the member is assigned
+        """
+
+    let mute: (Bool | None)
+        """
+        whether the user is muted in voice channels
+        """
+
+    let deaf: (Bool | None)
+        """
+        whether the user is deafened in voice channels
+        """
+
+    new val create(
+        access_token': String,
+        nick': (String | None) = None,
+        roles': (Array[Snowflake] val | None) = None,
+        mute': (Bool | None) = None,
+        deaf': (Bool | None) = None
+    ) =>
+        access_token = access_token'
+        nick = nick'
+        roles = roles'
+        mute = mute'
+        deaf = deaf'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject.update("access_token", access_token)
+
+        match nick
+        | let nick': String => obj = obj.update("nick", nick')
+        end
+
+        match roles
+        | let roles': Array[Snowflake] val => obj = obj.update("roles", _Snowflakes.to_json(roles'))
+        end
+
+        match mute
+        | let mute': Bool => obj = obj.update("mute", mute')
+        end
+
+        match deaf
+        | let deaf': Bool => obj = obj.update("deaf", deaf')
+        end
+
+        obj
+
+class val UpdateGuildMemberParams
+    """
+    https://docs.discord.com/developers/resources/guild#modify-guild-member-json-params
+
+    All parameters to this endpoint are optional and nullable. When moving members to channels, the API user must have permissions to both connect to the channel and have the `MOVE_MEMBERS` permission.
+    """
+
+    let nick: Nullable[String]
+        """
+        value to set user's nickname to
+
+        Requires the `MANAGE_NICKNAMES` permission.
+        """
+
+    let roles: Nullable[Array[Snowflake] val]
+        """
+        array of role ids the member is assigned
+
+        Requires the `MANAGE_ROLES` permission.
+        """
+
+    let mute: Nullable[Bool]
+        """
+        whether the user is muted in voice channels. Will throw a 400 error if the user is not in a voice channel
+
+        Requires the `MUTE_MEMBERS` permission.
+        """
+
+    let deaf: Nullable[Bool]
+        """
+        whether the user is deafened in voice channels. Will throw a 400 error if the user is not in a voice channel
+
+        Requires the `DEAFEN_MEMBERS` permission.
+        """
+
+    let channel_id: Nullable[Snowflake]
+        """
+        id of channel to move user to (if they are connected to voice)
+
+        Requires the `MOVE_MEMBERS` permission.
+        """
+
+    let communication_disabled_until: Nullable[ISO8601]
+        """
+        when the user's timeout will expire and the user will be able to communicate in the guild again (up to 28 days in the future), set to null to remove timeout
+
+        Requires the `MODERATE_MEMBERS` permission.
+        """
+
+    let flags: Nullable[Array[GuildMemberFlag] val]
+        """
+        guild member flags
+
+        Requires the `MODERATE_MEMBERS` or the `MANAGE_GUILD` permission.
+        """
+
+    new val create(
+        nick': Nullable[String] = None,
+        roles': Nullable[Array[Snowflake] val] = None,
+        mute': Nullable[Bool] = None,
+        deaf': Nullable[Bool] = None,
+        channel_id': Nullable[Snowflake] = None,
+        communication_disabled_until': Nullable[ISO8601] = None,
+        flags': Nullable[Array[GuildMemberFlag] val] = None
+    ) =>
+        nick = nick'
+        roles = roles'
+        mute = mute'
+        deaf = deaf'
+        channel_id = channel_id'
+        communication_disabled_until = communication_disabled_until'
+        flags = flags'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match nick
+        | let nick': String => obj = obj.update("nick", nick')
+        | Null => obj = obj.update("nick", None)
+        end
+
+        match roles
+        | let roles': Array[Snowflake] val => obj = obj.update("roles", _Snowflakes.to_json(roles'))
+        | Null => obj = obj.update("roles", None)
+        end
+
+        match mute
+        | let mute': Bool => obj = obj.update("mute", mute')
+        | Null => obj = obj.update("mute", None)
+        end
+
+        match deaf
+        | let deaf': Bool => obj = obj.update("deaf", deaf')
+        | Null => obj = obj.update("deaf", None)
+        end
+
+        match channel_id
+        | let channel_id': Snowflake => obj = obj.update("channel_id", channel_id'.to_json())
+        | Null => obj = obj.update("channel_id", None)
+        end
+
+        match communication_disabled_until
+        | let communication_disabled_until': ISO8601 => obj = obj.update("communication_disabled_until", communication_disabled_until')
+        | Null => obj = obj.update("communication_disabled_until", None)
+        end
+
+        match flags
+        | let flags': Array[GuildMemberFlag] val => obj = obj.update("flags", _GuildMemberFlags.to_json(flags'))
+        | Null => obj = obj.update("flags", None)
+        end
+
+        obj
+
+class val UpdateCurrentMemberParams
+    """
+    https://docs.discord.com/developers/resources/guild#modify-current-member-json-params
+    """
+
+    let nick: Nullable[String]
+        """
+        value to set user's nickname to
+
+        Requires the `CHANGE_NICKNAME` permission.
+        """
+
+    new val create(nick': Nullable[String] = None) =>
+        nick = nick'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match nick
+        | let nick': String => obj = obj.update("nick", nick')
+        | Null => obj = obj.update("nick", None)
+        end
+
+        obj
+
+class val UpdateCurrentUserNickParams
+    """
+    https://docs.discord.com/developers/resources/guild#modify-current-user-nick-json-params
+
+    Deprecated in favour of Modify Current Member.
+    """
+
+    let nick: Nullable[String]
+        """
+        value to set user's nickname to
+
+        Requires the `CHANGE_NICKNAME` permission.
+        """
+
+    new val create(nick': Nullable[String] = None) =>
+        nick = nick'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match nick
+        | let nick': String => obj = obj.update("nick", nick')
+        | Null => obj = obj.update("nick", None)
+        end
+
+        obj
+
+class val GetGuildBansParams
+    """
+    https://docs.discord.com/developers/resources/guild#get-guild-bans-query-string-params
+
+    Provide a `before` and/or `after` to paginate. Users will always be returned in ascending order by `user.id`. If both `before` and `after` are provided, only `before` is respected.
+    """
+
+    let limit: (USize | None)
+        """
+        number of users to return (up to maximum 1000), defaults to 1000
+        """
+
+    let before: (Snowflake | None)
+        """
+        consider only users before given user id
+        """
+
+    let after: (Snowflake | None)
+        """
+        consider only users after given user id
+        """
+
+    new val create(
+        limit': (USize | None) = None,
+        before': (Snowflake | None) = None,
+        after': (Snowflake | None) = None
+    ) =>
+        limit = limit'
+        before = before'
+        after = after'
+
+    fun to_query(): RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match limit
+        | let limit': USize => query.push(("limit", limit'.string()))
+        end
+
+        match before
+        | let before': Snowflake => query.push(("before", before'.string()))
+        end
+
+        match after
+        | let after': Snowflake => query.push(("after", after'.string()))
+        end
+
+        consume query
+
+class val CreateGuildBanParams
+    """
+    https://docs.discord.com/developers/resources/guild#create-guild-ban-json-params
+    """
+
+    let delete_message_seconds: (USize | None)
+        """
+        number of seconds to delete messages for, between 0 and 604800 (7 days), defaults to 0
+        """
+
+    new val create(delete_message_seconds': (USize | None) = None) =>
+        delete_message_seconds = delete_message_seconds'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match delete_message_seconds
+        | let delete_message_seconds': USize => obj = obj.update("delete_message_seconds", delete_message_seconds'.i64())
+        end
+
+        obj
+
+class val BulkGuildBanParams
+    """
+    https://docs.discord.com/developers/resources/guild#bulk-guild-ban-json-params
+
+    If a user is already banned, or the bot lacks the permission to ban them, they will be listed in `failed_users`.
+    """
+
+    let user_ids: Array[Snowflake] val
+        """
+        list of user ids to ban (max 200)
+        """
+
+    let delete_message_seconds: (USize | None)
+        """
+        number of seconds to delete messages for, between 0 and 604800 (7 days), defaults to 0
+        """
+
+    new val create(user_ids': Array[Snowflake] val, delete_message_seconds': (USize | None) = None) =>
+        user_ids = user_ids'
+        delete_message_seconds = delete_message_seconds'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject.update("user_ids", _Snowflakes.to_json(user_ids))
+
+        match delete_message_seconds
+        | let delete_message_seconds': USize => obj = obj.update("delete_message_seconds", delete_message_seconds'.i64())
+        end
+
+        obj
+
+class val CreateGuildRoleParams
+    """
+    https://docs.discord.com/developers/resources/guild#create-guild-role-json-params
+
+    All JSON params are optional.
+    """
+
+    let name: (String | None)
+        """
+        name of the role, max 100 characters. Default: "new role"
+        """
+
+    let permissions: (Array[Permission] val | None)
+        """
+        bitwise value of the enabled/disabled permissions. Default: @everyone permissions in guild
+        """
+
+    let color: (I64 | None)
+        """
+        RGB color value. Default: 0
+
+        Deprecated in favour of `colors`.
+        """
+
+    let colors: (RoleColors | None)
+        """
+        the role's colors. Default: `primary_color` of 0
+        """
+
+    let hoist: (Bool | None)
+        """
+        whether the role should be displayed separately in the sidebar. Default: false
+        """
+
+    let icon: Nullable[ImageData]
+        """
+        the role's icon image (if the guild has the `ROLE_ICONS` feature). Default: null
+        """
+
+    let unicode_emoji: Nullable[String]
+        """
+        the role's unicode emoji as a standard emoji (if the guild has the `ROLE_ICONS` feature). Default: null
+        """
+
+    let mentionable: (Bool | None)
+        """
+        whether the role should be mentionable. Default: false
+        """
+
+    new val create(
+        name': (String | None) = None,
+        permissions': (Array[Permission] val | None) = None,
+        color': (I64 | None) = None,
+        colors': (RoleColors | None) = None,
+        hoist': (Bool | None) = None,
+        icon': Nullable[ImageData] = None,
+        unicode_emoji': Nullable[String] = None,
+        mentionable': (Bool | None) = None
+    ) =>
+        name = name'
+        permissions = permissions'
+        color = color'
+        colors = colors'
+        hoist = hoist'
+        icon = icon'
+        unicode_emoji = unicode_emoji'
+        mentionable = mentionable'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match name
+        | let name': String => obj = obj.update("name", name')
+        end
+
+        match permissions
+        | let permissions': Array[Permission] val => obj = obj.update("permissions", _Permissions.to_json(permissions'))
+        end
+
+        match color
+        | let color': I64 => obj = obj.update("color", color')
+        end
+
+        match colors
+        | let colors': RoleColors => obj = obj.update("colors", colors'.to_json())
+        end
+
+        match hoist
+        | let hoist': Bool => obj = obj.update("hoist", hoist')
+        end
+
+        match icon
+        | let icon': ImageData => obj = obj.update("icon", icon')
+        | Null => obj = obj.update("icon", None)
+        end
+
+        match unicode_emoji
+        | let unicode_emoji': String => obj = obj.update("unicode_emoji", unicode_emoji')
+        | Null => obj = obj.update("unicode_emoji", None)
+        end
+
+        match mentionable
+        | let mentionable': Bool => obj = obj.update("mentionable", mentionable')
+        end
+
+        obj
+
+class val GuildRolePosition
+    """
+    https://docs.discord.com/developers/resources/guild#modify-guild-role-positions-json-params
+
+    A single entry of the array body sent to Modify Guild Role Positions.
+    """
+
+    let id: Snowflake
+        """
+        role
+        """
+
+    let position: Nullable[USize]
+        """
+        sorting position of the role (roles with the same position are sorted by id)
+        """
+
+    new val create(id': Snowflake, position': Nullable[USize] = None) =>
+        id = id'
+        position = position'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject.update("id", id.to_json())
+
+        match position
+        | let position': USize => obj = obj.update("position", position'.i64())
+        | Null => obj = obj.update("position", None)
+        end
+
+        obj
+
+class val UpdateGuildRolePositionsParams
+    """
+    https://docs.discord.com/developers/resources/guild#modify-guild-role-positions
+
+    This endpoint takes a JSON array of parameters.
+    """
+
+    let positions: Array[GuildRolePosition] val
+        """
+        the roles to reposition
+        """
+
+    new val create(positions': Array[GuildRolePosition] val) =>
+        positions = positions'
+
+    fun to_json(): json.JsonArray =>
+        var array = json.JsonArray
+        for position in positions.values() do array = array.push(position.to_json()) end
+        array
+
+class val UpdateGuildRoleParams
+    """
+    https://docs.discord.com/developers/resources/guild#modify-guild-role-json-params
+
+    All parameters to this endpoint are optional and nullable.
+    """
+
+    let name: Nullable[String]
+        """
+        name of the role, max 100 characters
+        """
+
+    let permissions: Nullable[Array[Permission] val]
+        """
+        bitwise value of the enabled/disabled permissions
+        """
+
+    let color: Nullable[I64]
+        """
+        RGB color value
+
+        Deprecated in favour of `colors`.
+        """
+
+    let colors: Nullable[RoleColors]
+        """
+        the role's colors
+        """
+
+    let hoist: Nullable[Bool]
+        """
+        whether the role should be displayed separately in the sidebar
+        """
+
+    let icon: Nullable[ImageData]
+        """
+        the role's icon image (if the guild has the `ROLE_ICONS` feature)
+        """
+
+    let unicode_emoji: Nullable[String]
+        """
+        the role's unicode emoji as a standard emoji (if the guild has the `ROLE_ICONS` feature)
+        """
+
+    let mentionable: Nullable[Bool]
+        """
+        whether the role should be mentionable
+        """
+
+    new val create(
+        name': Nullable[String] = None,
+        permissions': Nullable[Array[Permission] val] = None,
+        color': Nullable[I64] = None,
+        colors': Nullable[RoleColors] = None,
+        hoist': Nullable[Bool] = None,
+        icon': Nullable[ImageData] = None,
+        unicode_emoji': Nullable[String] = None,
+        mentionable': Nullable[Bool] = None
+    ) =>
+        name = name'
+        permissions = permissions'
+        color = color'
+        colors = colors'
+        hoist = hoist'
+        icon = icon'
+        unicode_emoji = unicode_emoji'
+        mentionable = mentionable'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match name
+        | let name': String => obj = obj.update("name", name')
+        | Null => obj = obj.update("name", None)
+        end
+
+        match permissions
+        | let permissions': Array[Permission] val => obj = obj.update("permissions", _Permissions.to_json(permissions'))
+        | Null => obj = obj.update("permissions", None)
+        end
+
+        match color
+        | let color': I64 => obj = obj.update("color", color')
+        | Null => obj = obj.update("color", None)
+        end
+
+        match colors
+        | let colors': RoleColors => obj = obj.update("colors", colors'.to_json())
+        | Null => obj = obj.update("colors", None)
+        end
+
+        match hoist
+        | let hoist': Bool => obj = obj.update("hoist", hoist')
+        | Null => obj = obj.update("hoist", None)
+        end
+
+        match icon
+        | let icon': ImageData => obj = obj.update("icon", icon')
+        | Null => obj = obj.update("icon", None)
+        end
+
+        match unicode_emoji
+        | let unicode_emoji': String => obj = obj.update("unicode_emoji", unicode_emoji')
+        | Null => obj = obj.update("unicode_emoji", None)
+        end
+
+        match mentionable
+        | let mentionable': Bool => obj = obj.update("mentionable", mentionable')
+        | Null => obj = obj.update("mentionable", None)
+        end
+
+        obj
+
+class val GetGuildPruneCountParams
+    """
+    https://docs.discord.com/developers/resources/guild#get-guild-prune-count-query-string-params
+
+    By default, prune will not remove users with roles. You can optionally include specific roles in your prune by providing the `include_roles` parameter. Any inactive user that has a subset of the provided role(s) will be counted in the prune and users with additional roles will not.
+    """
+
+    let days: (USize | None)
+        """
+        number of days to count prune for (1-30), defaults to 7
+        """
+
+    let include_roles: (Array[Snowflake] val | None)
+        """
+        role(s) to include, comma-delimited array of snowflakes
+        """
+
+    new val create(days': (USize | None) = None, include_roles': (Array[Snowflake] val | None) = None) =>
+        days = days'
+        include_roles = include_roles'
+
+    fun to_query(): RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match days
+        | let days': USize => query.push(("days", days'.string()))
+        end
+
+        match include_roles
+        | let include_roles': Array[Snowflake] val => query.push(("include_roles", _CommaSeparated(include_roles')))
+        end
+
+        consume query
+
+class val BeginGuildPruneParams
+    """
+    https://docs.discord.com/developers/resources/guild#begin-guild-prune-json-params
+
+    For large guilds it's recommended to set the `compute_prune_count` option to false, forcing `pruned` to null.
+    """
+
+    let days: (USize | None)
+        """
+        number of days to prune (1-30), defaults to 7
+        """
+
+    let compute_prune_count: (Bool | None)
+        """
+        whether `pruned` is returned, discouraged for large guilds, defaults to true
+        """
+
+    let include_roles: (Array[Snowflake] val | None)
+        """
+        role(s) to include, defaults to none
+        """
+
+    new val create(
+        days': (USize | None) = None,
+        compute_prune_count': (Bool | None) = None,
+        include_roles': (Array[Snowflake] val | None) = None
+    ) =>
+        days = days'
+        compute_prune_count = compute_prune_count'
+        include_roles = include_roles'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match days
+        | let days': USize => obj = obj.update("days", days'.i64())
+        end
+
+        match compute_prune_count
+        | let compute_prune_count': Bool => obj = obj.update("compute_prune_count", compute_prune_count')
+        end
+
+        match include_roles
+        | let include_roles': Array[Snowflake] val => obj = obj.update("include_roles", _Snowflakes.to_json(include_roles'))
+        end
+
+        obj
+
+class val UpdateGuildWidgetParams
+    """
+    https://docs.discord.com/developers/resources/guild#modify-guild-widget
+
+    Accepts a partial guild widget settings object.
+    """
+
+    let enabled: (Bool | None)
+        """
+        whether the widget is enabled
+        """
+
+    let channel_id: Nullable[Snowflake]
+        """
+        the widget channel id
+        """
+
+    new val create(enabled': (Bool | None) = None, channel_id': Nullable[Snowflake] = None) =>
+        enabled = enabled'
+        channel_id = channel_id'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match enabled
+        | let enabled': Bool => obj = obj.update("enabled", enabled')
+        end
+
+        match channel_id
+        | let channel_id': Snowflake => obj = obj.update("channel_id", channel_id'.to_json())
+        | Null => obj = obj.update("channel_id", None)
+        end
+
+        obj
+
+trait val GuildWidgetStyle is (collections.Hashable & Equatable[GuildWidgetStyle])
+    """
+    https://docs.discord.com/developers/resources/guild#get-guild-widget-image-widget-style-options
+    """
+
+    fun value(): String
+
+    fun hash(): USize => value().hash()
+
+    fun eq(that: GuildWidgetStyle): Bool => value() == that.value()
+primitive ShieldGuildWidgetStyle is GuildWidgetStyle
+    """
+    shield style widget with Discord icon and guild members online count
+    """
+
+    fun value(): String => "shield"
+primitive Banner1GuildWidgetStyle is GuildWidgetStyle
+    """
+    large image with guild icon, name and online count. "POWERED BY DISCORD" as the footer of the widget
+    """
+
+    fun value(): String => "banner1"
+primitive Banner2GuildWidgetStyle is GuildWidgetStyle
+    """
+    smaller widget style with guild icon, name and online count. Split on the right with Discord logo
+    """
+
+    fun value(): String => "banner2"
+primitive Banner3GuildWidgetStyle is GuildWidgetStyle
+    """
+    large image with guild icon, name and online count. In the footer, Discord logo on the left and "Chat Now" on the right
+    """
+
+    fun value(): String => "banner3"
+primitive Banner4GuildWidgetStyle is GuildWidgetStyle
+    """
+    large Discord logo at the top of the widget. Guild icon, name and online count in the middle portion of the widget and a "JOIN MY SERVER" button at the bottom
+    """
+
+    fun value(): String => "banner4"
+primitive GuildWidgetStyles
+    fun from(value: String): GuildWidgetStyle ? =>
+        match value
+        | "shield" => ShieldGuildWidgetStyle
+        | "banner1" => Banner1GuildWidgetStyle
+        | "banner2" => Banner2GuildWidgetStyle
+        | "banner3" => Banner3GuildWidgetStyle
+        | "banner4" => Banner4GuildWidgetStyle
+        else error
+        end
+
+class val GetGuildWidgetImageParams
+    """
+    https://docs.discord.com/developers/resources/guild#get-guild-widget-image-query-string-params
+
+    All parameters to this endpoint are optional.
+    """
+
+    let style: (GuildWidgetStyle | None)
+        """
+        style of the widget image returned (see below), defaults to `shield`
+        """
+
+    new val create(style': (GuildWidgetStyle | None) = None) =>
+        style = style'
+
+    fun to_query(): RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match style
+        | let style': GuildWidgetStyle => query.push(("style", style'.value()))
+        end
+
+        consume query
+
+class val UpdateGuildWelcomeScreenParams
+    """
+    https://docs.discord.com/developers/resources/guild#modify-guild-welcome-screen-json-params
+
+    All parameters to this endpoint are optional and nullable.
+    """
+
+    let enabled: Nullable[Bool]
+        """
+        whether the welcome screen is enabled
+        """
+
+    let welcome_channels: Nullable[Array[WelcomeScreenChannel] val]
+        """
+        channels linked in the welcome screen and their display options
+        """
+
+    let description: Nullable[String]
+        """
+        the server description to show in the welcome screen
+        """
+
+    new val create(
+        enabled': Nullable[Bool] = None,
+        welcome_channels': Nullable[Array[WelcomeScreenChannel] val] = None,
+        description': Nullable[String] = None
+    ) =>
+        enabled = enabled'
+        welcome_channels = welcome_channels'
+        description = description'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match enabled
+        | let enabled': Bool => obj = obj.update("enabled", enabled')
+        | Null => obj = obj.update("enabled", None)
+        end
+
+        match welcome_channels
+        | let welcome_channels': Array[WelcomeScreenChannel] val => obj = obj.update("welcome_channels", _WelcomeScreenChannels.to_json(welcome_channels'))
+        | Null => obj = obj.update("welcome_channels", None)
+        end
+
+        match description
+        | let description': String => obj = obj.update("description", description')
+        | Null => obj = obj.update("description", None)
+        end
+
+        obj
+
+class val UpdateGuildOnboardingParams
+    """
+    https://docs.discord.com/developers/resources/guild#modify-guild-onboarding-json-params
+
+    Onboarding enforces constraints when enabled. These constraints are that there must be at least 7 Default Channels and at least 5 of them must allow sending messages to the @everyone role. The `mode` field modifies what is considered when enforcing these constraints.
+    """
+
+    let prompts: Array[OnboardingPrompt] val
+        """
+        Prompts shown during onboarding and in customize community
+        """
+
+    let default_channel_ids: Array[Snowflake] val
+        """
+        Channel IDs that members get opted into automatically
+        """
+
+    let enabled: Bool
+        """
+        Whether onboarding is enabled in the guild
+        """
+
+    let mode: OnboardingMode
+        """
+        Current mode of onboarding
+        """
+
+    new val create(
+        prompts': Array[OnboardingPrompt] val,
+        default_channel_ids': Array[Snowflake] val,
+        enabled': Bool,
+        mode': OnboardingMode
+    ) =>
+        prompts = prompts'
+        default_channel_ids = default_channel_ids'
+        enabled = enabled'
+        mode = mode'
+
+    fun to_json(): json.JsonObject =>
+        json.JsonObject
+            .update("prompts", _OnboardingPrompts.to_json(prompts))
+            .update("default_channel_ids", _Snowflakes.to_json(default_channel_ids))
+            .update("enabled", enabled)
+            .update("mode", mode.value().i64())
+
+class val UpdateGuildIncidentActionsParams
+    """
+    https://docs.discord.com/developers/resources/guild#modify-guild-incident-actions-json-params
+
+    Both fields are nullable and may be set to a timestamp up to 24 hours in the future.
+    """
+
+    let invites_disabled_until: Nullable[ISO8601]
+        """
+        when invites should be enabled again
+        """
+
+    let dms_disabled_until: Nullable[ISO8601]
+        """
+        when direct messages should be enabled again
+        """
+
+    new val create(
+        invites_disabled_until': Nullable[ISO8601] = None,
+        dms_disabled_until': Nullable[ISO8601] = None
+    ) =>
+        invites_disabled_until = invites_disabled_until'
+        dms_disabled_until = dms_disabled_until'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match invites_disabled_until
+        | let invites_disabled_until': ISO8601 => obj = obj.update("invites_disabled_until", invites_disabled_until')
+        | Null => obj = obj.update("invites_disabled_until", None)
+        end
+
+        match dms_disabled_until
+        | let dms_disabled_until': ISO8601 => obj = obj.update("dms_disabled_until", dms_disabled_until')
+        | Null => obj = obj.update("dms_disabled_until", None)
+        end
+
+        obj

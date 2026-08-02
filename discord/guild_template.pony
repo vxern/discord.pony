@@ -125,3 +125,66 @@ class val GuildTemplate
         end
 
         obj
+
+class val CreateGuildTemplateParams
+    """
+    https://docs.discord.com/developers/resources/guild-template#create-guild-template-json-params
+    """
+
+    let name: String
+        """
+        name of the template (1-100 characters)
+        """
+
+    let description: (String | None)
+        """
+        description for the template (0-120 characters)
+        """
+
+    new val create(name': String, description': (String | None) = None) =>
+        name = name'
+        description = description'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject.update("name", name)
+
+        match description
+        | let description': String => obj = obj.update("description", description')
+        end
+
+        obj
+
+class val UpdateGuildTemplateParams
+    """
+    https://docs.discord.com/developers/resources/guild-template#modify-guild-template-json-params
+
+    All parameters to this endpoint are optional and nullable.
+    """
+
+    let name: (String | None)
+        """
+        name of the template (1-100 characters)
+        """
+
+    let description: Nullable[String]
+        """
+        description for the template (0-120 characters)
+        """
+
+    new val create(name': (String | None) = None, description': Nullable[String] = None) =>
+        name = name'
+        description = description'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match name
+        | let name': String => obj = obj.update("name", name')
+        end
+
+        match description
+        | let description': String => obj = obj.update("description", description')
+        | Null => obj = obj.update("description", None)
+        end
+
+        obj

@@ -314,3 +314,123 @@ primitive _PollAnswerCounts
         var array = json.JsonArray
         for count in counts.values() do array = array.push(count.to_json()) end
         array
+
+class val GetAnswerVotersParams
+    """
+    https://docs.discord.com/developers/resources/poll#get-answer-voters-query-string-params
+    """
+
+    let after: (Snowflake | None)
+        """
+        Get users after this user ID
+        """
+
+    let limit: (USize | None)
+        """
+        Max number of users to return (1-100), defaults to 25
+        """
+
+    new val create(after': (Snowflake | None) = None, limit': (USize | None) = None) =>
+        after = after'
+        limit = limit'
+
+    fun to_query(): RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match after
+        | let after': Snowflake => query.push(("after", after'.string()))
+        end
+
+        match limit
+        | let limit': USize => query.push(("limit", limit'.string()))
+        end
+
+        consume query
+
+class val PollAnswerParams
+    """
+    https://docs.discord.com/developers/resources/poll#poll-answer-object
+
+    An answer of a poll being created. Unlike a poll answer returned by the API, `answer_id` is assigned by Discord and so is not sent.
+    """
+
+    let poll_media: PollMedia
+        """
+        The data of the answer
+        """
+
+    new val create(poll_media': PollMedia) =>
+        poll_media = poll_media'
+
+    fun to_json(): json.JsonObject =>
+        json.JsonObject.update("poll_media", poll_media.to_json())
+
+primitive _PollAnswerParams
+    fun to_json(answers: Array[PollAnswerParams] val): json.JsonArray =>
+        var array = json.JsonArray
+        for answer in answers.values() do array = array.push(answer.to_json()) end
+        array
+
+class val PollParams
+    """
+    https://docs.discord.com/developers/resources/poll#poll-create-request-object-poll-create-request-object-structure
+
+    This is the request object used when creating a poll across the different endpoints. It is similar but not exactly identical to the main poll object. The main difference is that the request has `duration` which eventually becomes `expiry`.
+    """
+
+    let question: PollMedia
+        """
+        The question of the poll. Only `text` is supported.
+        """
+
+    let answers: Array[PollAnswerParams] val
+        """
+        Each of the answers available in the poll, up to 10
+        """
+
+    let duration: (USize | None)
+        """
+        Number of hours the poll should be open for, up to 32 days. Defaults to 24
+        """
+
+    let allow_multiselect: (Bool | None)
+        """
+        Whether a user can select multiple answers. Defaults to false
+        """
+
+    let layout_type: (PollLayoutType | None)
+        """
+        The layout type of the poll. Defaults to... DEFAULT!
+        """
+
+    new val create(
+        question': PollMedia,
+        answers': Array[PollAnswerParams] val,
+        duration': (USize | None) = None,
+        allow_multiselect': (Bool | None) = None,
+        layout_type': (PollLayoutType | None) = None
+    ) =>
+        question = question'
+        answers = answers'
+        duration = duration'
+        allow_multiselect = allow_multiselect'
+        layout_type = layout_type'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+            .update("question", question.to_json())
+            .update("answers", _PollAnswerParams.to_json(answers))
+
+        match duration
+        | let duration': USize => obj = obj.update("duration", duration'.i64())
+        end
+
+        match allow_multiselect
+        | let allow_multiselect': Bool => obj = obj.update("allow_multiselect", allow_multiselect')
+        end
+
+        match layout_type
+        | let layout_type': PollLayoutType => obj = obj.update("layout_type", layout_type'.value().i64())
+        end
+
+        obj

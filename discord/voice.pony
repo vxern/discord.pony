@@ -1,4 +1,5 @@
 use collections = "collections"
+use json = "json"
 
 trait val VoiceOpcode is (collections.Hashable & Equatable[VoiceOpcode])
     """
@@ -310,3 +311,98 @@ primitive VoiceCloseEventCodeDisconnectedCallTerminated is VoiceCloseEventCode
 
     fun value(): U16 => 4022
     fun reconnect(): Bool => false
+
+class val UpdateCurrentUserVoiceStateParams
+    """
+    https://docs.discord.com/developers/resources/voice#modify-current-user-voice-state-json-params
+
+    There are currently several caveats for this endpoint:
+
+    - `channel_id` must currently point to a stage channel.
+    - current user must already have joined `channel_id`.
+    - You must have the `MUTE_MEMBERS` permission to unsuppress yourself. You can always suppress yourself.
+    - You must have the `REQUEST_TO_SPEAK` permission to request to speak. You can always clear your own request to speak.
+    - You are able to set `request_to_speak_timestamp` to any present or future time.
+    """
+
+    let channel_id: (Snowflake | None)
+        """
+        the id of the channel the user is currently in
+        """
+
+    let suppress: (Bool | None)
+        """
+        toggles the user's suppress state
+        """
+
+    let request_to_speak_timestamp: Nullable[ISO8601]
+        """
+        sets the user's request to speak
+        """
+
+    new val create(
+        channel_id': (Snowflake | None) = None,
+        suppress': (Bool | None) = None,
+        request_to_speak_timestamp': Nullable[ISO8601] = None
+    ) =>
+        channel_id = channel_id'
+        suppress = suppress'
+        request_to_speak_timestamp = request_to_speak_timestamp'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match channel_id
+        | let channel_id': Snowflake => obj = obj.update("channel_id", channel_id'.to_json())
+        end
+
+        match suppress
+        | let suppress': Bool => obj = obj.update("suppress", suppress')
+        end
+
+        match request_to_speak_timestamp
+        | let request_to_speak_timestamp': ISO8601 => obj = obj.update("request_to_speak_timestamp", request_to_speak_timestamp')
+        | Null => obj = obj.update("request_to_speak_timestamp", None)
+        end
+
+        obj
+
+class val UpdateUserVoiceStateParams
+    """
+    https://docs.discord.com/developers/resources/voice#modify-user-voice-state-json-params
+
+    There are currently several caveats for this endpoint:
+
+    - `channel_id` must currently point to a stage channel.
+    - User must already have joined `channel_id`.
+    - You must have the `MUTE_MEMBERS` permission.
+    - When unsuppressed, non-bot users will have their `request_to_speak_timestamp` set to the current time. Bot users will not.
+    - When suppressed, the user will have their `request_to_speak_timestamp` removed.
+    """
+
+    let channel_id: (Snowflake | None)
+        """
+        the id of the channel the user is currently in
+        """
+
+    let suppress: (Bool | None)
+        """
+        toggles the user's suppress state
+        """
+
+    new val create(channel_id': (Snowflake | None) = None, suppress': (Bool | None) = None) =>
+        channel_id = channel_id'
+        suppress = suppress'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match channel_id
+        | let channel_id': Snowflake => obj = obj.update("channel_id", channel_id'.to_json())
+        end
+
+        match suppress
+        | let suppress': Bool => obj = obj.update("suppress", suppress')
+        end
+
+        obj

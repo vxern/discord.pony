@@ -122,6 +122,24 @@ primitive _Localizations
             map
         end
 
+    fun immutable(value: json.JsonValue): (collections.Map[Locale, String] val | None) ? =>
+        """
+        Decodes a localisation dictionary as an immutable map, for values that have to be sendable.
+        """
+
+        match value
+        | let obj: json.JsonObject =>
+            recover val
+                let map = collections.Map[Locale, String](obj.size())
+                for (key, value') in obj.pairs() do
+                    match (Locales.from(key)?, value')
+                    | (let locale: Locale, let string: String) => map(locale) = string
+                    end
+                end
+                map
+            end
+        end
+
     fun to_json(map: collections.Map[Locale, String] box): json.JsonObject =>
         var obj = json.JsonObject
         for (locale, string) in map.pairs() do obj = obj.update(locale.value(), string) end

@@ -813,3 +813,168 @@ primitive _Strings
         var array = json.JsonArray
         for string in strings.values() do array = array.push(string) end
         array
+
+class val UpdateApplicationParams
+    """
+    https://docs.discord.com/developers/resources/application#edit-current-application-json-params
+
+    All parameters to this endpoint are optional.
+    """
+
+    let custom_install_url: (String | None)
+        """
+        Default custom authorization URL for the app, if enabled
+        """
+
+    let description: (String | None)
+        """
+        Description of the app
+        """
+
+    let role_connections_verification_url: (String | None)
+        """
+        Role connection verification URL for the app
+        """
+
+    let install_params: (InstallParams | None)
+        """
+        Settings for the app’s default in-app authorization link, if enabled
+        """
+
+    let integration_types_config: (collections.Map[ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration] val | None)
+        """
+        Default scopes and permissions for each supported installation context. Value for each key is an integration type configuration object
+        """
+
+    let flags: (Array[ApplicationFlag] val | None)
+        """
+        App’s public flags
+
+        Only limited intent flags (`GATEWAY_PRESENCE_LIMITED`, `GATEWAY_GUILD_MEMBERS_LIMITED`, and `GATEWAY_MESSAGE_CONTENT_LIMITED`) can be updated via the API.
+        """
+
+    let icon: Nullable[ImageData]
+        """
+        Icon for the app
+        """
+
+    let cover_image: Nullable[ImageData]
+        """
+        Default rich presence invite cover image for the app
+        """
+
+    let interactions_endpoint_url: (String | None)
+        """
+        Interactions endpoint URL for the app
+
+        To update an interactions endpoint URL via the API, the URL must be valid according to the receiving an interaction documentation.
+        """
+
+    let tags: (Array[String] val | None)
+        """
+        List of tags describing the content and functionality of the app (max of 20 characters per tag). Max of 5 tags.
+        """
+
+    let event_webhooks_url: (String | None)
+        """
+        Event webhooks URL for the app to receive webhook events
+        """
+
+    let event_webhooks_status: (ApplicationEventWebhookStatus | None)
+        """
+        If webhook events are enabled for the app. `1` to disable, and `2` to enable.
+        """
+
+    let event_webhooks_types: (Array[String] val | None)
+        """
+        List of Webhook event types to subscribe to
+        """
+
+    new val create(
+        custom_install_url': (String | None) = None,
+        description': (String | None) = None,
+        role_connections_verification_url': (String | None) = None,
+        install_params': (InstallParams | None) = None,
+        integration_types_config': (collections.Map[ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration] val | None) = None,
+        flags': (Array[ApplicationFlag] val | None) = None,
+        icon': Nullable[ImageData] = None,
+        cover_image': Nullable[ImageData] = None,
+        interactions_endpoint_url': (String | None) = None,
+        tags': (Array[String] val | None) = None,
+        event_webhooks_url': (String | None) = None,
+        event_webhooks_status': (ApplicationEventWebhookStatus | None) = None,
+        event_webhooks_types': (Array[String] val | None) = None
+    ) =>
+        custom_install_url = custom_install_url'
+        description = description'
+        role_connections_verification_url = role_connections_verification_url'
+        install_params = install_params'
+        integration_types_config = integration_types_config'
+        flags = flags'
+        icon = icon'
+        cover_image = cover_image'
+        interactions_endpoint_url = interactions_endpoint_url'
+        tags = tags'
+        event_webhooks_url = event_webhooks_url'
+        event_webhooks_status = event_webhooks_status'
+        event_webhooks_types = event_webhooks_types'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match custom_install_url
+        | let custom_install_url': String => obj = obj.update("custom_install_url", custom_install_url')
+        end
+
+        match description
+        | let description': String => obj = obj.update("description", description')
+        end
+
+        match role_connections_verification_url
+        | let role_connections_verification_url': String => obj = obj.update("role_connections_verification_url", role_connections_verification_url')
+        end
+
+        match install_params
+        | let install_params': InstallParams => obj = obj.update("install_params", install_params'.to_json())
+        end
+
+        match integration_types_config
+        | let integration_types_config': collections.Map[ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration] val =>
+            obj = obj.update("integration_types_config", _IntegrationTypesConfiguration.to_json(integration_types_config'))
+        end
+
+        match flags
+        | let flags': Array[ApplicationFlag] val => obj = obj.update("flags", _ApplicationFlags.to_json(flags'))
+        end
+
+        match icon
+        | let icon': ImageData => obj = obj.update("icon", icon')
+        | Null => obj = obj.update("icon", None)
+        end
+
+        match cover_image
+        | let cover_image': ImageData => obj = obj.update("cover_image", cover_image')
+        | Null => obj = obj.update("cover_image", None)
+        end
+
+        match interactions_endpoint_url
+        | let interactions_endpoint_url': String => obj = obj.update("interactions_endpoint_url", interactions_endpoint_url')
+        end
+
+        match tags
+        | let tags': Array[String] val => obj = obj.update("tags", _Strings.to_json(tags'))
+        end
+
+        match event_webhooks_url
+        | let event_webhooks_url': String => obj = obj.update("event_webhooks_url", event_webhooks_url')
+        end
+
+        match event_webhooks_status
+        | let event_webhooks_status': ApplicationEventWebhookStatus => obj = obj.update("event_webhooks_status", event_webhooks_status'.value().i64())
+        end
+
+        match event_webhooks_types
+        | let event_webhooks_types': Array[String] val => obj = obj.update("event_webhooks_types", _Strings.to_json(event_webhooks_types'))
+        end
+
+        obj

@@ -730,3 +730,372 @@ primitive _USizes
         var array = json.JsonArray
         for integer in integers.values() do array = array.push(integer.i64()) end
         array
+
+class val GetGuildScheduledEventsParams
+    """
+    https://docs.discord.com/developers/resources/guild-scheduled-event#list-scheduled-events-for-guild-query-string-params
+    """
+
+    let with_user_count: (Bool | None)
+        """
+        include number of users subscribed to each event
+        """
+
+    new val create(with_user_count': (Bool | None) = None) =>
+        with_user_count = with_user_count'
+
+    fun to_query(): RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match with_user_count
+        | let with_user_count': Bool => query.push(("with_user_count", with_user_count'.string()))
+        end
+
+        consume query
+
+class val CreateGuildScheduledEventParams
+    """
+    https://docs.discord.com/developers/resources/guild-scheduled-event#create-guild-scheduled-event-json-params
+
+    A guild can have a maximum of 100 events with `SCHEDULED` or `ACTIVE` status at any time.
+    """
+
+    let name: String
+        """
+        the name of the scheduled event (1-100 characters)
+        """
+
+    let privacy_level: GuildScheduledEventPrivacyLevel
+        """
+        the privacy level of the scheduled event
+        """
+
+    let scheduled_start_time: ISO8601
+        """
+        the time the event will start
+        """
+
+    let entity_type: GuildScheduledEventEntityType
+        """
+        the entity type of the scheduled event
+        """
+
+    let channel_id: (Snowflake | None)
+        """
+        the channel id of the scheduled event
+
+        Optional for events with an `entity_type` of `STAGE_INSTANCE` or `VOICE`, and must be null for events with an `entity_type` of `EXTERNAL`.
+        """
+
+    let entity_metadata: (GuildScheduledEventEntityMetadata | None)
+        """
+        the entity metadata of the scheduled event
+
+        Required for events with an `entity_type` of `EXTERNAL`.
+        """
+
+    let scheduled_end_time: (ISO8601 | None)
+        """
+        the time the event will end
+
+        Required for events with an `entity_type` of `EXTERNAL`.
+        """
+
+    let description: (String | None)
+        """
+        the description of the scheduled event (1-1000 characters)
+        """
+
+    let image: (ImageData | None)
+        """
+        the cover image of the scheduled event
+        """
+
+    let recurrence_rule: (GuildScheduledEventRecurrenceRule | None)
+        """
+        the definition for how often this event should recur
+        """
+
+    new val create(
+        name': String,
+        privacy_level': GuildScheduledEventPrivacyLevel,
+        scheduled_start_time': ISO8601,
+        entity_type': GuildScheduledEventEntityType,
+        channel_id': (Snowflake | None) = None,
+        entity_metadata': (GuildScheduledEventEntityMetadata | None) = None,
+        scheduled_end_time': (ISO8601 | None) = None,
+        description': (String | None) = None,
+        image': (ImageData | None) = None,
+        recurrence_rule': (GuildScheduledEventRecurrenceRule | None) = None
+    ) =>
+        name = name'
+        privacy_level = privacy_level'
+        scheduled_start_time = scheduled_start_time'
+        entity_type = entity_type'
+        channel_id = channel_id'
+        entity_metadata = entity_metadata'
+        scheduled_end_time = scheduled_end_time'
+        description = description'
+        image = image'
+        recurrence_rule = recurrence_rule'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+            .update("name", name)
+            .update("privacy_level", privacy_level.value().i64())
+            .update("scheduled_start_time", scheduled_start_time)
+            .update("entity_type", entity_type.value().i64())
+
+        match channel_id
+        | let channel_id': Snowflake => obj = obj.update("channel_id", channel_id'.to_json())
+        end
+
+        match entity_metadata
+        | let entity_metadata': GuildScheduledEventEntityMetadata => obj = obj.update("entity_metadata", entity_metadata'.to_json())
+        end
+
+        match scheduled_end_time
+        | let scheduled_end_time': ISO8601 => obj = obj.update("scheduled_end_time", scheduled_end_time')
+        end
+
+        match description
+        | let description': String => obj = obj.update("description", description')
+        end
+
+        match image
+        | let image': ImageData => obj = obj.update("image", image')
+        end
+
+        match recurrence_rule
+        | let recurrence_rule': GuildScheduledEventRecurrenceRule => obj = obj.update("recurrence_rule", recurrence_rule'.to_json())
+        end
+
+        obj
+
+class val GetGuildScheduledEventParams
+    """
+    https://docs.discord.com/developers/resources/guild-scheduled-event#get-guild-scheduled-event-query-string-params
+    """
+
+    let with_user_count: (Bool | None)
+        """
+        include number of users subscribed to this event
+        """
+
+    new val create(with_user_count': (Bool | None) = None) =>
+        with_user_count = with_user_count'
+
+    fun to_query(): RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match with_user_count
+        | let with_user_count': Bool => query.push(("with_user_count", with_user_count'.string()))
+        end
+
+        consume query
+
+class val UpdateGuildScheduledEventParams
+    """
+    https://docs.discord.com/developers/resources/guild-scheduled-event#modify-guild-scheduled-event-json-params
+
+    All parameters to this endpoint are optional.
+
+    To start or end an event, use this endpoint to modify the event's `status` field.
+    """
+
+    let name: (String | None)
+        """
+        the name of the scheduled event (1-100 characters)
+        """
+
+    let privacy_level: (GuildScheduledEventPrivacyLevel | None)
+        """
+        the privacy level of the scheduled event
+        """
+
+    let scheduled_start_time: (ISO8601 | None)
+        """
+        the time the event will start
+        """
+
+    let entity_type: (GuildScheduledEventEntityType | None)
+        """
+        the entity type of the scheduled event
+        """
+
+    let channel_id: Nullable[Snowflake]
+        """
+        the channel id of the scheduled event, set to null if changing `entity_type` to `EXTERNAL`
+        """
+
+    let entity_metadata: Nullable[GuildScheduledEventEntityMetadata]
+        """
+        the entity metadata of the scheduled event
+
+        Required for events with an `entity_type` of `EXTERNAL`.
+        """
+
+    let scheduled_end_time: Nullable[ISO8601]
+        """
+        the time the event will end
+
+        Required for events with an `entity_type` of `EXTERNAL`.
+        """
+
+    let description: Nullable[String]
+        """
+        the description of the scheduled event (1-1000 characters)
+        """
+
+    let image: (ImageData | None)
+        """
+        the cover image of the scheduled event
+        """
+
+    let status: (GuildScheduledEventStatus | None)
+        """
+        the status of the scheduled event
+        """
+
+    let recurrence_rule: Nullable[GuildScheduledEventRecurrenceRule]
+        """
+        the definition for how often this event should recur
+        """
+
+    new val create(
+        name': (String | None) = None,
+        privacy_level': (GuildScheduledEventPrivacyLevel | None) = None,
+        scheduled_start_time': (ISO8601 | None) = None,
+        entity_type': (GuildScheduledEventEntityType | None) = None,
+        channel_id': Nullable[Snowflake] = None,
+        entity_metadata': Nullable[GuildScheduledEventEntityMetadata] = None,
+        scheduled_end_time': Nullable[ISO8601] = None,
+        description': Nullable[String] = None,
+        image': (ImageData | None) = None,
+        status': (GuildScheduledEventStatus | None) = None,
+        recurrence_rule': Nullable[GuildScheduledEventRecurrenceRule] = None
+    ) =>
+        name = name'
+        privacy_level = privacy_level'
+        scheduled_start_time = scheduled_start_time'
+        entity_type = entity_type'
+        channel_id = channel_id'
+        entity_metadata = entity_metadata'
+        scheduled_end_time = scheduled_end_time'
+        description = description'
+        image = image'
+        status = status'
+        recurrence_rule = recurrence_rule'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match name
+        | let name': String => obj = obj.update("name", name')
+        end
+
+        match privacy_level
+        | let privacy_level': GuildScheduledEventPrivacyLevel => obj = obj.update("privacy_level", privacy_level'.value().i64())
+        end
+
+        match scheduled_start_time
+        | let scheduled_start_time': ISO8601 => obj = obj.update("scheduled_start_time", scheduled_start_time')
+        end
+
+        match entity_type
+        | let entity_type': GuildScheduledEventEntityType => obj = obj.update("entity_type", entity_type'.value().i64())
+        end
+
+        match channel_id
+        | let channel_id': Snowflake => obj = obj.update("channel_id", channel_id'.to_json())
+        | Null => obj = obj.update("channel_id", None)
+        end
+
+        match entity_metadata
+        | let entity_metadata': GuildScheduledEventEntityMetadata => obj = obj.update("entity_metadata", entity_metadata'.to_json())
+        | Null => obj = obj.update("entity_metadata", None)
+        end
+
+        match scheduled_end_time
+        | let scheduled_end_time': ISO8601 => obj = obj.update("scheduled_end_time", scheduled_end_time')
+        | Null => obj = obj.update("scheduled_end_time", None)
+        end
+
+        match description
+        | let description': String => obj = obj.update("description", description')
+        | Null => obj = obj.update("description", None)
+        end
+
+        match image
+        | let image': ImageData => obj = obj.update("image", image')
+        end
+
+        match status
+        | let status': GuildScheduledEventStatus => obj = obj.update("status", status'.value().i64())
+        end
+
+        match recurrence_rule
+        | let recurrence_rule': GuildScheduledEventRecurrenceRule => obj = obj.update("recurrence_rule", recurrence_rule'.to_json())
+        | Null => obj = obj.update("recurrence_rule", None)
+        end
+
+        obj
+
+class val GetGuildScheduledEventUsersParams
+    """
+    https://docs.discord.com/developers/resources/guild-scheduled-event#get-guild-scheduled-event-users-query-string-params
+
+    Provide a `before` and/or `after` to paginate. Users will always be returned in ascending order by `user_id`. If both `before` and `after` are provided, only `before` is respected.
+    """
+
+    let limit: (USize | None)
+        """
+        number of users to return (up to maximum 100), defaults to 100
+        """
+
+    let with_member: (Bool | None)
+        """
+        include guild member data if it exists, defaults to false
+        """
+
+    let before: (Snowflake | None)
+        """
+        consider only users before given user id
+        """
+
+    let after: (Snowflake | None)
+        """
+        consider only users after given user id
+        """
+
+    new val create(
+        limit': (USize | None) = None,
+        with_member': (Bool | None) = None,
+        before': (Snowflake | None) = None,
+        after': (Snowflake | None) = None
+    ) =>
+        limit = limit'
+        with_member = with_member'
+        before = before'
+        after = after'
+
+    fun to_query(): RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match limit
+        | let limit': USize => query.push(("limit", limit'.string()))
+        end
+
+        match with_member
+        | let with_member': Bool => query.push(("with_member", with_member'.string()))
+        end
+
+        match before
+        | let before': Snowflake => query.push(("before", before'.string()))
+        end
+
+        match after
+        | let after': Snowflake => query.push(("after", after'.string()))
+        end
+
+        consume query

@@ -186,3 +186,563 @@ primitive WebhookTypes
         | 3 => ApplicationWebhookType
         else error
         end
+
+class val CreateWebhookParams
+    """
+    https://docs.discord.com/developers/resources/webhook#create-webhook-json-params
+
+    Webhook names follow the naming restrictions that can be found in the Usernames and Nicknames documentation, with the following additional stipulations:
+
+    - Webhook names cannot be: `clyde`, `discord`
+    """
+
+    let name: String
+        """
+        name of the webhook (1-80 characters)
+        """
+
+    let avatar: (ImageData | None)
+        """
+        image for the default webhook avatar
+        """
+
+    new val create(name': String, avatar': (ImageData | None) = None) =>
+        name = name'
+        avatar = avatar'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject.update("name", name)
+
+        match avatar
+        | let avatar': ImageData => obj = obj.update("avatar", avatar')
+        end
+
+        obj
+
+class val UpdateWebhookParams
+    """
+    https://docs.discord.com/developers/resources/webhook#modify-webhook-json-params
+
+    All parameters to this endpoint are optional.
+    """
+
+    let name: (String | None)
+        """
+        the default name of the webhook
+        """
+
+    let avatar: Nullable[ImageData]
+        """
+        image for the default webhook avatar
+        """
+
+    let channel_id: (Snowflake | None)
+        """
+        the new channel id this webhook should be moved to
+        """
+
+    new val create(
+        name': (String | None) = None,
+        avatar': Nullable[ImageData] = None,
+        channel_id': (Snowflake | None) = None
+    ) =>
+        name = name'
+        avatar = avatar'
+        channel_id = channel_id'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match name
+        | let name': String => obj = obj.update("name", name')
+        end
+
+        match avatar
+        | let avatar': ImageData => obj = obj.update("avatar", avatar')
+        | Null => obj = obj.update("avatar", None)
+        end
+
+        match channel_id
+        | let channel_id': Snowflake => obj = obj.update("channel_id", channel_id'.to_json())
+        end
+
+        obj
+
+class val UpdateWebhookWithTokenParams
+    """
+    https://docs.discord.com/developers/resources/webhook#modify-webhook-with-token
+
+    Same as Modify Webhook, except this call does not require authentication, does not accept a `channel_id` parameter in the body, and does not return a user in the webhook object.
+    """
+
+    let name: (String | None)
+        """
+        the default name of the webhook
+        """
+
+    let avatar: Nullable[ImageData]
+        """
+        image for the default webhook avatar
+        """
+
+    new val create(name': (String | None) = None, avatar': Nullable[ImageData] = None) =>
+        name = name'
+        avatar = avatar'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match name
+        | let name': String => obj = obj.update("name", name')
+        end
+
+        match avatar
+        | let avatar': ImageData => obj = obj.update("avatar", avatar')
+        | Null => obj = obj.update("avatar", None)
+        end
+
+        obj
+
+class val ExecuteWebhookParams
+    """
+    https://docs.discord.com/developers/resources/webhook#execute-webhook
+
+    This endpoint takes both query string parameters and a JSON body.
+
+    Note that when sending a message, you must provide a value for at least one of `content`, `embeds`, `components`, `file` or `poll`.
+    """
+
+    let content: (String | None)
+        """
+        the message contents (up to 2000 characters)
+        """
+
+    let username: (String | None)
+        """
+        override the default username of the webhook
+        """
+
+    let avatar_url: (String | None)
+        """
+        override the default avatar of the webhook
+        """
+
+    let tts: (Bool | None)
+        """
+        true if this is a TTS message
+        """
+
+    let embeds: (Array[MessageEmbed] val | None)
+        """
+        array of up to 10 embeds
+        """
+
+    let allowed_mentions: (AllowedMentions | None)
+        """
+        allowed mentions for the message
+        """
+
+    let components: (Array[Component] val | None)
+        """
+        the components to include with the message
+
+        Requires an application-owned webhook.
+        """
+
+    let attachments: (Array[MessageAttachmentParams] val | None)
+        """
+        attachment objects with `filename` and `description`
+        """
+
+    let flags: (Array[MessageFlag] val | None)
+        """
+        message flags combined as a bitfield (only `SUPPRESS_EMBEDS`, `SUPPRESS_NOTIFICATIONS` and `IS_COMPONENTS_V2` can be set)
+        """
+
+    let thread_name: (String | None)
+        """
+        name of thread to create (requires the webhook channel to be a forum or media channel)
+        """
+
+    let applied_tags: (Array[Snowflake] val | None)
+        """
+        array of tag ids to apply to the thread (requires the webhook channel to be a forum or media channel)
+        """
+
+    let poll: (PollParams | None)
+        """
+        A poll!
+        """
+
+    let wait: (Bool | None)
+        """
+        waits for server confirmation of message send before response, and returns the created message body (defaults to `false`; when `false` a message that is not saved does not return an error)
+        """
+
+    let thread_id: (Snowflake | None)
+        """
+        Send a message to the specified thread within a webhook's channel. The thread will automatically be unarchived.
+        """
+
+    let with_components: (Bool | None)
+        """
+        whether to respect the `components` field of the request (defaults to `false`; when `false`, only components without custom_id are allowed)
+        """
+
+    new val create(
+        content': (String | None) = None,
+        username': (String | None) = None,
+        avatar_url': (String | None) = None,
+        tts': (Bool | None) = None,
+        embeds': (Array[MessageEmbed] val | None) = None,
+        allowed_mentions': (AllowedMentions | None) = None,
+        components': (Array[Component] val | None) = None,
+        attachments': (Array[MessageAttachmentParams] val | None) = None,
+        flags': (Array[MessageFlag] val | None) = None,
+        thread_name': (String | None) = None,
+        applied_tags': (Array[Snowflake] val | None) = None,
+        poll': (PollParams | None) = None,
+        wait': (Bool | None) = None,
+        thread_id': (Snowflake | None) = None,
+        with_components': (Bool | None) = None
+    ) =>
+        content = content'
+        username = username'
+        avatar_url = avatar_url'
+        tts = tts'
+        embeds = embeds'
+        allowed_mentions = allowed_mentions'
+        components = components'
+        attachments = attachments'
+        flags = flags'
+        thread_name = thread_name'
+        applied_tags = applied_tags'
+        poll = poll'
+        wait = wait'
+        thread_id = thread_id'
+        with_components = with_components'
+
+    fun to_query(): RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match wait
+        | let wait': Bool => query.push(("wait", wait'.string()))
+        end
+
+        match thread_id
+        | let thread_id': Snowflake => query.push(("thread_id", thread_id'.string()))
+        end
+
+        match with_components
+        | let with_components': Bool => query.push(("with_components", with_components'.string()))
+        end
+
+        consume query
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match content
+        | let content': String => obj = obj.update("content", content')
+        end
+
+        match username
+        | let username': String => obj = obj.update("username", username')
+        end
+
+        match avatar_url
+        | let avatar_url': String => obj = obj.update("avatar_url", avatar_url')
+        end
+
+        match tts
+        | let tts': Bool => obj = obj.update("tts", tts')
+        end
+
+        match embeds
+        | let embeds': Array[MessageEmbed] val => obj = obj.update("embeds", _MessageEmbeds.to_json(embeds'))
+        end
+
+        match allowed_mentions
+        | let allowed_mentions': AllowedMentions => obj = obj.update("allowed_mentions", allowed_mentions'.to_json())
+        end
+
+        match components
+        | let components': Array[Component] val => obj = obj.update("components", _Components.to_json(components'))
+        end
+
+        match attachments
+        | let attachments': Array[MessageAttachmentParams] val => obj = obj.update("attachments", _MessageAttachmentParams.to_json(attachments'))
+        end
+
+        match flags
+        | let flags': Array[MessageFlag] val => obj = obj.update("flags", _MessageFlags.to_json(flags'))
+        end
+
+        match thread_name
+        | let thread_name': String => obj = obj.update("thread_name", thread_name')
+        end
+
+        match applied_tags
+        | let applied_tags': Array[Snowflake] val => obj = obj.update("applied_tags", _Snowflakes.to_json(applied_tags'))
+        end
+
+        match poll
+        | let poll': PollParams => obj = obj.update("poll", poll'.to_json())
+        end
+
+        obj
+
+class val ExecuteSlackCompatibleWebhookParams
+    """
+    https://docs.discord.com/developers/resources/webhook#execute-slackcompatible-webhook
+
+    Refer to Slack's documentation for more information. Discord does not support Slack's `channel`, `icon_emoji`, `mrkdwn`, or `mrkdwn_in` properties.
+
+    The Slack-shaped payload is passed through verbatim as `payload`.
+    """
+
+    let payload: json.JsonObject
+        """
+        the Slack-compatible message payload
+        """
+
+    let thread_id: (Snowflake | None)
+        """
+        id of the thread to send the message in
+        """
+
+    let wait: (Bool | None)
+        """
+        waits for server confirmation of message send before response (defaults to `true`; when `false` a message that is not saved does not return an error)
+        """
+
+    new val create(
+        payload': json.JsonObject,
+        thread_id': (Snowflake | None) = None,
+        wait': (Bool | None) = None
+    ) =>
+        payload = payload'
+        thread_id = thread_id'
+        wait = wait'
+
+    fun to_query(): RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match thread_id
+        | let thread_id': Snowflake => query.push(("thread_id", thread_id'.string()))
+        end
+
+        match wait
+        | let wait': Bool => query.push(("wait", wait'.string()))
+        end
+
+        consume query
+
+    fun to_json(): json.JsonObject => payload
+
+class val ExecuteGithubCompatibleWebhookParams
+    """
+    https://docs.discord.com/developers/resources/webhook#execute-githubcompatible-webhook
+
+    Add a new webhook to your GitHub repo (in the repo's settings), and use this endpoint as the "Payload URL." You can choose what events your Discord channel receives by choosing the "Let me select individual events" option and selecting individual events for the new webhook you're configuring.
+
+    The GitHub event payload is passed through verbatim as `payload`.
+    """
+
+    let payload: json.JsonObject
+        """
+        the GitHub event payload
+        """
+
+    let thread_id: (Snowflake | None)
+        """
+        id of the thread to send the message in
+        """
+
+    let wait: (Bool | None)
+        """
+        waits for server confirmation of message send before response (defaults to `true`; when `false` a message that is not saved does not return an error)
+        """
+
+    new val create(
+        payload': json.JsonObject,
+        thread_id': (Snowflake | None) = None,
+        wait': (Bool | None) = None
+    ) =>
+        payload = payload'
+        thread_id = thread_id'
+        wait = wait'
+
+    fun to_query(): RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match thread_id
+        | let thread_id': Snowflake => query.push(("thread_id", thread_id'.string()))
+        end
+
+        match wait
+        | let wait': Bool => query.push(("wait", wait'.string()))
+        end
+
+        consume query
+
+    fun to_json(): json.JsonObject => payload
+
+class val GetWebhookMessageParams
+    """
+    https://docs.discord.com/developers/resources/webhook#get-webhook-message-query-string-params
+    """
+
+    let thread_id: (Snowflake | None)
+        """
+        id of the thread the message is in
+        """
+
+    new val create(thread_id': (Snowflake | None) = None) =>
+        thread_id = thread_id'
+
+    fun to_query(): RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match thread_id
+        | let thread_id': Snowflake => query.push(("thread_id", thread_id'.string()))
+        end
+
+        consume query
+
+class val UpdateWebhookMessageParams
+    """
+    https://docs.discord.com/developers/resources/webhook#edit-webhook-message
+
+    This endpoint takes both query string parameters and a JSON body. All JSON parameters are optional and nullable.
+    """
+
+    let content: Nullable[String]
+        """
+        the message contents (up to 2000 characters)
+        """
+
+    let embeds: Nullable[Array[MessageEmbed] val]
+        """
+        array of up to 10 embeds
+        """
+
+    let allowed_mentions: Nullable[AllowedMentions]
+        """
+        allowed mentions for the message
+        """
+
+    let components: Nullable[Array[Component] val]
+        """
+        the components to include with the message
+
+        Requires an application-owned webhook.
+        """
+
+    let attachments: Nullable[Array[MessageAttachmentParams] val]
+        """
+        attached files to keep and possible descriptions for new files
+        """
+
+    let flags: (Array[MessageFlag] val | None)
+        """
+        message flags combined as a bitfield (only `SUPPRESS_EMBEDS` and `IS_COMPONENTS_V2` can be set)
+        """
+
+    let thread_id: (Snowflake | None)
+        """
+        id of the thread the message is in
+        """
+
+    let with_components: (Bool | None)
+        """
+        whether to respect the `components` field of the request (defaults to `false`; when `false`, only components without custom_id are allowed)
+        """
+
+    new val create(
+        content': Nullable[String] = None,
+        embeds': Nullable[Array[MessageEmbed] val] = None,
+        allowed_mentions': Nullable[AllowedMentions] = None,
+        components': Nullable[Array[Component] val] = None,
+        attachments': Nullable[Array[MessageAttachmentParams] val] = None,
+        flags': (Array[MessageFlag] val | None) = None,
+        thread_id': (Snowflake | None) = None,
+        with_components': (Bool | None) = None
+    ) =>
+        content = content'
+        embeds = embeds'
+        allowed_mentions = allowed_mentions'
+        components = components'
+        attachments = attachments'
+        flags = flags'
+        thread_id = thread_id'
+        with_components = with_components'
+
+    fun to_query(): RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match thread_id
+        | let thread_id': Snowflake => query.push(("thread_id", thread_id'.string()))
+        end
+
+        match with_components
+        | let with_components': Bool => query.push(("with_components", with_components'.string()))
+        end
+
+        consume query
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match content
+        | let content': String => obj = obj.update("content", content')
+        | Null => obj = obj.update("content", None)
+        end
+
+        match embeds
+        | let embeds': Array[MessageEmbed] val => obj = obj.update("embeds", _MessageEmbeds.to_json(embeds'))
+        | Null => obj = obj.update("embeds", None)
+        end
+
+        match allowed_mentions
+        | let allowed_mentions': AllowedMentions => obj = obj.update("allowed_mentions", allowed_mentions'.to_json())
+        | Null => obj = obj.update("allowed_mentions", None)
+        end
+
+        match components
+        | let components': Array[Component] val => obj = obj.update("components", _Components.to_json(components'))
+        | Null => obj = obj.update("components", None)
+        end
+
+        match attachments
+        | let attachments': Array[MessageAttachmentParams] val => obj = obj.update("attachments", _MessageAttachmentParams.to_json(attachments'))
+        | Null => obj = obj.update("attachments", None)
+        end
+
+        match flags
+        | let flags': Array[MessageFlag] val => obj = obj.update("flags", _MessageFlags.to_json(flags'))
+        end
+
+        obj
+
+class val DeleteWebhookMessageParams
+    """
+    https://docs.discord.com/developers/resources/webhook#delete-webhook-message-query-string-params
+    """
+
+    let thread_id: (Snowflake | None)
+        """
+        id of the thread the message is in
+        """
+
+    new val create(thread_id': (Snowflake | None) = None) =>
+        thread_id = thread_id'
+
+    fun to_query(): RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match thread_id
+        | let thread_id': Snowflake => query.push(("thread_id", thread_id'.string()))
+        end
+
+        consume query

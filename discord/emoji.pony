@@ -141,3 +141,113 @@ primitive _Emojis
         var array = json.JsonArray
         for emoji in emojis.values() do array = array.push(emoji.to_json()) end
         array
+
+class val CreateGuildEmojiParams
+    """
+    https://docs.discord.com/developers/resources/emoji#create-guild-emoji-json-params
+
+    Emojis and animated emojis have a maximum file size of 256 KiB.
+    """
+
+    let name: String
+        """
+        name of the emoji
+        """
+
+    let image: ImageData
+        """
+        the 128x128 emoji image
+        """
+
+    let roles: Array[Snowflake] val
+        """
+        roles allowed to use this emoji
+        """
+
+    new val create(name': String, image': ImageData, roles': Array[Snowflake] val) =>
+        name = name'
+        image = image'
+        roles = roles'
+
+    fun to_json(): json.JsonObject =>
+        json.JsonObject
+            .update("name", name)
+            .update("image", image)
+            .update("roles", _Snowflakes.to_json(roles))
+
+class val UpdateGuildEmojiParams
+    """
+    https://docs.discord.com/developers/resources/emoji#modify-guild-emoji-json-params
+
+    All parameters to this endpoint are optional.
+    """
+
+    let name: (String | None)
+        """
+        name of the emoji
+        """
+
+    let roles: Nullable[Array[Snowflake] val]
+        """
+        roles allowed to use this emoji
+        """
+
+    new val create(name': (String | None) = None, roles': Nullable[Array[Snowflake] val] = None) =>
+        name = name'
+        roles = roles'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match name
+        | let name': String => obj = obj.update("name", name')
+        end
+
+        match roles
+        | let roles': Array[Snowflake] val => obj = obj.update("roles", _Snowflakes.to_json(roles'))
+        | Null => obj = obj.update("roles", None)
+        end
+
+        obj
+
+class val CreateApplicationEmojiParams
+    """
+    https://docs.discord.com/developers/resources/emoji#create-application-emoji-json-params
+
+    Emojis and animated emojis have a maximum file size of 256 KiB.
+    """
+
+    let name: String
+        """
+        name of the emoji
+        """
+
+    let image: ImageData
+        """
+        the 128x128 emoji image
+        """
+
+    new val create(name': String, image': ImageData) =>
+        name = name'
+        image = image'
+
+    fun to_json(): json.JsonObject =>
+        json.JsonObject
+            .update("name", name)
+            .update("image", image)
+
+class val UpdateApplicationEmojiParams
+    """
+    https://docs.discord.com/developers/resources/emoji#modify-application-emoji-json-params
+    """
+
+    let name: String
+        """
+        name of the emoji
+        """
+
+    new val create(name': String) =>
+        name = name'
+
+    fun to_json(): json.JsonObject =>
+        json.JsonObject.update("name", name)

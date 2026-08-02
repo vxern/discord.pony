@@ -162,3 +162,60 @@ primitive SubscriptionStatuses
         | 2 => InactiveSubscriptionStatus
         else error
         end
+
+class val GetSKUSubscriptionsParams
+    """
+    https://docs.discord.com/developers/resources/subscription#list-sku-subscriptions-query-string-params
+    """
+
+    let before: (Snowflake | None)
+        """
+        List subscriptions before this ID
+        """
+
+    let after: (Snowflake | None)
+        """
+        List subscriptions after this ID
+        """
+
+    let limit: (USize | None)
+        """
+        Number of results to return (1-100), defaults to 50
+        """
+
+    let user_id: (Snowflake | None)
+        """
+        User ID for which to return subscriptions. Required except for OAuth queries.
+        """
+
+    new val create(
+        before': (Snowflake | None) = None,
+        after': (Snowflake | None) = None,
+        limit': (USize | None) = None,
+        user_id': (Snowflake | None) = None
+    ) =>
+        before = before'
+        after = after'
+        limit = limit'
+        user_id = user_id'
+
+    fun to_query(): RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match before
+        | let before': Snowflake => query.push(("before", before'.string()))
+        end
+
+        match after
+        | let after': Snowflake => query.push(("after", after'.string()))
+        end
+
+        match limit
+        | let limit': USize => query.push(("limit", limit'.string()))
+        end
+
+        match user_id
+        | let user_id': Snowflake => query.push(("user_id", user_id'.string()))
+        end
+
+        consume query

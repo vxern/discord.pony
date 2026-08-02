@@ -204,3 +204,376 @@ primitive _Metadata
         var obj = json.JsonObject
         for (key, value) in map.pairs() do obj = obj.update(key, value) end
         obj
+
+class val CreateLobbyParams
+    """
+    https://docs.discord.com/developers/resources/lobby#create-lobby-json-params
+
+    All parameters to this endpoint are optional.
+    """
+
+    let metadata: (collections.Map[String, String] val | None)
+        """
+        optional dictionary of string key/value pairs. The max total length is 1000.
+        """
+
+    let members: (Array[LobbyMemberParams] val | None)
+        """
+        optional array of up to 25 users to be added to the lobby
+        """
+
+    let idle_timeout_seconds: (USize | None)
+        """
+        seconds to wait before shutting down a lobby after it becomes idle. Value can be between 5 and 604800 (7 days).
+        """
+
+    new val create(
+        metadata': (collections.Map[String, String] val | None) = None,
+        members': (Array[LobbyMemberParams] val | None) = None,
+        idle_timeout_seconds': (USize | None) = None
+    ) =>
+        metadata = metadata'
+        members = members'
+        idle_timeout_seconds = idle_timeout_seconds'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match metadata
+        | let metadata': collections.Map[String, String] val => obj = obj.update("metadata", _Metadata.to_json(metadata'))
+        end
+
+        match members
+        | let members': Array[LobbyMemberParams] val => obj = obj.update("members", _LobbyMemberParams.to_json(members'))
+        end
+
+        match idle_timeout_seconds
+        | let idle_timeout_seconds': USize => obj = obj.update("idle_timeout_seconds", idle_timeout_seconds'.i64())
+        end
+
+        obj
+
+class val LobbyMemberParams
+    """
+    https://docs.discord.com/developers/resources/lobby#create-lobby-lobby-member-params
+
+    A member to seed a lobby with.
+    """
+
+    let id: Snowflake
+        """
+        the id of the user
+        """
+
+    let metadata: (collections.Map[String, String] val | None)
+        """
+        optional dictionary of string key/value pairs. The max total length is 1000.
+        """
+
+    let flags: (Array[LobbyMemberFlag] val | None)
+        """
+        lobby member flags combined as a bitfield
+        """
+
+    new val create(
+        id': Snowflake,
+        metadata': (collections.Map[String, String] val | None) = None,
+        flags': (Array[LobbyMemberFlag] val | None) = None
+    ) =>
+        id = id'
+        metadata = metadata'
+        flags = flags'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject.update("id", id.to_json())
+
+        match metadata
+        | let metadata': collections.Map[String, String] val => obj = obj.update("metadata", _Metadata.to_json(metadata'))
+        end
+
+        match flags
+        | let flags': Array[LobbyMemberFlag] val => obj = obj.update("flags", _LobbyMemberFlags.to_json(flags'))
+        end
+
+        obj
+
+primitive _LobbyMemberParams
+    fun to_json(members: Array[LobbyMemberParams] val): json.JsonArray =>
+        var array = json.JsonArray
+        for member in members.values() do array = array.push(member.to_json()) end
+        array
+
+class val CreateOrJoinLobbyParams
+    """
+    https://docs.discord.com/developers/resources/lobby#create-or-join-lobby-json-params
+
+    Adds the current user to a lobby matching the given secret, creating the lobby if one does not already exist.
+    """
+
+    let secret: String
+        """
+        the secret to use for the lobby (1-250 characters)
+        """
+
+    let lobby_metadata: (collections.Map[String, String] val | None)
+        """
+        optional dictionary of string key/value pairs. The max total length is 1000.
+        """
+
+    let member_metadata: (collections.Map[String, String] val | None)
+        """
+        optional dictionary of string key/value pairs. The max total length is 1000.
+        """
+
+    let idle_timeout_seconds: (USize | None)
+        """
+        seconds to wait before shutting down a lobby after it becomes idle. Value can be between 5 and 604800 (7 days).
+        """
+
+    new val create(
+        secret': String,
+        lobby_metadata': (collections.Map[String, String] val | None) = None,
+        member_metadata': (collections.Map[String, String] val | None) = None,
+        idle_timeout_seconds': (USize | None) = None
+    ) =>
+        secret = secret'
+        lobby_metadata = lobby_metadata'
+        member_metadata = member_metadata'
+        idle_timeout_seconds = idle_timeout_seconds'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject.update("secret", secret)
+
+        match lobby_metadata
+        | let lobby_metadata': collections.Map[String, String] val => obj = obj.update("lobby_metadata", _Metadata.to_json(lobby_metadata'))
+        end
+
+        match member_metadata
+        | let member_metadata': collections.Map[String, String] val => obj = obj.update("member_metadata", _Metadata.to_json(member_metadata'))
+        end
+
+        match idle_timeout_seconds
+        | let idle_timeout_seconds': USize => obj = obj.update("idle_timeout_seconds", idle_timeout_seconds'.i64())
+        end
+
+        obj
+
+class val UpdateLobbyParams
+    """
+    https://docs.discord.com/developers/resources/lobby#modify-lobby-json-params
+
+    All parameters to this endpoint are optional. Any parameters that are not provided will be reset.
+    """
+
+    let metadata: (collections.Map[String, String] val | None)
+        """
+        optional dictionary of string key/value pairs. The max total length is 1000.
+        """
+
+    let members: (Array[LobbyMemberParams] val | None)
+        """
+        optional array of up to 25 users to be added to the lobby
+        """
+
+    let idle_timeout_seconds: (USize | None)
+        """
+        seconds to wait before shutting down a lobby after it becomes idle. Value can be between 5 and 604800 (7 days).
+        """
+
+    new val create(
+        metadata': (collections.Map[String, String] val | None) = None,
+        members': (Array[LobbyMemberParams] val | None) = None,
+        idle_timeout_seconds': (USize | None) = None
+    ) =>
+        metadata = metadata'
+        members = members'
+        idle_timeout_seconds = idle_timeout_seconds'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match metadata
+        | let metadata': collections.Map[String, String] val => obj = obj.update("metadata", _Metadata.to_json(metadata'))
+        end
+
+        match members
+        | let members': Array[LobbyMemberParams] val => obj = obj.update("members", _LobbyMemberParams.to_json(members'))
+        end
+
+        match idle_timeout_seconds
+        | let idle_timeout_seconds': USize => obj = obj.update("idle_timeout_seconds", idle_timeout_seconds'.i64())
+        end
+
+        obj
+
+class val AddLobbyMemberParams
+    """
+    https://docs.discord.com/developers/resources/lobby#add-a-member-to-a-lobby-json-params
+    """
+
+    let metadata: (collections.Map[String, String] val | None)
+        """
+        optional dictionary of string key/value pairs. The max total length is 1000.
+        """
+
+    let flags: (Array[LobbyMemberFlag] val | None)
+        """
+        lobby member flags combined as a bitfield
+        """
+
+    new val create(
+        metadata': (collections.Map[String, String] val | None) = None,
+        flags': (Array[LobbyMemberFlag] val | None) = None
+    ) =>
+        metadata = metadata'
+        flags = flags'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match metadata
+        | let metadata': collections.Map[String, String] val => obj = obj.update("metadata", _Metadata.to_json(metadata'))
+        end
+
+        match flags
+        | let flags': Array[LobbyMemberFlag] val => obj = obj.update("flags", _LobbyMemberFlags.to_json(flags'))
+        end
+
+        obj
+
+class val BulkUpdateLobbyMembersParams
+    """
+    https://docs.discord.com/developers/resources/lobby#bulk-update-lobby-members
+
+    This endpoint takes a JSON array of lobby member params, replacing the lobby's membership with the supplied set.
+    """
+
+    let members: Array[LobbyMemberParams] val
+        """
+        the members the lobby should end up with (max 25)
+        """
+
+    new val create(members': Array[LobbyMemberParams] val) =>
+        members = members'
+
+    fun to_json(): json.JsonArray =>
+        _LobbyMemberParams.to_json(members)
+
+class val LinkChannelToLobbyParams
+    """
+    https://docs.discord.com/developers/resources/lobby#link-channel-to-lobby-json-params
+    """
+
+    let channel_id: (Snowflake | None)
+        """
+        the id of the channel to link to the lobby. If not provided, will unlink any currently linked channels from the lobby.
+        """
+
+    new val create(channel_id': (Snowflake | None) = None) =>
+        channel_id = channel_id'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match channel_id
+        | let channel_id': Snowflake => obj = obj.update("channel_id", channel_id'.to_json())
+        end
+
+        obj
+
+class val SendLobbyMessageParams
+    """
+    https://docs.discord.com/developers/resources/lobby#send-lobby-message-json-params
+
+    At least one of `content` or `embeds` must be provided.
+    """
+
+    let content: (String | None)
+        """
+        Message contents (up to 2000 characters)
+        """
+
+    let metadata: (collections.Map[String, String] val | None)
+        """
+        optional dictionary of string key/value pairs. The max total length is 1000.
+        """
+
+    let allowed_mentions: (AllowedMentions | None)
+        """
+        Allowed mentions for the message
+        """
+
+    let flags: (Array[MessageFlag] val | None)
+        """
+        Message flags combined as a bitfield
+        """
+
+    new val create(
+        content': (String | None) = None,
+        metadata': (collections.Map[String, String] val | None) = None,
+        allowed_mentions': (AllowedMentions | None) = None,
+        flags': (Array[MessageFlag] val | None) = None
+    ) =>
+        content = content'
+        metadata = metadata'
+        allowed_mentions = allowed_mentions'
+        flags = flags'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match content
+        | let content': String => obj = obj.update("content", content')
+        end
+
+        match metadata
+        | let metadata': collections.Map[String, String] val => obj = obj.update("metadata", _Metadata.to_json(metadata'))
+        end
+
+        match allowed_mentions
+        | let allowed_mentions': AllowedMentions => obj = obj.update("allowed_mentions", allowed_mentions'.to_json())
+        end
+
+        match flags
+        | let flags': Array[MessageFlag] val => obj = obj.update("flags", _MessageFlags.to_json(flags'))
+        end
+
+        obj
+
+class val GetLobbyMessagesParams
+    """
+    https://docs.discord.com/developers/resources/lobby#get-lobby-messages-query-string-params
+    """
+
+    let limit: (USize | None)
+        """
+        max number of messages to return (1-100)
+        """
+
+    new val create(limit': (USize | None) = None) =>
+        limit = limit'
+
+    fun to_query(): RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match limit
+        | let limit': USize => query.push(("limit", limit'.string()))
+        end
+
+        consume query
+
+class val UpdateLobbyMessageModerationMetadataParams
+    """
+    https://docs.discord.com/developers/resources/lobby#update-lobby-message-moderation-metadata-json-params
+    """
+
+    let metadata: collections.Map[String, String] val
+        """
+        dictionary of string key/value pairs. The max total length is 1000.
+        """
+
+    new val create(metadata': collections.Map[String, String] val) =>
+        metadata = metadata'
+
+    fun to_json(): json.JsonObject =>
+        json.JsonObject.update("metadata", _Metadata.to_json(metadata))

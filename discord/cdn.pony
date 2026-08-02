@@ -25,6 +25,14 @@ type ImageSize is (U64 | None)
     between 16 and 4096. `None` serves the image at its original size.
     """
 
+type ImageData is String
+    """
+    https://docs.discord.com/developers/reference#image-data
+
+    An image uploaded to the API as a base64-encoded data URI, of the form
+    `data:image/{jpeg,png,gif};base64,{data}`.
+    """
+
 primitive CDN
     fun base_url(): String => "https://cdn.discordapp.com"
 

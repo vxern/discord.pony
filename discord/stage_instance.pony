@@ -120,3 +120,101 @@ primitive StageInstancePrivacyLevels
         | 2 => GuildOnlyStageInstancePrivacyLevel
         else error
         end
+
+class val CreateStageInstanceParams
+    """
+    https://docs.discord.com/developers/resources/stage-instance#create-stage-instance-json-params
+    """
+
+    let channel_id: Snowflake
+        """
+        The id of the Stage channel
+        """
+
+    let topic: String
+        """
+        The topic of the Stage instance (1-120 characters)
+        """
+
+    let privacy_level: (StageInstancePrivacyLevel | None)
+        """
+        The privacy level of the Stage instance (default GUILD_ONLY)
+        """
+
+    let send_start_notification: (Bool | None)
+        """
+        Notify @everyone that a Stage instance has started
+
+        The stage moderator must have the MENTION_EVERYONE permission for this notification to be sent.
+        """
+
+    let guild_scheduled_event_id: (Snowflake | None)
+        """
+        The guild scheduled event associated with this Stage instance
+        """
+
+    new val create(
+        channel_id': Snowflake,
+        topic': String,
+        privacy_level': (StageInstancePrivacyLevel | None) = None,
+        send_start_notification': (Bool | None) = None,
+        guild_scheduled_event_id': (Snowflake | None) = None
+    ) =>
+        channel_id = channel_id'
+        topic = topic'
+        privacy_level = privacy_level'
+        send_start_notification = send_start_notification'
+        guild_scheduled_event_id = guild_scheduled_event_id'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+            .update("channel_id", channel_id.to_json())
+            .update("topic", topic)
+
+        match privacy_level
+        | let privacy_level': StageInstancePrivacyLevel => obj = obj.update("privacy_level", privacy_level'.value().i64())
+        end
+
+        match send_start_notification
+        | let send_start_notification': Bool => obj = obj.update("send_start_notification", send_start_notification')
+        end
+
+        match guild_scheduled_event_id
+        | let guild_scheduled_event_id': Snowflake => obj = obj.update("guild_scheduled_event_id", guild_scheduled_event_id'.to_json())
+        end
+
+        obj
+
+class val UpdateStageInstanceParams
+    """
+    https://docs.discord.com/developers/resources/stage-instance#modify-stage-instance-json-params
+
+    All parameters to this endpoint are optional.
+    """
+
+    let topic: (String | None)
+        """
+        The topic of the Stage instance (1-120 characters)
+        """
+
+    let privacy_level: (StageInstancePrivacyLevel | None)
+        """
+        The privacy level of the Stage instance
+        """
+
+    new val create(topic': (String | None) = None, privacy_level': (StageInstancePrivacyLevel | None) = None) =>
+        topic = topic'
+        privacy_level = privacy_level'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match topic
+        | let topic': String => obj = obj.update("topic", topic')
+        end
+
+        match privacy_level
+        | let privacy_level': StageInstancePrivacyLevel => obj = obj.update("privacy_level", privacy_level'.value().i64())
+        end
+
+        obj

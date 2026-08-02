@@ -3174,3 +3174,686 @@ primitive BaseThemeTypes
         | 4 => MidnightBaseThemeType
         else error
         end
+
+class val MessageAttachmentParams
+    """
+    https://docs.discord.com/developers/resources/message#attachment-object
+
+    A partial attachment object, used to keep, describe or rename attachments when creating or editing a message.
+    """
+
+    let id: Snowflake
+        """
+        attachment id
+        """
+
+    let filename: (String | None)
+        """
+        name of file attached
+        """
+
+    let title: (String | None)
+        """
+        the title of the file
+        """
+
+    let description: (String | None)
+        """
+        description for the file (max 1024 characters)
+        """
+
+    new val create(
+        id': Snowflake,
+        filename': (String | None) = None,
+        title': (String | None) = None,
+        description': (String | None) = None
+    ) =>
+        id = id'
+        filename = filename'
+        title = title'
+        description = description'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject.update("id", id.to_json())
+
+        match filename
+        | let filename': String => obj = obj.update("filename", filename')
+        end
+
+        match title
+        | let title': String => obj = obj.update("title", title')
+        end
+
+        match description
+        | let description': String => obj = obj.update("description", description')
+        end
+
+        obj
+
+primitive _MessageAttachmentParams
+    fun to_json(attachments: Array[MessageAttachmentParams] val): json.JsonArray =>
+        var array = json.JsonArray
+        for attachment in attachments.values() do array = array.push(attachment.to_json()) end
+        array
+
+class val GetChannelMessagesParams
+    """
+    https://docs.discord.com/developers/resources/message#get-channel-messages-query-string-params
+
+    The `before`, `after`, and `around` parameters are mutually exclusive, only one may be passed at a time.
+    """
+
+    let around: (Snowflake | None)
+        """
+        Get messages around this message ID
+        """
+
+    let before: (Snowflake | None)
+        """
+        Get messages before this message ID
+        """
+
+    let after: (Snowflake | None)
+        """
+        Get messages after this message ID
+        """
+
+    let limit: (USize | None)
+        """
+        Max number of messages to return (1-100). Defaults to 50.
+        """
+
+    new val create(
+        around': (Snowflake | None) = None,
+        before': (Snowflake | None) = None,
+        after': (Snowflake | None) = None,
+        limit': (USize | None) = None
+    ) =>
+        around = around'
+        before = before'
+        after = after'
+        limit = limit'
+
+    fun to_query(): RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match around
+        | let around': Snowflake => query.push(("around", around'.string()))
+        end
+
+        match before
+        | let before': Snowflake => query.push(("before", before'.string()))
+        end
+
+        match after
+        | let after': Snowflake => query.push(("after", after'.string()))
+        end
+
+        match limit
+        | let limit': USize => query.push(("limit", limit'.string()))
+        end
+
+        consume query
+
+class val SearchGuildMessagesParams
+    """
+    https://docs.discord.com/developers/resources/message#search-guild-messages-query-string-params
+    """
+
+    let content: (String | None)
+        """
+        the message content to search for
+        """
+
+    let author_id: (Array[Snowflake] val | None)
+        """
+        only include messages sent by these authors
+        """
+
+    let channel_id: (Array[Snowflake] val | None)
+        """
+        only include messages sent in these channels
+        """
+
+    let mentions: (Array[Snowflake] val | None)
+        """
+        only include messages that mention these users
+        """
+
+    let max_id: (Snowflake | None)
+        """
+        only include messages with an ID less than this
+        """
+
+    let min_id: (Snowflake | None)
+        """
+        only include messages with an ID greater than this
+        """
+
+    let include_nsfw: (Bool | None)
+        """
+        whether to include messages from age-restricted channels, defaults to false
+        """
+
+    let offset: (USize | None)
+        """
+        number of messages to skip before returning results, defaults to 0
+        """
+
+    let limit: (USize | None)
+        """
+        max number of messages to return (1-25), defaults to 25
+        """
+
+    new val create(
+        content': (String | None) = None,
+        author_id': (Array[Snowflake] val | None) = None,
+        channel_id': (Array[Snowflake] val | None) = None,
+        mentions': (Array[Snowflake] val | None) = None,
+        max_id': (Snowflake | None) = None,
+        min_id': (Snowflake | None) = None,
+        include_nsfw': (Bool | None) = None,
+        offset': (USize | None) = None,
+        limit': (USize | None) = None
+    ) =>
+        content = content'
+        author_id = author_id'
+        channel_id = channel_id'
+        mentions = mentions'
+        max_id = max_id'
+        min_id = min_id'
+        include_nsfw = include_nsfw'
+        offset = offset'
+        limit = limit'
+
+    fun to_query(): RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match content
+        | let content': String => query.push(("content", content'))
+        end
+
+        match author_id
+        | let author_id': Array[Snowflake] val =>
+            for id in author_id'.values() do query.push(("author_id", id.string())) end
+        end
+
+        match channel_id
+        | let channel_id': Array[Snowflake] val =>
+            for id in channel_id'.values() do query.push(("channel_id", id.string())) end
+        end
+
+        match mentions
+        | let mentions': Array[Snowflake] val =>
+            for id in mentions'.values() do query.push(("mentions", id.string())) end
+        end
+
+        match max_id
+        | let max_id': Snowflake => query.push(("max_id", max_id'.string()))
+        end
+
+        match min_id
+        | let min_id': Snowflake => query.push(("min_id", min_id'.string()))
+        end
+
+        match include_nsfw
+        | let include_nsfw': Bool => query.push(("include_nsfw", include_nsfw'.string()))
+        end
+
+        match offset
+        | let offset': USize => query.push(("offset", offset'.string()))
+        end
+
+        match limit
+        | let limit': USize => query.push(("limit", limit'.string()))
+        end
+
+        consume query
+
+class val CreateMessageParams
+    """
+    https://docs.discord.com/developers/resources/message#create-message-jsonform-params
+
+    One of `content`, `embeds`, `sticker_ids`, `components`, `files` or `poll` is required.
+
+    Files are uploaded as a `multipart/form-data` body; only the JSON portion of such a request is serialised here.
+    """
+
+    let content: (String | None)
+        """
+        Message contents (up to 2000 characters)
+        """
+
+    let nonce: (String | None)
+        """
+        Can be used to verify a message was sent (up to 25 characters). Value will appear in the Message Create Gateway event.
+        """
+
+    let tts: (Bool | None)
+        """
+        true if this is a TTS message
+        """
+
+    let embeds: (Array[MessageEmbed] val | None)
+        """
+        Up to 10 rich embeds (up to 6000 characters)
+        """
+
+    let allowed_mentions: (AllowedMentions | None)
+        """
+        Allowed mentions for the message
+        """
+
+    let message_reference: (MessageReference | None)
+        """
+        Include to make your message a reply or a forward
+        """
+
+    let components: (Array[Component] val | None)
+        """
+        Components to include with the message
+        """
+
+    let sticker_ids: (Array[Snowflake] val | None)
+        """
+        IDs of up to 3 stickers in the server to send in the message
+        """
+
+    let attachments: (Array[MessageAttachmentParams] val | None)
+        """
+        Attachment objects with `filename` and `description`
+        """
+
+    let flags: (Array[MessageFlag] val | None)
+        """
+        Message flags combined as a bitfield (only `SUPPRESS_EMBEDS`, `SUPPRESS_NOTIFICATIONS` and `IS_COMPONENTS_V2` can be set)
+        """
+
+    let enforce_nonce: (Bool | None)
+        """
+        If true and nonce is present, it will be checked for uniqueness in the past few minutes. If another message was created by the same author with the same nonce, that message will be returned and no new message will be created.
+        """
+
+    let poll: (PollParams | None)
+        """
+        A poll!
+        """
+
+    new val create(
+        content': (String | None) = None,
+        nonce': (String | None) = None,
+        tts': (Bool | None) = None,
+        embeds': (Array[MessageEmbed] val | None) = None,
+        allowed_mentions': (AllowedMentions | None) = None,
+        message_reference': (MessageReference | None) = None,
+        components': (Array[Component] val | None) = None,
+        sticker_ids': (Array[Snowflake] val | None) = None,
+        attachments': (Array[MessageAttachmentParams] val | None) = None,
+        flags': (Array[MessageFlag] val | None) = None,
+        enforce_nonce': (Bool | None) = None,
+        poll': (PollParams | None) = None
+    ) =>
+        content = content'
+        nonce = nonce'
+        tts = tts'
+        embeds = embeds'
+        allowed_mentions = allowed_mentions'
+        message_reference = message_reference'
+        components = components'
+        sticker_ids = sticker_ids'
+        attachments = attachments'
+        flags = flags'
+        enforce_nonce = enforce_nonce'
+        poll = poll'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match content
+        | let content': String => obj = obj.update("content", content')
+        end
+
+        match nonce
+        | let nonce': String => obj = obj.update("nonce", nonce')
+        end
+
+        match tts
+        | let tts': Bool => obj = obj.update("tts", tts')
+        end
+
+        match embeds
+        | let embeds': Array[MessageEmbed] val => obj = obj.update("embeds", _MessageEmbeds.to_json(embeds'))
+        end
+
+        match allowed_mentions
+        | let allowed_mentions': AllowedMentions => obj = obj.update("allowed_mentions", allowed_mentions'.to_json())
+        end
+
+        match message_reference
+        | let message_reference': MessageReference => obj = obj.update("message_reference", message_reference'.to_json())
+        end
+
+        match components
+        | let components': Array[Component] val => obj = obj.update("components", _Components.to_json(components'))
+        end
+
+        match sticker_ids
+        | let sticker_ids': Array[Snowflake] val => obj = obj.update("sticker_ids", _Snowflakes.to_json(sticker_ids'))
+        end
+
+        match attachments
+        | let attachments': Array[MessageAttachmentParams] val => obj = obj.update("attachments", _MessageAttachmentParams.to_json(attachments'))
+        end
+
+        match flags
+        | let flags': Array[MessageFlag] val => obj = obj.update("flags", _MessageFlags.to_json(flags'))
+        end
+
+        match enforce_nonce
+        | let enforce_nonce': Bool => obj = obj.update("enforce_nonce", enforce_nonce')
+        end
+
+        match poll
+        | let poll': PollParams => obj = obj.update("poll", poll'.to_json())
+        end
+
+        obj
+
+class val ForumThreadMessageParams
+    """
+    https://docs.discord.com/developers/resources/channel#start-thread-in-forum-or-media-channel-forum-and-media-thread-message-params-object
+
+    The contents of the first message in a forum or media thread. One of `content`, `embeds`, `sticker_ids`, `components` or `files` is required.
+    """
+
+    let content: (String | None)
+        """
+        Message contents (up to 2000 characters)
+        """
+
+    let embeds: (Array[MessageEmbed] val | None)
+        """
+        Up to 10 rich embeds (up to 6000 characters)
+        """
+
+    let allowed_mentions: (AllowedMentions | None)
+        """
+        Allowed mentions for the message
+        """
+
+    let components: (Array[Component] val | None)
+        """
+        Components to include with the message
+        """
+
+    let sticker_ids: (Array[Snowflake] val | None)
+        """
+        IDs of up to 3 stickers in the server to send in the message
+        """
+
+    let attachments: (Array[MessageAttachmentParams] val | None)
+        """
+        Attachment objects with `filename` and `description`
+        """
+
+    let flags: (Array[MessageFlag] val | None)
+        """
+        Message flags combined as a bitfield (only `SUPPRESS_EMBEDS` and `SUPPRESS_NOTIFICATIONS` can be set)
+        """
+
+    new val create(
+        content': (String | None) = None,
+        embeds': (Array[MessageEmbed] val | None) = None,
+        allowed_mentions': (AllowedMentions | None) = None,
+        components': (Array[Component] val | None) = None,
+        sticker_ids': (Array[Snowflake] val | None) = None,
+        attachments': (Array[MessageAttachmentParams] val | None) = None,
+        flags': (Array[MessageFlag] val | None) = None
+    ) =>
+        content = content'
+        embeds = embeds'
+        allowed_mentions = allowed_mentions'
+        components = components'
+        sticker_ids = sticker_ids'
+        attachments = attachments'
+        flags = flags'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match content
+        | let content': String => obj = obj.update("content", content')
+        end
+
+        match embeds
+        | let embeds': Array[MessageEmbed] val => obj = obj.update("embeds", _MessageEmbeds.to_json(embeds'))
+        end
+
+        match allowed_mentions
+        | let allowed_mentions': AllowedMentions => obj = obj.update("allowed_mentions", allowed_mentions'.to_json())
+        end
+
+        match components
+        | let components': Array[Component] val => obj = obj.update("components", _Components.to_json(components'))
+        end
+
+        match sticker_ids
+        | let sticker_ids': Array[Snowflake] val => obj = obj.update("sticker_ids", _Snowflakes.to_json(sticker_ids'))
+        end
+
+        match attachments
+        | let attachments': Array[MessageAttachmentParams] val => obj = obj.update("attachments", _MessageAttachmentParams.to_json(attachments'))
+        end
+
+        match flags
+        | let flags': Array[MessageFlag] val => obj = obj.update("flags", _MessageFlags.to_json(flags'))
+        end
+
+        obj
+
+class val GetReactionsParams
+    """
+    https://docs.discord.com/developers/resources/message#get-reactions-query-string-params
+    """
+
+    let type': (MessageReactionType | None)
+        """
+        The type of reaction
+        """
+
+    let after: (Snowflake | None)
+        """
+        Get users after this user ID
+        """
+
+    let limit: (USize | None)
+        """
+        Max number of users to return (1-100). Defaults to 25.
+        """
+
+    new val create(
+        type'': (MessageReactionType | None) = None,
+        after': (Snowflake | None) = None,
+        limit': (USize | None) = None
+    ) =>
+        type' = type''
+        after = after'
+        limit = limit'
+
+    fun to_query(): RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match type'
+        | let type'': MessageReactionType => query.push(("type", type''.value().string()))
+        end
+
+        match after
+        | let after': Snowflake => query.push(("after", after'.string()))
+        end
+
+        match limit
+        | let limit': USize => query.push(("limit", limit'.string()))
+        end
+
+        consume query
+
+trait val MessageReactionType is (collections.Hashable & Equatable[MessageReactionType])
+    """
+    https://docs.discord.com/developers/resources/message#get-reactions-reaction-types
+    """
+
+    fun value(): U8
+
+    fun hash(): USize => value().hash()
+
+    fun eq(that: MessageReactionType): Bool => value() == that.value()
+primitive NormalMessageReactionType is MessageReactionType
+    fun value(): U8 => 0
+primitive BurstMessageReactionType is MessageReactionType
+    fun value(): U8 => 1
+primitive MessageReactionTypes
+    fun from(value: U8): MessageReactionType ? =>
+        match value
+        | 0 => NormalMessageReactionType
+        | 1 => BurstMessageReactionType
+        else error
+        end
+
+class val UpdateMessageParams
+    """
+    https://docs.discord.com/developers/resources/message#edit-message-jsonform-params
+
+    All parameters to this endpoint are optional and nullable.
+
+    Files are uploaded as a `multipart/form-data` body; only the JSON portion of such a request is serialised here.
+    """
+
+    let content: Nullable[String]
+        """
+        Message contents (up to 2000 characters)
+        """
+
+    let embeds: Nullable[Array[MessageEmbed] val]
+        """
+        Up to 10 rich embeds (up to 6000 characters)
+        """
+
+    let flags: Nullable[Array[MessageFlag] val]
+        """
+        Edit the flags of a message (only `SUPPRESS_EMBEDS` and `IS_COMPONENTS_V2` can currently be set/unset)
+        """
+
+    let allowed_mentions: Nullable[AllowedMentions]
+        """
+        Allowed mentions for the message
+        """
+
+    let components: Nullable[Array[Component] val]
+        """
+        Components to include with the message
+        """
+
+    let attachments: Nullable[Array[MessageAttachmentParams] val]
+        """
+        Attached files to keep and possible descriptions for new files
+        """
+
+    new val create(
+        content': Nullable[String] = None,
+        embeds': Nullable[Array[MessageEmbed] val] = None,
+        flags': Nullable[Array[MessageFlag] val] = None,
+        allowed_mentions': Nullable[AllowedMentions] = None,
+        components': Nullable[Array[Component] val] = None,
+        attachments': Nullable[Array[MessageAttachmentParams] val] = None
+    ) =>
+        content = content'
+        embeds = embeds'
+        flags = flags'
+        allowed_mentions = allowed_mentions'
+        components = components'
+        attachments = attachments'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match content
+        | let content': String => obj = obj.update("content", content')
+        | Null => obj = obj.update("content", None)
+        end
+
+        match embeds
+        | let embeds': Array[MessageEmbed] val => obj = obj.update("embeds", _MessageEmbeds.to_json(embeds'))
+        | Null => obj = obj.update("embeds", None)
+        end
+
+        match flags
+        | let flags': Array[MessageFlag] val => obj = obj.update("flags", _MessageFlags.to_json(flags'))
+        | Null => obj = obj.update("flags", None)
+        end
+
+        match allowed_mentions
+        | let allowed_mentions': AllowedMentions => obj = obj.update("allowed_mentions", allowed_mentions'.to_json())
+        | Null => obj = obj.update("allowed_mentions", None)
+        end
+
+        match components
+        | let components': Array[Component] val => obj = obj.update("components", _Components.to_json(components'))
+        | Null => obj = obj.update("components", None)
+        end
+
+        match attachments
+        | let attachments': Array[MessageAttachmentParams] val => obj = obj.update("attachments", _MessageAttachmentParams.to_json(attachments'))
+        | Null => obj = obj.update("attachments", None)
+        end
+
+        obj
+
+class val BulkDeleteMessagesParams
+    """
+    https://docs.discord.com/developers/resources/message#bulk-delete-messages-json-params
+
+    This endpoint will not delete messages older than 2 weeks, and will fail with a 400 BAD REQUEST if any message provided is older than that or if any duplicate message IDs are provided.
+    """
+
+    let messages: Array[Snowflake] val
+        """
+        an array of message ids to delete (2-100)
+        """
+
+    new val create(messages': Array[Snowflake] val) =>
+        messages = messages'
+
+    fun to_json(): json.JsonObject =>
+        json.JsonObject.update("messages", _Snowflakes.to_json(messages))
+
+class val GetChannelPinsParams
+    """
+    https://docs.discord.com/developers/resources/message#get-channel-pins-query-string-params
+    """
+
+    let before: (ISO8601 | None)
+        """
+        Get messages pinned before this timestamp
+        """
+
+    let limit: (USize | None)
+        """
+        Maximum number of pins to return (1-50). Defaults to 50.
+        """
+
+    new val create(before': (ISO8601 | None) = None, limit': (USize | None) = None) =>
+        before = before'
+        limit = limit'
+
+    fun to_query(): RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match before
+        | let before': ISO8601 => query.push(("before", before'))
+        end
+
+        match limit
+        | let limit': USize => query.push(("limit", limit'.string()))
+        end
+
+        consume query

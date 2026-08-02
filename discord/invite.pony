@@ -389,3 +389,67 @@ class val InviteStageInstance
             .update("participant_count", participant_count.i64())
             .update("speaker_count", speaker_count.i64())
             .update("topic", topic)
+
+class val GetInviteParams
+    """
+    https://docs.discord.com/developers/resources/invite#get-invite-query-string-params
+    """
+
+    let with_counts: (Bool | None)
+        """
+        whether the invite should contain approximate member counts
+        """
+
+    let with_expiration: (Bool | None)
+        """
+        whether the invite should contain the expiration date
+        """
+
+    let guild_scheduled_event_id: (Snowflake | None)
+        """
+        the guild scheduled event to include with the invite
+        """
+
+    new val create(
+        with_counts': (Bool | None) = None,
+        with_expiration': (Bool | None) = None,
+        guild_scheduled_event_id': (Snowflake | None) = None
+    ) =>
+        with_counts = with_counts'
+        with_expiration = with_expiration'
+        guild_scheduled_event_id = guild_scheduled_event_id'
+
+    fun to_query(): RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match with_counts
+        | let with_counts': Bool => query.push(("with_counts", with_counts'.string()))
+        end
+
+        match with_expiration
+        | let with_expiration': Bool => query.push(("with_expiration", with_expiration'.string()))
+        end
+
+        match guild_scheduled_event_id
+        | let guild_scheduled_event_id': Snowflake => query.push(("guild_scheduled_event_id", guild_scheduled_event_id'.string()))
+        end
+
+        consume query
+
+class val UpdateInviteTargetUsersParams
+    """
+    https://docs.discord.com/developers/resources/invite#update-target-users-json-params
+
+    Replaces the set of users an invite is targeted at.
+    """
+
+    let user_ids: Array[Snowflake] val
+        """
+        the ids of the users to target with this invite
+        """
+
+    new val create(user_ids': Array[Snowflake] val) =>
+        user_ids = user_ids'
+
+    fun to_json(): json.JsonObject =>
+        json.JsonObject.update("user_ids", _Snowflakes.to_json(user_ids))

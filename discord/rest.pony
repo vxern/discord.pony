@@ -2,11 +2,36 @@ use courier = "courier"
 use collections = "collections"
 use json = "json"
 
-// TODO(vxern): This is temporary.
-class val ParamsStub
-    fun to_query(): Array[(String, String)] val => []
-    fun to_body(): String => ""
 type Reason is (String | None)
+
+primitive Null
+    """
+    https://docs.discord.com/developers/reference#nullable-and-optional-resource-fields
+
+    Serialised as JSON `null`, explicitly clearing a field. Distinct from `None`, which omits the field from the request body altogether.
+    """
+
+type Nullable[A: Any val] is (A | Null | None)
+    """
+    A request field Discord documents as nullable: it may carry a value, be cleared with `Null`, or be left out entirely with `None`.
+
+    Discord treats the two absences differently — sending `null` resets the field to its default, whereas omitting the key leaves the current value untouched — so the distinction cannot be collapsed.
+    """
+
+primitive _CommaSeparated
+    """
+    Joins values for query parameters documented as comma-delimited sets.
+    """
+
+    fun apply(ids: Array[Snowflake] val): String =>
+        var buffer = recover iso String end
+        var first = true
+        for id in ids.values() do
+            if not first then buffer.push(',') end
+            first = false
+            buffer.append(id.string())
+        end
+        consume buffer
 
 class Rest
     let options: RestOptions

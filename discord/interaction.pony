@@ -1000,3 +1000,606 @@ class val InteractionCallbackActivityInstanceResource
     fun to_json(): json.JsonObject =>
         json.JsonObject
             .update("id", id)
+
+type InteractionCallbackData is (InteractionCallbackMessageParams | InteractionCallbackAutocompleteParams | InteractionCallbackModalParams)
+    """
+    https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-response-object-interaction-callback-data-structures
+
+    Which of the three shapes is expected is determined by the `type` of the interaction response rather than by a tag on the data itself.
+    """
+
+class val InteractionCallbackMessageParams
+    """
+    https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-response-object-messages
+
+    Not all message fields are currently supported.
+    """
+
+    let tts: (Bool | None)
+        """
+        is the response TTS
+        """
+
+    let content: (String | None)
+        """
+        message content
+        """
+
+    let embeds: (Array[MessageEmbed] val | None)
+        """
+        supports up to 10 embeds
+        """
+
+    let allowed_mentions: (AllowedMentions | None)
+        """
+        allowed mentions object
+        """
+
+    let flags: (Array[MessageFlag] val | None)
+        """
+        message flags combined as a bitfield (only `SUPPRESS_EMBEDS`, `EPHEMERAL` and `IS_COMPONENTS_V2` can be set)
+        """
+
+    let components: (Array[Component] val | None)
+        """
+        message components
+        """
+
+    let attachments: (Array[MessageAttachmentParams] val | None)
+        """
+        attachment objects with `filename` and `description`
+        """
+
+    let poll: (PollParams | None)
+        """
+        details about the poll
+        """
+
+    new val create(
+        tts': (Bool | None) = None,
+        content': (String | None) = None,
+        embeds': (Array[MessageEmbed] val | None) = None,
+        allowed_mentions': (AllowedMentions | None) = None,
+        flags': (Array[MessageFlag] val | None) = None,
+        components': (Array[Component] val | None) = None,
+        attachments': (Array[MessageAttachmentParams] val | None) = None,
+        poll': (PollParams | None) = None
+    ) =>
+        tts = tts'
+        content = content'
+        embeds = embeds'
+        allowed_mentions = allowed_mentions'
+        flags = flags'
+        components = components'
+        attachments = attachments'
+        poll = poll'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match tts
+        | let tts': Bool => obj = obj.update("tts", tts')
+        end
+
+        match content
+        | let content': String => obj = obj.update("content", content')
+        end
+
+        match embeds
+        | let embeds': Array[MessageEmbed] val => obj = obj.update("embeds", _MessageEmbeds.to_json(embeds'))
+        end
+
+        match allowed_mentions
+        | let allowed_mentions': AllowedMentions => obj = obj.update("allowed_mentions", allowed_mentions'.to_json())
+        end
+
+        match flags
+        | let flags': Array[MessageFlag] val => obj = obj.update("flags", _MessageFlags.to_json(flags'))
+        end
+
+        match components
+        | let components': Array[Component] val => obj = obj.update("components", _Components.to_json(components'))
+        end
+
+        match attachments
+        | let attachments': Array[MessageAttachmentParams] val => obj = obj.update("attachments", _MessageAttachmentParams.to_json(attachments'))
+        end
+
+        match poll
+        | let poll': PollParams => obj = obj.update("poll", poll'.to_json())
+        end
+
+        obj
+
+class val InteractionCallbackAutocompleteParams
+    """
+    https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-response-object-autocomplete
+    """
+
+    let choices: Array[ApplicationCommandOptionChoice] val
+        """
+        autocomplete choices (max of 25 choices)
+        """
+
+    new val create(choices': Array[ApplicationCommandOptionChoice] val) =>
+        choices = choices'
+
+    fun to_json(): json.JsonObject =>
+        json.JsonObject.update("choices", _ApplicationCommandOptionChoices.to_json(choices))
+
+class val InteractionCallbackModalParams
+    """
+    https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-response-object-modal
+    """
+
+    let custom_id: String
+        """
+        Developer-defined identifier for the modal, max 100 characters
+        """
+
+    let title: String
+        """
+        Title of the popup modal, max 45 characters
+        """
+
+    let components: Array[Component] val
+        """
+        Components that make up the modal
+        """
+
+    new val create(custom_id': String, title': String, components': Array[Component] val) =>
+        custom_id = custom_id'
+        title = title'
+        components = components'
+
+    fun to_json(): json.JsonObject =>
+        json.JsonObject
+            .update("custom_id", custom_id)
+            .update("title", title)
+            .update("components", _Components.to_json(components))
+
+class val CreateInteractionResponseParams
+    """
+    https://docs.discord.com/developers/interactions/receiving-and-responding#create-interaction-response
+
+    This endpoint takes both a query string parameter and a JSON body.
+    """
+
+    let type': InteractionCallbackType
+        """
+        the type of response
+        """
+
+    let data: (InteractionCallbackData | None)
+        """
+        an optional response message
+
+        The shape expected depends on `type`.
+        """
+
+    let with_response: (Bool | None)
+        """
+        whether to include an interaction callback response object as the response (defaults to `false`)
+        """
+
+    new val create(
+        type'': InteractionCallbackType,
+        data': (InteractionCallbackData | None) = None,
+        with_response': (Bool | None) = None
+    ) =>
+        type' = type''
+        data = data'
+        with_response = with_response'
+
+    fun to_query(): RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match with_response
+        | let with_response': Bool => query.push(("with_response", with_response'.string()))
+        end
+
+        consume query
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject.update("type", type'.value().i64())
+
+        match data
+        | let data': InteractionCallbackMessageParams => obj = obj.update("data", data'.to_json())
+        | let data': InteractionCallbackAutocompleteParams => obj = obj.update("data", data'.to_json())
+        | let data': InteractionCallbackModalParams => obj = obj.update("data", data'.to_json())
+        end
+
+        obj
+
+class val GetOriginalInteractionResponseParams
+    """
+    https://docs.discord.com/developers/interactions/receiving-and-responding#get-original-interaction-response
+
+    Functions the same as Get Webhook Message.
+    """
+
+    let thread_id: (Snowflake | None)
+        """
+        id of the thread the message is in
+        """
+
+    new val create(thread_id': (Snowflake | None) = None) =>
+        thread_id = thread_id'
+
+    fun to_query(): RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match thread_id
+        | let thread_id': Snowflake => query.push(("thread_id", thread_id'.string()))
+        end
+
+        consume query
+
+class val UpdateOriginalInteractionResponseParams
+    """
+    https://docs.discord.com/developers/interactions/receiving-and-responding#edit-original-interaction-response
+
+    Functions the same as Edit Webhook Message, and so takes both query string parameters and a JSON body.
+    """
+
+    let content: Nullable[String]
+        """
+        the message contents (up to 2000 characters)
+        """
+
+    let embeds: Nullable[Array[MessageEmbed] val]
+        """
+        array of up to 10 embeds
+        """
+
+    let allowed_mentions: Nullable[AllowedMentions]
+        """
+        allowed mentions for the message
+        """
+
+    let components: Nullable[Array[Component] val]
+        """
+        the components to include with the message
+        """
+
+    let attachments: Nullable[Array[MessageAttachmentParams] val]
+        """
+        attached files to keep and possible descriptions for new files
+        """
+
+    let flags: (Array[MessageFlag] val | None)
+        """
+        message flags combined as a bitfield (only `SUPPRESS_EMBEDS` and `IS_COMPONENTS_V2` can be set)
+        """
+
+    let thread_id: (Snowflake | None)
+        """
+        id of the thread the message is in
+        """
+
+    let with_components: (Bool | None)
+        """
+        whether to respect the `components` field of the request (defaults to `false`; when `false`, only components without custom_id are allowed)
+        """
+
+    new val create(
+        content': Nullable[String] = None,
+        embeds': Nullable[Array[MessageEmbed] val] = None,
+        allowed_mentions': Nullable[AllowedMentions] = None,
+        components': Nullable[Array[Component] val] = None,
+        attachments': Nullable[Array[MessageAttachmentParams] val] = None,
+        flags': (Array[MessageFlag] val | None) = None,
+        thread_id': (Snowflake | None) = None,
+        with_components': (Bool | None) = None
+    ) =>
+        content = content'
+        embeds = embeds'
+        allowed_mentions = allowed_mentions'
+        components = components'
+        attachments = attachments'
+        flags = flags'
+        thread_id = thread_id'
+        with_components = with_components'
+
+    fun to_query(): RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match thread_id
+        | let thread_id': Snowflake => query.push(("thread_id", thread_id'.string()))
+        end
+
+        match with_components
+        | let with_components': Bool => query.push(("with_components", with_components'.string()))
+        end
+
+        consume query
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match content
+        | let content': String => obj = obj.update("content", content')
+        | Null => obj = obj.update("content", None)
+        end
+
+        match embeds
+        | let embeds': Array[MessageEmbed] val => obj = obj.update("embeds", _MessageEmbeds.to_json(embeds'))
+        | Null => obj = obj.update("embeds", None)
+        end
+
+        match allowed_mentions
+        | let allowed_mentions': AllowedMentions => obj = obj.update("allowed_mentions", allowed_mentions'.to_json())
+        | Null => obj = obj.update("allowed_mentions", None)
+        end
+
+        match components
+        | let components': Array[Component] val => obj = obj.update("components", _Components.to_json(components'))
+        | Null => obj = obj.update("components", None)
+        end
+
+        match attachments
+        | let attachments': Array[MessageAttachmentParams] val => obj = obj.update("attachments", _MessageAttachmentParams.to_json(attachments'))
+        | Null => obj = obj.update("attachments", None)
+        end
+
+        match flags
+        | let flags': Array[MessageFlag] val => obj = obj.update("flags", _MessageFlags.to_json(flags'))
+        end
+
+        obj
+
+class val CreateFollowupMessageParams
+    """
+    https://docs.discord.com/developers/interactions/receiving-and-responding#create-followup-message
+
+    Functions the same as Execute Webhook, and so takes both query string parameters and a JSON body, but `wait` is always true. The `thread_id`, `avatar_url` and `username` parameters are not supported when using this endpoint for interaction followups.
+    """
+
+    let content: (String | None)
+        """
+        the message contents (up to 2000 characters)
+        """
+
+    let tts: (Bool | None)
+        """
+        true if this is a TTS message
+        """
+
+    let embeds: (Array[MessageEmbed] val | None)
+        """
+        array of up to 10 embeds
+        """
+
+    let allowed_mentions: (AllowedMentions | None)
+        """
+        allowed mentions for the message
+        """
+
+    let components: (Array[Component] val | None)
+        """
+        the components to include with the message
+        """
+
+    let attachments: (Array[MessageAttachmentParams] val | None)
+        """
+        attachment objects with `filename` and `description`
+        """
+
+    let flags: (Array[MessageFlag] val | None)
+        """
+        message flags combined as a bitfield (only `SUPPRESS_EMBEDS`, `EPHEMERAL` and `IS_COMPONENTS_V2` can be set)
+        """
+
+    let poll: (PollParams | None)
+        """
+        A poll!
+        """
+
+    let with_components: (Bool | None)
+        """
+        whether to respect the `components` field of the request (defaults to `false`; when `false`, only components without custom_id are allowed)
+        """
+
+    new val create(
+        content': (String | None) = None,
+        tts': (Bool | None) = None,
+        embeds': (Array[MessageEmbed] val | None) = None,
+        allowed_mentions': (AllowedMentions | None) = None,
+        components': (Array[Component] val | None) = None,
+        attachments': (Array[MessageAttachmentParams] val | None) = None,
+        flags': (Array[MessageFlag] val | None) = None,
+        poll': (PollParams | None) = None,
+        with_components': (Bool | None) = None
+    ) =>
+        content = content'
+        tts = tts'
+        embeds = embeds'
+        allowed_mentions = allowed_mentions'
+        components = components'
+        attachments = attachments'
+        flags = flags'
+        poll = poll'
+        with_components = with_components'
+
+    fun to_query(): RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match with_components
+        | let with_components': Bool => query.push(("with_components", with_components'.string()))
+        end
+
+        consume query
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match content
+        | let content': String => obj = obj.update("content", content')
+        end
+
+        match tts
+        | let tts': Bool => obj = obj.update("tts", tts')
+        end
+
+        match embeds
+        | let embeds': Array[MessageEmbed] val => obj = obj.update("embeds", _MessageEmbeds.to_json(embeds'))
+        end
+
+        match allowed_mentions
+        | let allowed_mentions': AllowedMentions => obj = obj.update("allowed_mentions", allowed_mentions'.to_json())
+        end
+
+        match components
+        | let components': Array[Component] val => obj = obj.update("components", _Components.to_json(components'))
+        end
+
+        match attachments
+        | let attachments': Array[MessageAttachmentParams] val => obj = obj.update("attachments", _MessageAttachmentParams.to_json(attachments'))
+        end
+
+        match flags
+        | let flags': Array[MessageFlag] val => obj = obj.update("flags", _MessageFlags.to_json(flags'))
+        end
+
+        match poll
+        | let poll': PollParams => obj = obj.update("poll", poll'.to_json())
+        end
+
+        obj
+
+class val GetFollowupMessageParams
+    """
+    https://docs.discord.com/developers/interactions/receiving-and-responding#get-followup-message
+
+    Functions the same as Get Webhook Message.
+    """
+
+    let thread_id: (Snowflake | None)
+        """
+        id of the thread the message is in
+        """
+
+    new val create(thread_id': (Snowflake | None) = None) =>
+        thread_id = thread_id'
+
+    fun to_query(): RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match thread_id
+        | let thread_id': Snowflake => query.push(("thread_id", thread_id'.string()))
+        end
+
+        consume query
+
+class val UpdateFollowupMessageParams
+    """
+    https://docs.discord.com/developers/interactions/receiving-and-responding#edit-followup-message
+
+    Functions the same as Edit Webhook Message, and so takes both query string parameters and a JSON body.
+    """
+
+    let content: Nullable[String]
+        """
+        the message contents (up to 2000 characters)
+        """
+
+    let embeds: Nullable[Array[MessageEmbed] val]
+        """
+        array of up to 10 embeds
+        """
+
+    let allowed_mentions: Nullable[AllowedMentions]
+        """
+        allowed mentions for the message
+        """
+
+    let components: Nullable[Array[Component] val]
+        """
+        the components to include with the message
+        """
+
+    let attachments: Nullable[Array[MessageAttachmentParams] val]
+        """
+        attached files to keep and possible descriptions for new files
+        """
+
+    let flags: (Array[MessageFlag] val | None)
+        """
+        message flags combined as a bitfield (only `SUPPRESS_EMBEDS` and `IS_COMPONENTS_V2` can be set)
+        """
+
+    let thread_id: (Snowflake | None)
+        """
+        id of the thread the message is in
+        """
+
+    let with_components: (Bool | None)
+        """
+        whether to respect the `components` field of the request (defaults to `false`; when `false`, only components without custom_id are allowed)
+        """
+
+    new val create(
+        content': Nullable[String] = None,
+        embeds': Nullable[Array[MessageEmbed] val] = None,
+        allowed_mentions': Nullable[AllowedMentions] = None,
+        components': Nullable[Array[Component] val] = None,
+        attachments': Nullable[Array[MessageAttachmentParams] val] = None,
+        flags': (Array[MessageFlag] val | None) = None,
+        thread_id': (Snowflake | None) = None,
+        with_components': (Bool | None) = None
+    ) =>
+        content = content'
+        embeds = embeds'
+        allowed_mentions = allowed_mentions'
+        components = components'
+        attachments = attachments'
+        flags = flags'
+        thread_id = thread_id'
+        with_components = with_components'
+
+    fun to_query(): RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match thread_id
+        | let thread_id': Snowflake => query.push(("thread_id", thread_id'.string()))
+        end
+
+        match with_components
+        | let with_components': Bool => query.push(("with_components", with_components'.string()))
+        end
+
+        consume query
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match content
+        | let content': String => obj = obj.update("content", content')
+        | Null => obj = obj.update("content", None)
+        end
+
+        match embeds
+        | let embeds': Array[MessageEmbed] val => obj = obj.update("embeds", _MessageEmbeds.to_json(embeds'))
+        | Null => obj = obj.update("embeds", None)
+        end
+
+        match allowed_mentions
+        | let allowed_mentions': AllowedMentions => obj = obj.update("allowed_mentions", allowed_mentions'.to_json())
+        | Null => obj = obj.update("allowed_mentions", None)
+        end
+
+        match components
+        | let components': Array[Component] val => obj = obj.update("components", _Components.to_json(components'))
+        | Null => obj = obj.update("components", None)
+        end
+
+        match attachments
+        | let attachments': Array[MessageAttachmentParams] val => obj = obj.update("attachments", _MessageAttachmentParams.to_json(attachments'))
+        | Null => obj = obj.update("attachments", None)
+        end
+
+        match flags
+        | let flags': Array[MessageFlag] val => obj = obj.update("flags", _MessageFlags.to_json(flags'))
+        end
+
+        obj
