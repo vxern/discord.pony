@@ -1,6 +1,15 @@
 {
-  "packages": [],
-  "deps": [],
+  "packages": ["discord"],
+  "deps": [
+    {
+      "locator": "github.com/ponylang/lori.git",
+      "version": "0.16.1"
+    },
+    {
+      "locator": "github.com/ponylang/courier.git",
+      "version": "0.4.0"
+    }
+  ],
   "info": {
     "description": "A Discord API library for Pony.",
     "homepage": "https://github.com/vxern/discord.pony",
