@@ -16,7 +16,7 @@ interface tag ResponseReceiver
     be on_response_received(request: courier.HTTPRequest, response: courier.HTTPResponse)
 
 actor Bucket is ResponseReceiver
-    let _rest: Rest
+    let _api: RestApi
     let _id: String
     embed _queue: Queue[courier.HTTPRequest] = Queue[courier.HTTPRequest]
 
@@ -24,8 +24,8 @@ actor Bucket is ResponseReceiver
     var _requests_in_flight: USize = 0
     var _requests_remaining: USize = 1
     
-    new create(rest: Rest, id: String) =>
-        _rest = rest
+    new create(api: RestApi, id: String) =>
+        _api = api
         _id = id
 
     be enqueue(request: courier.HTTPRequest) =>
@@ -40,7 +40,7 @@ actor Bucket is ResponseReceiver
                 _requests_in_flight = _requests_in_flight + 1
                 _requests_remaining = _requests_remaining - 1
 
-                _rest.send_request(request, this)
+                _api.send_request(request, this)
             else
                 break
             end
