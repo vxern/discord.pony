@@ -106,17 +106,31 @@ class val RateLimit
 primitive RateLimitConstants
     fun global_rate_limit_max_count(): USize =>
         """
-        How many requests can be made.
+        How many requests can be made to the API.
         """
 
         50
 
     fun global_rate_limit_window_ms(): USize =>
         """
-        What window of time the requests can be made.
+        What window of time the requests can be made to the API in.
         """
 
-        1000
+        1000 // 1 second
+
+    fun cloudflare_rate_limit_max_count(): USize =>
+        """
+        How many requests can be made via Cloudflare's proxy.
+        """
+
+        10_000
+
+    fun cloudflare_rate_limit_window_ms(): USize =>
+        """
+        What window of time the requests can be made via Cloudflare's proxy in.
+        """
+
+        10 * 60 * 1000 // 10 minutes
 
     fun limit_header_name(): String => "X-RateLimit-Limit".lower()
 
