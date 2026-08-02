@@ -13,14 +13,14 @@ class Queue[A: Any #send]
     fun ref dequeue(): A^ ? => _queue.shift()?
 
 interface tag ResponseReceiver
-    be on_response_received(response: courier.HTTPResponse)
+    be on_response_received(request: courier.HTTPRequest, response: courier.HTTPResponse)
 
 actor Bucket is ResponseReceiver
     let _rest: Rest
     let _id: String
     embed _queue: Queue[courier.HTTPRequest] = Queue[courier.HTTPRequest]
 
-    var _rate_limit: (RateLimit | None) = None
+    var _rate_limit: (_RateLimit | None) = None
     var _requests_in_flight: USize = 0
     var _requests_remaining: USize = 1
     
@@ -46,24 +46,28 @@ actor Bucket is ResponseReceiver
             end
         end
     
-    be on_response_received(response: courier.HTTPResponse) =>
+    be on_response_received(request: courier.HTTPRequest, response: courier.HTTPResponse) =>
         _requests_in_flight = _requests_in_flight - 1
 
         // Not every response carries rate limit headers, which is fine.
         // In that case, we just default to the standard rate limit.
         try
-            let rate_limit = RateLimit.from_headers(response.headers)?
+            let rate_limit = _RateLimit.from_headers(response.headers)?
             if rate_limit.is_newer_than(_rate_limit) then
                 _rate_limit = rate_limit
                 _requests_remaining = rate_limit.remaining - _requests_in_flight.min(rate_limit.remaining)
             end
+        end
+
+        if response.status == 429 then
+            _queue.enqueue_at_beginning(request)
         end
         
         // TODO(vxern): Send the response back in a callback.
 
         _drain()
 
-class val RateLimit
+class val _RateLimit
     let limit: USize
     let remaining: USize
     let reset_s: F64
@@ -79,11 +83,11 @@ class val RateLimit
         
         for (key, value) in headers.values() do
             match key
-            | RateLimitConstants.limit_header_name() => limit' = value.usize()?
-            | RateLimitConstants.remaining_header_name() => remaining' = value.usize()?
-            | RateLimitConstants.reset_header_name() => reset_s' = value.f64()?
-            | RateLimitConstants.reset_after_header_name() => reset_after_s' = value.f64()?
-            | RateLimitConstants.bucket_header_name() => bucket' = value
+            | "x-ratelimit-limit" => limit' = value.usize()?
+            | "x-ratelimit-remaining" => remaining' = value.usize()?
+            | "x-ratelimit-reset" => reset_s' = value.f64()?
+            | "x-ratelimit-reset-After" => reset_after_s' = value.f64()?
+            | "x-ratelimit-bucket" => bucket' = value
             end
         end
 
@@ -93,9 +97,9 @@ class val RateLimit
         reset_after_s = reset_after_s' as F64
         bucket = bucket' as String
     
-    fun is_newer_than(other: (RateLimit | None)): Bool =>
+    fun is_newer_than(other: (_RateLimit | None)): Bool =>
         match other
-        | let other': RateLimit =>
+        | let other': _RateLimit =>
             (reset_s > other'.reset_s)
             or (reset_after_s < other'.reset_after_s)
             or (remaining < other'.remaining)
@@ -103,7 +107,7 @@ class val RateLimit
             true
         end
 
-primitive RateLimitConstants
+primitive _RateLimitConstants
     fun global_rate_limit_max_count(): USize =>
         """
         How many requests can be made to the API.
@@ -131,16 +135,6 @@ primitive RateLimitConstants
         """
 
         10 * 60 * 1000 // 10 minutes
-
-    fun limit_header_name(): String => "X-RateLimit-Limit".lower()
-
-    fun remaining_header_name(): String => "X-RateLimit-Remaining".lower()
-
-    fun reset_header_name(): String => "X-RateLimit-Reset".lower()
-
-    fun reset_after_header_name(): String => "X-RateLimit-Reset-After".lower()
-
-    fun bucket_header_name(): String => "X-RateLimit-Bucket".lower()
 
     fun global_header_name(): String => "X-RateLimit-Global".lower()
 
