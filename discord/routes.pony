@@ -39,14 +39,14 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/applications/@me"), handler)
 
-    be update_application(application: Application, handler: ResponseReceiver) =>
+    be update_application(params: UpdateApplicationParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/application#edit-current-application
 
         Edit properties of the app associated with the requesting bot user. Only properties that are passed will be updated. Returns the updated application object on success.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/applications/@me" where body = json.JsonPrinter.print(application.to_json())), handler)
+        api.send_request(options.build_request(courier.PATCH, "/applications/@me" where body = json.JsonPrinter.print(params.to_json())), handler)
 
     be get_application_activity_instance(application_id: Snowflake, activity_instance_id: Snowflake, handler: ResponseReceiver) =>
         """
@@ -57,7 +57,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/activity-instances/" + activity_instance_id.string()), handler)
 
-    be get_audit_log(guild_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be get_audit_log(guild_id: Snowflake, params: GetAuditLogParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/audit-log#get-guild-audit-log
 
@@ -86,23 +86,23 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/auto-moderation/rules/" + auto_moderation_rule_id.string()), handler)
 
-    be create_auto_moderation_rule(guild_id: Snowflake, params: ParamsStub, handler: ResponseReceiver, reason: Reason = None) =>
+    be create_auto_moderation_rule(guild_id: Snowflake, params: CreateAutoModerationRuleParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/auto-moderation#create-auto-moderation-rule
 
         Create a new rule. Returns an auto moderation rule on success. Fires an Auto Moderation Rule Create Gateway event.
         """
 
-        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/auto-moderation/rules" where body = params.to_body(), reason = reason), handler)
+        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/auto-moderation/rules" where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
-    be update_auto_moderation_rule(guild_id: Snowflake, auto_moderation_rule_id: Snowflake, params: ParamsStub, handler: ResponseReceiver, reason: Reason = None) =>
+    be update_auto_moderation_rule(guild_id: Snowflake, auto_moderation_rule_id: Snowflake, params: UpdateAutoModerationRuleParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/auto-moderation#modify-auto-moderation-rule
 
         Modify an existing rule. Returns an auto moderation rule on success. Fires an Auto Moderation Rule Update Gateway event.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/auto-moderation/rules/" + auto_moderation_rule_id.string() where body = params.to_body(), reason = reason), handler)
+        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/auto-moderation/rules/" + auto_moderation_rule_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
     be delete_auto_moderation_rule(guild_id: Snowflake, auto_moderation_rule_id: Snowflake, handler: ResponseReceiver, reason: Reason = None) =>
         """
@@ -122,23 +122,23 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string()), handler)
 
-    be update_channel(channel_id: Snowflake, params: ParamsStub, handler: ResponseReceiver, reason: Reason = None) =>
+    be update_channel(channel_id: Snowflake, params: UpdateChannelParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/channel#modify-channel
 
         Update a channel’s settings. Returns a channel on success, and a 400 BAD REQUEST on invalid parameters.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/channels/" + channel_id.string() where body = params.to_body(), reason = reason), handler)
+        api.send_request(options.build_request(courier.PATCH, "/channels/" + channel_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
-    be set_voice_channel_status(channel_id: Snowflake, params: ParamsStub, handler: ResponseReceiver, reason: Reason = None) =>
+    be set_voice_channel_status(channel_id: Snowflake, params: SetVoiceChannelStatusParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/channel#set-voice-channel-status
 
         Set a voice channel’s status. Requires the SET_VOICE_CHANNEL_STATUS permission, and additionally the MANAGE_CHANNELS permission if the current user is not connected to the voice channel. Fires a Voice Channel Status Update Gateway event.
         """
 
-        api.send_request(options.build_request(courier.PUT, "/channels/" + channel_id.string() + "/voice-status" where body = params.to_body(), reason = reason), handler)
+        api.send_request(options.build_request(courier.PUT, "/channels/" + channel_id.string() + "/voice-status" where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
     be delete_channel(channel_id: Snowflake, handler: ResponseReceiver, reason: Reason = None) =>
         """
@@ -149,14 +149,14 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() where reason = reason), handler)
 
-    be update_channel_permissions(channel_id: Snowflake, permission_overwrite_id: Snowflake, handler: ResponseReceiver, reason: Reason = None) =>
+    be update_channel_permissions(channel_id: Snowflake, permission_overwrite_id: Snowflake, params: UpdateChannelPermissionsParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/channel#edit-channel-permissions
 
         Edit the channel permission overwrites for a user or role in a channel. Only usable for guild channels. Requires the MANAGE_ROLES permission. Only permissions your bot has in the guild or parent channel (if applicable) can be allowed/denied (unless your bot has a MANAGE_ROLES overwrite in the channel). Returns a 204 empty response on success. Fires a Channel Update Gateway event. For more information about permissions, see permissions.
         """
 
-        api.send_request(options.build_request(courier.PUT, "/channels/" + channel_id.string() + "/permissions/" + permission_overwrite_id.string() where reason = reason), handler)
+        api.send_request(options.build_request(courier.PUT, "/channels/" + channel_id.string() + "/permissions/" + permission_overwrite_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
     be get_channel_invites(channel_id: Snowflake, handler: ResponseReceiver) =>
         """
@@ -167,14 +167,14 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/invites"), handler)
 
-    be create_channel_invite(channel_id: Snowflake, params: ParamsStub, handler: ResponseReceiver, reason: Reason = None) =>
+    be create_channel_invite(channel_id: Snowflake, params: CreateChannelInviteParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/channel#create-channel-invite
 
         Create a new invite object for the channel. Only usable for guild channels. Requires the CREATE_INSTANT_INVITE permission. All JSON parameters for this route are optional, however the request body is not. If you are not sending any fields, you still have to send an empty JSON object ({}). Returns an invite object. Fires an Invite Create Gateway event.
         """
 
-        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/invites" where body = params.to_body(), reason = reason), handler)
+        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/invites" where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
     be delete_channel_permission_overwrite(channel_id: Snowflake, permission_overwrite_id: Snowflake, handler: ResponseReceiver, reason: Reason = None) =>
         """
@@ -185,14 +185,14 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() + "/permissions/" + permission_overwrite_id.string() where reason = reason), handler)
 
-    be follow_announcement_channel(channel_id: Snowflake, params: ParamsStub, handler: ResponseReceiver, reason: Reason = None) =>
+    be follow_announcement_channel(channel_id: Snowflake, params: FollowAnnouncementChannelParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/channel#follow-announcement-channel
 
         Follow an Announcement Channel to send messages to a target channel. Requires the MANAGE_WEBHOOKS permission in the target channel. Returns a followed channel object. Fires a Webhooks Update Gateway event for the target channel.
         """
 
-        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/followers" where body = params.to_body(), reason = reason), handler)
+        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/followers" where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
     be trigger_typing_indicator(channel_id: Snowflake, handler: ResponseReceiver) =>
         """
@@ -205,14 +205,14 @@ actor Routes
 
         api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/typing"), handler)
 
-    be add_group_dm_recipient(channel_id: Snowflake, user_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be add_group_dm_recipient(channel_id: Snowflake, user_id: Snowflake, params: AddGroupDMRecipientParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/channel#group-dm-add-recipient
 
         Adds a recipient to a Group DM using their access token.
         """
 
-        api.send_request(options.build_request(courier.PUT, "/channels/" + channel_id.string() + "/recipients/" + user_id.string() where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.PUT, "/channels/" + channel_id.string() + "/recipients/" + user_id.string() where body = json.JsonPrinter.print(params.to_json())), handler)
 
     be remove_group_dm_recipient(channel_id: Snowflake, user_id: Snowflake, handler: ResponseReceiver) =>
         """
@@ -223,7 +223,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() + "/recipients/" + user_id.string()), handler)
 
-    be start_thread_from_message(channel_id: Snowflake, message_id: Snowflake, params: ParamsStub, handler: ResponseReceiver, reason: Reason = None) =>
+    be start_thread_from_message(channel_id: Snowflake, message_id: Snowflake, params: StartThreadFromMessageParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/channel#start-thread-from-message
 
@@ -232,18 +232,18 @@ actor Routes
         When called on a GUILD_TEXT channel, creates a PUBLIC_THREAD. When called on a GUILD_ANNOUNCEMENT channel, creates a ANNOUNCEMENT_THREAD. Does not work on a GUILD_FORUM or a GUILD_MEDIA channel. The id of the created thread will be the same as the id of the source message, and as such a message can only have a single thread created from it.
         """
 
-        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/messages/" + message_id.string() + "/threads" where body = params.to_body(), reason = reason), handler)
+        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/messages/" + message_id.string() + "/threads" where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
-    be start_thread_without_message(channel_id: Snowflake, params: ParamsStub, handler: ResponseReceiver, reason: Reason = None) =>
+    be start_thread_without_message(channel_id: Snowflake, params: StartThreadWithoutMessageParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/channel#start-thread-without-message
 
         Creates a new thread that is not connected to an existing message. Returns a channel on success, and a 400 BAD REQUEST on invalid parameters. Fires a Thread Create Gateway event.
         """
 
-        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/threads" where body = params.to_body(), reason = reason), handler)
+        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/threads" where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
-    be start_thread_in_forum_or_media_channel(channel_id: Snowflake, params: ParamsStub, handler: ResponseReceiver, reason: Reason = None) =>
+    be start_thread_in_forum_or_media_channel(channel_id: Snowflake, params: StartThreadInForumOrMediaChannelParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/channel#start-thread-in-forum-or-media-channel
 
@@ -258,7 +258,7 @@ actor Routes
         - Note that when sending a message, you must provide a value for at least one of content, embeds, sticker_ids, components, or files[n].
         """
 
-        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/threads" where body = params.to_body(), reason = reason), handler)
+        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/threads" where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
     be join_thread(channel_id: Snowflake, handler: ResponseReceiver) =>
         """
@@ -296,7 +296,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() + "/thread-members/" + user_id.string()), handler)
 
-    be get_thread_member(channel_id: Snowflake, user_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be get_thread_member(channel_id: Snowflake, user_id: Snowflake, params: GetThreadMemberParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/channel#get-thread-member
 
@@ -307,7 +307,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/thread-members/" + user_id.string() where query = params.to_query()), handler)
 
-    be get_thread_members(channel_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be get_thread_members(channel_id: Snowflake, params: GetThreadMembersParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/channel#list-thread-members
 
@@ -318,7 +318,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/thread-members" where query = params.to_query()), handler)
 
-    be get_public_archived_threads(channel_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be get_public_archived_threads(channel_id: Snowflake, params: GetPublicArchivedThreadsParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/channel#list-public-archived-threads
 
@@ -327,7 +327,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/threads/archived/public" where query = params.to_query()), handler)
 
-    be get_private_archived_threads(channel_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be get_private_archived_threads(channel_id: Snowflake, params: GetPrivateArchivedThreadsParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/channel#list-private-archived-threads
 
@@ -336,7 +336,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/threads/archived/private" where query = params.to_query()), handler)
 
-    be get_joined_private_archived_threads(channel_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be get_joined_private_archived_threads(channel_id: Snowflake, params: GetJoinedPrivateArchivedThreadsParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/channel#list-joined-private-archived-threads
 
@@ -363,23 +363,23 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/emojis/" + emoji_id.string()), handler)
 
-    be create_guild_emoji(guild_id: Snowflake, params: ParamsStub, handler: ResponseReceiver, reason: Reason = None) =>
+    be create_guild_emoji(guild_id: Snowflake, params: CreateGuildEmojiParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/emoji#create-guild-emoji
 
         Create a new emoji for the guild. Requires the CREATE_GUILD_EXPRESSIONS permission. Returns the new emoji object on success. Fires a Guild Emojis Update Gateway event.
         """
 
-        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/emojis" where body = params.to_body(), reason = reason), handler)
+        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/emojis" where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
-    be update_guild_emoji(guild_id: Snowflake, emoji_id: Snowflake, handler: ResponseReceiver, reason: Reason = None) =>
+    be update_guild_emoji(guild_id: Snowflake, emoji_id: Snowflake, params: UpdateGuildEmojiParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/emoji#modify-guild-emoji
 
         Modify the given emoji. For emojis created by the current user, requires either the CREATE_GUILD_EXPRESSIONS or MANAGE_GUILD_EXPRESSIONS permission. For other emojis, requires the MANAGE_GUILD_EXPRESSIONS permission. Returns the updated emoji object on success. Fires a Guild Emojis Update Gateway event.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/emojis/" + emoji_id.string() where reason = reason), handler)
+        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/emojis/" + emoji_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
     be delete_guild_emoji(guild_id: Snowflake, emoji_id: Snowflake, handler: ResponseReceiver, reason: Reason = None) =>
         """
@@ -408,23 +408,23 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/emojis/" + emoji_id.string()), handler)
 
-    be create_application_emoji(application_id: Snowflake, handler: ResponseReceiver) =>
+    be create_application_emoji(application_id: Snowflake, params: CreateApplicationEmojiParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/emoji#create-application-emoji
 
         Create a new emoji for the application. Returns the new emoji object on success.
         """
 
-        api.send_request(options.build_request(courier.POST, "/applications/" + application_id.string() + "/emojis"), handler)
+        api.send_request(options.build_request(courier.POST, "/applications/" + application_id.string() + "/emojis" where body = json.JsonPrinter.print(params.to_json())), handler)
 
-    be update_application_emoji(application_id: Snowflake, emoji_id: Snowflake, handler: ResponseReceiver) =>
+    be update_application_emoji(application_id: Snowflake, emoji_id: Snowflake, params: UpdateApplicationEmojiParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/emoji#modify-application-emoji
 
         Modify the given emoji. Returns the updated emoji object on success.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/applications/" + application_id.string() + "/emojis/" + emoji_id.string()), handler)
+        api.send_request(options.build_request(courier.PATCH, "/applications/" + application_id.string() + "/emojis/" + emoji_id.string() where body = json.JsonPrinter.print(params.to_json())), handler)
 
     be delete_application_emoji(application_id: Snowflake, emoji_id: Snowflake, handler: ResponseReceiver) =>
         """
@@ -435,7 +435,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/applications/" + application_id.string() + "/emojis/" + emoji_id.string()), handler)
 
-    be get_entitlements(application_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be get_entitlements(application_id: Snowflake, params: GetEntitlementsParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/entitlement#list-entitlements
 
@@ -464,7 +464,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.POST, "/applications/" + application_id.string() + "/entitlements/" + entitlement_id.string() + "/consume"), handler)
 
-    be create_test_entitlement(application_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be create_test_entitlement(application_id: Snowflake, params: CreateTestEntitlementParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/entitlement#create-test-entitlement
 
@@ -475,7 +475,7 @@ actor Routes
         After creating a test entitlement, you'll need to reload your Discord client. After doing so, you'll see that your server or user now has premium access.
         """
 
-        api.send_request(options.build_request(courier.POST, "/applications/" + application_id.string() + "/entitlements" where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.POST, "/applications/" + application_id.string() + "/entitlements" where body = json.JsonPrinter.print(params.to_json())), handler)
 
     be delete_test_entitlement(application_id: Snowflake, entitlement_id: Snowflake, handler: ResponseReceiver) =>
         """
@@ -488,7 +488,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/applications/" + application_id.string() + "/entitlements/" + entitlement_id.string()), handler)
 
-    be get_guild(guild_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be get_guild(guild_id: Snowflake, params: GetGuildParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/guild#get-guild
 
@@ -507,7 +507,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/preview"), handler)
 
-    be update_guild(guild_id: Snowflake, params: ParamsStub, handler: ResponseReceiver, reason: Reason = None) =>
+    be update_guild(guild_id: Snowflake, params: UpdateGuildParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/guild#modify-guild
 
@@ -520,7 +520,7 @@ actor Routes
         Attempting to add or remove the COMMUNITY guild feature requires the ADMINISTRATOR permission.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() where body = params.to_body(), reason = reason), handler)
+        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
     be get_guild_channels(guild_id: Snowflake, handler: ResponseReceiver) =>
         """
@@ -531,7 +531,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/channels"), handler)
 
-    be create_guild_channel(guild_id: Snowflake, params: ParamsStub, handler: ResponseReceiver, reason: Reason = None) =>
+    be create_guild_channel(guild_id: Snowflake, params: CreateGuildChannelParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/guild#create-guild-channel
 
@@ -542,9 +542,9 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/channels" where body = params.to_body(), reason = reason), handler)
+        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/channels" where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
-    be update_guild_channel_positions(guild_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be update_guild_channel_positions(guild_id: Snowflake, params: UpdateGuildChannelPositionsParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/guild#modify-guild-channel-positions
 
@@ -555,7 +555,7 @@ actor Routes
         This endpoint takes a JSON array of parameters in the following format:
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/channels" where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/channels" where body = json.JsonPrinter.print(params.to_json())), handler)
 
     be get_active_guild_threads(guild_id: Snowflake, handler: ResponseReceiver) =>
         """
@@ -575,7 +575,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/members/" + user_id.string()), handler)
 
-    be get_guild_members(guild_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be get_guild_members(guild_id: Snowflake, params: GetGuildMembersParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/guild#list-guild-members
 
@@ -588,7 +588,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/members" where query = params.to_query()), handler)
 
-    be search_guild_members(guild_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be search_guild_members(guild_id: Snowflake, params: SearchGuildMembersParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/guild#search-guild-members
 
@@ -599,7 +599,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/members/search" where query = params.to_query()), handler)
 
-    be add_guild_member(guild_id: Snowflake, user_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be add_guild_member(guild_id: Snowflake, user_id: Snowflake, params: AddGuildMemberParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/guild#add-guild-member
 
@@ -612,9 +612,9 @@ actor Routes
         The Authorization header must be a Bot token (belonging to the same application used for authorization), and the bot must be a member of the guild with CREATE_INSTANT_INVITE permission.
         """
 
-        api.send_request(options.build_request(courier.PUT, "/guilds/" + guild_id.string() + "/members/" + user_id.string() where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.PUT, "/guilds/" + guild_id.string() + "/members/" + user_id.string() where body = json.JsonPrinter.print(params.to_json())), handler)
 
-    be update_guild_member(guild_id: Snowflake, user_id: Snowflake, params: ParamsStub, handler: ResponseReceiver, reason: Reason = None) =>
+    be update_guild_member(guild_id: Snowflake, user_id: Snowflake, params: UpdateGuildMemberParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/guild#modify-guild-member
 
@@ -625,9 +625,9 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/members/" + user_id.string() where body = params.to_body(), reason = reason), handler)
+        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/members/" + user_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
-    be update_current_member(guild_id: Snowflake, params: ParamsStub, handler: ResponseReceiver, reason: Reason = None) =>
+    be update_current_member(guild_id: Snowflake, params: UpdateCurrentMemberParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/guild#modify-current-member
 
@@ -636,9 +636,9 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/members/@me" where body = params.to_body(), reason = reason), handler)
+        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/members/@me" where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
-    be update_current_user_nick(guild_id: Snowflake, params: ParamsStub, handler: ResponseReceiver, reason: Reason = None) =>
+    be update_current_user_nick(guild_id: Snowflake, params: UpdateCurrentUserNickParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/guild#modify-current-user-nick
 
@@ -649,7 +649,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/members/@me/nick" where body = params.to_body(), reason = reason), handler)
+        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/members/@me/nick" where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
     be add_guild_member_role(guild_id: Snowflake, user_id: Snowflake, role_id: Snowflake, handler: ResponseReceiver, reason: Reason = None) =>
         """
@@ -684,7 +684,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/guilds/" + guild_id.string() + "/members/" + user_id.string() where reason = reason), handler)
 
-    be get_guild_bans(guild_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be get_guild_bans(guild_id: Snowflake, params: GetGuildBansParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/guild#get-guild-bans
 
@@ -702,7 +702,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/bans/" + user_id.string()), handler)
 
-    be create_guild_ban(guild_id: Snowflake, user_id: Snowflake, params: ParamsStub, handler: ResponseReceiver, reason: Reason = None) =>
+    be create_guild_ban(guild_id: Snowflake, user_id: Snowflake, params: CreateGuildBanParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/guild#create-guild-ban
 
@@ -711,7 +711,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.PUT, "/guilds/" + guild_id.string() + "/bans/" + user_id.string() where body = params.to_body(), reason = reason), handler)
+        api.send_request(options.build_request(courier.PUT, "/guilds/" + guild_id.string() + "/bans/" + user_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
     be remove_guild_ban(guild_id: Snowflake, user_id: Snowflake, handler: ResponseReceiver, reason: Reason = None) =>
         """
@@ -724,7 +724,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/guilds/" + guild_id.string() + "/bans/" + user_id.string() where reason = reason), handler)
 
-    be bulk_guild_ban(guild_id: Snowflake, params: ParamsStub, handler: ResponseReceiver, reason: Reason = None) =>
+    be bulk_guild_ban(guild_id: Snowflake, params: BulkGuildBanParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/guild#bulk-guild-ban
 
@@ -733,7 +733,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/bulk-ban" where body = params.to_body(), reason = reason), handler)
+        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/bulk-ban" where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
     be get_guild_roles(guild_id: Snowflake, handler: ResponseReceiver) =>
         """
@@ -762,7 +762,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/roles/member-counts"), handler)
 
-    be create_guild_role(guild_id: Snowflake, params: ParamsStub, handler: ResponseReceiver, reason: Reason = None) =>
+    be create_guild_role(guild_id: Snowflake, params: CreateGuildRoleParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/guild#create-guild-role
 
@@ -771,9 +771,9 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/roles" where body = params.to_body(), reason = reason), handler)
+        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/roles" where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
-    be update_guild_role_positions(guild_id: Snowflake, params: ParamsStub, handler: ResponseReceiver, reason: Reason = None) =>
+    be update_guild_role_positions(guild_id: Snowflake, params: UpdateGuildRolePositionsParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/guild#modify-guild-role-positions
 
@@ -784,9 +784,9 @@ actor Routes
         This endpoint takes a JSON array of parameters in the following format:
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/roles" where body = params.to_body(), reason = reason), handler)
+        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/roles" where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
-    be update_guild_role(guild_id: Snowflake, role_id: Snowflake, params: ParamsStub, handler: ResponseReceiver, reason: Reason = None) =>
+    be update_guild_role(guild_id: Snowflake, role_id: Snowflake, params: UpdateGuildRoleParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/guild#modify-guild-role
 
@@ -797,7 +797,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/roles/" + role_id.string() where body = params.to_body(), reason = reason), handler)
+        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/roles/" + role_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
     be delete_guild_role(guild_id: Snowflake, role_id: Snowflake, handler: ResponseReceiver, reason: Reason = None) =>
         """
@@ -810,7 +810,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/guilds/" + guild_id.string() + "/roles/" + role_id.string() where reason = reason), handler)
 
-    be get_guild_prune_count(guild_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be get_guild_prune_count(guild_id: Snowflake, params: GetGuildPruneCountParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/guild#get-guild-prune-count
 
@@ -821,7 +821,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/prune" where query = params.to_query()), handler)
 
-    be begin_guild_prune(guild_id: Snowflake, params: ParamsStub, handler: ResponseReceiver, reason: Reason = None) =>
+    be begin_guild_prune(guild_id: Snowflake, params: BeginGuildPruneParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/guild#begin-guild-prune
 
@@ -832,7 +832,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/prune" where body = params.to_body(), reason = reason), handler)
+        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/prune" where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
     be get_guild_voice_regions(guild_id: Snowflake, handler: ResponseReceiver) =>
         """
@@ -883,7 +883,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/widget"), handler)
 
-    be update_guild_widget(guild_id: Snowflake, params: ParamsStub, handler: ResponseReceiver, reason: Reason = None) =>
+    be update_guild_widget(guild_id: Snowflake, params: UpdateGuildWidgetParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/guild#modify-guild-widget
 
@@ -892,7 +892,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/widget" where body = params.to_body(), reason = reason), handler)
+        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/widget" where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
     be get_guild_widget(guild_id: Snowflake, handler: ResponseReceiver) =>
         """
@@ -914,7 +914,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/vanity-url"), handler)
 
-    be get_guild_widget_image(guild_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be get_guild_widget_image(guild_id: Snowflake, params: GetGuildWidgetImageParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/guild#get-guild-widget-image
 
@@ -934,7 +934,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/welcome-screen"), handler)
 
-    be update_guild_welcome_screen(guild_id: Snowflake, params: ParamsStub, handler: ResponseReceiver, reason: Reason = None) =>
+    be update_guild_welcome_screen(guild_id: Snowflake, params: UpdateGuildWelcomeScreenParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/guild#modify-guild-welcome-screen
 
@@ -945,7 +945,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/welcome-screen" where body = params.to_body(), reason = reason), handler)
+        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/welcome-screen" where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
     be get_guild_onboarding(guild_id: Snowflake, handler: ResponseReceiver) =>
         """
@@ -956,7 +956,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/onboarding"), handler)
 
-    be update_guild_onboarding(guild_id: Snowflake, params: ParamsStub, handler: ResponseReceiver, reason: Reason = None) =>
+    be update_guild_onboarding(guild_id: Snowflake, params: UpdateGuildOnboardingParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/guild#modify-guild-onboarding
 
@@ -969,18 +969,18 @@ actor Routes
         All parameters to this endpoint are optional.
         """
 
-        api.send_request(options.build_request(courier.PUT, "/guilds/" + guild_id.string() + "/onboarding" where body = params.to_body(), reason = reason), handler)
+        api.send_request(options.build_request(courier.PUT, "/guilds/" + guild_id.string() + "/onboarding" where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
-    be update_guild_incident_actions(guild_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be update_guild_incident_actions(guild_id: Snowflake, params: UpdateGuildIncidentActionsParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/guild#modify-guild-incident-actions
 
         Modifies the incident actions of the guild. Returns a 200 with the Incidents Data object for the guild. Requires the MANAGE_GUILD permission.
         """
 
-        api.send_request(options.build_request(courier.PUT, "/guilds/" + guild_id.string() + "/incident-actions" where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.PUT, "/guilds/" + guild_id.string() + "/incident-actions" where body = json.JsonPrinter.print(params.to_json())), handler)
 
-    be get_guild_scheduled_events(guild_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be get_guild_scheduled_events(guild_id: Snowflake, params: GetGuildScheduledEventsParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/guild-scheduled-event#list-scheduled-events-for-guild
 
@@ -989,7 +989,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/scheduled-events" where query = params.to_query()), handler)
 
-    be create_guild_scheduled_event(guild_id: Snowflake, params: ParamsStub, handler: ResponseReceiver, reason: Reason = None) =>
+    be create_guild_scheduled_event(guild_id: Snowflake, params: CreateGuildScheduledEventParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/guild-scheduled-event#create-guild-scheduled-event
 
@@ -1000,9 +1000,9 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/scheduled-events" where body = params.to_body(), reason = reason), handler)
+        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/scheduled-events" where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
-    be get_guild_scheduled_event(guild_id: Snowflake, guild_scheduled_event_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be get_guild_scheduled_event(guild_id: Snowflake, guild_scheduled_event_id: Snowflake, params: GetGuildScheduledEventParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/guild-scheduled-event#get-guild-scheduled-event
 
@@ -1011,7 +1011,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/scheduled-events/" + guild_scheduled_event_id.string() where query = params.to_query()), handler)
 
-    be update_guild_scheduled_event(guild_id: Snowflake, guild_scheduled_event_id: Snowflake, params: ParamsStub, handler: ResponseReceiver, reason: Reason = None) =>
+    be update_guild_scheduled_event(guild_id: Snowflake, guild_scheduled_event_id: Snowflake, params: UpdateGuildScheduledEventParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/guild-scheduled-event#modify-guild-scheduled-event
 
@@ -1026,7 +1026,7 @@ actor Routes
         All parameters to this endpoint are optional.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/scheduled-events/" + guild_scheduled_event_id.string() where body = params.to_body(), reason = reason), handler)
+        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/scheduled-events/" + guild_scheduled_event_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
     be delete_guild_scheduled_event(guild_id: Snowflake, guild_scheduled_event_id: Snowflake, handler: ResponseReceiver) =>
         """
@@ -1037,7 +1037,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/guilds/" + guild_id.string() + "/scheduled-events/" + guild_scheduled_event_id.string()), handler)
 
-    be get_guild_scheduled_event_users(guild_id: Snowflake, guild_scheduled_event_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be get_guild_scheduled_event_users(guild_id: Snowflake, guild_scheduled_event_id: Snowflake, params: GetGuildScheduledEventUsersParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/guild-scheduled-event#get-guild-scheduled-event-users
 
@@ -1064,14 +1064,14 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/templates"), handler)
 
-    be create_guild_template(guild_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be create_guild_template(guild_id: Snowflake, params: CreateGuildTemplateParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/guild-template#create-guild-template
 
         Creates a template for the guild. Requires the MANAGE_GUILD permission. Returns the created guild template object on success.
         """
 
-        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/templates" where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/templates" where body = json.JsonPrinter.print(params.to_json())), handler)
 
     be sync_guild_template(guild_id: Snowflake, template_code: String, handler: ResponseReceiver) =>
         """
@@ -1082,14 +1082,14 @@ actor Routes
 
         api.send_request(options.build_request(courier.PUT, "/guilds/" + guild_id.string() + "/templates/" + template_code), handler)
 
-    be update_guild_template(guild_id: Snowflake, template_code: String, params: ParamsStub, handler: ResponseReceiver) =>
+    be update_guild_template(guild_id: Snowflake, template_code: String, params: UpdateGuildTemplateParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/guild-template#modify-guild-template
 
         Modifies the template's metadata. Requires the MANAGE_GUILD permission. Returns the guild template object on success.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/templates/" + template_code where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/templates/" + template_code where body = json.JsonPrinter.print(params.to_json())), handler)
 
     be delete_guild_template(guild_id: Snowflake, template_code: String, handler: ResponseReceiver) =>
         """
@@ -1100,7 +1100,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/guilds/" + guild_id.string() + "/templates/" + template_code), handler)
 
-    be get_invite(invite_code: String, params: ParamsStub, handler: ResponseReceiver) =>
+    be get_invite(invite_code: String, params: GetInviteParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/invite#get-invite
 
@@ -1129,14 +1129,14 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/invites/" + invite_code + "/target-users"), handler)
 
-    be update_invite_target_users(invite_code: String, params: ParamsStub, handler: ResponseReceiver) =>
+    be update_invite_target_users(invite_code: String, params: UpdateInviteTargetUsersParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/invite#update-target-users
 
         Updates the users allowed to see and accept this invite. Uploading a file with invalid user IDs will result in a 400 with the invalid IDs described. Requires the caller to be the inviter or have the MANAGE_GUILD permission.
         """
 
-        api.send_request(options.build_request(courier.PUT, "/invites/" + invite_code + "/target-users" where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.PUT, "/invites/" + invite_code + "/target-users" where body = json.JsonPrinter.print(params.to_json())), handler)
 
     be get_invite_target_users_job_status(invite_code: String, handler: ResponseReceiver) =>
         """
@@ -1147,7 +1147,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/invites/" + invite_code + "/target-users/job-status"), handler)
 
-    be create_lobby(params: ParamsStub, handler: ResponseReceiver) =>
+    be create_lobby(params: CreateLobbyParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/lobby#create-lobby
 
@@ -1158,9 +1158,9 @@ actor Routes
         Discord Social SDK clients will not be able to join or leave a lobby created using this API, such as Client::CreateOrJoinLobby. See Managing Lobbies for more information.
         """
 
-        api.send_request(options.build_request(courier.POST, "/lobbies" where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.POST, "/lobbies" where body = json.JsonPrinter.print(params.to_json())), handler)
 
-    be create_or_join_lobby(params: ParamsStub, handler: ResponseReceiver) =>
+    be create_or_join_lobby(params: CreateOrJoinLobbyParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/lobby#create-or-join-lobby
 
@@ -1171,7 +1171,7 @@ actor Routes
         Returns a lobby object.
         """
 
-        api.send_request(options.build_request(courier.PUT, "/lobbies" where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.PUT, "/lobbies" where body = json.JsonPrinter.print(params.to_json())), handler)
 
     be get_lobby(lobby_id: Snowflake, handler: ResponseReceiver) =>
         """
@@ -1182,7 +1182,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/lobbies/" + lobby_id.string()), handler)
 
-    be update_lobby(lobby_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be update_lobby(lobby_id: Snowflake, params: UpdateLobbyParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/lobby#modify-lobby
 
@@ -1191,7 +1191,7 @@ actor Routes
         Returns the updated lobby object.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/lobbies/" + lobby_id.string() where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.PATCH, "/lobbies/" + lobby_id.string() where body = json.JsonPrinter.print(params.to_json())), handler)
 
     be delete_lobby(lobby_id: Snowflake, handler: ResponseReceiver) =>
         """
@@ -1206,7 +1206,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/lobbies/" + lobby_id.string()), handler)
 
-    be add_lobby_member(lobby_id: Snowflake, user_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be add_lobby_member(lobby_id: Snowflake, user_id: Snowflake, params: AddLobbyMemberParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/lobby#add-a-member-to-a-lobby
 
@@ -1215,9 +1215,9 @@ actor Routes
         Returns the lobby member object.
         """
 
-        api.send_request(options.build_request(courier.PUT, "/lobbies/" + lobby_id.string() + "/members/" + user_id.string() where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.PUT, "/lobbies/" + lobby_id.string() + "/members/" + user_id.string() where body = json.JsonPrinter.print(params.to_json())), handler)
 
-    be bulk_update_lobby_members(lobby_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be bulk_update_lobby_members(lobby_id: Snowflake, params: BulkUpdateLobbyMembersParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/lobby#bulk-update-lobby-members
 
@@ -1228,7 +1228,7 @@ actor Routes
         Users unknown to Discord will return a 404 UNKNOWN_USER error. Users that fail permission checks or who have already reached the maximum number of lobbies per application (and are not already a member of this lobby) are silently dropped from the upsert set.
         """
 
-        api.send_request(options.build_request(courier.POST, "/lobbies/" + lobby_id.string() + "/members/bulk" where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.POST, "/lobbies/" + lobby_id.string() + "/members/bulk" where body = json.JsonPrinter.print(params.to_json())), handler)
 
     be remove_lobby_member(lobby_id: Snowflake, user_id: Snowflake, handler: ResponseReceiver) =>
         """
@@ -1254,7 +1254,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/lobbies/" + lobby_id.string() + "/members/@me"), handler)
 
-    be link_channel_to_lobby(lobby_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be link_channel_to_lobby(lobby_id: Snowflake, params: LinkChannelToLobbyParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/lobby#link-channel-to-lobby
 
@@ -1265,7 +1265,7 @@ actor Routes
         Returns a lobby object with a linked channel.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/lobbies/" + lobby_id.string() + "/channel-linking" where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.PATCH, "/lobbies/" + lobby_id.string() + "/channel-linking" where body = json.JsonPrinter.print(params.to_json())), handler)
 
     be unlink_channel_from_lobby(lobby_id: Snowflake, handler: ResponseReceiver) =>
         """
@@ -1282,7 +1282,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.PATCH, "/lobbies/" + lobby_id.string() + "/channel-linking"), handler)
 
-    be send_lobby_message(lobby_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be send_lobby_message(lobby_id: Snowflake, params: SendLobbyMessageParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/lobby#send-lobby-message
 
@@ -1295,9 +1295,9 @@ actor Routes
         If the lobby has a linked channel, the message is also forwarded to that channel. If forwarding fails (for example, due to AutoMod), the lobby message is still delivered to other lobby members.
         """
 
-        api.send_request(options.build_request(courier.POST, "/lobbies/" + lobby_id.string() + "/messages" where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.POST, "/lobbies/" + lobby_id.string() + "/messages" where body = json.JsonPrinter.print(params.to_json())), handler)
 
-    be get_lobby_messages(lobby_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be get_lobby_messages(lobby_id: Snowflake, params: GetLobbyMessagesParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/lobby#get-lobby-messages
 
@@ -1310,7 +1310,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/lobbies/" + lobby_id.string() + "/messages" where query = params.to_query()), handler)
 
-    be update_lobby_message_moderation_metadata(lobby_id: Snowflake, message_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be update_lobby_message_moderation_metadata(lobby_id: Snowflake, message_id: Snowflake, params: UpdateLobbyMessageModerationMetadataParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/lobby#update-lobby-message-moderation-metadata
 
@@ -1323,7 +1323,7 @@ actor Routes
         Returns HTTP 204: No Content on success.
         """
 
-        api.send_request(options.build_request(courier.PUT, "/lobbies/" + lobby_id.string() + "/messages/" + message_id.string() + "/moderation-metadata" where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.PUT, "/lobbies/" + lobby_id.string() + "/messages/" + message_id.string() + "/moderation-metadata" where body = json.JsonPrinter.print(params.to_json())), handler)
 
     be create_lobby_channel_invite_for_self(lobby_id: Snowflake, handler: ResponseReceiver) =>
         """
@@ -1351,7 +1351,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.POST, "/lobbies/" + lobby_id.string() + "/members/" + user_id.string() + "/invites"), handler)
 
-    be get_channel_messages(channel_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be get_channel_messages(channel_id: Snowflake, params: GetChannelMessagesParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/message#get-channel-messages
 
@@ -1366,7 +1366,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/messages" where query = params.to_query()), handler)
 
-    be search_guild_messages(guild_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be search_guild_messages(guild_id: Snowflake, params: SearchGuildMessagesParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/message#search-guild-messages
 
@@ -1397,7 +1397,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/messages/" + message_id.string()), handler)
 
-    be create_message(channel_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be create_message(channel_id: Snowflake, params: CreateMessageParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/message#create-message
 
@@ -1411,7 +1411,7 @@ actor Routes
         Files must be attached using a multipart/form-data body as described in Uploading Files.
         """
 
-        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/messages" where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/messages" where body = json.JsonPrinter.print(params.to_json())), handler)
 
     be crosspost_message(channel_id: Snowflake, message_id: Snowflake, handler: ResponseReceiver) =>
         """
@@ -1454,7 +1454,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() + "/messages/" + message_id.string() + "/reactions/" + emoji + "/" + user_id.string()), handler)
 
-    be get_reactions(channel_id: Snowflake, message_id: Snowflake, emoji: String, params: ParamsStub, handler: ResponseReceiver) =>
+    be get_reactions(channel_id: Snowflake, message_id: Snowflake, emoji: String, params: GetReactionsParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/message#get-reactions
 
@@ -1483,7 +1483,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() + "/messages/" + message_id.string() + "/reactions/" + emoji), handler)
 
-    be update_message(channel_id: Snowflake, message_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be update_message(channel_id: Snowflake, message_id: Snowflake, params: UpdateMessageParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/message#edit-message
 
@@ -1501,7 +1501,7 @@ actor Routes
         All parameters to this endpoint are optional and nullable.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/channels/" + channel_id.string() + "/messages/" + message_id.string() where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.PATCH, "/channels/" + channel_id.string() + "/messages/" + message_id.string() where body = json.JsonPrinter.print(params.to_json())), handler)
 
     be delete_message(channel_id: Snowflake, message_id: Snowflake, handler: ResponseReceiver, reason: Reason = None) =>
         """
@@ -1514,7 +1514,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() + "/messages/" + message_id.string() where reason = reason), handler)
 
-    be bulk_delete_messages(channel_id: Snowflake, params: ParamsStub, handler: ResponseReceiver, reason: Reason = None) =>
+    be bulk_delete_messages(channel_id: Snowflake, params: BulkDeleteMessagesParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/message#bulk-delete-messages
 
@@ -1527,9 +1527,9 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/messages/bulk-delete" where body = params.to_body(), reason = reason), handler)
+        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/messages/bulk-delete" where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
-    be get_channel_pins(channel_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be get_channel_pins(channel_id: Snowflake, params: GetChannelPinsParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/message#get-channel-pins
 
@@ -1588,7 +1588,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() + "/pins/" + message_id.string()), handler)
 
-    be get_answer_voters(channel_id: Snowflake, message_id: Snowflake, answer_id: U64, params: ParamsStub, handler: ResponseReceiver) =>
+    be get_answer_voters(channel_id: Snowflake, message_id: Snowflake, answer_id: U64, params: GetAnswerVotersParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/poll#get-answer-voters
 
@@ -1619,7 +1619,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/skus"), handler)
 
-    be send_soundboard_sound(channel_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be send_soundboard_sound(channel_id: Snowflake, params: SendSoundboardSoundParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/soundboard#send-soundboard-sound
 
@@ -1628,7 +1628,7 @@ actor Routes
         Requires the SPEAK and USE_SOUNDBOARD permissions, and also the USE_EXTERNAL_SOUNDS permission if the sound is from a different server. Additionally, requires the user to be connected to the voice channel, having a voice state without deaf, self_deaf, mute, or suppress enabled.
         """
 
-        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/send-soundboard-sound" where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/send-soundboard-sound" where body = json.JsonPrinter.print(params.to_json())), handler)
 
     be get_default_soundboard_sounds(handler: ResponseReceiver) =>
         """
@@ -1657,7 +1657,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/soundboard-sounds/" + sound_id.string()), handler)
 
-    be create_guild_soundboard_sound(guild_id: Snowflake, params: ParamsStub, handler: ResponseReceiver, reason: Reason = None) =>
+    be create_guild_soundboard_sound(guild_id: Snowflake, params: CreateGuildSoundboardSoundParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/soundboard#create-guild-soundboard-sound
 
@@ -1668,9 +1668,9 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/soundboard-sounds" where body = params.to_body(), reason = reason), handler)
+        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/soundboard-sounds" where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
-    be update_guild_soundboard_sound(guild_id: Snowflake, sound_id: Snowflake, params: ParamsStub, handler: ResponseReceiver, reason: Reason = None) =>
+    be update_guild_soundboard_sound(guild_id: Snowflake, sound_id: Snowflake, params: UpdateGuildSoundboardSoundParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/soundboard#modify-guild-soundboard-sound
 
@@ -1681,7 +1681,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/soundboard-sounds/" + sound_id.string() where body = params.to_body(), reason = reason), handler)
+        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/soundboard-sounds/" + sound_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
     be delete_guild_soundboard_sound(guild_id: Snowflake, sound_id: Snowflake, handler: ResponseReceiver, reason: Reason = None) =>
         """
@@ -1694,7 +1694,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/guilds/" + guild_id.string() + "/soundboard-sounds/" + sound_id.string() where reason = reason), handler)
 
-    be create_stage_instance(params: ParamsStub, handler: ResponseReceiver, reason: Reason = None) =>
+    be create_stage_instance(params: CreateStageInstanceParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/stage-instance#create-stage-instance
 
@@ -1705,7 +1705,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.POST, "/stage-instances" where body = params.to_body(), reason = reason), handler)
+        api.send_request(options.build_request(courier.POST, "/stage-instances" where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
     be get_stage_instance(channel_id: Snowflake, handler: ResponseReceiver) =>
         """
@@ -1716,7 +1716,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/stage-instances/" + channel_id.string()), handler)
 
-    be update_stage_instance(channel_id: Snowflake, params: ParamsStub, handler: ResponseReceiver, reason: Reason = None) =>
+    be update_stage_instance(channel_id: Snowflake, params: UpdateStageInstanceParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/stage-instance#modify-stage-instance
 
@@ -1727,7 +1727,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/stage-instances/" + channel_id.string() where body = params.to_body(), reason = reason), handler)
+        api.send_request(options.build_request(courier.PATCH, "/stage-instances/" + channel_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
     be delete_stage_instance(channel_id: Snowflake, handler: ResponseReceiver, reason: Reason = None) =>
         """
@@ -1787,7 +1787,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/stickers/" + sticker_id.string()), handler)
 
-    be create_guild_sticker(guild_id: Snowflake, params: ParamsStub, handler: ResponseReceiver, reason: Reason = None) =>
+    be create_guild_sticker(guild_id: Snowflake, params: CreateGuildStickerParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/sticker#create-guild-sticker
 
@@ -1802,9 +1802,9 @@ actor Routes
         Uploaded stickers are constrained to 5 seconds in length for animated stickers, and 320 x 320 pixels.
         """
 
-        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/stickers" where body = params.to_body(), reason = reason), handler)
+        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/stickers" where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
-    be update_guild_sticker(guild_id: Snowflake, sticker_id: Snowflake, params: ParamsStub, handler: ResponseReceiver, reason: Reason = None) =>
+    be update_guild_sticker(guild_id: Snowflake, sticker_id: Snowflake, params: UpdateGuildStickerParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/sticker#modify-guild-sticker
 
@@ -1815,7 +1815,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/stickers/" + sticker_id.string() where body = params.to_body(), reason = reason), handler)
+        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/stickers/" + sticker_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
     be delete_guild_sticker(guild_id: Snowflake, sticker_id: Snowflake, handler: ResponseReceiver, reason: Reason = None) =>
         """
@@ -1828,7 +1828,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/guilds/" + guild_id.string() + "/stickers/" + sticker_id.string() where reason = reason), handler)
 
-    be get_sku_subscriptions(sku_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be get_sku_subscriptions(sku_id: Snowflake, params: GetSKUSubscriptionsParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/subscription#list-sku-subscriptions
 
@@ -1864,7 +1864,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/users/" + user_id.string()), handler)
 
-    be update_current_user(params: ParamsStub, handler: ResponseReceiver) =>
+    be update_current_user(params: UpdateCurrentUserParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/user#modify-current-user
 
@@ -1873,9 +1873,9 @@ actor Routes
         All parameters to this endpoint are optional.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/users/@me" where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.PATCH, "/users/@me" where body = json.JsonPrinter.print(params.to_json())), handler)
 
-    be get_current_user_guilds(params: ParamsStub, handler: ResponseReceiver) =>
+    be get_current_user_guilds(params: GetCurrentUserGuildsParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/user#get-current-user-guilds
 
@@ -1902,7 +1902,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/users/@me/guilds/" + guild_id.string()), handler)
 
-    be create_dm(params: ParamsStub, handler: ResponseReceiver) =>
+    be create_dm(params: CreateDMParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/user#create-dm
 
@@ -1911,9 +1911,9 @@ actor Routes
         You should not use this endpoint to DM everyone in a server about something. DMs should generally be initiated by a user action. If you open a significant amount of DMs too quickly, your bot may be rate limited or blocked from opening new ones.
         """
 
-        api.send_request(options.build_request(courier.POST, "/users/@me/channels" where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.POST, "/users/@me/channels" where body = json.JsonPrinter.print(params.to_json())), handler)
 
-    be create_group_dm(params: ParamsStub, handler: ResponseReceiver) =>
+    be create_group_dm(params: CreateGroupDMParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/user#create-group-dm
 
@@ -1922,7 +1922,7 @@ actor Routes
         This endpoint is limited to 10 active group DMs.
         """
 
-        api.send_request(options.build_request(courier.POST, "/users/@me/channels" where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.POST, "/users/@me/channels" where body = json.JsonPrinter.print(params.to_json())), handler)
 
     be get_current_user_connections(handler: ResponseReceiver) =>
         """
@@ -1942,14 +1942,14 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/users/@me/applications/" + application_id.string() + "/role-connection"), handler)
 
-    be update_current_user_application_role_connection(application_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be update_current_user_application_role_connection(application_id: Snowflake, params: UpdateCurrentUserApplicationRoleConnectionParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/user#update-current-user-application-role-connection
 
         Updates and returns the application role connection for the user. Requires an OAuth2 access token with role_connections.write scope for the application specified in the path.
         """
 
-        api.send_request(options.build_request(courier.PUT, "/users/@me/applications/" + application_id.string() + "/role-connection" where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.PUT, "/users/@me/applications/" + application_id.string() + "/role-connection" where body = json.JsonPrinter.print(params.to_json())), handler)
 
     be delete_current_user_application_role_connection(application_id: Snowflake, handler: ResponseReceiver) =>
         """
@@ -1989,25 +1989,25 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/voice-states/" + user_id.string()), handler)
 
-    be update_current_user_voice_state(guild_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be update_current_user_voice_state(guild_id: Snowflake, params: UpdateCurrentUserVoiceStateParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/voice#modify-current-user-voice-state
 
         Updates the current user's voice state. Returns 204 No Content on success. Fires a Voice State Update Gateway event.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/voice-states/@me" where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/voice-states/@me" where body = json.JsonPrinter.print(params.to_json())), handler)
 
-    be update_user_voice_state(guild_id: Snowflake, user_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be update_user_voice_state(guild_id: Snowflake, user_id: Snowflake, params: UpdateUserVoiceStateParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/voice#modify-user-voice-state
 
         Updates another user's voice state. Returns 204 No Content on success. Fires a Voice State Update Gateway event.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/voice-states/" + user_id.string() where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/voice-states/" + user_id.string() where body = json.JsonPrinter.print(params.to_json())), handler)
 
-    be create_webhook(channel_id: Snowflake, params: ParamsStub, handler: ResponseReceiver, reason: Reason = None) =>
+    be create_webhook(channel_id: Snowflake, params: CreateWebhookParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/webhook#create-webhook
 
@@ -2021,7 +2021,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/webhooks" where body = params.to_body(), reason = reason), handler)
+        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/webhooks" where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
     be get_channel_webhooks(channel_id: Snowflake, handler: ResponseReceiver) =>
         """
@@ -2062,7 +2062,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/webhooks/" + webhook_id.string() + "/" + webhook_token), handler)
 
-    be update_webhook(webhook_id: Snowflake, params: ParamsStub, handler: ResponseReceiver, reason: Reason = None) =>
+    be update_webhook(webhook_id: Snowflake, params: UpdateWebhookParams, handler: ResponseReceiver, reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/webhook#modify-webhook
 
@@ -2073,16 +2073,16 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/webhooks/" + webhook_id.string() where body = params.to_body(), reason = reason), handler)
+        api.send_request(options.build_request(courier.PATCH, "/webhooks/" + webhook_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), handler)
 
-    be update_webhook_with_token(webhook_id: Snowflake, webhook_token: String, params: ParamsStub, handler: ResponseReceiver) =>
+    be update_webhook_with_token(webhook_id: Snowflake, webhook_token: String, params: UpdateWebhookWithTokenParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/webhook#modify-webhook-with-token
 
         Same as above, except this call does not require authentication, does not accept a channel_id parameter in the body, and does not return a user in the webhook object.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/webhooks/" + webhook_id.string() + "/" + webhook_token where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.PATCH, "/webhooks/" + webhook_id.string() + "/" + webhook_token where body = json.JsonPrinter.print(params.to_json())), handler)
 
     be delete_webhook(webhook_id: Snowflake, handler: ResponseReceiver, reason: Reason = None) =>
         """
@@ -2104,7 +2104,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/webhooks/" + webhook_id.string() + "/" + webhook_token), handler)
 
-    be execute_webhook(webhook_id: Snowflake, webhook_token: String, params: ParamsStub, handler: ResponseReceiver) =>
+    be execute_webhook(webhook_id: Snowflake, webhook_token: String, params: ExecuteWebhookParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/webhook#execute-webhook
 
@@ -2117,27 +2117,27 @@ actor Routes
         Discord may strip certain characters from message content, like invalid unicode characters or characters which cause unexpected message formatting. If you are passing user-generated strings into message content, consider sanitizing the data to prevent unexpected behavior and using allowed_mentions to prevent unexpected mentions.
         """
 
-        api.send_request(options.build_request(courier.POST, "/webhooks/" + webhook_id.string() + "/" + webhook_token where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.POST, "/webhooks/" + webhook_id.string() + "/" + webhook_token where query = params.to_query(), body = json.JsonPrinter.print(params.to_json())), handler)
 
-    be execute_slack_compatible_webhook(webhook_id: Snowflake, webhook_token: String, params: ParamsStub, handler: ResponseReceiver) =>
+    be execute_slack_compatible_webhook(webhook_id: Snowflake, webhook_token: String, params: ExecuteSlackCompatibleWebhookParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/webhook#execute-slack-compatible-webhook
 
         Refer to Slack's documentation for more information. We do not support Slack's channel, icon_emoji, mrkdwn, or mrkdwn_in properties.
         """
 
-        api.send_request(options.build_request(courier.POST, "/webhooks/" + webhook_id.string() + "/" + webhook_token + "/slack" where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.POST, "/webhooks/" + webhook_id.string() + "/" + webhook_token + "/slack" where query = params.to_query(), body = json.JsonPrinter.print(params.to_json())), handler)
 
-    be execute_github_compatible_webhook(webhook_id: Snowflake, webhook_token: String, params: ParamsStub, handler: ResponseReceiver) =>
+    be execute_github_compatible_webhook(webhook_id: Snowflake, webhook_token: String, params: ExecuteGithubCompatibleWebhookParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/webhook#execute-github-compatible-webhook
 
         Add a new webhook to your GitHub repo (in the repo's settings), and use this endpoint as the "Payload URL." You can choose what events your Discord channel receives by choosing the "Let me select individual events" option and selecting individual events for the new webhook you're configuring. The supported events are commit_comment, create, delete, fork, issue_comment, issues, member, public, pull_request, pull_request_review, pull_request_review_comment, push, release, watch, check_run, check_suite, discussion, and discussion_comment.
         """
 
-        api.send_request(options.build_request(courier.POST, "/webhooks/" + webhook_id.string() + "/" + webhook_token + "/github" where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.POST, "/webhooks/" + webhook_id.string() + "/" + webhook_token + "/github" where query = params.to_query(), body = json.JsonPrinter.print(params.to_json())), handler)
 
-    be get_webhook_message(webhook_id: Snowflake, webhook_token: String, message_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be get_webhook_message(webhook_id: Snowflake, webhook_token: String, message_id: Snowflake, params: GetWebhookMessageParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/webhook#get-webhook-message
 
@@ -2146,7 +2146,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/webhooks/" + webhook_id.string() + "/" + webhook_token + "/messages/" + message_id.string() where query = params.to_query()), handler)
 
-    be update_webhook_message(webhook_id: Snowflake, webhook_token: String, message_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be update_webhook_message(webhook_id: Snowflake, webhook_token: String, message_id: Snowflake, params: UpdateWebhookMessageParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/webhook#edit-webhook-message
 
@@ -2162,9 +2162,9 @@ actor Routes
         All parameters to this endpoint are optional and nullable.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/webhooks/" + webhook_id.string() + "/" + webhook_token + "/messages/" + message_id.string() where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.PATCH, "/webhooks/" + webhook_id.string() + "/" + webhook_token + "/messages/" + message_id.string() where query = params.to_query(), body = json.JsonPrinter.print(params.to_json())), handler)
 
-    be delete_webhook_message(webhook_id: Snowflake, webhook_token: String, message_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be delete_webhook_message(webhook_id: Snowflake, webhook_token: String, message_id: Snowflake, params: DeleteWebhookMessageParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/resources/webhook#delete-webhook-message
 
@@ -2173,7 +2173,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/webhooks/" + webhook_id.string() + "/" + webhook_token + "/messages/" + message_id.string() where query = params.to_query()), handler)
 
-    be create_interaction_response(interaction_id: Snowflake, interaction_token: String, params: ParamsStub, handler: ResponseReceiver) =>
+    be create_interaction_response(interaction_id: Snowflake, interaction_token: String, params: CreateInteractionResponseParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/interactions/receiving-and-responding#create-interaction-response
 
@@ -2182,9 +2182,9 @@ actor Routes
         This endpoint also supports file attachments similar to the webhook endpoints. Refer to Uploading Files for details on uploading files and multipart/form-data requests.
         """
 
-        api.send_request(options.build_request(courier.POST, "/interactions/" + interaction_id.string() + "/" + interaction_token + "/callback" where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.POST, "/interactions/" + interaction_id.string() + "/" + interaction_token + "/callback" where query = params.to_query(), body = json.JsonPrinter.print(params.to_json())), handler)
 
-    be get_original_interaction_response(application_id: Snowflake, interaction_token: String, params: ParamsStub, handler: ResponseReceiver) =>
+    be get_original_interaction_response(application_id: Snowflake, interaction_token: String, params: GetOriginalInteractionResponseParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/interactions/receiving-and-responding#get-original-interaction-response
 
@@ -2193,14 +2193,14 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/webhooks/" + application_id.string() + "/" + interaction_token + "/messages/@original" where query = params.to_query()), handler)
 
-    be update_original_interaction_response(application_id: Snowflake, interaction_token: String, params: ParamsStub, handler: ResponseReceiver) =>
+    be update_original_interaction_response(application_id: Snowflake, interaction_token: String, params: UpdateOriginalInteractionResponseParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/interactions/receiving-and-responding#edit-original-interaction-response
 
         Edits the initial Interaction response. Functions the same as Edit Webhook Message.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/webhooks/" + application_id.string() + "/" + interaction_token + "/messages/@original" where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.PATCH, "/webhooks/" + application_id.string() + "/" + interaction_token + "/messages/@original" where query = params.to_query(), body = json.JsonPrinter.print(params.to_json())), handler)
 
     be delete_original_interaction_response(application_id: Snowflake, interaction_token: String, handler: ResponseReceiver) =>
         """
@@ -2211,7 +2211,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/webhooks/" + application_id.string() + "/" + interaction_token + "/messages/@original"), handler)
 
-    be create_followup_message(application_id: Snowflake, interaction_token: String, params: ParamsStub, handler: ResponseReceiver) =>
+    be create_followup_message(application_id: Snowflake, interaction_token: String, params: CreateFollowupMessageParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/interactions/receiving-and-responding#create-followup-message
 
@@ -2222,9 +2222,9 @@ actor Routes
         When using this endpoint directly after responding to an interaction with DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE, this endpoint will function as Edit Original Interaction Response for backwards compatibility. In this case, no new message will be created, and the loading message will be edited instead. The ephemeral flag will be ignored, and the value you provided in the initial defer response will be preserved, as an existing message's ephemeral state cannot be changed. This behavior is deprecated, and you should use the Edit Original Interaction Response endpoint in this case instead.
         """
 
-        api.send_request(options.build_request(courier.POST, "/webhooks/" + application_id.string() + "/" + interaction_token where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.POST, "/webhooks/" + application_id.string() + "/" + interaction_token where query = params.to_query(), body = json.JsonPrinter.print(params.to_json())), handler)
 
-    be get_followup_message(application_id: Snowflake, interaction_token: String, message_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be get_followup_message(application_id: Snowflake, interaction_token: String, message_id: Snowflake, params: GetFollowupMessageParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/interactions/receiving-and-responding#get-followup-message
 
@@ -2233,14 +2233,14 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/webhooks/" + application_id.string() + "/" + interaction_token + "/messages/" + message_id.string() where query = params.to_query()), handler)
 
-    be update_followup_message(application_id: Snowflake, interaction_token: String, message_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be update_followup_message(application_id: Snowflake, interaction_token: String, message_id: Snowflake, params: UpdateFollowupMessageParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/interactions/receiving-and-responding#edit-followup-message
 
         Edits a followup message for an Interaction. Functions the same as Edit Webhook Message.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/webhooks/" + application_id.string() + "/" + interaction_token + "/messages/" + message_id.string() where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.PATCH, "/webhooks/" + application_id.string() + "/" + interaction_token + "/messages/" + message_id.string() where query = params.to_query(), body = json.JsonPrinter.print(params.to_json())), handler)
 
     be delete_followup_message(application_id: Snowflake, interaction_token: String, message_id: Snowflake, handler: ResponseReceiver) =>
         """
@@ -2251,7 +2251,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/webhooks/" + application_id.string() + "/" + interaction_token + "/messages/" + message_id.string()), handler)
 
-    be get_global_application_commands(application_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be get_global_application_commands(application_id: Snowflake, params: GetGlobalApplicationCommandsParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/interactions/application-commands#get-global-application-commands
 
@@ -2262,7 +2262,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/commands" where query = params.to_query()), handler)
 
-    be create_global_application_command(application_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be create_global_application_command(application_id: Snowflake, params: CreateGlobalApplicationCommandParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/interactions/application-commands#create-global-application-command
 
@@ -2271,7 +2271,7 @@ actor Routes
         Create a new global command. Returns 201 if a command with the same name does not already exist, or a 200 if it does (in which case the previous command will be overwritten). Both responses include an application command object.
         """
 
-        api.send_request(options.build_request(courier.POST, "/applications/" + application_id.string() + "/commands" where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.POST, "/applications/" + application_id.string() + "/commands" where body = json.JsonPrinter.print(params.to_json())), handler)
 
     be get_global_application_command(application_id: Snowflake, command_id: Snowflake, handler: ResponseReceiver) =>
         """
@@ -2282,7 +2282,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/commands/" + command_id.string()), handler)
 
-    be update_global_application_command(application_id: Snowflake, command_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be update_global_application_command(application_id: Snowflake, command_id: Snowflake, params: UpdateGlobalApplicationCommandParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/interactions/application-commands#edit-global-application-command
 
@@ -2291,7 +2291,7 @@ actor Routes
         Edit a global command. Returns 200 and an application command object. All fields are optional, but any fields provided will entirely overwrite the existing values of those fields.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/applications/" + application_id.string() + "/commands/" + command_id.string() where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.PATCH, "/applications/" + application_id.string() + "/commands/" + command_id.string() where body = json.JsonPrinter.print(params.to_json())), handler)
 
     be delete_global_application_command(application_id: Snowflake, command_id: Snowflake, handler: ResponseReceiver) =>
         """
@@ -2302,7 +2302,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/applications/" + application_id.string() + "/commands/" + command_id.string()), handler)
 
-    be bulk_overwrite_global_application_commands(application_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be bulk_overwrite_global_application_commands(application_id: Snowflake, params: BulkOverwriteGlobalApplicationCommandsParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/interactions/application-commands#bulk-overwrite-global-application-commands
 
@@ -2311,9 +2311,9 @@ actor Routes
         This will overwrite all types of application commands: slash commands, user commands, and message commands.
         """
 
-        api.send_request(options.build_request(courier.PUT, "/applications/" + application_id.string() + "/commands" where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.PUT, "/applications/" + application_id.string() + "/commands" where body = json.JsonPrinter.print(params.to_json())), handler)
 
-    be get_guild_application_commands(application_id: Snowflake, guild_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be get_guild_application_commands(application_id: Snowflake, guild_id: Snowflake, params: GetGuildApplicationCommandsParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/interactions/application-commands#get-guild-application-commands
 
@@ -2324,7 +2324,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands" where query = params.to_query()), handler)
 
-    be create_guild_application_command(application_id: Snowflake, guild_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be create_guild_application_command(application_id: Snowflake, guild_id: Snowflake, params: CreateGuildApplicationCommandParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/interactions/application-commands#create-guild-application-command
 
@@ -2333,7 +2333,7 @@ actor Routes
         Create a new guild command. New guild commands will be available in the guild immediately. Returns 201 if a command with the same name does not already exist, or a 200 if it does (in which case the previous command will be overwritten). Both responses include an application command object.
         """
 
-        api.send_request(options.build_request(courier.POST, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands" where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.POST, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands" where body = json.JsonPrinter.print(params.to_json())), handler)
 
     be get_guild_application_command(application_id: Snowflake, guild_id: Snowflake, command_id: Snowflake, handler: ResponseReceiver) =>
         """
@@ -2344,7 +2344,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/" + command_id.string()), handler)
 
-    be update_guild_application_command(application_id: Snowflake, guild_id: Snowflake, command_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be update_guild_application_command(application_id: Snowflake, guild_id: Snowflake, command_id: Snowflake, params: UpdateGuildApplicationCommandParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/interactions/application-commands#edit-guild-application-command
 
@@ -2353,7 +2353,7 @@ actor Routes
         Edit a guild command. Updates for guild commands will be available immediately. Returns 200 and an application command object. All fields are optional, but any fields provided will entirely overwrite the existing values of those fields.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/" + command_id.string() where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.PATCH, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/" + command_id.string() where body = json.JsonPrinter.print(params.to_json())), handler)
 
     be delete_guild_application_command(application_id: Snowflake, guild_id: Snowflake, command_id: Snowflake, handler: ResponseReceiver) =>
         """
@@ -2364,7 +2364,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/" + command_id.string()), handler)
 
-    be bulk_overwrite_guild_application_commands(application_id: Snowflake, guild_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be bulk_overwrite_guild_application_commands(application_id: Snowflake, guild_id: Snowflake, params: BulkOverwriteGuildApplicationCommandsParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/interactions/application-commands#bulk-overwrite-guild-application-commands
 
@@ -2373,7 +2373,7 @@ actor Routes
         This will overwrite all types of application commands: slash commands, user commands, and message commands.
         """
 
-        api.send_request(options.build_request(courier.PUT, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands" where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.PUT, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands" where body = json.JsonPrinter.print(params.to_json())), handler)
 
     be get_guild_application_command_permissions(application_id: Snowflake, guild_id: Snowflake, handler: ResponseReceiver) =>
         """
@@ -2393,7 +2393,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/" + command_id.string() + "/permissions"), handler)
 
-    be update_application_command_permissions(application_id: Snowflake, guild_id: Snowflake, command_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be update_application_command_permissions(application_id: Snowflake, guild_id: Snowflake, command_id: Snowflake, params: UpdateApplicationCommandPermissionsParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/interactions/application-commands#edit-application-command-permissions
 
@@ -2408,16 +2408,16 @@ actor Routes
         Deleting or renaming a command will permanently delete all permissions for the command
         """
 
-        api.send_request(options.build_request(courier.PUT, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/" + command_id.string() + "/permissions" where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.PUT, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/" + command_id.string() + "/permissions" where body = json.JsonPrinter.print(params.to_json())), handler)
 
-    be batch_update_application_command_permissions(application_id: Snowflake, guild_id: Snowflake, params: ParamsStub, handler: ResponseReceiver) =>
+    be batch_update_application_command_permissions(application_id: Snowflake, guild_id: Snowflake, params: BatchUpdateApplicationCommandPermissionsParams, handler: ResponseReceiver) =>
         """
         https://docs.discord.com/developers/interactions/application-commands#batch-edit-application-command-permissions
 
         This endpoint has been disabled with updates to command permissions (Permissions v2). Instead, you can edit each application command permissions (though you should be careful to handle any potential rate limits).
         """
 
-        api.send_request(options.build_request(courier.PUT, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/permissions" where body = params.to_body()), handler)
+        api.send_request(options.build_request(courier.PUT, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/permissions" where body = json.JsonPrinter.print(params.to_json())), handler)
 
     be get_current_bot_application_information(handler: ResponseReceiver) =>
         """
