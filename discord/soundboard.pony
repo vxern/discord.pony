@@ -107,6 +107,24 @@ class val SoundboardSound
 
         obj
 
+primitive _SoundboardSounds
+    fun apply(value: json.JsonValue): Array[SoundboardSound] val ? =>
+        """
+        Decodes an array of soundboard sounds.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let sounds = Array[SoundboardSound](array.size())
+            for sound in array.values() do sounds.push(SoundboardSound.from_json(sound as json.JsonObject)?) end
+            sounds
+        end
+
+    fun to_json(sounds: Array[SoundboardSound] val): json.JsonArray =>
+        var array = json.JsonArray
+        for sound in sounds.values() do array = array.push(sound.to_json()) end
+        array
+
 type SoundData is String
     """
     https://docs.discord.com/developers/resources/soundboard#create-guild-soundboard-sound

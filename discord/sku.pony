@@ -75,6 +75,24 @@ class val SKU
             .update("slug", slug)
             .update("flags", _SKUFlags.to_json(flags))
 
+primitive _SKUs
+    fun apply(value: json.JsonValue): Array[SKU] val ? =>
+        """
+        Decodes an array of SKUs.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let skus = Array[SKU](array.size())
+            for sku in array.values() do skus.push(SKU.from_json(sku as json.JsonObject)?) end
+            skus
+        end
+
+    fun to_json(skus: Array[SKU] val): json.JsonArray =>
+        var array = json.JsonArray
+        for sku in skus.values() do array = array.push(sku.to_json()) end
+        array
+
 trait val SKUType is (collections.Hashable & Equatable[SKUType])
     """
     https://docs.discord.com/developers/resources/sku#sku-object-sku-types

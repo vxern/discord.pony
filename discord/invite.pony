@@ -175,6 +175,24 @@ class val Invite
 
         obj
 
+primitive _Invites
+    fun apply(value: json.JsonValue): Array[Invite] val ? =>
+        """
+        Decodes an array of invites.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let invites = Array[Invite](array.size())
+            for invite in array.values() do invites.push(Invite.from_json(invite as json.JsonObject)?) end
+            invites
+        end
+
+    fun to_json(invites: Array[Invite] val): json.JsonArray =>
+        var array = json.JsonArray
+        for invite in invites.values() do array = array.push(invite.to_json()) end
+        array
+
 trait val InviteType is (collections.Hashable & Equatable[InviteType])
     """
     https://docs.discord.com/developers/resources/invite#invite-object-invite-types

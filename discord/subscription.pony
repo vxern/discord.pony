@@ -124,6 +124,24 @@ class val Subscription
 
         obj
 
+primitive _Subscriptions
+    fun apply(value: json.JsonValue): Array[Subscription] val ? =>
+        """
+        Decodes an array of subscriptions.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let subscriptions = Array[Subscription](array.size())
+            for subscription in array.values() do subscriptions.push(Subscription.from_json(subscription as json.JsonObject)?) end
+            subscriptions
+        end
+
+    fun to_json(subscriptions: Array[Subscription] val): json.JsonArray =>
+        var array = json.JsonArray
+        for subscription in subscriptions.values() do array = array.push(subscription.to_json()) end
+        array
+
 trait val SubscriptionStatus is (collections.Hashable & Equatable[SubscriptionStatus])
     """
     https://docs.discord.com/developers/resources/subscription#subscription-statuses

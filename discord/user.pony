@@ -725,6 +725,24 @@ class val Connection
 
         obj
 
+primitive _Connections
+    fun apply(value: json.JsonValue): Array[Connection] val ? =>
+        """
+        Decodes an array of connections.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let connections = Array[Connection](array.size())
+            for connection in array.values() do connections.push(Connection.from_json(connection as json.JsonObject)?) end
+            connections
+        end
+
+    fun to_json(connections: Array[Connection] val): json.JsonArray =>
+        var array = json.JsonArray
+        for connection in connections.values() do array = array.push(connection.to_json()) end
+        array
+
 trait val ConnectionVisibility is (collections.Hashable & Equatable[ConnectionVisibility])
     """
     https://docs.discord.com/developers/resources/user#connection-object-visibility-types

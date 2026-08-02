@@ -126,6 +126,24 @@ class val GuildTemplate
 
         obj
 
+primitive _GuildTemplates
+    fun apply(value: json.JsonValue): Array[GuildTemplate] val ? =>
+        """
+        Decodes an array of guild templates.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let templates = Array[GuildTemplate](array.size())
+            for template in array.values() do templates.push(GuildTemplate.from_json(template as json.JsonObject)?) end
+            templates
+        end
+
+    fun to_json(templates: Array[GuildTemplate] val): json.JsonArray =>
+        var array = json.JsonArray
+        for template in templates.values() do array = array.push(template.to_json()) end
+        array
+
 class val CreateGuildTemplateParams
     """
     https://docs.discord.com/developers/resources/guild-template#create-guild-template-json-params

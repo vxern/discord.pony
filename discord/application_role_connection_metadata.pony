@@ -89,6 +89,24 @@ class val ApplicationRoleConnectionMetadata
 
         obj
 
+primitive _ApplicationRoleConnectionMetadatas
+    fun apply(value: json.JsonValue): Array[ApplicationRoleConnectionMetadata] val ? =>
+        """
+        Decodes an array of application role connection metadata records.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let records = Array[ApplicationRoleConnectionMetadata](array.size())
+            for record in array.values() do records.push(ApplicationRoleConnectionMetadata.from_json(record as json.JsonObject)?) end
+            records
+        end
+
+    fun to_json(records: Array[ApplicationRoleConnectionMetadata] val): json.JsonArray =>
+        var array = json.JsonArray
+        for record in records.values() do array = array.push(record.to_json()) end
+        array
+
 trait val ApplicationRoleConnectionMetadataType is (collections.Hashable & Equatable[ApplicationRoleConnectionMetadataType])
     """
     https://docs.discord.com/developers/resources/application-role-connection-metadata#application-role-connection-metadata-object-application-role-connection-metadata-type

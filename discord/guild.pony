@@ -468,6 +468,24 @@ class val Guild
 
         obj
 
+primitive _Guilds
+    fun apply(value: json.JsonValue): Array[Guild] val ? =>
+        """
+        Decodes an array of guilds.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let guilds = Array[Guild](array.size())
+            for guild in array.values() do guilds.push(Guild.from_json(guild as json.JsonObject)?) end
+            guilds
+        end
+
+    fun to_json(guilds: Array[Guild] val): json.JsonArray =>
+        var array = json.JsonArray
+        for guild in guilds.values() do array = array.push(guild.to_json()) end
+        array
+
 trait val DefaultMessageNotificationLevel is (collections.Hashable & Equatable[DefaultMessageNotificationLevel])
     """
     https://docs.discord.com/developers/resources/guild#guild-object-default-message-notification-level
@@ -1654,6 +1672,24 @@ class val Ban
         json.JsonObject
             .update("reason", reason)
             .update("user", user.to_json())
+
+primitive _Bans
+    fun apply(value: json.JsonValue): Array[Ban] val ? =>
+        """
+        Decodes an array of bans.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let bans = Array[Ban](array.size())
+            for ban in array.values() do bans.push(Ban.from_json(ban as json.JsonObject)?) end
+            bans
+        end
+
+    fun to_json(bans: Array[Ban] val): json.JsonArray =>
+        var array = json.JsonArray
+        for ban in bans.values() do array = array.push(ban.to_json()) end
+        array
 
 class val WelcomeScreen
     """

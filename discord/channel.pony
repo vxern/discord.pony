@@ -1029,6 +1029,24 @@ class val ThreadMember
 
         obj
 
+primitive _ThreadMembers
+    fun apply(value: json.JsonValue): Array[ThreadMember] val ? =>
+        """
+        Decodes an array of thread members.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let members = Array[ThreadMember](array.size())
+            for member in array.values() do members.push(ThreadMember.from_json(member as json.JsonObject)?) end
+            members
+        end
+
+    fun to_json(members: Array[ThreadMember] val): json.JsonArray =>
+        var array = json.JsonArray
+        for member in members.values() do array = array.push(member.to_json()) end
+        array
+
 class val DefaultReaction
     """
     https://docs.discord.com/developers/resources/channel#default-reaction-object-default-reaction-structure

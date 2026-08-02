@@ -714,6 +714,24 @@ class val GuildScheduledEventUser
 
         obj
 
+primitive _GuildScheduledEventUsers
+    fun apply(value: json.JsonValue): Array[GuildScheduledEventUser] val ? =>
+        """
+        Decodes an array of guild scheduled event users.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let users = Array[GuildScheduledEventUser](array.size())
+            for user in array.values() do users.push(GuildScheduledEventUser.from_json(user as json.JsonObject)?) end
+            users
+        end
+
+    fun to_json(users: Array[GuildScheduledEventUser] val): json.JsonArray =>
+        var array = json.JsonArray
+        for user in users.values() do array = array.push(user.to_json()) end
+        array
+
 primitive _USizes
     fun apply(array: json.JsonArray): Array[USize] val ? =>
         """
