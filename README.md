@@ -182,4 +182,260 @@
   - [x] Webhook
 
 #### Routes
-
+- [x] Application Role Connection Metadata
+    - [x] Get Application Role Connection Metadata Records
+    - [x] Update Application Role Connection Metadata Records
+- [x] Application
+    - [x] Get Current Application
+    - [x] Edit Current Application
+    - [x] Get Application Activity Instance
+- [x] Audit Log
+    - [x] Get Guild Audit Log
+- Auto Moderation
+    - [x] List Auto Moderation Rules for Guild
+    - [x] Get Auto Moderation Rule
+    - [x] Create Auto Moderation Rule
+    - [x] Modify Auto Moderation Rule
+    - [x] Delete Auto Moderation Rule
+- [x] Channel 
+    - [x] Get Channel
+    - [x] Modify Channel
+    - [x] Delete/Close Channel
+    - [x] Set Voice Channel Status
+    - [x] Edit Channel Permissions
+    - [x] Delete Channel Permission
+    - [x] Get Channel Invites
+    - [x] Create Channel Invite
+    - [x] Follow Announcement Channel
+    - [x] Trigger Typing Indicator
+    - [x] Group DM Add Recipient
+    - [x] Group DM Remove Recipient
+    - [x] Start Thread from Message
+    - [x] Start Thread without Message
+    - [x] Start Thread in Forum or Media Channel
+    - [x] Join Thread
+    - [x] Add Thread Member
+    - [x] Leave Thread
+    - [x] Remove Thread Member
+    - [x] Get Thread Member
+    - [x] List Thread Members
+    - [x] List Public Archived Threads
+    - [x] List Private Archived Threads
+    - [x] List Joined Private Archived Threads
+- [x] Emoji 
+    - [x] List Guild Emojis
+    - [x] Get Guild Emoji
+    - [x] Create Guild Emoji
+    - [x] Modify Guild Emoji
+    - [x] Delete Guild Emoji
+    - [x] List Application Emojis
+    - [x] Get Application Emoji
+    - [x] Create Application Emoji
+    - [x] Modify Application Emoji
+    - [x] Delete Application Emoji
+- [x] Entitlement
+    - [x] List Entitlements
+    - [x] Get Entitlement
+    - [x] Consume an Entitlement
+    - [x] Create Test Entitlement
+    - [x] Delete Test Entitlement
+- [x] Guild 
+    - [x] Get Guild
+    - [x] Get Guild Preview
+    - [x] Modify Guild
+    - [x] Get Guild Channels
+    - [x] Create Guild Channel
+    - [x] Modify Guild Channel Positions
+    - [x] List Active Guild Threads
+    - [x] Get Guild Member
+    - [x] List Guild Members
+    - [x] Search Guild Members
+    - [x] Add Guild Member
+    - [x] Modify Guild Member
+    - [x] Modify Current Member
+    - [x] Modify Current User Nick (deprecated)
+    - [x] Add Guild Member Role
+    - [x] Remove Guild Member Role
+    - [x] Remove Guild Member
+    - [x] Get Guild Bans
+    - [x] Get Guild Ban
+    - [x] Create Guild Ban
+    - [x] Remove Guild Ban
+    - [x] Bulk Guild Ban
+    - [x] Get Guild Roles
+    - [x] Get Guild Role
+    - [x] Get Guild Role Member Counts
+    - [x] Create Guild Role
+    - [x] Modify Guild Role Positions
+    - [x] Modify Guild Role
+    - [x] Delete Guild Role
+    - [x] Get Guild Prune Count
+    - [x] Begin Guild Prune
+    - [x] Get Guild Voice Regions
+    - [x] Get Guild Invites
+    - [x] Get Guild Integrations
+    - [x] Delete Guild Integration
+    - [x] Get Guild Widget Settings
+    - [x] Modify Guild Widget
+    - [x] Get Guild Widget
+    - [x] Get Guild Vanity URL
+    - [x] Get Guild Widget Image
+    - [x] Get Guild Welcome Screen
+    - [x] Modify Guild Welcome Screen
+    - [x] Get Guild Onboarding
+    - [x] Modify Guild Onboarding
+    - [x] Modify Guild Incident Actions
+- [x] Guild Scheduled Event
+    - [x] List Scheduled Events for Guild
+    - [x] Create Guild Scheduled Event
+    - [x] Get Guild Scheduled Event
+    - [x] Modify Guild Scheduled Event
+    - [x] Delete Guild Scheduled Event
+    - [x] Get Guild Scheduled Event Users
+- [x] Guild Template
+    - [x] Get Guild Template
+    - [x] Get Guild Templates
+    - [x] Create Guild Template
+    - [x] Sync Guild Template
+    - [x] Modify Guild Template
+    - [x] Delete Guild Template
+- [x] Invite
+    - [x] Get Invite
+    - [x] Delete Invite
+    - [x] Get Target Users
+    - [x] Update Target Users
+    - [x] Get Target Users Job Status
+- [x] Lobby 
+    - [x] Create Lobby
+    - [x] Create or Join Lobby
+    - [x] Get Lobby
+    - [x] Modify Lobby
+    - [x] Delete Lobby
+    - [x] Add a Member to a Lobby
+    - [x] Bulk Update Lobby Members
+    - [x] Remove a Member from a Lobby
+    - [x] Leave Lobby
+    - [x] Link Channel to Lobby
+    - [x] Unlink Channel from Lobby
+    - [x] Send Lobby Message
+    - [x] Get Lobby Messages
+    - [x] Update Lobby Message Moderation Metadata
+    - [x] Create Lobby Channel Invite for Self
+    - [x] Create Lobby Channel Invite for User
+- [x] Message 
+    - [x] Get Channel Messages
+    - [x] Search Guild Messages
+    - [x] Get Channel Message
+    - [x] Create Message
+    - [x] Crosspost Message
+    - [x] Create Reaction
+    - [x] Delete Own Reaction
+    - [x] Delete User Reaction
+    - [x] Get Reactions
+    - [x] Delete All Reactions
+    - [x] Delete All Reactions for Emoji
+    - [x] Edit Message
+    - [x] Delete Message
+    - [x] Bulk Delete Messages
+    - [x] Get Channel Pins
+    - [x] Pin Message
+    - [x] Unpin Message
+    - [x] Get Pinned Messages (deprecated)
+    - [x] Pin Message (deprecated)
+    - [x] Unpin Message (deprecated)
+- [x] Poll
+    - [x] Get Answer Voters
+    - [x] End Poll
+- [x] SKU (1) & Subscription
+    - [x] List SKUs
+    - [x] List SKU Subscriptions
+    - [x] Get SKU Subscription
+- [x] Soundboard
+    - [x] Send Soundboard Sound
+    - [x] List Default Soundboard Sounds
+    - [x] List Guild Soundboard Sounds
+    - [x] Get Guild Soundboard Sound
+    - [x] Create Guild Soundboard Sound
+    - [x] Modify Guild Soundboard Sound
+    - [x] Delete Guild Soundboard Sound
+- [x] Stage Instance
+    - [x] Create Stage Instance
+    - [x] Get Stage Instance
+    - [x] Modify Stage Instance
+    - [x] Delete Stage Instance
+- [x] Sticker
+    - [x] Get Sticker
+    - [x] List Sticker Packs
+    - [x] Get Sticker Pack
+    - [x] List Guild Stickers
+    - [x] Get Guild Sticker
+    - [x] Create Guild Sticker
+    - [x] Modify Guild Sticker
+    - [x] Delete Guild Sticker
+- [x] User 
+    - [x] Get Current User
+    - [x] Get User
+    - [x] Modify Current User
+    - [x] Get Current User Guilds
+    - [x] Get Current User Guild Member
+    - [x] Leave Guild
+    - [x] Create DM
+    - [x] Create Group DM
+    - [x] Get Current User Connections
+    - [x] Get Current User Application Role Connection
+    - [x] Update Current User Application Role Connection
+    - [x] Delete Current User Application Role Connection
+- [x] Voice
+    - [x] List Voice Regions
+    - [x] Get Current User Voice State
+    - [x] Get User Voice State
+    - [x] Modify Current User Voice State
+    - [x] Modify User Voice State
+- [x] Webhook 
+    - [x] Create Webhook
+    - [x] Get Channel Webhooks
+    - [x] Get Guild Webhooks
+    - [x] Get Webhook
+    - [x] Get Webhook with Token
+    - [x] Modify Webhook
+    - [x] Modify Webhook with Token
+    - [x] Delete Webhook
+    - [x] Delete Webhook with Token
+    - [x] Execute Webhook
+    - [x] Execute Slack-Compatible Webhook
+    - [x] Execute GitHub-Compatible Webhook
+    - [x] Get Webhook Message
+    - [x] Edit Webhook Message
+    - [x] Delete Webhook Message
+- [x] Receiving and Responding
+    - [x] Create Interaction Response
+    - [x] Get Original Interaction Response
+    - [x] Edit Original Interaction Response
+    - [x] Delete Original Interaction Response
+    - [x] Create Followup Message
+    - [x] Get Followup Message
+    - [x] Edit Followup Message
+    - [x] Delete Followup Message
+- [x] Application Commands 
+    - [x] Get Global Application Commands
+    - [x] Create Global Application Command
+    - [x] Get Global Application Command
+    - [x] Edit Global Application Command
+    - [x] Delete Global Application Command
+    - [x] Bulk Overwrite Global Application Commands
+    - [x] Get Guild Application Commands
+    - [x] Create Guild Application Command
+    - [x] Get Guild Application Command
+    - [x] Edit Guild Application Command
+    - [x] Delete Guild Application Command
+    - [x] Bulk Overwrite Guild Application Commands
+    - [x] Get Guild Application Command Permissions
+    - [x] Get Application Command Permissions
+    - [x] Edit Application Command Permissions
+    - [x] Batch Edit Application Command Permissions
+- [x] OAuth2
+    - [x] Get Current Bot Application Information
+    - [x] Get Current Authorization Information
+- [x] Gateway
+    - [x] Get Gateway
+    - [x] Get Gateway Bot
