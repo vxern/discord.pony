@@ -1,7 +1,7 @@
 use collections = "collections"
 use json = "json"
 
-class val AutoModerationRule
+class val AutoModerationRule is Jsonable
     """
     https://docs.discord.com/developers/resources/auto-moderation#auto-moderation-rule-object-auto-moderation-rule-structure
 
@@ -201,7 +201,7 @@ primitive AutoModerationTriggerTypes
         else error
         end
 
-class val AutoModerationTriggerMetadata
+class val AutoModerationTriggerMetadata is Jsonable
     """
     https://docs.discord.com/developers/resources/auto-moderation#auto-moderation-rule-object-trigger-metadata
 
@@ -392,7 +392,7 @@ primitive AutoModerationEventTypes
         else error
         end
 
-class val AutoModerationAction
+class val AutoModerationAction is Jsonable
     """
     https://docs.discord.com/developers/resources/auto-moderation#auto-moderation-action-object-auto-moderation-action-structure
 
@@ -497,7 +497,7 @@ primitive AutoModerationActionTypes
         else error
         end
 
-class val AutoModerationActionMetadata
+class val AutoModerationActionMetadata is Jsonable
     """
     https://docs.discord.com/developers/resources/auto-moderation#auto-moderation-action-object-action-metadata
 
@@ -559,7 +559,7 @@ class val AutoModerationActionMetadata
 
         obj
 
-class val CreateAutoModerationRuleParams
+class val CreateAutoModerationRuleParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/auto-moderation#create-auto-moderation-rule-json-params
     """
@@ -650,7 +650,7 @@ class val CreateAutoModerationRuleParams
 
         obj
 
-class val UpdateAutoModerationRuleParams
+class val UpdateAutoModerationRuleParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/auto-moderation#modify-auto-moderation-rule-json-params
 

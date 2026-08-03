@@ -312,7 +312,7 @@ primitive VoiceCloseEventCodeDisconnectedCallTerminated is VoiceCloseEventCode
     fun value(): U16 => 4022
     fun reconnect(): Bool => false
 
-class val UpdateCurrentUserVoiceStateParams
+class val UpdateCurrentUserVoiceStateParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/voice#modify-current-user-voice-state-json-params
 
@@ -367,7 +367,7 @@ class val UpdateCurrentUserVoiceStateParams
 
         obj
 
-class val UpdateUserVoiceStateParams
+class val UpdateUserVoiceStateParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/voice#modify-user-voice-state-json-params
 

@@ -1,7 +1,7 @@
 use collections = "collections"
 use json = "json"
 
-class val StageInstance
+class val StageInstance is Jsonable
     """
     https://docs.discord.com/developers/resources/stage-instance#stage-instance-object-stage-instance-structure
 
@@ -121,7 +121,7 @@ primitive StageInstancePrivacyLevels
         else error
         end
 
-class val CreateStageInstanceParams
+class val CreateStageInstanceParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/stage-instance#create-stage-instance-json-params
     """
@@ -185,7 +185,7 @@ class val CreateStageInstanceParams
 
         obj
 
-class val UpdateStageInstanceParams
+class val UpdateStageInstanceParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/stage-instance#modify-stage-instance-json-params
 

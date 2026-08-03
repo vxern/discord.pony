@@ -2502,15 +2502,6 @@ actor Routes
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
         api.send_request(options.build_request(courier.GET, "/gateway/bot"), _Decode.payload(handler, options.on_error))
 
-interface val _FromJson
-    """
-    A payload type that knows how to decode itself, letting `_Decode.entity`
-    name the constructor generically rather than taking a decoding lambda at
-    every one of the call sites in `Routes`.
-    """
-
-    new val from_json(obj: json.JsonObject) ?
-
 primitive _Decode
     """
     Adapts typed handlers down to the `RawResponseHandler` that `RestApi` takes.
@@ -2521,7 +2512,7 @@ primitive _Decode
     type the route returns — goes to `on_error` instead.
     """
 
-    fun entity[A: _FromJson val](handler: ResponseHandler[A], on_error: RestErrorHandler): RawResponseHandler =>
+    fun entity[A: FromJsonable val](handler: ResponseHandler[A], on_error: RestErrorHandler): RawResponseHandler =>
         """
         Decodes a lone object, as returned by routes documented as returning
         "a ... object".

@@ -1,7 +1,7 @@
 use collections = "collections"
 use json = "json"
 
-class val Lobby
+class val Lobby is Jsonable
     """
     https://docs.discord.com/developers/resources/lobby#lobby-object
 
@@ -72,7 +72,7 @@ class val Lobby
 
         obj
 
-class val LobbyMember
+class val LobbyMember is Jsonable
     """
     https://docs.discord.com/developers/resources/lobby#lobby-member-object
 
@@ -205,7 +205,7 @@ primitive _Metadata
         for (key, value) in map.pairs() do obj = obj.update(key, value) end
         obj
 
-class val CreateLobbyParams
+class val CreateLobbyParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/lobby#create-lobby-json-params
 
@@ -253,7 +253,7 @@ class val CreateLobbyParams
 
         obj
 
-class val LobbyMemberParams
+class val LobbyMemberParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/lobby#create-lobby-lobby-member-params
 
@@ -303,7 +303,7 @@ primitive _LobbyMemberParams
         for member in members.values() do array = array.push(member.to_json()) end
         array
 
-class val CreateOrJoinLobbyParams
+class val CreateOrJoinLobbyParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/lobby#create-or-join-lobby-json-params
 
@@ -358,7 +358,7 @@ class val CreateOrJoinLobbyParams
 
         obj
 
-class val UpdateLobbyParams
+class val UpdateLobbyParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/lobby#modify-lobby-json-params
 
@@ -406,7 +406,7 @@ class val UpdateLobbyParams
 
         obj
 
-class val AddLobbyMemberParams
+class val AddLobbyMemberParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/lobby#add-a-member-to-a-lobby-json-params
     """
@@ -441,7 +441,7 @@ class val AddLobbyMemberParams
 
         obj
 
-class val BulkUpdateLobbyMembersParams
+class val BulkUpdateLobbyMembersParams is ToJsonableArray
     """
     https://docs.discord.com/developers/resources/lobby#bulk-update-lobby-members
 
@@ -459,7 +459,7 @@ class val BulkUpdateLobbyMembersParams
     fun to_json(): json.JsonArray =>
         _LobbyMemberParams.to_json(members)
 
-class val LinkChannelToLobbyParams
+class val LinkChannelToLobbyParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/lobby#link-channel-to-lobby-json-params
     """
@@ -481,7 +481,7 @@ class val LinkChannelToLobbyParams
 
         obj
 
-class val SendLobbyMessageParams
+class val SendLobbyMessageParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/lobby#send-lobby-message-json-params
 
@@ -562,7 +562,7 @@ class val GetLobbyMessagesParams
 
         consume query
 
-class val UpdateLobbyMessageModerationMetadataParams
+class val UpdateLobbyMessageModerationMetadataParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/lobby#update-lobby-message-moderation-metadata-json-params
     """

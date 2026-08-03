@@ -1,7 +1,7 @@
 use collections = "collections"
 use json = "json"
 
-class val Guild
+class val Guild is Jsonable
     """
     https://docs.discord.com/developers/resources/guild#guild-object-guild-structure
 
@@ -783,7 +783,7 @@ primitive _SystemChannelFlags
         for flag in flags.values() do bits = bits or (U64(1) << flag.value().u64()) end
         bits.i64()
 
-class val GuildPreview
+class val GuildPreview is Jsonable
     """
     https://docs.discord.com/developers/resources/guild#guild-preview-object-guild-preview-structure
     """
@@ -902,7 +902,7 @@ class val GuildPreview
             .update("description", description)
             .update("stickers", _Stickers.to_json(stickers))
 
-class val GuildWidgetSettings
+class val GuildWidgetSettings is Jsonable
     """
     https://docs.discord.com/developers/resources/guild#guild-widget-settings-object-guild-widget-settings-structure
     """
@@ -937,7 +937,7 @@ class val GuildWidgetSettings
             .update("enabled", enabled)
             .update("channel_id", match channel_id | let channel_id': Snowflake => channel_id'.to_json() end)
 
-class val GuildWidget
+class val GuildWidget is Jsonable
     """
     https://docs.discord.com/developers/resources/guild#guild-widget-object-guild-widget-structure
     """
@@ -1003,7 +1003,7 @@ class val GuildWidget
             .update("members", _Users.to_json(members))
             .update("presence_count", presence_count.i64())
 
-class val GuildMember
+class val GuildMember is Jsonable
     """
     https://docs.discord.com/developers/resources/guild#guild-member-object-guild-member-structure
 
@@ -1300,7 +1300,7 @@ primitive _GuildMemberFlags
         for flag in flags.values() do bits = bits or (U64(1) << flag.value().u64()) end
         bits.i64()
 
-class val Integration
+class val Integration is Jsonable
     """
     https://docs.discord.com/developers/resources/guild#integration-object-integration-structure
 
@@ -1537,7 +1537,7 @@ primitive IntegrationExpireBehaviors
         else error
         end
 
-class val IntegrationAccount
+class val IntegrationAccount is Jsonable
     """
     https://docs.discord.com/developers/resources/guild#integration-account-object-integration-account-structure
     """
@@ -1571,7 +1571,7 @@ class val IntegrationAccount
             .update("id", id)
             .update("name", name)
 
-class val IntegrationApplication
+class val IntegrationApplication is Jsonable
     """
     https://docs.discord.com/developers/resources/guild#integration-application-object-integration-application-structure
     """
@@ -1638,7 +1638,7 @@ class val IntegrationApplication
 
         obj
 
-class val Ban
+class val Ban is Jsonable
     """
     https://docs.discord.com/developers/resources/guild#ban-object-ban-structure
     """
@@ -1691,7 +1691,7 @@ primitive _Bans
         for ban in bans.values() do array = array.push(ban.to_json()) end
         array
 
-class val WelcomeScreen
+class val WelcomeScreen is Jsonable
     """
     https://docs.discord.com/developers/resources/guild#welcome-screen-object-welcome-screen-structure
     """
@@ -1726,7 +1726,7 @@ class val WelcomeScreen
             .update("description", description)
             .update("welcome_channels", _WelcomeScreenChannels.to_json(welcome_channels))
 
-class val WelcomeScreenChannel
+class val WelcomeScreenChannel is Jsonable
     """
     https://docs.discord.com/developers/resources/guild#welcome-screen-object-welcome-screen-channel-structure
     """
@@ -1798,7 +1798,7 @@ primitive _WelcomeScreenChannels
         for channel in channels.values() do array = array.push(channel.to_json()) end
         array
 
-class val GuildOnboarding
+class val GuildOnboarding is Jsonable
     """
     https://docs.discord.com/developers/resources/guild#guild-onboarding-object-guild-onboarding-structure
 
@@ -1893,7 +1893,7 @@ primitive OnboardingModes
         else error
         end
 
-class val OnboardingPrompt
+class val OnboardingPrompt is Jsonable
     """
     https://docs.discord.com/developers/resources/guild#guild-onboarding-object-onboarding-prompt-structure
     """
@@ -2012,7 +2012,7 @@ primitive OnboardingPromptTypes
         else error
         end
 
-class val OnboardingPromptOption
+class val OnboardingPromptOption is Jsonable
     """
     https://docs.discord.com/developers/resources/guild#guild-onboarding-object-prompt-option-structure
     """
@@ -2144,7 +2144,7 @@ primitive _OnboardingPromptOptions
         for option in options.values() do array = array.push(option.to_json()) end
         array
 
-class val IncidentsData
+class val IncidentsData is Jsonable
     """
     https://docs.discord.com/developers/resources/guild#incidents-data-object-incidents-data-structure
     """
@@ -2230,7 +2230,7 @@ class val GetGuildParams
 
         consume query
 
-class val UpdateGuildParams
+class val UpdateGuildParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/guild#modify-guild-json-params
 
@@ -2481,7 +2481,7 @@ class val UpdateGuildParams
 
         obj
 
-class val CreateGuildChannelParams
+class val CreateGuildChannelParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/guild#create-guild-channel-json-params
 
@@ -2690,7 +2690,7 @@ class val CreateGuildChannelParams
 
         obj
 
-class val GuildChannelPosition
+class val GuildChannelPosition is ToJsonable
     """
     https://docs.discord.com/developers/resources/guild#modify-guild-channel-positions-json-params
 
@@ -2748,7 +2748,7 @@ class val GuildChannelPosition
 
         obj
 
-class val UpdateGuildChannelPositionsParams
+class val UpdateGuildChannelPositionsParams is ToJsonableArray
     """
     https://docs.discord.com/developers/resources/guild#modify-guild-channel-positions
 
@@ -2832,7 +2832,7 @@ class val SearchGuildMembersParams
 
         consume params
 
-class val AddGuildMemberParams
+class val AddGuildMemberParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/guild#add-guild-member-json-params
 
@@ -2898,7 +2898,7 @@ class val AddGuildMemberParams
 
         obj
 
-class val UpdateGuildMemberParams
+class val UpdateGuildMemberParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/guild#modify-guild-member-json-params
 
@@ -3011,7 +3011,7 @@ class val UpdateGuildMemberParams
 
         obj
 
-class val UpdateCurrentMemberParams
+class val UpdateCurrentMemberParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/guild#modify-current-member-json-params
     """
@@ -3036,7 +3036,7 @@ class val UpdateCurrentMemberParams
 
         obj
 
-class val UpdateCurrentUserNickParams
+class val UpdateCurrentUserNickParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/guild#modify-current-user-nick-json-params
 
@@ -3111,7 +3111,7 @@ class val GetGuildBansParams
 
         consume query
 
-class val CreateGuildBanParams
+class val CreateGuildBanParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/guild#create-guild-ban-json-params
     """
@@ -3133,7 +3133,7 @@ class val CreateGuildBanParams
 
         obj
 
-class val BulkGuildBanParams
+class val BulkGuildBanParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/guild#bulk-guild-ban-json-params
 
@@ -3163,7 +3163,7 @@ class val BulkGuildBanParams
 
         obj
 
-class val CreateGuildRoleParams
+class val CreateGuildRoleParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/guild#create-guild-role-json-params
 
@@ -3270,7 +3270,7 @@ class val CreateGuildRoleParams
 
         obj
 
-class val GuildRolePosition
+class val GuildRolePosition is ToJsonable
     """
     https://docs.discord.com/developers/resources/guild#modify-guild-role-positions-json-params
 
@@ -3301,7 +3301,7 @@ class val GuildRolePosition
 
         obj
 
-class val UpdateGuildRolePositionsParams
+class val UpdateGuildRolePositionsParams is ToJsonableArray
     """
     https://docs.discord.com/developers/resources/guild#modify-guild-role-positions
 
@@ -3321,7 +3321,7 @@ class val UpdateGuildRolePositionsParams
         for position in positions.values() do array = array.push(position.to_json()) end
         array
 
-class val UpdateGuildRoleParams
+class val UpdateGuildRoleParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/guild#modify-guild-role-json-params
 
@@ -3468,7 +3468,7 @@ class val GetGuildPruneCountParams
 
         consume query
 
-class val BeginGuildPruneParams
+class val BeginGuildPruneParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/guild#begin-guild-prune-json-params
 
@@ -3516,7 +3516,7 @@ class val BeginGuildPruneParams
 
         obj
 
-class val UpdateGuildWidgetParams
+class val UpdateGuildWidgetParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/guild#modify-guild-widget
 
@@ -3626,7 +3626,7 @@ class val GetGuildWidgetImageParams
 
         consume query
 
-class val UpdateGuildWelcomeScreenParams
+class val UpdateGuildWelcomeScreenParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/guild#modify-guild-welcome-screen-json-params
 
@@ -3677,7 +3677,7 @@ class val UpdateGuildWelcomeScreenParams
 
         obj
 
-class val UpdateGuildOnboardingParams
+class val UpdateGuildOnboardingParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/guild#modify-guild-onboarding-json-params
 
@@ -3722,7 +3722,7 @@ class val UpdateGuildOnboardingParams
             .update("enabled", enabled)
             .update("mode", mode.value().i64())
 
-class val UpdateGuildIncidentActionsParams
+class val UpdateGuildIncidentActionsParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/guild#modify-guild-incident-actions-json-params
 

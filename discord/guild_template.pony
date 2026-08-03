@@ -1,6 +1,6 @@
 use json = "json"
 
-class val GuildTemplate
+class val GuildTemplate is Jsonable
     """
     https://docs.discord.com/developers/resources/guild-template#guild-template-object-guild-template-structure
 
@@ -144,7 +144,7 @@ primitive _GuildTemplates
         for template in templates.values() do array = array.push(template.to_json()) end
         array
 
-class val CreateGuildTemplateParams
+class val CreateGuildTemplateParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/guild-template#create-guild-template-json-params
     """
@@ -172,7 +172,7 @@ class val CreateGuildTemplateParams
 
         obj
 
-class val UpdateGuildTemplateParams
+class val UpdateGuildTemplateParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/guild-template#modify-guild-template-json-params
 

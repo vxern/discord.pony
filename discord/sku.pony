@@ -1,7 +1,7 @@
 use collections = "collections"
 use json = "json"
 
-class val SKU
+class val SKU is Jsonable
     """
     https://docs.discord.com/developers/resources/sku#sku-object-sku-structure
 

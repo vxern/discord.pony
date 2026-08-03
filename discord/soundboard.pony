@@ -1,6 +1,6 @@
 use json = "json"
 
-class val SoundboardSound
+class val SoundboardSound is Jsonable
     """
     https://docs.discord.com/developers/resources/soundboard#soundboard-sound-object-soundboard-sound-structure
 
@@ -134,7 +134,7 @@ type SoundData is String
     seconds.
     """
 
-class val SendSoundboardSoundParams
+class val SendSoundboardSoundParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/soundboard#send-soundboard-sound-json-params
     """
@@ -162,7 +162,7 @@ class val SendSoundboardSoundParams
 
         obj
 
-class val CreateGuildSoundboardSoundParams
+class val CreateGuildSoundboardSoundParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/soundboard#create-guild-soundboard-sound-json-params
 
@@ -229,7 +229,7 @@ class val CreateGuildSoundboardSoundParams
 
         obj
 
-class val UpdateGuildSoundboardSoundParams
+class val UpdateGuildSoundboardSoundParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/soundboard#modify-guild-soundboard-sound-json-params
 

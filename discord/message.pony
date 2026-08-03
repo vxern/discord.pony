@@ -1,7 +1,7 @@
 use collections = "collections"
 use json = "json"
 
-class val Message
+class val Message is Jsonable
     """
     https://docs.discord.com/developers/resources/message#message-object
 
@@ -655,7 +655,7 @@ primitive MessageTypes
         else error
         end
 
-class val MessageActivity
+class val MessageActivity is Jsonable
     """
     https://docs.discord.com/developers/resources/message#message-object-message-activity-structure
     """
@@ -871,7 +871,7 @@ primitive MessageInteractionMetadatas
         else error
         end
 
-class val ApplicationCommandInteractionMetadata
+class val ApplicationCommandInteractionMetadata is Jsonable
     """
     https://docs.discord.com/developers/resources/message#message-interaction-metadata-object-application-command-interaction-metadata-structure
     """
@@ -961,7 +961,7 @@ class val ApplicationCommandInteractionMetadata
 
         obj
 
-class val MessageComponentInteractionMetadata
+class val MessageComponentInteractionMetadata is Jsonable
     """
     https://docs.discord.com/developers/resources/message#message-interaction-metadata-object-message-component-interaction-metadata-structure
     """
@@ -1036,7 +1036,7 @@ class val MessageComponentInteractionMetadata
 
         obj
 
-class val ModalSubmitInteractionMetadata
+class val ModalSubmitInteractionMetadata is Jsonable
     """
     https://docs.discord.com/developers/resources/message#message-interaction-metadata-object-modal-submit-interaction-metadata-structure
     """
@@ -1114,7 +1114,7 @@ class val ModalSubmitInteractionMetadata
 
         obj
 
-class val MessageInteraction
+class val MessageInteraction is Jsonable
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#message-interaction-object-message-interaction-structure
 
@@ -1170,7 +1170,7 @@ class val MessageInteraction
             .update("name", name)
             .update("user", user.to_json())
 
-class val MessageCall
+class val MessageCall is Jsonable
     """
     https://docs.discord.com/developers/resources/message#message-call-object-message-call-object-structure
 
@@ -1207,7 +1207,7 @@ class val MessageCall
             .update("participants", _Snowflakes.to_json(participants))
             .update("ended_timestamp", ended_timestamp)
 
-class val MessageReference
+class val MessageReference is Jsonable
     """
     https://docs.discord.com/developers/resources/message#message-reference-structure
 
@@ -1334,7 +1334,7 @@ primitive MessageReferenceTypes
         else error
         end
 
-class val MessageSnapshot
+class val MessageSnapshot is Jsonable
     """
     https://docs.discord.com/developers/resources/message#message-snapshot-object-message-snapshot-structure
 
@@ -1499,7 +1499,7 @@ primitive _MessageSnapshots
         for snapshot in snapshots.values() do array = array.push(snapshot.to_json()) end
         array
 
-class val MessageReaction
+class val MessageReaction is Jsonable
     """
     https://docs.discord.com/developers/resources/message#reaction-object-reaction-structure
     """
@@ -1587,7 +1587,7 @@ primitive _MessageReactions
         for reaction in reactions.values() do array = array.push(reaction.to_json()) end
         array
 
-class val MessageReactionCountDetails
+class val MessageReactionCountDetails is Jsonable
     """
     https://docs.discord.com/developers/resources/message#reaction-count-details-object-reaction-count-details-structure
 
@@ -1623,7 +1623,7 @@ class val MessageReactionCountDetails
             .update("burst", burst.i64())
             .update("normal", normal.i64())
 
-class val MessageEmbed
+class val MessageEmbed is Jsonable
     """
     https://docs.discord.com/developers/resources/message#embed-object-embed-structure
 
@@ -1942,7 +1942,7 @@ primitive _MessageEmbedFlags
         for flag in flags.values() do bits = bits or (U64(1) << flag.value().u64()) end
         bits.i64()
 
-class val MessageEmbedVideo
+class val MessageEmbedVideo is Jsonable
     """
     https://docs.discord.com/developers/resources/message#embed-object-embed-video-structure
     """
@@ -2068,7 +2068,7 @@ class val MessageEmbedVideo
 
         obj
 
-class val MessageEmbedImage
+class val MessageEmbedImage is Jsonable
     """
     https://docs.discord.com/developers/resources/message#embed-object-embed-image-structure
 
@@ -2235,7 +2235,7 @@ primitive _MessageEmbedMediaFlags
         for flag in flags.values() do bits = bits or (U64(1) << flag.value().u64()) end
         bits.i64()
 
-class val MessageEmbedProvider
+class val MessageEmbedProvider is Jsonable
     """
     https://docs.discord.com/developers/resources/message#embed-object-embed-provider-structure
     """
@@ -2277,7 +2277,7 @@ class val MessageEmbedProvider
 
         obj
 
-class val MessageEmbedAuthor
+class val MessageEmbedAuthor is Jsonable
     """
     https://docs.discord.com/developers/resources/message#embed-object-embed-author-structure
     """
@@ -2340,7 +2340,7 @@ class val MessageEmbedAuthor
 
         obj
 
-class val MessageEmbedFooter
+class val MessageEmbedFooter is Jsonable
     """
     https://docs.discord.com/developers/resources/message#embed-object-embed-footer-structure
     """
@@ -2391,7 +2391,7 @@ class val MessageEmbedFooter
 
         obj
 
-class val MessageEmbedField
+class val MessageEmbedField is Jsonable
     """
     https://docs.discord.com/developers/resources/message#embed-object-embed-field-structure
     """
@@ -2457,7 +2457,7 @@ primitive _MessageEmbedFields
         for field in fields.values() do array = array.push(field.to_json()) end
         array
 
-class val MessageAttachment
+class val MessageAttachment is Jsonable
     """
     https://docs.discord.com/developers/resources/message#attachment-object-attachment-structure
     """
@@ -2781,7 +2781,7 @@ primitive _MessageAttachmentFlags
         for flag in flags.values() do bits = bits or (U64(1) << flag.value().u64()) end
         bits.i64()
 
-class val ChannelMention
+class val ChannelMention is Jsonable
     """
     https://docs.discord.com/developers/resources/message#channel-mention-object-channel-mention-structure
     """
@@ -2851,7 +2851,7 @@ primitive _ChannelMentions
         for mention in mentions.values() do array = array.push(mention.to_json()) end
         array
 
-class val AllowedMentions
+class val AllowedMentions is Jsonable
     """
     https://docs.discord.com/developers/resources/message#allowed-mentions-object
 
@@ -2978,7 +2978,7 @@ primitive _AllowedMentions
         for type' in types.values() do array = array.push(type'.value()) end
         array
 
-class val RoleSubscriptionData
+class val RoleSubscriptionData is Jsonable
     """
     https://docs.discord.com/developers/resources/message#role-subscription-data-object-role-subscription-data-object-structure
     """
@@ -3030,7 +3030,7 @@ class val RoleSubscriptionData
             .update("total_months_subscribed", total_months_subscribed.i64())
             .update("is_renewal", is_renewal)
 
-class val MessagePin
+class val MessagePin is Jsonable
     """
     https://docs.discord.com/developers/resources/message#message-pin-object-message-pin-object-structure
     """
@@ -3082,7 +3082,7 @@ primitive _MessagePins
         for pin in pins.values() do array = array.push(pin.to_json()) end
         array
 
-class val SharedClientTheme
+class val SharedClientTheme is Jsonable
     """
     https://docs.discord.com/developers/resources/message#shared-client-theme-object-shared-client-theme-object-structure
     """
@@ -3175,7 +3175,7 @@ primitive BaseThemeTypes
         else error
         end
 
-class val MessageAttachmentParams
+class val MessageAttachmentParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/message#attachment-object
 
@@ -3410,7 +3410,7 @@ class val SearchGuildMessagesParams
 
         consume query
 
-class val CreateMessageParams
+class val CreateMessageParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/message#create-message-jsonform-params
 
@@ -3559,7 +3559,7 @@ class val CreateMessageParams
 
         obj
 
-class val ForumThreadMessageParams
+class val ForumThreadMessageParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/channel#start-thread-in-forum-or-media-channel-forum-and-media-thread-message-params-object
 
@@ -3719,7 +3719,7 @@ primitive MessageReactionTypes
         else error
         end
 
-class val UpdateMessageParams
+class val UpdateMessageParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/message#edit-message-jsonform-params
 
@@ -3808,7 +3808,7 @@ class val UpdateMessageParams
 
         obj
 
-class val BulkDeleteMessagesParams
+class val BulkDeleteMessagesParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/message#bulk-delete-messages-json-params
 

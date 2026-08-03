@@ -1,7 +1,7 @@
 use collections = "collections"
 use json = "json"
 
-class val Sticker
+class val Sticker is Jsonable
     """
     https://docs.discord.com/developers/resources/sticker#sticker-object-sticker-structure
 
@@ -214,7 +214,7 @@ primitive StickerFormatTypes
         else error
         end
 
-class val StickerItem
+class val StickerItem is Jsonable
     """
     https://docs.discord.com/developers/resources/sticker#sticker-item-object-sticker-item-structure
 
@@ -259,7 +259,7 @@ class val StickerItem
             .update("name", name)
             .update("format_type", format_type.value().i64())
 
-class val StickerPack
+class val StickerPack is Jsonable
     """
     https://docs.discord.com/developers/resources/sticker#sticker-pack-object-sticker-pack-structure
 
@@ -366,7 +366,7 @@ primitive _StickerItems
         for item in items.values() do array = array.push(item.to_json()) end
         array
 
-class val CreateGuildStickerParams
+class val CreateGuildStickerParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/sticker#create-guild-sticker-form-params
 
@@ -405,7 +405,7 @@ class val CreateGuildStickerParams
             .update("description", description)
             .update("tags", tags)
 
-class val UpdateGuildStickerParams
+class val UpdateGuildStickerParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/sticker#modify-guild-sticker-json-params
 

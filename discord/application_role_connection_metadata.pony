@@ -1,7 +1,7 @@
 use collections = "collections"
 use json = "json"
 
-class val ApplicationRoleConnectionMetadata
+class val ApplicationRoleConnectionMetadata is Jsonable
     """
     https://docs.discord.com/developers/resources/application-role-connection-metadata#application-role-connection-metadata-object-application-role-connection-metadata-structure
 

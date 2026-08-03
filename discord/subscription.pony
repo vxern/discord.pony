@@ -1,7 +1,7 @@
 use collections = "collections"
 use json = "json"
 
-class val Subscription
+class val Subscription is Jsonable
     """
     https://docs.discord.com/developers/resources/subscription#subscription-object-subscription-structure
 

@@ -491,7 +491,7 @@ primitive _Permissions
         for permission in permissions.values() do bits = bits or (U64(1) << permission.value().u64()) end
         bits.string()
 
-class val Role
+class val Role is Jsonable
     """
     https://docs.discord.com/developers/topics/permissions#role-object
 
@@ -653,7 +653,7 @@ primitive _Roles
         for role in roles.values() do array = array.push(role.to_json()) end
         array
 
-class val RoleTags
+class val RoleTags is Jsonable
     """
     https://docs.discord.com/developers/topics/permissions#role-object-role-tags-structure
 
@@ -739,7 +739,7 @@ class val RoleTags
 
         obj
 
-class val RoleColors
+class val RoleColors is Jsonable
     """
     https://docs.discord.com/developers/topics/permissions#role-object-role-colors-object
 

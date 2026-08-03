@@ -1,7 +1,7 @@
 use collections = "collections"
 use json = "json"
 
-trait val Component
+trait val Component is Jsonable
     """
     https://docs.discord.com/developers/components/reference#component-object
 
@@ -16,8 +16,6 @@ trait val Component
         """
         The type of the component
         """
-
-    fun to_json(): json.JsonObject
 
 trait val ComponentType is (collections.Hashable & Equatable[ComponentType])
     """
@@ -653,7 +651,7 @@ class val StringSelectComponent is Component
 
         obj
 
-class val SelectOption
+class val SelectOption is Jsonable
     """
     https://docs.discord.com/developers/components/reference#string-select-select-option-structure
     """
@@ -1301,7 +1299,7 @@ primitive _SelectJson
 
         obj
 
-class val SelectDefaultValue
+class val SelectDefaultValue is Jsonable
     """
     https://docs.discord.com/developers/components/reference#user-select-select-default-value-structure
 
@@ -1609,7 +1607,7 @@ class val MediaGalleryComponent is Component
         _ComponentJson(component_type(), id)
             .update("items", _MediaGalleryItems.to_json(items))
 
-class val MediaGalleryItem
+class val MediaGalleryItem is Jsonable
     """
     https://docs.discord.com/developers/components/reference#media-gallery-media-gallery-item-structure
     """
@@ -2141,7 +2139,7 @@ class val RadioGroupComponent is Component
 
         obj
 
-class val RadioGroupOption
+class val RadioGroupOption is Jsonable
     """
     https://docs.discord.com/developers/components/reference#radio-group-option-structure
     """
@@ -2305,7 +2303,7 @@ class val CheckboxGroupComponent is Component
 
         obj
 
-class val CheckboxGroupOption
+class val CheckboxGroupOption is Jsonable
     """
     https://docs.discord.com/developers/components/reference#checkbox-group-option-structure
     """
@@ -2436,7 +2434,7 @@ class val CheckboxComponent is Component
 
         obj
 
-class val UnfurledMediaItem
+class val UnfurledMediaItem is Jsonable
     """
     https://docs.discord.com/developers/components/reference#unfurled-media-item
 

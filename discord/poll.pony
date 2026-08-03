@@ -1,7 +1,7 @@
 use collections = "collections"
 use json = "json"
 
-class val Poll
+class val Poll is Jsonable
     """
     https://docs.discord.com/developers/resources/poll#poll-object-poll-object-structure
 
@@ -106,7 +106,7 @@ primitive PollLayoutTypes
         else error
         end
 
-class val PollMedia
+class val PollMedia is Jsonable
     """
     https://docs.discord.com/developers/resources/poll#poll-media-object-poll-media-object-structure
 
@@ -156,7 +156,7 @@ class val PollMedia
 
         obj
 
-class val PollAnswer
+class val PollAnswer is Jsonable
     """
     https://docs.discord.com/developers/resources/poll#poll-answer-object-poll-answer-object-structure
 
@@ -212,7 +212,7 @@ primitive _PollAnswers
         for answer in answers.values() do array = array.push(answer.to_json()) end
         array
 
-class val PollResults
+class val PollResults is Jsonable
     """
     https://docs.discord.com/developers/resources/poll#poll-results-object-poll-results-object-structure
 
@@ -254,7 +254,7 @@ class val PollResults
             .update("is_finalized", is_finalized)
             .update("answer_counts", _PollAnswerCounts.to_json(answer_counts))
 
-class val PollAnswerCount
+class val PollAnswerCount is Jsonable
     """
     https://docs.discord.com/developers/resources/poll#poll-results-object-poll-answer-count-object-structure
     """
@@ -347,7 +347,7 @@ class val GetAnswerVotersParams
 
         consume query
 
-class val PollAnswerParams
+class val PollAnswerParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/poll#poll-answer-object
 
@@ -371,7 +371,7 @@ primitive _PollAnswerParams
         for answer in answers.values() do array = array.push(answer.to_json()) end
         array
 
-class val PollParams
+class val PollParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/poll#poll-create-request-object-poll-create-request-object-structure
 

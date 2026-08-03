@@ -1,7 +1,7 @@
 use collections = "collections"
 use json = "json"
 
-class val Entitlement
+class val Entitlement is Jsonable
     """
     https://docs.discord.com/developers/resources/entitlement#entitlement-object-entitlement-structure
 
@@ -325,7 +325,7 @@ class val GetEntitlementsParams
 
         consume query
 
-class val CreateTestEntitlementParams
+class val CreateTestEntitlementParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/entitlement#create-test-entitlement-json-params
     """

@@ -1,6 +1,6 @@
 use json = "json"
 
-class val Emoji
+class val Emoji is Jsonable
     """
     https://docs.discord.com/developers/resources/emoji#emoji-object
 
@@ -142,7 +142,7 @@ primitive _Emojis
         for emoji in emojis.values() do array = array.push(emoji.to_json()) end
         array
 
-class val CreateGuildEmojiParams
+class val CreateGuildEmojiParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/emoji#create-guild-emoji-json-params
 
@@ -175,7 +175,7 @@ class val CreateGuildEmojiParams
             .update("image", image)
             .update("roles", _Snowflakes.to_json(roles))
 
-class val UpdateGuildEmojiParams
+class val UpdateGuildEmojiParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/emoji#modify-guild-emoji-json-params
 
@@ -210,7 +210,7 @@ class val UpdateGuildEmojiParams
 
         obj
 
-class val CreateApplicationEmojiParams
+class val CreateApplicationEmojiParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/emoji#create-application-emoji-json-params
 
@@ -236,7 +236,7 @@ class val CreateApplicationEmojiParams
             .update("name", name)
             .update("image", image)
 
-class val UpdateApplicationEmojiParams
+class val UpdateApplicationEmojiParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/emoji#modify-application-emoji-json-params
     """

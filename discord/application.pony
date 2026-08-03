@@ -1,7 +1,7 @@
 use collections = "collections"
 use json = "json"
 
-class val Application
+class val Application is Jsonable
     """
     https://docs.discord.com/developers/resources/application#application-object-application-structure
 
@@ -410,7 +410,7 @@ primitive ApplicationIntegrationTypes
         else error
         end
 
-class val ApplicationIntegrationTypeConfiguration
+class val ApplicationIntegrationTypeConfiguration is Jsonable
     """
     https://docs.discord.com/developers/resources/application#application-object-application-integration-type-configuration-object
     """
@@ -609,7 +609,7 @@ primitive _ApplicationFlags
         for flag in flags.values() do bits = bits or (U64(1) << flag.value().u64()) end
         bits.i64()
 
-class val InstallParams
+class val InstallParams is Jsonable
     """
     https://docs.discord.com/developers/resources/application#install-params-object-install-params-structure
     """
@@ -643,7 +643,7 @@ class val InstallParams
             .update("scopes", _Strings.to_json(scopes))
             .update("permissions", _Permissions.to_json(permissions))
 
-class val ActivityInstance
+class val ActivityInstance is Jsonable
     """
     https://docs.discord.com/developers/resources/application#get-application-activity-instance-activity-instance-object
 
@@ -706,7 +706,7 @@ class val ActivityInstance
             .update("location", location.to_json())
             .update("users", _Snowflakes.to_json(users))
 
-class val ActivityLocation
+class val ActivityLocation is Jsonable
     """
     https://docs.discord.com/developers/resources/application#get-application-activity-instance-activity-location-object
 
@@ -814,7 +814,7 @@ primitive _Strings
         for string in strings.values() do array = array.push(string) end
         array
 
-class val UpdateApplicationParams
+class val UpdateApplicationParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/application#edit-current-application-json-params
 

@@ -1,7 +1,7 @@
 use collections = "collections"
 use json = "json"
 
-class val User
+class val User is Jsonable
     """
     https://docs.discord.com/developers/resources/user#user-object-user-structure
 
@@ -430,7 +430,7 @@ primitive PremiumTypes
         else error
         end
 
-class val AvatarDecorationData
+class val AvatarDecorationData is Jsonable
     """
     https://docs.discord.com/developers/resources/user#avatar-decoration-data-object-avatar-decoration-data-structure
 
@@ -466,7 +466,7 @@ class val AvatarDecorationData
             .update("asset", asset)
             .update("sku_id", sku_id.to_json())
 
-class val Collectibles
+class val Collectibles is Jsonable
     """
     https://docs.discord.com/developers/resources/user#collectibles
 
@@ -499,7 +499,7 @@ class val Collectibles
 
         obj
 
-class val Nameplate
+class val Nameplate is Jsonable
     """
     https://docs.discord.com/developers/resources/user#nameplate
 
@@ -553,7 +553,7 @@ class val Nameplate
             .update("label", label)
             .update("palette", palette)
 
-class val UserPrimaryGuild
+class val UserPrimaryGuild is Jsonable
     """
     https://docs.discord.com/developers/resources/user#user-object-user-primary-guild
     """
@@ -609,7 +609,7 @@ class val UserPrimaryGuild
             .update("tag", tag')
             .update("badge", badge)
 
-class val Connection
+class val Connection is Jsonable
     """
     https://docs.discord.com/developers/resources/user#connection-object-connection-structure
 
@@ -773,7 +773,7 @@ primitive ConnectionVisibilities
         else error
         end
 
-class val ApplicationRoleConnection
+class val ApplicationRoleConnection is Jsonable
     """
     https://docs.discord.com/developers/resources/user#application-role-connection-object-application-role-connection-structure
 
@@ -825,7 +825,7 @@ class val ApplicationRoleConnection
 
         obj
 
-class val UpdateCurrentUserParams
+class val UpdateCurrentUserParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/user#modify-current-user-json-params
 
@@ -936,7 +936,7 @@ class val GetCurrentUserGuildsParams
 
         consume query
 
-class val CreateDMParams
+class val CreateDMParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/user#create-dm-json-params
 
@@ -954,7 +954,7 @@ class val CreateDMParams
     fun to_json(): json.JsonObject =>
         json.JsonObject.update("recipient_id", recipient_id.to_json())
 
-class val CreateGroupDMParams
+class val CreateGroupDMParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/user#create-group-dm-json-params
 
@@ -983,7 +983,7 @@ class val CreateGroupDMParams
             .update("access_tokens", _Strings.to_json(access_tokens))
             .update("nicks", nicks')
 
-class val UpdateCurrentUserApplicationRoleConnectionParams
+class val UpdateCurrentUserApplicationRoleConnectionParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/user#update-current-user-application-role-connection-json-params
 

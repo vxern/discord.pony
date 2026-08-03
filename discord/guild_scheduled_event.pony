@@ -1,7 +1,7 @@
 use collections = "collections"
 use json = "json"
 
-class val GuildScheduledEvent
+class val GuildScheduledEvent is Jsonable
     """
     https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-structure
 
@@ -311,7 +311,7 @@ primitive GuildScheduledEventStatuses
         else error
         end
 
-class val GuildScheduledEventEntityMetadata
+class val GuildScheduledEventEntityMetadata is Jsonable
     """
     https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-entity-metadata
 
@@ -345,7 +345,7 @@ class val GuildScheduledEventEntityMetadata
 
         obj
 
-class val GuildScheduledEventRecurrenceRule
+class val GuildScheduledEventRecurrenceRule is Jsonable
     """
     https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-recurrence-rule-object-guild-scheduled-event-recurrence-rule-structure
 
@@ -546,7 +546,7 @@ primitive _GuildScheduledEventRecurrenceRuleWeekdays
         for weekday in weekdays.values() do array = array.push(weekday.value().i64()) end
         array
 
-class val GuildScheduledEventRecurrenceRuleNWeekday
+class val GuildScheduledEventRecurrenceRuleNWeekday is Jsonable
     """
     https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-recurrence-rule-object-guild-scheduled-event-recurrence-rule-nweekday-structure
     """
@@ -666,7 +666,7 @@ primitive _GuildScheduledEventRecurrenceRuleMonths
         for month in months.values() do array = array.push(month.value().i64()) end
         array
 
-class val GuildScheduledEventUser
+class val GuildScheduledEventUser is Jsonable
     """
     https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-user-object-guild-scheduled-event-user-structure
     """
@@ -771,7 +771,7 @@ class val GetGuildScheduledEventsParams
 
         consume query
 
-class val CreateGuildScheduledEventParams
+class val CreateGuildScheduledEventParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/guild-scheduled-event#create-guild-scheduled-event-json-params
 
@@ -912,7 +912,7 @@ class val GetGuildScheduledEventParams
 
         consume query
 
-class val UpdateGuildScheduledEventParams
+class val UpdateGuildScheduledEventParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/guild-scheduled-event#modify-guild-scheduled-event-json-params
 

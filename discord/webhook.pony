@@ -1,7 +1,7 @@
 use collections = "collections"
 use json = "json"
 
-class val Webhook
+class val Webhook is Jsonable
     """
     https://docs.discord.com/developers/resources/webhook#webhook-object-webhook-structure
 
@@ -187,7 +187,7 @@ primitive WebhookTypes
         else error
         end
 
-class val CreateWebhookParams
+class val CreateWebhookParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/webhook#create-webhook-json-params
 
@@ -219,7 +219,7 @@ class val CreateWebhookParams
 
         obj
 
-class val UpdateWebhookParams
+class val UpdateWebhookParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/webhook#modify-webhook-json-params
 
@@ -268,7 +268,7 @@ class val UpdateWebhookParams
 
         obj
 
-class val UpdateWebhookWithTokenParams
+class val UpdateWebhookWithTokenParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/webhook#modify-webhook-with-token
 
@@ -303,7 +303,7 @@ class val UpdateWebhookWithTokenParams
 
         obj
 
-class val ExecuteWebhookParams
+class val ExecuteWebhookParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/webhook#execute-webhook
 
@@ -492,7 +492,7 @@ class val ExecuteWebhookParams
 
         obj
 
-class val ExecuteSlackCompatibleWebhookParams
+class val ExecuteSlackCompatibleWebhookParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/webhook#execute-slackcompatible-webhook
 
@@ -540,7 +540,7 @@ class val ExecuteSlackCompatibleWebhookParams
 
     fun to_json(): json.JsonObject => payload
 
-class val ExecuteGithubCompatibleWebhookParams
+class val ExecuteGithubCompatibleWebhookParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/webhook#execute-githubcompatible-webhook
 
@@ -610,7 +610,7 @@ class val GetWebhookMessageParams
 
         consume query
 
-class val UpdateWebhookMessageParams
+class val UpdateWebhookMessageParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/webhook#edit-webhook-message
 

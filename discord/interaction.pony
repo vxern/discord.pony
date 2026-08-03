@@ -8,7 +8,7 @@ type InteractionData is (ApplicationCommandData | MessageComponentData | ModalSu
     While the `data` field is present for every interaction type except PING, its structure depends on the interaction's type.
     """
 
-class val Interaction
+class val Interaction is Jsonable
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-object-interaction-structure
 
@@ -330,7 +330,7 @@ primitive InteractionContextTypes
         else error
         end
 
-class val ApplicationCommandData
+class val ApplicationCommandData is Jsonable
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-object-application-command-data-structure
 
@@ -408,7 +408,7 @@ class val ApplicationCommandData
 
         obj
 
-class val MessageComponentData
+class val MessageComponentData is Jsonable
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-object-message-component-data-structure
 
@@ -472,7 +472,7 @@ class val MessageComponentData
 
         obj
 
-class val ModalSubmitData
+class val ModalSubmitData is Jsonable
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-object-modal-submit-data-structure
 
@@ -508,7 +508,7 @@ class val ModalSubmitData
             .update("custom_id", custom_id)
             .update("components", _Components.to_json(components))
 
-class val ResolvedData
+class val ResolvedData is Jsonable
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-object-resolved-data-structure
 
@@ -682,7 +682,7 @@ primitive _ResolvedAttachments
         for (id, attachment) in map.pairs() do obj = obj.update(id.string(), attachment.to_json()) end
         obj
 
-class val InteractionResponse
+class val InteractionResponse is Jsonable
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-response-object-interaction-response-structure
     """
@@ -796,7 +796,7 @@ primitive InteractionCallbackTypes
         else error
         end
 
-class val InteractionCallbackResponse
+class val InteractionCallbackResponse is Jsonable
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-callback-interaction-callback-response-object
     """
@@ -835,7 +835,7 @@ class val InteractionCallbackResponse
 
         obj
 
-class val InteractionCallback
+class val InteractionCallback is Jsonable
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-callback-interaction-callback-object
     """
@@ -921,7 +921,7 @@ class val InteractionCallback
 
         obj
 
-class val InteractionCallbackResource
+class val InteractionCallbackResource is Jsonable
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-callback-interaction-callback-resource-object
     """
@@ -976,7 +976,7 @@ class val InteractionCallbackResource
 
         obj
 
-class val InteractionCallbackActivityInstanceResource
+class val InteractionCallbackActivityInstanceResource is Jsonable
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-callback-interaction-callback-activity-instance-resource
     """
@@ -1008,7 +1008,7 @@ type InteractionCallbackData is (InteractionCallbackMessageParams | InteractionC
     Which of the three shapes is expected is determined by the `type` of the interaction response rather than by a tag on the data itself.
     """
 
-class val InteractionCallbackMessageParams
+class val InteractionCallbackMessageParams is ToJsonable
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-response-object-messages
 
@@ -1111,7 +1111,7 @@ class val InteractionCallbackMessageParams
 
         obj
 
-class val InteractionCallbackAutocompleteParams
+class val InteractionCallbackAutocompleteParams is ToJsonable
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-response-object-autocomplete
     """
@@ -1127,7 +1127,7 @@ class val InteractionCallbackAutocompleteParams
     fun to_json(): json.JsonObject =>
         json.JsonObject.update("choices", _ApplicationCommandOptionChoices.to_json(choices))
 
-class val InteractionCallbackModalParams
+class val InteractionCallbackModalParams is ToJsonable
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-response-object-modal
     """
@@ -1158,7 +1158,7 @@ class val InteractionCallbackModalParams
             .update("title", title)
             .update("components", _Components.to_json(components))
 
-class val CreateInteractionResponseParams
+class val CreateInteractionResponseParams is ToJsonable
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#create-interaction-response
 
@@ -1235,7 +1235,7 @@ class val GetOriginalInteractionResponseParams
 
         consume query
 
-class val UpdateOriginalInteractionResponseParams
+class val UpdateOriginalInteractionResponseParams is ToJsonable
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#edit-original-interaction-response
 
@@ -1348,7 +1348,7 @@ class val UpdateOriginalInteractionResponseParams
 
         obj
 
-class val CreateFollowupMessageParams
+class val CreateFollowupMessageParams is ToJsonable
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#create-followup-message
 
@@ -1491,7 +1491,7 @@ class val GetFollowupMessageParams
 
         consume query
 
-class val UpdateFollowupMessageParams
+class val UpdateFollowupMessageParams is ToJsonable
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#edit-followup-message
 

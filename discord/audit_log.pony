@@ -1,7 +1,7 @@
 use collections = "collections"
 use json = "json"
 
-class val AuditLog
+class val AuditLog is Jsonable
     """
     https://docs.discord.com/developers/resources/audit-log#audit-log-object-audit-log-structure
 
@@ -81,7 +81,7 @@ class val AuditLog
             .update("users", _Users.to_json(users))
             .update("webhooks", _Webhooks.to_json(webhooks))
 
-class val AuditLogEntry
+class val AuditLogEntry is Jsonable
     """
     https://docs.discord.com/developers/resources/audit-log#audit-log-entry-object-audit-log-entry-structure
 
@@ -799,7 +799,7 @@ primitive AuditLogEvents
         | 193 => VoiceChannelStatusDeleteAuditLogEvent
         else error
         end
-class val OptionalAuditEntryInfo
+class val OptionalAuditEntryInfo is Jsonable
     """
     https://docs.discord.com/developers/resources/audit-log#audit-log-entry-object-optional-audit-entry-info
     """
@@ -999,7 +999,7 @@ class val OptionalAuditEntryInfo
 
         obj
 
-class val AuditLogChange
+class val AuditLogChange is Jsonable
     """
     https://docs.discord.com/developers/resources/audit-log#audit-log-change-object-audit-log-change-structure
 

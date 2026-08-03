@@ -1,7 +1,7 @@
 use collections = "collections"
 use json = "json"
 
-class val Channel
+class val Channel is Jsonable
     """
     https://docs.discord.com/developers/resources/channel#channel-object-channel-structure
 
@@ -740,7 +740,7 @@ primitive ForumLayoutTypes
         else error
         end
 
-class val FollowedChannel
+class val FollowedChannel is Jsonable
     """
     https://docs.discord.com/developers/resources/channel#followed-channel-object-followed-channel-structure
     """
@@ -774,7 +774,7 @@ class val FollowedChannel
             .update("channel_id", channel_id.to_json())
             .update("webhook_id", webhook_id.to_json())
 
-class val PermissionOverwrite
+class val PermissionOverwrite is Jsonable
     """
     https://docs.discord.com/developers/resources/channel#overwrite-object-overwrite-structure
 
@@ -868,7 +868,7 @@ primitive PermissionOverwriteTypes
         else error
         end
 
-class val ThreadMetadata
+class val ThreadMetadata is Jsonable
     """
     https://docs.discord.com/developers/resources/channel#thread-metadata-object-thread-metadata-structure
 
@@ -949,7 +949,7 @@ class val ThreadMetadata
 
         obj
 
-class val ThreadMember
+class val ThreadMember is Jsonable
     """
     https://docs.discord.com/developers/resources/channel#thread-member-object-thread-member-structure
 
@@ -1047,7 +1047,7 @@ primitive _ThreadMembers
         for member in members.values() do array = array.push(member.to_json()) end
         array
 
-class val DefaultReaction
+class val DefaultReaction is Jsonable
     """
     https://docs.discord.com/developers/resources/channel#default-reaction-object-default-reaction-structure
 
@@ -1085,7 +1085,7 @@ class val DefaultReaction
             .update("emoji_id", match emoji_id | let emoji_id': Snowflake => emoji_id'.to_json() end)
             .update("emoji_name", emoji_name)
 
-class val ForumTag
+class val ForumTag is Jsonable
     """
     https://docs.discord.com/developers/resources/channel#forum-tag-object-forum-tag-structure
 
@@ -1170,7 +1170,7 @@ primitive _ForumTags
         for forum_tag in tags.values() do array = array.push(forum_tag.to_json()) end
         array
 
-class val ForumTagParams
+class val ForumTagParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/channel#forum-tag-object
 
@@ -1246,7 +1246,7 @@ primitive _ForumTagParams
         for forum_tag in tags.values() do array = array.push(forum_tag.to_json()) end
         array
 
-class val UpdateChannelParams
+class val UpdateChannelParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/channel#modify-channel
 
@@ -1551,7 +1551,7 @@ class val UpdateChannelParams
 
         obj
 
-class val SetVoiceChannelStatusParams
+class val SetVoiceChannelStatusParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/channel#set-voice-channel-status-json-params
     """
@@ -1574,7 +1574,7 @@ class val SetVoiceChannelStatusParams
 
         obj
 
-class val UpdateChannelPermissionsParams
+class val UpdateChannelPermissionsParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/channel#edit-channel-permissions-json-params
     """
@@ -1618,7 +1618,7 @@ class val UpdateChannelPermissionsParams
 
         obj
 
-class val CreateChannelInviteParams
+class val CreateChannelInviteParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/channel#create-channel-invite-json-params
 
@@ -1710,7 +1710,7 @@ class val CreateChannelInviteParams
 
         obj
 
-class val FollowAnnouncementChannelParams
+class val FollowAnnouncementChannelParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/channel#follow-announcement-channel-json-params
     """
@@ -1726,7 +1726,7 @@ class val FollowAnnouncementChannelParams
     fun to_json(): json.JsonObject =>
         json.JsonObject.update("webhook_channel_id", webhook_channel_id.to_json())
 
-class val AddGroupDMRecipientParams
+class val AddGroupDMRecipientParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/channel#group-dm-add-recipient-json-params
     """
@@ -1754,7 +1754,7 @@ class val AddGroupDMRecipientParams
 
         obj
 
-class val StartThreadFromMessageParams
+class val StartThreadFromMessageParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/channel#start-thread-from-message-json-params
     """
@@ -1796,7 +1796,7 @@ class val StartThreadFromMessageParams
 
         obj
 
-class val StartThreadWithoutMessageParams
+class val StartThreadWithoutMessageParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/channel#start-thread-without-message-json-params
     """
@@ -1862,7 +1862,7 @@ class val StartThreadWithoutMessageParams
 
         obj
 
-class val StartThreadInForumOrMediaChannelParams
+class val StartThreadInForumOrMediaChannelParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/channel#start-thread-in-forum-or-media-channel-json/form-params
     """

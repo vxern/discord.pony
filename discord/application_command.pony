@@ -147,7 +147,7 @@ type ApplicationCommandOptionChoiceValue is (String | I64 | F64)
     The value of an application command option choice, whose type must match the type of the option it belongs to.
     """
 
-class val ApplicationCommandOptionChoice
+class val ApplicationCommandOptionChoice is Jsonable
     """
     https://docs.discord.com/developers/interactions/application-commands#application-command-object-application-command-option-choice-structure
 
@@ -230,7 +230,7 @@ primitive _ApplicationCommandOptionChoices
         for choice in choices.values() do array = array.push(choice.to_json()) end
         array
 
-class val ApplicationCommandOption
+class val ApplicationCommandOption is ToJsonable
     """
     https://docs.discord.com/developers/interactions/application-commands#application-command-object-application-command-option-structure
 
@@ -430,7 +430,7 @@ primitive ApplicationCommandPermissionTypes
         else error
         end
 
-class val ApplicationCommandPermission
+class val ApplicationCommandPermission is Jsonable
     """
     https://docs.discord.com/developers/interactions/application-commands#application-command-permissions-object-application-command-permissions-structure
 
@@ -520,7 +520,7 @@ class val GetGlobalApplicationCommandsParams
 
         consume query
 
-class val CreateGlobalApplicationCommandParams
+class val CreateGlobalApplicationCommandParams is ToJsonable
     """
     https://docs.discord.com/developers/interactions/application-commands#create-global-application-command-json-params
 
@@ -623,7 +623,7 @@ class val CreateGlobalApplicationCommandParams
             nsfw,
             handler)
 
-class val UpdateGlobalApplicationCommandParams
+class val UpdateGlobalApplicationCommandParams is ToJsonable
     """
     https://docs.discord.com/developers/interactions/application-commands#edit-global-application-command-json-params
 
@@ -716,7 +716,7 @@ class val UpdateGlobalApplicationCommandParams
 
         obj
 
-class val BulkOverwriteGlobalApplicationCommandsParams
+class val BulkOverwriteGlobalApplicationCommandsParams is ToJsonableArray
     """
     https://docs.discord.com/developers/interactions/application-commands#bulk-overwrite-global-application-commands
 
@@ -758,7 +758,7 @@ class val GetGuildApplicationCommandsParams
 
         consume query
 
-class val CreateGuildApplicationCommandParams
+class val CreateGuildApplicationCommandParams is ToJsonable
     """
     https://docs.discord.com/developers/interactions/application-commands#create-guild-application-command-json-params
 
@@ -838,7 +838,7 @@ class val CreateGuildApplicationCommandParams
             nsfw,
             None)
 
-class val UpdateGuildApplicationCommandParams
+class val UpdateGuildApplicationCommandParams is ToJsonable
     """
     https://docs.discord.com/developers/interactions/application-commands#edit-guild-application-command-json-params
 
@@ -917,7 +917,7 @@ class val UpdateGuildApplicationCommandParams
 
         obj
 
-class val BulkOverwriteGuildApplicationCommandsParams
+class val BulkOverwriteGuildApplicationCommandsParams is ToJsonableArray
     """
     https://docs.discord.com/developers/interactions/application-commands#bulk-overwrite-guild-application-commands
 
@@ -937,7 +937,7 @@ class val BulkOverwriteGuildApplicationCommandsParams
         for command in commands.values() do array = array.push(command.to_json()) end
         array
 
-class val UpdateApplicationCommandPermissionsParams
+class val UpdateApplicationCommandPermissionsParams is ToJsonable
     """
     https://docs.discord.com/developers/interactions/application-commands#edit-application-command-permissions-json-params
 
@@ -955,7 +955,7 @@ class val UpdateApplicationCommandPermissionsParams
     fun to_json(): json.JsonObject =>
         json.JsonObject.update("permissions", _ApplicationCommandPermissions.to_json(permissions))
 
-class val GuildApplicationCommandPermissionsParams
+class val GuildApplicationCommandPermissionsParams is ToJsonable
     """
     https://docs.discord.com/developers/interactions/application-commands#batch-edit-application-command-permissions
 
@@ -981,7 +981,7 @@ class val GuildApplicationCommandPermissionsParams
             .update("id", id.to_json())
             .update("permissions", _ApplicationCommandPermissions.to_json(permissions))
 
-class val BatchUpdateApplicationCommandPermissionsParams
+class val BatchUpdateApplicationCommandPermissionsParams is ToJsonableArray
     """
     https://docs.discord.com/developers/interactions/application-commands#batch-edit-application-command-permissions
 

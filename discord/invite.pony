@@ -1,7 +1,7 @@
 use collections = "collections"
 use json = "json"
 
-class val Invite
+class val Invite is Jsonable
     """
     https://docs.discord.com/developers/resources/invite#invite-object-invite-structure
 
@@ -289,7 +289,7 @@ primitive _InviteFlags
         for flag in flags.values() do bits = bits or (U64(1) << flag.value().u64()) end
         bits.i64()
 
-class val InviteMetadata
+class val InviteMetadata is Jsonable
     """
     https://docs.discord.com/developers/resources/invite#invite-metadata-object-invite-metadata-structure
 
@@ -352,7 +352,7 @@ class val InviteMetadata
             .update("temporary", temporary)
             .update("created_at", created_at)
 
-class val InviteStageInstance
+class val InviteStageInstance is Jsonable
     """
     https://docs.discord.com/developers/resources/invite#invite-stage-instance-object-invite-stage-instance-structure
 
@@ -454,7 +454,7 @@ class val GetInviteParams
 
         consume query
 
-class val UpdateInviteTargetUsersParams
+class val UpdateInviteTargetUsersParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/invite#update-target-users-json-params
 
