@@ -7,7 +7,7 @@ use json = "json"
 class val Snowflake is (Stringable & collections.Hashable & Equatable[Snowflake])
     let value: U64
 
-    new create(value': U64) => value = value'
+    new val create(value': U64) => value = value'
 
     new val from_timestamp(value': U64) => value = (value' - SnowflakeDefaults.discord_epoch_ms()) << 22
 
