@@ -1,4 +1,4 @@
-use discord = "../discord"
+use discord = "../../discord"
 
 actor Main
     new create(env: Env) =>
@@ -11,5 +11,5 @@ actor Main
         let bot = discord.Bot(env, token)
 
         bot.rest.routes.get_application(
-            { (application: discord.Message) => env.out.print("sent " + message.id.string()) }
+            { (application: discord.Application) => env.out.print(application.string()) }
         )
