@@ -16,7 +16,7 @@ actor Routes
         Returns a list of application role connection metadata objects for the given application.
         """
 
-        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/role-connections/metadata"), _Decode.list[ApplicationRoleConnectionMetadata](handler, _ApplicationRoleConnectionMetadatas))
+        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/role-connections/metadata"), _Decode.list[ApplicationRoleConnectionMetadata](handler, _ApplicationRoleConnectionMetadatas, options.on_error))
 
     be update_application_role_connection_metadata(application_id: Snowflake, application_role_connection_metadata: Array[ApplicationRoleConnectionMetadata] val, handler: ResponseHandler[Array[ApplicationRoleConnectionMetadata] val]) =>
         """
@@ -28,7 +28,7 @@ actor Routes
         var records = json.JsonArray
         for record in application_role_connection_metadata.values() do records = records.push(record.to_json()) end
 
-        api.send_request(options.build_request(courier.PUT, "/applications/" + application_id.string() + "/role-connections/metadata" where body = json.JsonPrinter.print(records)), _Decode.list[ApplicationRoleConnectionMetadata](handler, _ApplicationRoleConnectionMetadatas))
+        api.send_request(options.build_request(courier.PUT, "/applications/" + application_id.string() + "/role-connections/metadata" where body = json.JsonPrinter.print(records)), _Decode.list[ApplicationRoleConnectionMetadata](handler, _ApplicationRoleConnectionMetadatas, options.on_error))
 
     be get_application(handler: ResponseHandler[Application]) =>
         """
@@ -37,7 +37,7 @@ actor Routes
         Returns the application object associated with the requesting bot user.
         """
 
-        api.send_request(options.build_request(courier.GET, "/applications/@me"), _Decode.entity[Application](handler))
+        api.send_request(options.build_request(courier.GET, "/applications/@me"), _Decode.entity[Application](handler, options.on_error))
 
     be update_application(params: UpdateApplicationParams, handler: ResponseHandler[Application]) =>
         """
@@ -46,7 +46,7 @@ actor Routes
         Edit properties of the app associated with the requesting bot user. Only properties that are passed will be updated. Returns the updated application object on success.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/applications/@me" where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Application](handler))
+        api.send_request(options.build_request(courier.PATCH, "/applications/@me" where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Application](handler, options.on_error))
 
     be get_application_activity_instance(application_id: Snowflake, activity_instance_id: Snowflake, handler: ResponseHandler[ActivityInstance]) =>
         """
@@ -55,7 +55,7 @@ actor Routes
         Returns a serialized activity instance, if it exists. Useful for preventing unwanted activity sessions.
         """
 
-        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/activity-instances/" + activity_instance_id.string()), _Decode.entity[ActivityInstance](handler))
+        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/activity-instances/" + activity_instance_id.string()), _Decode.entity[ActivityInstance](handler, options.on_error))
 
     be get_audit_log(guild_id: Snowflake, params: GetAuditLogParams, handler: ResponseHandler[AuditLog]) =>
         """
@@ -66,7 +66,7 @@ actor Routes
         The returned list of audit log entries is ordered based on whether you use before or after. When using before, the list is ordered by the audit log entry ID descending (newer entries first). If after is used, the list is reversed and appears in ascending order (older entries first). Omitting both before and after defaults to before the current timestamp and will show the most recent entries in descending order by ID, the opposite can be achieved using after=0 (showing oldest entries).
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/audit-logs" where query = params.to_query()), _Decode.entity[AuditLog](handler))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/audit-logs" where query = params.to_query()), _Decode.entity[AuditLog](handler, options.on_error))
 
     be get_auto_moderation_rules(guild_id: Snowflake, handler: ResponseHandler[Array[AutoModerationRule] val]) =>
         """
@@ -75,7 +75,7 @@ actor Routes
         Get a list of all rules currently configured for the guild. Returns a list of auto moderation rule objects for the given guild.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/auto-moderation/rules"), _Decode.list[AutoModerationRule](handler, _AutoModerationRules))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/auto-moderation/rules"), _Decode.list[AutoModerationRule](handler, _AutoModerationRules, options.on_error))
 
     be get_auto_moderation_rule(guild_id: Snowflake, auto_moderation_rule_id: Snowflake, handler: ResponseHandler[AutoModerationRule]) =>
         """
@@ -84,7 +84,7 @@ actor Routes
         Get a single rule. Returns an auto moderation rule object.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/auto-moderation/rules/" + auto_moderation_rule_id.string()), _Decode.entity[AutoModerationRule](handler))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/auto-moderation/rules/" + auto_moderation_rule_id.string()), _Decode.entity[AutoModerationRule](handler, options.on_error))
 
     be create_auto_moderation_rule(guild_id: Snowflake, params: CreateAutoModerationRuleParams, handler: ResponseHandler[AutoModerationRule], reason: Reason = None) =>
         """
@@ -93,7 +93,7 @@ actor Routes
         Create a new rule. Returns an auto moderation rule on success. Fires an Auto Moderation Rule Create Gateway event.
         """
 
-        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/auto-moderation/rules" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[AutoModerationRule](handler))
+        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/auto-moderation/rules" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[AutoModerationRule](handler, options.on_error))
 
     be update_auto_moderation_rule(guild_id: Snowflake, auto_moderation_rule_id: Snowflake, params: UpdateAutoModerationRuleParams, handler: ResponseHandler[AutoModerationRule], reason: Reason = None) =>
         """
@@ -102,7 +102,7 @@ actor Routes
         Modify an existing rule. Returns an auto moderation rule on success. Fires an Auto Moderation Rule Update Gateway event.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/auto-moderation/rules/" + auto_moderation_rule_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[AutoModerationRule](handler))
+        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/auto-moderation/rules/" + auto_moderation_rule_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[AutoModerationRule](handler, options.on_error))
 
     be delete_auto_moderation_rule(guild_id: Snowflake, auto_moderation_rule_id: Snowflake, handler: EmptyResponseHandler, reason: Reason = None) =>
         """
@@ -111,7 +111,7 @@ actor Routes
         Delete a rule. Returns a 204 on success. Fires an Auto Moderation Rule Delete Gateway event.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/guilds/" + guild_id.string() + "/auto-moderation/rules/" + auto_moderation_rule_id.string() where reason = reason), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.DELETE, "/guilds/" + guild_id.string() + "/auto-moderation/rules/" + auto_moderation_rule_id.string() where reason = reason), _Decode.empty(handler, options.on_error))
 
     be get_channel(channel_id: Snowflake, handler: ResponseHandler[Channel]) =>
         """
@@ -120,7 +120,7 @@ actor Routes
         Get a channel by ID. Returns a channel object. If the channel is a thread, a thread member object is included in the returned result.
         """
 
-        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string()), _Decode.entity[Channel](handler))
+        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string()), _Decode.entity[Channel](handler, options.on_error))
 
     be update_channel(channel_id: Snowflake, params: UpdateChannelParams, handler: ResponseHandler[Channel], reason: Reason = None) =>
         """
@@ -129,7 +129,7 @@ actor Routes
         Update a channel’s settings. Returns a channel on success, and a 400 BAD REQUEST on invalid parameters.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/channels/" + channel_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Channel](handler))
+        api.send_request(options.build_request(courier.PATCH, "/channels/" + channel_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Channel](handler, options.on_error))
 
     be set_voice_channel_status(channel_id: Snowflake, params: SetVoiceChannelStatusParams, handler: EmptyResponseHandler, reason: Reason = None) =>
         """
@@ -138,7 +138,7 @@ actor Routes
         Set a voice channel’s status. Requires the SET_VOICE_CHANNEL_STATUS permission, and additionally the MANAGE_CHANNELS permission if the current user is not connected to the voice channel. Fires a Voice Channel Status Update Gateway event.
         """
 
-        api.send_request(options.build_request(courier.PUT, "/channels/" + channel_id.string() + "/voice-status" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.PUT, "/channels/" + channel_id.string() + "/voice-status" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.empty(handler, options.on_error))
 
     be delete_channel(channel_id: Snowflake, handler: ResponseHandler[Channel], reason: Reason = None) =>
         """
@@ -147,7 +147,7 @@ actor Routes
         Delete a channel, or close a private message. Requires the MANAGE_CHANNELS permission for the guild, or MANAGE_THREADS if the channel is a thread. Deleting a category does not delete its child channels; they will have their parent_id removed and a Channel Update Gateway event will fire for each of them. Returns a channel object on success. Fires a Channel Delete Gateway event (or Thread Delete if the channel was a thread).
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() where reason = reason), _Decode.entity[Channel](handler))
+        api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() where reason = reason), _Decode.entity[Channel](handler, options.on_error))
 
     be update_channel_permissions(channel_id: Snowflake, permission_overwrite_id: Snowflake, params: UpdateChannelPermissionsParams, handler: EmptyResponseHandler, reason: Reason = None) =>
         """
@@ -156,7 +156,7 @@ actor Routes
         Edit the channel permission overwrites for a user or role in a channel. Only usable for guild channels. Requires the MANAGE_ROLES permission. Only permissions your bot has in the guild or parent channel (if applicable) can be allowed/denied (unless your bot has a MANAGE_ROLES overwrite in the channel). Returns a 204 empty response on success. Fires a Channel Update Gateway event. For more information about permissions, see permissions.
         """
 
-        api.send_request(options.build_request(courier.PUT, "/channels/" + channel_id.string() + "/permissions/" + permission_overwrite_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.PUT, "/channels/" + channel_id.string() + "/permissions/" + permission_overwrite_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.empty(handler, options.on_error))
 
     be get_channel_invites(channel_id: Snowflake, handler: ResponseHandler[Array[Invite] val]) =>
         """
@@ -165,7 +165,7 @@ actor Routes
         Returns a list of invite objects (with invite metadata) for the channel. Only usable for guild channels. Requires the MANAGE_CHANNELS permission.
         """
 
-        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/invites"), _Decode.list[Invite](handler, _Invites))
+        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/invites"), _Decode.list[Invite](handler, _Invites, options.on_error))
 
     be create_channel_invite(channel_id: Snowflake, params: CreateChannelInviteParams, handler: ResponseHandler[Invite], reason: Reason = None) =>
         """
@@ -174,7 +174,7 @@ actor Routes
         Create a new invite object for the channel. Only usable for guild channels. Requires the CREATE_INSTANT_INVITE permission. All JSON parameters for this route are optional, however the request body is not. If you are not sending any fields, you still have to send an empty JSON object ({}). Returns an invite object. Fires an Invite Create Gateway event.
         """
 
-        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/invites" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Invite](handler))
+        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/invites" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Invite](handler, options.on_error))
 
     be delete_channel_permission_overwrite(channel_id: Snowflake, permission_overwrite_id: Snowflake, handler: EmptyResponseHandler, reason: Reason = None) =>
         """
@@ -183,7 +183,7 @@ actor Routes
         Delete a channel permission overwrite for a user or role in a channel. Only usable for guild channels. Requires the MANAGE_ROLES permission. Returns a 204 empty response on success. Fires a Channel Update Gateway event. For more information about permissions, see permissions
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() + "/permissions/" + permission_overwrite_id.string() where reason = reason), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() + "/permissions/" + permission_overwrite_id.string() where reason = reason), _Decode.empty(handler, options.on_error))
 
     be follow_announcement_channel(channel_id: Snowflake, params: FollowAnnouncementChannelParams, handler: ResponseHandler[FollowedChannel], reason: Reason = None) =>
         """
@@ -192,7 +192,7 @@ actor Routes
         Follow an Announcement Channel to send messages to a target channel. Requires the MANAGE_WEBHOOKS permission in the target channel. Returns a followed channel object. Fires a Webhooks Update Gateway event for the target channel.
         """
 
-        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/followers" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[FollowedChannel](handler))
+        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/followers" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[FollowedChannel](handler, options.on_error))
 
     be trigger_typing_indicator(channel_id: Snowflake, handler: EmptyResponseHandler) =>
         """
@@ -203,7 +203,7 @@ actor Routes
         Generally bots should not use this route. However, if a bot is responding to a command and expects the computation to take a few seconds, this endpoint may be called to let the user know that the bot is processing their message.
         """
 
-        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/typing"), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/typing"), _Decode.empty(handler, options.on_error))
 
     be add_group_dm_recipient(channel_id: Snowflake, user_id: Snowflake, params: AddGroupDMRecipientParams, handler: EmptyResponseHandler) =>
         """
@@ -212,7 +212,7 @@ actor Routes
         Adds a recipient to a Group DM using their access token.
         """
 
-        api.send_request(options.build_request(courier.PUT, "/channels/" + channel_id.string() + "/recipients/" + user_id.string() where body = json.JsonPrinter.print(params.to_json())), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.PUT, "/channels/" + channel_id.string() + "/recipients/" + user_id.string() where body = json.JsonPrinter.print(params.to_json())), _Decode.empty(handler, options.on_error))
 
     be remove_group_dm_recipient(channel_id: Snowflake, user_id: Snowflake, handler: EmptyResponseHandler) =>
         """
@@ -221,7 +221,7 @@ actor Routes
         Removes a recipient from a Group DM.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() + "/recipients/" + user_id.string()), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() + "/recipients/" + user_id.string()), _Decode.empty(handler, options.on_error))
 
     be start_thread_from_message(channel_id: Snowflake, message_id: Snowflake, params: StartThreadFromMessageParams, handler: ResponseHandler[Channel], reason: Reason = None) =>
         """
@@ -232,7 +232,7 @@ actor Routes
         When called on a GUILD_TEXT channel, creates a PUBLIC_THREAD. When called on a GUILD_ANNOUNCEMENT channel, creates a ANNOUNCEMENT_THREAD. Does not work on a GUILD_FORUM or a GUILD_MEDIA channel. The id of the created thread will be the same as the id of the source message, and as such a message can only have a single thread created from it.
         """
 
-        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/messages/" + message_id.string() + "/threads" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Channel](handler))
+        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/messages/" + message_id.string() + "/threads" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Channel](handler, options.on_error))
 
     be start_thread_without_message(channel_id: Snowflake, params: StartThreadWithoutMessageParams, handler: ResponseHandler[Channel], reason: Reason = None) =>
         """
@@ -241,7 +241,7 @@ actor Routes
         Creates a new thread that is not connected to an existing message. Returns a channel on success, and a 400 BAD REQUEST on invalid parameters. Fires a Thread Create Gateway event.
         """
 
-        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/threads" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Channel](handler))
+        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/threads" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Channel](handler, options.on_error))
 
     be start_thread_in_forum_or_media_channel(channel_id: Snowflake, params: StartThreadInForumOrMediaChannelParams, handler: ResponseHandler[Channel], reason: Reason = None) =>
         """
@@ -258,7 +258,7 @@ actor Routes
         - Note that when sending a message, you must provide a value for at least one of content, embeds, sticker_ids, components, or files[n].
         """
 
-        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/threads" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Channel](handler))
+        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/threads" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Channel](handler, options.on_error))
 
     be join_thread(channel_id: Snowflake, handler: EmptyResponseHandler) =>
         """
@@ -267,7 +267,7 @@ actor Routes
         Adds the current user to a thread. Also requires the thread is not archived. Returns a 204 empty response on success. Fires a Thread Members Update and a Thread Create Gateway event.
         """
 
-        api.send_request(options.build_request(courier.PUT, "/channels/" + channel_id.string() + "/thread-members/@me"), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.PUT, "/channels/" + channel_id.string() + "/thread-members/@me"), _Decode.empty(handler, options.on_error))
 
     be add_thread_member(channel_id: Snowflake, user_id: Snowflake, handler: EmptyResponseHandler) =>
         """
@@ -276,7 +276,7 @@ actor Routes
         Adds another member to a thread. Requires the ability to send messages in the thread. Also requires the thread is not archived. Returns a 204 empty response if the member is successfully added or was already a member of the thread. Fires a Thread Members Update Gateway event.
         """
 
-        api.send_request(options.build_request(courier.PUT, "/channels/" + channel_id.string() + "/thread-members/" + user_id.string()), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.PUT, "/channels/" + channel_id.string() + "/thread-members/" + user_id.string()), _Decode.empty(handler, options.on_error))
 
     be leave_thread(channel_id: Snowflake, handler: EmptyResponseHandler) =>
         """
@@ -285,7 +285,7 @@ actor Routes
         Removes the current user from a thread. Also requires the thread is not archived. Returns a 204 empty response on success. Fires a Thread Members Update Gateway event.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() + "/thread-members/@me"), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() + "/thread-members/@me"), _Decode.empty(handler, options.on_error))
 
     be remove_thread_member(channel_id: Snowflake, user_id: Snowflake, handler: EmptyResponseHandler) =>
         """
@@ -294,7 +294,7 @@ actor Routes
         Removes another member from a thread. Requires the MANAGE_THREADS permission, or the creator of the thread if it is a PRIVATE_THREAD. Also requires the thread is not archived. Returns a 204 empty response on success. Fires a Thread Members Update Gateway event.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() + "/thread-members/" + user_id.string()), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() + "/thread-members/" + user_id.string()), _Decode.empty(handler, options.on_error))
 
     be get_thread_member(channel_id: Snowflake, user_id: Snowflake, params: GetThreadMemberParams, handler: ResponseHandler[ThreadMember]) =>
         """
@@ -305,7 +305,7 @@ actor Routes
         When with_member is set to true, the thread member object will include a member field containing a guild member object.
         """
 
-        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/thread-members/" + user_id.string() where query = params.to_query()), _Decode.entity[ThreadMember](handler))
+        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/thread-members/" + user_id.string() where query = params.to_query()), _Decode.entity[ThreadMember](handler, options.on_error))
 
     be get_thread_members(channel_id: Snowflake, params: GetThreadMembersParams, handler: ResponseHandler[Array[ThreadMember] val]) =>
         """
@@ -316,7 +316,7 @@ actor Routes
         When with_member is set to true, the results will be paginated and each thread member object will include a member field containing a guild member object.
         """
 
-        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/thread-members" where query = params.to_query()), _Decode.list[ThreadMember](handler, _ThreadMembers))
+        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/thread-members" where query = params.to_query()), _Decode.list[ThreadMember](handler, _ThreadMembers, options.on_error))
 
     be get_public_archived_threads(channel_id: Snowflake, params: GetPublicArchivedThreadsParams, handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -326,7 +326,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/threads/archived/public" where query = params.to_query()), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/threads/archived/public" where query = params.to_query()), _Decode.payload(handler, options.on_error))
 
     be get_private_archived_threads(channel_id: Snowflake, params: GetPrivateArchivedThreadsParams, handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -336,7 +336,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/threads/archived/private" where query = params.to_query()), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/threads/archived/private" where query = params.to_query()), _Decode.payload(handler, options.on_error))
 
     be get_joined_private_archived_threads(channel_id: Snowflake, params: GetJoinedPrivateArchivedThreadsParams, handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -346,7 +346,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/users/@me/threads/archived/private" where query = params.to_query()), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/users/@me/threads/archived/private" where query = params.to_query()), _Decode.payload(handler, options.on_error))
 
     be get_guild_emojis(guild_id: Snowflake, handler: ResponseHandler[Array[Emoji] val]) =>
         """
@@ -355,7 +355,7 @@ actor Routes
         Returns a list of emoji objects for the given guild. Includes user fields if the bot has the CREATE_GUILD_EXPRESSIONS or MANAGE_GUILD_EXPRESSIONS permission.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/emojis"), _Decode.list[Emoji](handler, _Emojis))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/emojis"), _Decode.list[Emoji](handler, _Emojis, options.on_error))
 
     be get_guild_emoji(guild_id: Snowflake, emoji_id: Snowflake, handler: ResponseHandler[Emoji]) =>
         """
@@ -364,7 +364,7 @@ actor Routes
         Returns an emoji object for the given guild and emoji IDs. Includes the user field if the bot has the MANAGE_GUILD_EXPRESSIONS permission, or if the bot created the emoji and has the CREATE_GUILD_EXPRESSIONS permission.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/emojis/" + emoji_id.string()), _Decode.entity[Emoji](handler))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/emojis/" + emoji_id.string()), _Decode.entity[Emoji](handler, options.on_error))
 
     be create_guild_emoji(guild_id: Snowflake, params: CreateGuildEmojiParams, handler: ResponseHandler[Emoji], reason: Reason = None) =>
         """
@@ -373,7 +373,7 @@ actor Routes
         Create a new emoji for the guild. Requires the CREATE_GUILD_EXPRESSIONS permission. Returns the new emoji object on success. Fires a Guild Emojis Update Gateway event.
         """
 
-        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/emojis" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Emoji](handler))
+        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/emojis" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Emoji](handler, options.on_error))
 
     be update_guild_emoji(guild_id: Snowflake, emoji_id: Snowflake, params: UpdateGuildEmojiParams, handler: ResponseHandler[Emoji], reason: Reason = None) =>
         """
@@ -382,7 +382,7 @@ actor Routes
         Modify the given emoji. For emojis created by the current user, requires either the CREATE_GUILD_EXPRESSIONS or MANAGE_GUILD_EXPRESSIONS permission. For other emojis, requires the MANAGE_GUILD_EXPRESSIONS permission. Returns the updated emoji object on success. Fires a Guild Emojis Update Gateway event.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/emojis/" + emoji_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Emoji](handler))
+        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/emojis/" + emoji_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Emoji](handler, options.on_error))
 
     be delete_guild_emoji(guild_id: Snowflake, emoji_id: Snowflake, handler: EmptyResponseHandler, reason: Reason = None) =>
         """
@@ -391,7 +391,7 @@ actor Routes
         Delete the given emoji. For emojis created by the current user, requires either the CREATE_GUILD_EXPRESSIONS or MANAGE_GUILD_EXPRESSIONS permission. For other emojis, requires the MANAGE_GUILD_EXPRESSIONS permission. Returns 204 No Content on success. Fires a Guild Emojis Update Gateway event.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/guilds/" + guild_id.string() + "/emojis/" + emoji_id.string() where reason = reason), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.DELETE, "/guilds/" + guild_id.string() + "/emojis/" + emoji_id.string() where reason = reason), _Decode.empty(handler, options.on_error))
 
     be get_application_emojis(application_id: Snowflake, handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -401,7 +401,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/emojis"), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/emojis"), _Decode.payload(handler, options.on_error))
 
     be get_application_emoji(application_id: Snowflake, emoji_id: Snowflake, handler: ResponseHandler[Emoji]) =>
         """
@@ -410,7 +410,7 @@ actor Routes
         Returns an emoji object for the given application and emoji IDs. Includes the user field.
         """
 
-        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/emojis/" + emoji_id.string()), _Decode.entity[Emoji](handler))
+        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/emojis/" + emoji_id.string()), _Decode.entity[Emoji](handler, options.on_error))
 
     be create_application_emoji(application_id: Snowflake, params: CreateApplicationEmojiParams, handler: ResponseHandler[Emoji]) =>
         """
@@ -419,7 +419,7 @@ actor Routes
         Create a new emoji for the application. Returns the new emoji object on success.
         """
 
-        api.send_request(options.build_request(courier.POST, "/applications/" + application_id.string() + "/emojis" where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Emoji](handler))
+        api.send_request(options.build_request(courier.POST, "/applications/" + application_id.string() + "/emojis" where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Emoji](handler, options.on_error))
 
     be update_application_emoji(application_id: Snowflake, emoji_id: Snowflake, params: UpdateApplicationEmojiParams, handler: ResponseHandler[Emoji]) =>
         """
@@ -428,7 +428,7 @@ actor Routes
         Modify the given emoji. Returns the updated emoji object on success.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/applications/" + application_id.string() + "/emojis/" + emoji_id.string() where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Emoji](handler))
+        api.send_request(options.build_request(courier.PATCH, "/applications/" + application_id.string() + "/emojis/" + emoji_id.string() where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Emoji](handler, options.on_error))
 
     be delete_application_emoji(application_id: Snowflake, emoji_id: Snowflake, handler: EmptyResponseHandler) =>
         """
@@ -437,7 +437,7 @@ actor Routes
         Delete the given emoji. Returns 204 No Content on success.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/applications/" + application_id.string() + "/emojis/" + emoji_id.string()), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.DELETE, "/applications/" + application_id.string() + "/emojis/" + emoji_id.string()), _Decode.empty(handler, options.on_error))
 
     be get_entitlements(application_id: Snowflake, params: GetEntitlementsParams, handler: ResponseHandler[Array[Entitlement] val]) =>
         """
@@ -446,7 +446,7 @@ actor Routes
         Returns all entitlements for a given app, active and expired.
         """
 
-        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/entitlements" where query = params.to_query()), _Decode.list[Entitlement](handler, _Entitlements))
+        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/entitlements" where query = params.to_query()), _Decode.list[Entitlement](handler, _Entitlements, options.on_error))
 
     be get_entitlement(application_id: Snowflake, entitlement_id: Snowflake, handler: ResponseHandler[Entitlement]) =>
         """
@@ -455,7 +455,7 @@ actor Routes
         Returns an entitlement.
         """
 
-        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/entitlements/" + entitlement_id.string()), _Decode.entity[Entitlement](handler))
+        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/entitlements/" + entitlement_id.string()), _Decode.entity[Entitlement](handler, options.on_error))
 
     be consume_entitlement(application_id: Snowflake, entitlement_id: Snowflake, handler: EmptyResponseHandler) =>
         """
@@ -466,7 +466,7 @@ actor Routes
         Returns a 204 No Content on success.
         """
 
-        api.send_request(options.build_request(courier.POST, "/applications/" + application_id.string() + "/entitlements/" + entitlement_id.string() + "/consume"), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.POST, "/applications/" + application_id.string() + "/entitlements/" + entitlement_id.string() + "/consume"), _Decode.empty(handler, options.on_error))
 
     be create_test_entitlement(application_id: Snowflake, params: CreateTestEntitlementParams, handler: ResponseHandler[Entitlement]) =>
         """
@@ -479,7 +479,7 @@ actor Routes
         After creating a test entitlement, you'll need to reload your Discord client. After doing so, you'll see that your server or user now has premium access.
         """
 
-        api.send_request(options.build_request(courier.POST, "/applications/" + application_id.string() + "/entitlements" where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Entitlement](handler))
+        api.send_request(options.build_request(courier.POST, "/applications/" + application_id.string() + "/entitlements" where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Entitlement](handler, options.on_error))
 
     be delete_test_entitlement(application_id: Snowflake, entitlement_id: Snowflake, handler: EmptyResponseHandler) =>
         """
@@ -490,7 +490,7 @@ actor Routes
         Returns 204 No Content on success.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/applications/" + application_id.string() + "/entitlements/" + entitlement_id.string()), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.DELETE, "/applications/" + application_id.string() + "/entitlements/" + entitlement_id.string()), _Decode.empty(handler, options.on_error))
 
     be get_guild(guild_id: Snowflake, params: GetGuildParams, handler: ResponseHandler[Guild]) =>
         """
@@ -499,7 +499,7 @@ actor Routes
         Returns the guild object for the given id. If with_counts is set to true, this endpoint will also return approximate_member_count and approximate_presence_count for the guild.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() where query = params.to_query()), _Decode.entity[Guild](handler))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() where query = params.to_query()), _Decode.entity[Guild](handler, options.on_error))
 
     be get_guild_preview(guild_id: Snowflake, handler: ResponseHandler[GuildPreview]) =>
         """
@@ -509,7 +509,7 @@ actor Routes
         If the user is not in the guild, then the guild must be discoverable.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/preview"), _Decode.entity[GuildPreview](handler))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/preview"), _Decode.entity[GuildPreview](handler, options.on_error))
 
     be update_guild(guild_id: Snowflake, params: UpdateGuildParams, handler: ResponseHandler[Guild], reason: Reason = None) =>
         """
@@ -524,7 +524,7 @@ actor Routes
         Attempting to add or remove the COMMUNITY guild feature requires the ADMINISTRATOR permission.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Guild](handler))
+        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Guild](handler, options.on_error))
 
     be get_guild_channels(guild_id: Snowflake, handler: ResponseHandler[Array[Channel] val]) =>
         """
@@ -533,7 +533,7 @@ actor Routes
         Returns a list of guild channel objects. Does not include threads.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/channels"), _Decode.list[Channel](handler, _Channels))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/channels"), _Decode.list[Channel](handler, _Channels, options.on_error))
 
     be create_guild_channel(guild_id: Snowflake, params: CreateGuildChannelParams, handler: ResponseHandler[Channel], reason: Reason = None) =>
         """
@@ -546,7 +546,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/channels" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Channel](handler))
+        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/channels" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Channel](handler, options.on_error))
 
     be update_guild_channel_positions(guild_id: Snowflake, params: UpdateGuildChannelPositionsParams, handler: EmptyResponseHandler) =>
         """
@@ -559,7 +559,7 @@ actor Routes
         This endpoint takes a JSON array of parameters in the following format:
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/channels" where body = json.JsonPrinter.print(params.to_json())), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/channels" where body = json.JsonPrinter.print(params.to_json())), _Decode.empty(handler, options.on_error))
 
     be get_active_guild_threads(guild_id: Snowflake, handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -569,7 +569,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/threads/active"), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/threads/active"), _Decode.payload(handler, options.on_error))
 
     be get_guild_member(guild_id: Snowflake, user_id: Snowflake, handler: ResponseHandler[GuildMember]) =>
         """
@@ -578,7 +578,7 @@ actor Routes
         Returns a guild member object for the specified user.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/members/" + user_id.string()), _Decode.entity[GuildMember](handler))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/members/" + user_id.string()), _Decode.entity[GuildMember](handler, options.on_error))
 
     be get_guild_members(guild_id: Snowflake, params: GetGuildMembersParams, handler: ResponseHandler[Array[GuildMember] val]) =>
         """
@@ -591,7 +591,7 @@ actor Routes
         All parameters to this endpoint are optional.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/members" where query = params.to_query()), _Decode.list[GuildMember](handler, _GuildMembers))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/members" where query = params.to_query()), _Decode.list[GuildMember](handler, _GuildMembers, options.on_error))
 
     be search_guild_members(guild_id: Snowflake, params: SearchGuildMembersParams, handler: ResponseHandler[Array[GuildMember] val]) =>
         """
@@ -602,7 +602,7 @@ actor Routes
         All parameters to this endpoint except for query are optional
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/members/search" where query = params.to_query()), _Decode.list[GuildMember](handler, _GuildMembers))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/members/search" where query = params.to_query()), _Decode.list[GuildMember](handler, _GuildMembers, options.on_error))
 
     be add_guild_member(guild_id: Snowflake, user_id: Snowflake, params: AddGuildMemberParams, handler: ResponseHandler[GuildMember]) =>
         """
@@ -617,7 +617,7 @@ actor Routes
         The Authorization header must be a Bot token (belonging to the same application used for authorization), and the bot must be a member of the guild with CREATE_INSTANT_INVITE permission.
         """
 
-        api.send_request(options.build_request(courier.PUT, "/guilds/" + guild_id.string() + "/members/" + user_id.string() where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[GuildMember](handler))
+        api.send_request(options.build_request(courier.PUT, "/guilds/" + guild_id.string() + "/members/" + user_id.string() where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[GuildMember](handler, options.on_error))
 
     be update_guild_member(guild_id: Snowflake, user_id: Snowflake, params: UpdateGuildMemberParams, handler: ResponseHandler[GuildMember], reason: Reason = None) =>
         """
@@ -630,7 +630,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/members/" + user_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[GuildMember](handler))
+        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/members/" + user_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[GuildMember](handler, options.on_error))
 
     be update_current_member(guild_id: Snowflake, params: UpdateCurrentMemberParams, handler: ResponseHandler[GuildMember], reason: Reason = None) =>
         """
@@ -641,7 +641,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/members/@me" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[GuildMember](handler))
+        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/members/@me" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[GuildMember](handler, options.on_error))
 
     be update_current_user_nick(guild_id: Snowflake, params: UpdateCurrentUserNickParams, handler: ResponseHandler[json.JsonValue], reason: Reason = None) =>
         """
@@ -655,7 +655,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/members/@me/nick" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/members/@me/nick" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.payload(handler, options.on_error))
 
     be add_guild_member_role(guild_id: Snowflake, user_id: Snowflake, role_id: Snowflake, handler: EmptyResponseHandler, reason: Reason = None) =>
         """
@@ -666,7 +666,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.PUT, "/guilds/" + guild_id.string() + "/members/" + user_id.string() + "/roles/" + role_id.string() where reason = reason), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.PUT, "/guilds/" + guild_id.string() + "/members/" + user_id.string() + "/roles/" + role_id.string() where reason = reason), _Decode.empty(handler, options.on_error))
 
     be remove_guild_member_role(guild_id: Snowflake, user_id: Snowflake, role_id: Snowflake, handler: EmptyResponseHandler, reason: Reason = None) =>
         """
@@ -677,7 +677,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/guilds/" + guild_id.string() + "/members/" + user_id.string() + "/roles/" + role_id.string() where reason = reason), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.DELETE, "/guilds/" + guild_id.string() + "/members/" + user_id.string() + "/roles/" + role_id.string() where reason = reason), _Decode.empty(handler, options.on_error))
 
     be remove_guild_member(guild_id: Snowflake, user_id: Snowflake, handler: EmptyResponseHandler, reason: Reason = None) =>
         """
@@ -688,7 +688,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/guilds/" + guild_id.string() + "/members/" + user_id.string() where reason = reason), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.DELETE, "/guilds/" + guild_id.string() + "/members/" + user_id.string() where reason = reason), _Decode.empty(handler, options.on_error))
 
     be get_guild_bans(guild_id: Snowflake, params: GetGuildBansParams, handler: ResponseHandler[Array[Ban] val]) =>
         """
@@ -697,7 +697,7 @@ actor Routes
         Returns a list of ban objects for the users banned from this guild. Requires the BAN_MEMBERS permission.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/bans" where query = params.to_query()), _Decode.list[Ban](handler, _Bans))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/bans" where query = params.to_query()), _Decode.list[Ban](handler, _Bans, options.on_error))
 
     be get_guild_ban(guild_id: Snowflake, user_id: Snowflake, handler: ResponseHandler[Ban]) =>
         """
@@ -706,7 +706,7 @@ actor Routes
         Returns a ban object for the given user or a 404 not found if the ban cannot be found. Requires the BAN_MEMBERS permission.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/bans/" + user_id.string()), _Decode.entity[Ban](handler))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/bans/" + user_id.string()), _Decode.entity[Ban](handler, options.on_error))
 
     be create_guild_ban(guild_id: Snowflake, user_id: Snowflake, params: CreateGuildBanParams, handler: EmptyResponseHandler, reason: Reason = None) =>
         """
@@ -717,7 +717,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.PUT, "/guilds/" + guild_id.string() + "/bans/" + user_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.PUT, "/guilds/" + guild_id.string() + "/bans/" + user_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.empty(handler, options.on_error))
 
     be remove_guild_ban(guild_id: Snowflake, user_id: Snowflake, handler: EmptyResponseHandler, reason: Reason = None) =>
         """
@@ -728,7 +728,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/guilds/" + guild_id.string() + "/bans/" + user_id.string() where reason = reason), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.DELETE, "/guilds/" + guild_id.string() + "/bans/" + user_id.string() where reason = reason), _Decode.empty(handler, options.on_error))
 
     be bulk_guild_ban(guild_id: Snowflake, params: BulkGuildBanParams, handler: ResponseHandler[json.JsonValue], reason: Reason = None) =>
         """
@@ -740,7 +740,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/bulk-ban" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/bulk-ban" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.payload(handler, options.on_error))
 
     be get_guild_roles(guild_id: Snowflake, handler: ResponseHandler[Array[Role] val]) =>
         """
@@ -749,7 +749,7 @@ actor Routes
         Returns a list of role objects for the guild.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/roles"), _Decode.list[Role](handler, _Roles))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/roles"), _Decode.list[Role](handler, _Roles, options.on_error))
 
     be get_guild_role(guild_id: Snowflake, role_id: Snowflake, handler: ResponseHandler[Role]) =>
         """
@@ -758,7 +758,7 @@ actor Routes
         Returns a role object for the specified role.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/roles/" + role_id.string()), _Decode.entity[Role](handler))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/roles/" + role_id.string()), _Decode.entity[Role](handler, options.on_error))
 
     be get_guild_role_member_counts(guild_id: Snowflake, handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -768,7 +768,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/roles/member-counts"), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/roles/member-counts"), _Decode.payload(handler, options.on_error))
 
     be create_guild_role(guild_id: Snowflake, params: CreateGuildRoleParams, handler: ResponseHandler[Role], reason: Reason = None) =>
         """
@@ -779,7 +779,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/roles" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Role](handler))
+        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/roles" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Role](handler, options.on_error))
 
     be update_guild_role_positions(guild_id: Snowflake, params: UpdateGuildRolePositionsParams, handler: ResponseHandler[Array[Role] val], reason: Reason = None) =>
         """
@@ -792,7 +792,7 @@ actor Routes
         This endpoint takes a JSON array of parameters in the following format:
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/roles" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.list[Role](handler, _Roles))
+        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/roles" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.list[Role](handler, _Roles, options.on_error))
 
     be update_guild_role(guild_id: Snowflake, role_id: Snowflake, params: UpdateGuildRoleParams, handler: ResponseHandler[Role], reason: Reason = None) =>
         """
@@ -805,7 +805,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/roles/" + role_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Role](handler))
+        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/roles/" + role_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Role](handler, options.on_error))
 
     be delete_guild_role(guild_id: Snowflake, role_id: Snowflake, handler: EmptyResponseHandler, reason: Reason = None) =>
         """
@@ -816,7 +816,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/guilds/" + guild_id.string() + "/roles/" + role_id.string() where reason = reason), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.DELETE, "/guilds/" + guild_id.string() + "/roles/" + role_id.string() where reason = reason), _Decode.empty(handler, options.on_error))
 
     be get_guild_prune_count(guild_id: Snowflake, params: GetGuildPruneCountParams, handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -828,7 +828,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/prune" where query = params.to_query()), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/prune" where query = params.to_query()), _Decode.payload(handler, options.on_error))
 
     be begin_guild_prune(guild_id: Snowflake, params: BeginGuildPruneParams, handler: ResponseHandler[json.JsonValue], reason: Reason = None) =>
         """
@@ -842,7 +842,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/prune" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/prune" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.payload(handler, options.on_error))
 
     be get_guild_voice_regions(guild_id: Snowflake, handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -852,7 +852,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/regions"), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/regions"), _Decode.payload(handler, options.on_error))
 
     be get_guild_invites(guild_id: Snowflake, handler: ResponseHandler[Array[Invite] val]) =>
         """
@@ -861,7 +861,7 @@ actor Routes
         Returns a list of invite objects. Requires the MANAGE_GUILD or VIEW_AUDIT_LOG permission. Invite Metadata is included with the MANAGE_GUILD permission.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/invites"), _Decode.list[Invite](handler, _Invites))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/invites"), _Decode.list[Invite](handler, _Invites, options.on_error))
 
     be get_guild_integrations(guild_id: Snowflake, handler: ResponseHandler[Array[Integration] val]) =>
         """
@@ -872,7 +872,7 @@ actor Routes
         This endpoint returns a maximum of 50 integrations. If a guild has more integrations, they cannot be accessed.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/integrations"), _Decode.list[Integration](handler, _Integrations))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/integrations"), _Decode.list[Integration](handler, _Integrations, options.on_error))
 
     be delete_guild_integration(guild_id: Snowflake, integration_id: Snowflake, handler: EmptyResponseHandler, reason: Reason = None) =>
         """
@@ -883,7 +883,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/guilds/" + guild_id.string() + "/integrations/" + integration_id.string() where reason = reason), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.DELETE, "/guilds/" + guild_id.string() + "/integrations/" + integration_id.string() where reason = reason), _Decode.empty(handler, options.on_error))
 
     be get_guild_widget_settings(guild_id: Snowflake, handler: ResponseHandler[GuildWidgetSettings]) =>
         """
@@ -892,7 +892,7 @@ actor Routes
         Returns a guild widget settings object. Requires the MANAGE_GUILD permission.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/widget"), _Decode.entity[GuildWidgetSettings](handler))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/widget"), _Decode.entity[GuildWidgetSettings](handler, options.on_error))
 
     be update_guild_widget(guild_id: Snowflake, params: UpdateGuildWidgetParams, handler: ResponseHandler[GuildWidgetSettings], reason: Reason = None) =>
         """
@@ -903,7 +903,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/widget" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[GuildWidgetSettings](handler))
+        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/widget" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[GuildWidgetSettings](handler, options.on_error))
 
     be get_guild_widget(guild_id: Snowflake, handler: ResponseHandler[GuildWidget]) =>
         """
@@ -912,7 +912,7 @@ actor Routes
         Returns the widget for the guild. Fires an Invite Create Gateway event when an invite channel is defined and a new Invite is generated.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/widget.json"), _Decode.entity[GuildWidget](handler))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/widget.json"), _Decode.entity[GuildWidget](handler, options.on_error))
 
     be get_guild_vanity_url(guild_id: Snowflake, handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -924,7 +924,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/vanity-url"), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/vanity-url"), _Decode.payload(handler, options.on_error))
 
     be get_guild_widget_image(guild_id: Snowflake, params: GetGuildWidgetImageParams, handler: ResponseHandler[Array[U8] val]) =>
         """
@@ -935,7 +935,7 @@ actor Routes
         All parameters to this endpoint are optional.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/widget.png" where query = params.to_query()), _Decode.bytes(handler))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/widget.png" where query = params.to_query()), _Decode.bytes(handler, options.on_error))
 
     be get_guild_welcome_screen(guild_id: Snowflake, handler: ResponseHandler[WelcomeScreen]) =>
         """
@@ -944,7 +944,7 @@ actor Routes
         Returns the Welcome Screen object for the guild. If the welcome screen is not enabled, the MANAGE_GUILD permission is required.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/welcome-screen"), _Decode.entity[WelcomeScreen](handler))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/welcome-screen"), _Decode.entity[WelcomeScreen](handler, options.on_error))
 
     be update_guild_welcome_screen(guild_id: Snowflake, params: UpdateGuildWelcomeScreenParams, handler: ResponseHandler[WelcomeScreen], reason: Reason = None) =>
         """
@@ -957,7 +957,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/welcome-screen" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[WelcomeScreen](handler))
+        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/welcome-screen" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[WelcomeScreen](handler, options.on_error))
 
     be get_guild_onboarding(guild_id: Snowflake, handler: ResponseHandler[GuildOnboarding]) =>
         """
@@ -966,7 +966,7 @@ actor Routes
         Returns the Onboarding object for the guild.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/onboarding"), _Decode.entity[GuildOnboarding](handler))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/onboarding"), _Decode.entity[GuildOnboarding](handler, options.on_error))
 
     be update_guild_onboarding(guild_id: Snowflake, params: UpdateGuildOnboardingParams, handler: ResponseHandler[GuildOnboarding], reason: Reason = None) =>
         """
@@ -981,7 +981,7 @@ actor Routes
         All parameters to this endpoint are optional.
         """
 
-        api.send_request(options.build_request(courier.PUT, "/guilds/" + guild_id.string() + "/onboarding" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[GuildOnboarding](handler))
+        api.send_request(options.build_request(courier.PUT, "/guilds/" + guild_id.string() + "/onboarding" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[GuildOnboarding](handler, options.on_error))
 
     be update_guild_incident_actions(guild_id: Snowflake, params: UpdateGuildIncidentActionsParams, handler: ResponseHandler[IncidentsData]) =>
         """
@@ -990,7 +990,7 @@ actor Routes
         Modifies the incident actions of the guild. Returns a 200 with the Incidents Data object for the guild. Requires the MANAGE_GUILD permission.
         """
 
-        api.send_request(options.build_request(courier.PUT, "/guilds/" + guild_id.string() + "/incident-actions" where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[IncidentsData](handler))
+        api.send_request(options.build_request(courier.PUT, "/guilds/" + guild_id.string() + "/incident-actions" where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[IncidentsData](handler, options.on_error))
 
     be get_guild_scheduled_events(guild_id: Snowflake, params: GetGuildScheduledEventsParams, handler: ResponseHandler[Array[GuildScheduledEvent] val]) =>
         """
@@ -999,7 +999,7 @@ actor Routes
         Returns a list of guild scheduled event objects for the given guild.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/scheduled-events" where query = params.to_query()), _Decode.list[GuildScheduledEvent](handler, _GuildScheduledEvents))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/scheduled-events" where query = params.to_query()), _Decode.list[GuildScheduledEvent](handler, _GuildScheduledEvents, options.on_error))
 
     be create_guild_scheduled_event(guild_id: Snowflake, params: CreateGuildScheduledEventParams, handler: ResponseHandler[GuildScheduledEvent], reason: Reason = None) =>
         """
@@ -1012,7 +1012,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/scheduled-events" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[GuildScheduledEvent](handler))
+        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/scheduled-events" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[GuildScheduledEvent](handler, options.on_error))
 
     be get_guild_scheduled_event(guild_id: Snowflake, guild_scheduled_event_id: Snowflake, params: GetGuildScheduledEventParams, handler: ResponseHandler[GuildScheduledEvent]) =>
         """
@@ -1021,7 +1021,7 @@ actor Routes
         Get a guild scheduled event. Returns a guild scheduled event object on success.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/scheduled-events/" + guild_scheduled_event_id.string() where query = params.to_query()), _Decode.entity[GuildScheduledEvent](handler))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/scheduled-events/" + guild_scheduled_event_id.string() where query = params.to_query()), _Decode.entity[GuildScheduledEvent](handler, options.on_error))
 
     be update_guild_scheduled_event(guild_id: Snowflake, guild_scheduled_event_id: Snowflake, params: UpdateGuildScheduledEventParams, handler: ResponseHandler[GuildScheduledEvent], reason: Reason = None) =>
         """
@@ -1038,7 +1038,7 @@ actor Routes
         All parameters to this endpoint are optional.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/scheduled-events/" + guild_scheduled_event_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[GuildScheduledEvent](handler))
+        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/scheduled-events/" + guild_scheduled_event_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[GuildScheduledEvent](handler, options.on_error))
 
     be delete_guild_scheduled_event(guild_id: Snowflake, guild_scheduled_event_id: Snowflake, handler: EmptyResponseHandler) =>
         """
@@ -1047,7 +1047,7 @@ actor Routes
         Delete a guild scheduled event. Returns a 204 on success. Fires a Guild Scheduled Event Delete Gateway event.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/guilds/" + guild_id.string() + "/scheduled-events/" + guild_scheduled_event_id.string()), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.DELETE, "/guilds/" + guild_id.string() + "/scheduled-events/" + guild_scheduled_event_id.string()), _Decode.empty(handler, options.on_error))
 
     be get_guild_scheduled_event_users(guild_id: Snowflake, guild_scheduled_event_id: Snowflake, params: GetGuildScheduledEventUsersParams, handler: ResponseHandler[Array[GuildScheduledEventUser] val]) =>
         """
@@ -1056,7 +1056,7 @@ actor Routes
         Get a list of guild scheduled event users subscribed to a guild scheduled event. Returns a list of guild scheduled event user objects on success. Guild member data, if it exists, is included if the with_member query parameter is set.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/scheduled-events/" + guild_scheduled_event_id.string() + "/users" where query = params.to_query()), _Decode.list[GuildScheduledEventUser](handler, _GuildScheduledEventUsers))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/scheduled-events/" + guild_scheduled_event_id.string() + "/users" where query = params.to_query()), _Decode.list[GuildScheduledEventUser](handler, _GuildScheduledEventUsers, options.on_error))
 
     be get_guild_template(template_code: String, handler: ResponseHandler[GuildTemplate]) =>
         """
@@ -1065,7 +1065,7 @@ actor Routes
         Returns a guild template object for the given code.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/templates/" + template_code), _Decode.entity[GuildTemplate](handler))
+        api.send_request(options.build_request(courier.GET, "/guilds/templates/" + template_code), _Decode.entity[GuildTemplate](handler, options.on_error))
 
     be get_guild_templates(guild_id: Snowflake, handler: ResponseHandler[Array[GuildTemplate] val]) =>
         """
@@ -1074,7 +1074,7 @@ actor Routes
         Returns an array of guild template objects. Requires the MANAGE_GUILD permission.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/templates"), _Decode.list[GuildTemplate](handler, _GuildTemplates))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/templates"), _Decode.list[GuildTemplate](handler, _GuildTemplates, options.on_error))
 
     be create_guild_template(guild_id: Snowflake, params: CreateGuildTemplateParams, handler: ResponseHandler[GuildTemplate]) =>
         """
@@ -1083,7 +1083,7 @@ actor Routes
         Creates a template for the guild. Requires the MANAGE_GUILD permission. Returns the created guild template object on success.
         """
 
-        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/templates" where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[GuildTemplate](handler))
+        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/templates" where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[GuildTemplate](handler, options.on_error))
 
     be sync_guild_template(guild_id: Snowflake, template_code: String, handler: ResponseHandler[GuildTemplate]) =>
         """
@@ -1092,7 +1092,7 @@ actor Routes
         Syncs the template to the guild's current state. Requires the MANAGE_GUILD permission. Returns the guild template object on success.
         """
 
-        api.send_request(options.build_request(courier.PUT, "/guilds/" + guild_id.string() + "/templates/" + template_code), _Decode.entity[GuildTemplate](handler))
+        api.send_request(options.build_request(courier.PUT, "/guilds/" + guild_id.string() + "/templates/" + template_code), _Decode.entity[GuildTemplate](handler, options.on_error))
 
     be update_guild_template(guild_id: Snowflake, template_code: String, params: UpdateGuildTemplateParams, handler: ResponseHandler[GuildTemplate]) =>
         """
@@ -1101,7 +1101,7 @@ actor Routes
         Modifies the template's metadata. Requires the MANAGE_GUILD permission. Returns the guild template object on success.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/templates/" + template_code where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[GuildTemplate](handler))
+        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/templates/" + template_code where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[GuildTemplate](handler, options.on_error))
 
     be delete_guild_template(guild_id: Snowflake, template_code: String, handler: ResponseHandler[GuildTemplate]) =>
         """
@@ -1110,7 +1110,7 @@ actor Routes
         Deletes the template. Requires the MANAGE_GUILD permission. Returns the deleted guild template object on success.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/guilds/" + guild_id.string() + "/templates/" + template_code), _Decode.entity[GuildTemplate](handler))
+        api.send_request(options.build_request(courier.DELETE, "/guilds/" + guild_id.string() + "/templates/" + template_code), _Decode.entity[GuildTemplate](handler, options.on_error))
 
     be get_invite(invite_code: String, params: GetInviteParams, handler: ResponseHandler[Invite]) =>
         """
@@ -1119,7 +1119,7 @@ actor Routes
         Returns an invite object for the given code.
         """
 
-        api.send_request(options.build_request(courier.GET, "/invites/" + invite_code where query = params.to_query()), _Decode.entity[Invite](handler))
+        api.send_request(options.build_request(courier.GET, "/invites/" + invite_code where query = params.to_query()), _Decode.entity[Invite](handler, options.on_error))
 
     be delete_invite(invite_code: String, handler: ResponseHandler[Invite], reason: Reason = None) =>
         """
@@ -1130,7 +1130,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/invites/" + invite_code where reason = reason), _Decode.entity[Invite](handler))
+        api.send_request(options.build_request(courier.DELETE, "/invites/" + invite_code where reason = reason), _Decode.entity[Invite](handler, options.on_error))
 
     be get_invite_target_users(invite_code: String, handler: ResponseHandler[String]) =>
         """
@@ -1139,7 +1139,7 @@ actor Routes
         Gets the users allowed to see and accept this invite. Response is a CSV file with the header user_id and each user ID from the original file passed to invite create on its own line. Requires the caller to be the inviter, or have MANAGE_GUILD permission, or have VIEW_AUDIT_LOG permission.
         """
 
-        api.send_request(options.build_request(courier.GET, "/invites/" + invite_code + "/target-users"), _Decode.text(handler))
+        api.send_request(options.build_request(courier.GET, "/invites/" + invite_code + "/target-users"), _Decode.text(handler, options.on_error))
 
     be update_invite_target_users(invite_code: String, params: UpdateInviteTargetUsersParams, handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -1149,7 +1149,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.PUT, "/invites/" + invite_code + "/target-users" where body = json.JsonPrinter.print(params.to_json())), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.PUT, "/invites/" + invite_code + "/target-users" where body = json.JsonPrinter.print(params.to_json())), _Decode.payload(handler, options.on_error))
 
     be get_invite_target_users_job_status(invite_code: String, handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -1159,7 +1159,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/invites/" + invite_code + "/target-users/job-status"), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.GET, "/invites/" + invite_code + "/target-users/job-status"), _Decode.payload(handler, options.on_error))
 
     be create_lobby(params: CreateLobbyParams, handler: ResponseHandler[Lobby]) =>
         """
@@ -1172,7 +1172,7 @@ actor Routes
         Discord Social SDK clients will not be able to join or leave a lobby created using this API, such as Client::CreateOrJoinLobby. See Managing Lobbies for more information.
         """
 
-        api.send_request(options.build_request(courier.POST, "/lobbies" where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Lobby](handler))
+        api.send_request(options.build_request(courier.POST, "/lobbies" where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Lobby](handler, options.on_error))
 
     be create_or_join_lobby(params: CreateOrJoinLobbyParams, handler: ResponseHandler[Lobby]) =>
         """
@@ -1185,7 +1185,7 @@ actor Routes
         Returns a lobby object.
         """
 
-        api.send_request(options.build_request(courier.PUT, "/lobbies" where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Lobby](handler))
+        api.send_request(options.build_request(courier.PUT, "/lobbies" where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Lobby](handler, options.on_error))
 
     be get_lobby(lobby_id: Snowflake, handler: ResponseHandler[Lobby]) =>
         """
@@ -1194,7 +1194,7 @@ actor Routes
         Returns a lobby object for the specified lobby id, if it exists.
         """
 
-        api.send_request(options.build_request(courier.GET, "/lobbies/" + lobby_id.string()), _Decode.entity[Lobby](handler))
+        api.send_request(options.build_request(courier.GET, "/lobbies/" + lobby_id.string()), _Decode.entity[Lobby](handler, options.on_error))
 
     be update_lobby(lobby_id: Snowflake, params: UpdateLobbyParams, handler: ResponseHandler[Lobby]) =>
         """
@@ -1205,7 +1205,7 @@ actor Routes
         Returns the updated lobby object.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/lobbies/" + lobby_id.string() where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Lobby](handler))
+        api.send_request(options.build_request(courier.PATCH, "/lobbies/" + lobby_id.string() where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Lobby](handler, options.on_error))
 
     be delete_lobby(lobby_id: Snowflake, handler: EmptyResponseHandler) =>
         """
@@ -1218,7 +1218,7 @@ actor Routes
         Returns nothing.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/lobbies/" + lobby_id.string()), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.DELETE, "/lobbies/" + lobby_id.string()), _Decode.empty(handler, options.on_error))
 
     be add_lobby_member(lobby_id: Snowflake, user_id: Snowflake, params: AddLobbyMemberParams, handler: ResponseHandler[LobbyMember]) =>
         """
@@ -1229,7 +1229,7 @@ actor Routes
         Returns the lobby member object.
         """
 
-        api.send_request(options.build_request(courier.PUT, "/lobbies/" + lobby_id.string() + "/members/" + user_id.string() where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[LobbyMember](handler))
+        api.send_request(options.build_request(courier.PUT, "/lobbies/" + lobby_id.string() + "/members/" + user_id.string() where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[LobbyMember](handler, options.on_error))
 
     be bulk_update_lobby_members(lobby_id: Snowflake, params: BulkUpdateLobbyMembersParams, handler: ResponseHandler[Array[LobbyMember] val]) =>
         """
@@ -1242,7 +1242,7 @@ actor Routes
         Users unknown to Discord will return a 404 UNKNOWN_USER error. Users that fail permission checks or who have already reached the maximum number of lobbies per application (and are not already a member of this lobby) are silently dropped from the upsert set.
         """
 
-        api.send_request(options.build_request(courier.POST, "/lobbies/" + lobby_id.string() + "/members/bulk" where body = json.JsonPrinter.print(params.to_json())), _Decode.list[LobbyMember](handler, _LobbyMembers))
+        api.send_request(options.build_request(courier.POST, "/lobbies/" + lobby_id.string() + "/members/bulk" where body = json.JsonPrinter.print(params.to_json())), _Decode.list[LobbyMember](handler, _LobbyMembers, options.on_error))
 
     be remove_lobby_member(lobby_id: Snowflake, user_id: Snowflake, handler: EmptyResponseHandler) =>
         """
@@ -1253,7 +1253,7 @@ actor Routes
         Returns nothing.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/lobbies/" + lobby_id.string() + "/members/" + user_id.string()), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.DELETE, "/lobbies/" + lobby_id.string() + "/members/" + user_id.string()), _Decode.empty(handler, options.on_error))
 
     be leave_lobby(lobby_id: Snowflake, handler: EmptyResponseHandler) =>
         """
@@ -1266,7 +1266,7 @@ actor Routes
         Returns nothing.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/lobbies/" + lobby_id.string() + "/members/@me"), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.DELETE, "/lobbies/" + lobby_id.string() + "/members/@me"), _Decode.empty(handler, options.on_error))
 
     be link_channel_to_lobby(lobby_id: Snowflake, params: LinkChannelToLobbyParams, handler: ResponseHandler[Lobby]) =>
         """
@@ -1279,7 +1279,7 @@ actor Routes
         Returns a lobby object with a linked channel.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/lobbies/" + lobby_id.string() + "/channel-linking" where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Lobby](handler))
+        api.send_request(options.build_request(courier.PATCH, "/lobbies/" + lobby_id.string() + "/channel-linking" where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Lobby](handler, options.on_error))
 
     be unlink_channel_from_lobby(lobby_id: Snowflake, handler: ResponseHandler[Lobby]) =>
         """
@@ -1294,7 +1294,7 @@ actor Routes
         Returns a lobby object without a linked channel.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/lobbies/" + lobby_id.string() + "/channel-linking"), _Decode.entity[Lobby](handler))
+        api.send_request(options.build_request(courier.PATCH, "/lobbies/" + lobby_id.string() + "/channel-linking"), _Decode.entity[Lobby](handler, options.on_error))
 
     be send_lobby_message(lobby_id: Snowflake, params: SendLobbyMessageParams, handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -1310,7 +1310,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.POST, "/lobbies/" + lobby_id.string() + "/messages" where body = json.JsonPrinter.print(params.to_json())), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.POST, "/lobbies/" + lobby_id.string() + "/messages" where body = json.JsonPrinter.print(params.to_json())), _Decode.payload(handler, options.on_error))
 
     be get_lobby_messages(lobby_id: Snowflake, params: GetLobbyMessagesParams, handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -1324,7 +1324,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/lobbies/" + lobby_id.string() + "/messages" where query = params.to_query()), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.GET, "/lobbies/" + lobby_id.string() + "/messages" where query = params.to_query()), _Decode.payload(handler, options.on_error))
 
     be update_lobby_message_moderation_metadata(lobby_id: Snowflake, message_id: Snowflake, params: UpdateLobbyMessageModerationMetadataParams, handler: EmptyResponseHandler) =>
         """
@@ -1339,7 +1339,7 @@ actor Routes
         Returns HTTP 204: No Content on success.
         """
 
-        api.send_request(options.build_request(courier.PUT, "/lobbies/" + lobby_id.string() + "/messages/" + message_id.string() + "/moderation-metadata" where body = json.JsonPrinter.print(params.to_json())), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.PUT, "/lobbies/" + lobby_id.string() + "/messages/" + message_id.string() + "/moderation-metadata" where body = json.JsonPrinter.print(params.to_json())), _Decode.empty(handler, options.on_error))
 
     be create_lobby_channel_invite_for_self(lobby_id: Snowflake, handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -1353,7 +1353,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.POST, "/lobbies/" + lobby_id.string() + "/members/@me/invites"), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.POST, "/lobbies/" + lobby_id.string() + "/members/@me/invites"), _Decode.payload(handler, options.on_error))
 
     be create_lobby_channel_invite_for_user(lobby_id: Snowflake, user_id: Snowflake, handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -1367,7 +1367,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.POST, "/lobbies/" + lobby_id.string() + "/members/" + user_id.string() + "/invites"), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.POST, "/lobbies/" + lobby_id.string() + "/members/" + user_id.string() + "/invites"), _Decode.payload(handler, options.on_error))
 
     be get_channel_messages(channel_id: Snowflake, params: GetChannelMessagesParams, handler: ResponseHandler[Array[Message] val]) =>
         """
@@ -1382,7 +1382,7 @@ actor Routes
         The before, after, and around parameters are mutually exclusive, only one may be passed at a time.
         """
 
-        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/messages" where query = params.to_query()), _Decode.list[Message](handler, _Messages))
+        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/messages" where query = params.to_query()), _Decode.list[Message](handler, _Messages, options.on_error))
 
     be search_guild_messages(guild_id: Snowflake, params: SearchGuildMessagesParams, handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -1403,7 +1403,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/messages/search" where query = params.to_query()), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/messages/search" where query = params.to_query()), _Decode.payload(handler, options.on_error))
 
     be get_channel_message(channel_id: Snowflake, message_id: Snowflake, handler: ResponseHandler[Message]) =>
         """
@@ -1414,7 +1414,7 @@ actor Routes
         If operating on a guild channel, this endpoint requires the current user to have the VIEW_CHANNEL and READ_MESSAGE_HISTORY permissions. If the channel is a voice channel, they must _also_ have the CONNECT permission.
         """
 
-        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/messages/" + message_id.string()), _Decode.entity[Message](handler))
+        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/messages/" + message_id.string()), _Decode.entity[Message](handler, options.on_error))
 
     be create_message(channel_id: Snowflake, params: CreateMessageParams, handler: ResponseHandler[Message]) =>
         """
@@ -1430,7 +1430,7 @@ actor Routes
         Files must be attached using a multipart/form-data body as described in Uploading Files.
         """
 
-        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/messages" where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Message](handler))
+        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/messages" where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Message](handler, options.on_error))
 
     be crosspost_message(channel_id: Snowflake, message_id: Snowflake, handler: ResponseHandler[Message]) =>
         """
@@ -1441,7 +1441,7 @@ actor Routes
         Returns a message object. Fires a Message Update Gateway event.
         """
 
-        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/messages/" + message_id.string() + "/crosspost"), _Decode.entity[Message](handler))
+        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/messages/" + message_id.string() + "/crosspost"), _Decode.entity[Message](handler, options.on_error))
 
     be create_reaction(channel_id: Snowflake, message_id: Snowflake, emoji: String, handler: EmptyResponseHandler) =>
         """
@@ -1451,7 +1451,7 @@ actor Routes
         The emoji must be URL Encoded or the request will fail with 10014: Unknown Emoji. To use custom emoji, you must encode it in the format name:id with the emoji name and emoji id.
         """
 
-        api.send_request(options.build_request(courier.PUT, "/channels/" + channel_id.string() + "/messages/" + message_id.string() + "/reactions/" + emoji + "/@me"), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.PUT, "/channels/" + channel_id.string() + "/messages/" + message_id.string() + "/reactions/" + emoji + "/@me"), _Decode.empty(handler, options.on_error))
 
     be delete_own_reaction(channel_id: Snowflake, message_id: Snowflake, emoji: String, handler: EmptyResponseHandler) =>
         """
@@ -1461,7 +1461,7 @@ actor Routes
         The emoji must be URL Encoded or the request will fail with 10014: Unknown Emoji. To use custom emoji, you must encode it in the format name:id with the emoji name and emoji id.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() + "/messages/" + message_id.string() + "/reactions/" + emoji + "/@me"), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() + "/messages/" + message_id.string() + "/reactions/" + emoji + "/@me"), _Decode.empty(handler, options.on_error))
 
     be delete_user_reaction(channel_id: Snowflake, message_id: Snowflake, emoji: String, user_id: Snowflake, handler: EmptyResponseHandler) =>
         """
@@ -1471,7 +1471,7 @@ actor Routes
         The emoji must be URL Encoded or the request will fail with 10014: Unknown Emoji. To use custom emoji, you must encode it in the format name:id with the emoji name and emoji id.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() + "/messages/" + message_id.string() + "/reactions/" + emoji + "/" + user_id.string()), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() + "/messages/" + message_id.string() + "/reactions/" + emoji + "/" + user_id.string()), _Decode.empty(handler, options.on_error))
 
     be get_reactions(channel_id: Snowflake, message_id: Snowflake, emoji: String, params: GetReactionsParams, handler: ResponseHandler[Array[User] val]) =>
         """
@@ -1481,7 +1481,7 @@ actor Routes
         The emoji must be URL Encoded or the request will fail with 10014: Unknown Emoji. To use custom emoji, you must encode it in the format name:id with the emoji name and emoji id.
         """
 
-        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/messages/" + message_id.string() + "/reactions/" + emoji where query = params.to_query()), _Decode.list[User](handler, _Users))
+        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/messages/" + message_id.string() + "/reactions/" + emoji where query = params.to_query()), _Decode.list[User](handler, _Users, options.on_error))
 
     be delete_all_reactions(channel_id: Snowflake, message_id: Snowflake, handler: EmptyResponseHandler) =>
         """
@@ -1490,7 +1490,7 @@ actor Routes
         Deletes all reactions on a message. This endpoint requires the MANAGE_MESSAGES permission to be present on the current user. Fires a Message Reaction Remove All Gateway event.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() + "/messages/" + message_id.string() + "/reactions"), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() + "/messages/" + message_id.string() + "/reactions"), _Decode.empty(handler, options.on_error))
 
     be delete_all_reactions_for_emoji(channel_id: Snowflake, message_id: Snowflake, emoji: String, handler: EmptyResponseHandler) =>
         """
@@ -1500,7 +1500,7 @@ actor Routes
         The emoji must be URL Encoded or the request will fail with 10014: Unknown Emoji. To use custom emoji, you must encode it in the format name:id with the emoji name and emoji id.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() + "/messages/" + message_id.string() + "/reactions/" + emoji), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() + "/messages/" + message_id.string() + "/reactions/" + emoji), _Decode.empty(handler, options.on_error))
 
     be update_message(channel_id: Snowflake, message_id: Snowflake, params: UpdateMessageParams, handler: ResponseHandler[Message]) =>
         """
@@ -1520,7 +1520,7 @@ actor Routes
         All parameters to this endpoint are optional and nullable.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/channels/" + channel_id.string() + "/messages/" + message_id.string() where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Message](handler))
+        api.send_request(options.build_request(courier.PATCH, "/channels/" + channel_id.string() + "/messages/" + message_id.string() where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Message](handler, options.on_error))
 
     be delete_message(channel_id: Snowflake, message_id: Snowflake, handler: EmptyResponseHandler, reason: Reason = None) =>
         """
@@ -1531,7 +1531,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() + "/messages/" + message_id.string() where reason = reason), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() + "/messages/" + message_id.string() where reason = reason), _Decode.empty(handler, options.on_error))
 
     be bulk_delete_messages(channel_id: Snowflake, params: BulkDeleteMessagesParams, handler: EmptyResponseHandler, reason: Reason = None) =>
         """
@@ -1546,7 +1546,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/messages/bulk-delete" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/messages/bulk-delete" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.empty(handler, options.on_error))
 
     be get_channel_pins(channel_id: Snowflake, params: GetChannelPinsParams, handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -1556,7 +1556,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/messages/pins" where query = params.to_query()), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/messages/pins" where query = params.to_query()), _Decode.payload(handler, options.on_error))
 
     be pin_message(channel_id: Snowflake, message_id: Snowflake, handler: EmptyResponseHandler, reason: Reason = None) =>
         """
@@ -1567,7 +1567,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.PUT, "/channels/" + channel_id.string() + "/messages/pins/" + message_id.string() where reason = reason), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.PUT, "/channels/" + channel_id.string() + "/messages/pins/" + message_id.string() where reason = reason), _Decode.empty(handler, options.on_error))
 
     be unpin_message(channel_id: Snowflake, message_id: Snowflake, handler: EmptyResponseHandler, reason: Reason = None) =>
         """
@@ -1578,7 +1578,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() + "/messages/pins/" + message_id.string() where reason = reason), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() + "/messages/pins/" + message_id.string() where reason = reason), _Decode.empty(handler, options.on_error))
 
     be get_pinned_messages_deprecated(channel_id: Snowflake, handler: ResponseHandler[Array[Message] val]) =>
         """
@@ -1588,7 +1588,7 @@ actor Routes
         This endpoint is deprecated. Use Get Channel Pins instead.
         """
 
-        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/pins"), _Decode.list[Message](handler, _Messages))
+        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/pins"), _Decode.list[Message](handler, _Messages, options.on_error))
 
     be pin_message_deprecated(channel_id: Snowflake, message_id: Snowflake, handler: EmptyResponseHandler) =>
         """
@@ -1597,7 +1597,7 @@ actor Routes
         This endpoint is deprecated. Use Pin Message instead.
         """
 
-        api.send_request(options.build_request(courier.PUT, "/channels/" + channel_id.string() + "/pins/" + message_id.string()), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.PUT, "/channels/" + channel_id.string() + "/pins/" + message_id.string()), _Decode.empty(handler, options.on_error))
 
     be unpin_message_deprecated(channel_id: Snowflake, message_id: Snowflake, handler: EmptyResponseHandler) =>
         """
@@ -1606,7 +1606,7 @@ actor Routes
         This endpoint is deprecated. Use Unpin Message instead.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() + "/pins/" + message_id.string()), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() + "/pins/" + message_id.string()), _Decode.empty(handler, options.on_error))
 
     be get_answer_voters(channel_id: Snowflake, message_id: Snowflake, answer_id: U64, params: GetAnswerVotersParams, handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -1616,7 +1616,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/polls/" + message_id.string() + "/answers/" + answer_id.string() where query = params.to_query()), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/polls/" + message_id.string() + "/answers/" + answer_id.string() where query = params.to_query()), _Decode.payload(handler, options.on_error))
 
     be end_poll(channel_id: Snowflake, message_id: Snowflake, handler: ResponseHandler[Message]) =>
         """
@@ -1627,7 +1627,7 @@ actor Routes
         Returns a message object. Fires a Message Update Gateway event.
         """
 
-        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/polls/" + message_id.string() + "/expire"), _Decode.entity[Message](handler))
+        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/polls/" + message_id.string() + "/expire"), _Decode.entity[Message](handler, options.on_error))
 
     be get_skus(application_id: Snowflake, handler: ResponseHandler[Array[SKU] val]) =>
         """
@@ -1638,7 +1638,7 @@ actor Routes
         Because of how our SKU and subscription systems work, you will see two SKUs for your subscription offering. For integration and testing entitlements for Subscriptions, you should use the SKU with type: 5.
         """
 
-        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/skus"), _Decode.list[SKU](handler, _SKUs))
+        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/skus"), _Decode.list[SKU](handler, _SKUs, options.on_error))
 
     be send_soundboard_sound(channel_id: Snowflake, params: SendSoundboardSoundParams, handler: EmptyResponseHandler) =>
         """
@@ -1649,7 +1649,7 @@ actor Routes
         Requires the SPEAK and USE_SOUNDBOARD permissions, and also the USE_EXTERNAL_SOUNDS permission if the sound is from a different server. Additionally, requires the user to be connected to the voice channel, having a voice state without deaf, self_deaf, mute, or suppress enabled.
         """
 
-        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/send-soundboard-sound" where body = json.JsonPrinter.print(params.to_json())), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/send-soundboard-sound" where body = json.JsonPrinter.print(params.to_json())), _Decode.empty(handler, options.on_error))
 
     be get_default_soundboard_sounds(handler: ResponseHandler[Array[SoundboardSound] val]) =>
         """
@@ -1658,7 +1658,7 @@ actor Routes
         Returns an array of soundboard sound objects that can be used by all users.
         """
 
-        api.send_request(options.build_request(courier.GET, "/soundboard-default-sounds"), _Decode.list[SoundboardSound](handler, _SoundboardSounds))
+        api.send_request(options.build_request(courier.GET, "/soundboard-default-sounds"), _Decode.list[SoundboardSound](handler, _SoundboardSounds, options.on_error))
 
     be get_guild_soundboard_sounds(guild_id: Snowflake, handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -1668,7 +1668,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/soundboard-sounds"), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/soundboard-sounds"), _Decode.payload(handler, options.on_error))
 
     be get_guild_soundboard_sound(guild_id: Snowflake, sound_id: Snowflake, handler: ResponseHandler[SoundboardSound]) =>
         """
@@ -1677,7 +1677,7 @@ actor Routes
         Returns a soundboard sound object for the given sound id. Includes the user field if the bot has the CREATE_GUILD_EXPRESSIONS or MANAGE_GUILD_EXPRESSIONS permission.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/soundboard-sounds/" + sound_id.string()), _Decode.entity[SoundboardSound](handler))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/soundboard-sounds/" + sound_id.string()), _Decode.entity[SoundboardSound](handler, options.on_error))
 
     be create_guild_soundboard_sound(guild_id: Snowflake, params: CreateGuildSoundboardSoundParams, handler: ResponseHandler[SoundboardSound], reason: Reason = None) =>
         """
@@ -1690,7 +1690,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/soundboard-sounds" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[SoundboardSound](handler))
+        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/soundboard-sounds" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[SoundboardSound](handler, options.on_error))
 
     be update_guild_soundboard_sound(guild_id: Snowflake, sound_id: Snowflake, params: UpdateGuildSoundboardSoundParams, handler: ResponseHandler[SoundboardSound], reason: Reason = None) =>
         """
@@ -1703,7 +1703,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/soundboard-sounds/" + sound_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[SoundboardSound](handler))
+        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/soundboard-sounds/" + sound_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[SoundboardSound](handler, options.on_error))
 
     be delete_guild_soundboard_sound(guild_id: Snowflake, sound_id: Snowflake, handler: EmptyResponseHandler, reason: Reason = None) =>
         """
@@ -1714,7 +1714,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/guilds/" + guild_id.string() + "/soundboard-sounds/" + sound_id.string() where reason = reason), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.DELETE, "/guilds/" + guild_id.string() + "/soundboard-sounds/" + sound_id.string() where reason = reason), _Decode.empty(handler, options.on_error))
 
     be create_stage_instance(params: CreateStageInstanceParams, handler: ResponseHandler[StageInstance], reason: Reason = None) =>
         """
@@ -1727,7 +1727,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.POST, "/stage-instances" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[StageInstance](handler))
+        api.send_request(options.build_request(courier.POST, "/stage-instances" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[StageInstance](handler, options.on_error))
 
     be get_stage_instance(channel_id: Snowflake, handler: ResponseHandler[StageInstance]) =>
         """
@@ -1736,7 +1736,7 @@ actor Routes
         Gets the stage instance associated with the Stage channel, if it exists.
         """
 
-        api.send_request(options.build_request(courier.GET, "/stage-instances/" + channel_id.string()), _Decode.entity[StageInstance](handler))
+        api.send_request(options.build_request(courier.GET, "/stage-instances/" + channel_id.string()), _Decode.entity[StageInstance](handler, options.on_error))
 
     be update_stage_instance(channel_id: Snowflake, params: UpdateStageInstanceParams, handler: ResponseHandler[StageInstance], reason: Reason = None) =>
         """
@@ -1749,7 +1749,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/stage-instances/" + channel_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[StageInstance](handler))
+        api.send_request(options.build_request(courier.PATCH, "/stage-instances/" + channel_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[StageInstance](handler, options.on_error))
 
     be delete_stage_instance(channel_id: Snowflake, handler: EmptyResponseHandler, reason: Reason = None) =>
         """
@@ -1762,7 +1762,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/stage-instances/" + channel_id.string() where reason = reason), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.DELETE, "/stage-instances/" + channel_id.string() where reason = reason), _Decode.empty(handler, options.on_error))
 
     be get_sticker(sticker_id: Snowflake, handler: ResponseHandler[Sticker]) =>
         """
@@ -1771,7 +1771,7 @@ actor Routes
         Returns a sticker object for the given sticker ID.
         """
 
-        api.send_request(options.build_request(courier.GET, "/stickers/" + sticker_id.string()), _Decode.entity[Sticker](handler))
+        api.send_request(options.build_request(courier.GET, "/stickers/" + sticker_id.string()), _Decode.entity[Sticker](handler, options.on_error))
 
     be get_sticker_packs(handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -1781,7 +1781,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/sticker-packs"), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.GET, "/sticker-packs"), _Decode.payload(handler, options.on_error))
 
     be get_sticker_pack(sticker_pack_id: Snowflake, handler: ResponseHandler[StickerPack]) =>
         """
@@ -1790,7 +1790,7 @@ actor Routes
         Returns a sticker pack object for the given sticker pack ID.
         """
 
-        api.send_request(options.build_request(courier.GET, "/sticker-packs/" + sticker_pack_id.string()), _Decode.entity[StickerPack](handler))
+        api.send_request(options.build_request(courier.GET, "/sticker-packs/" + sticker_pack_id.string()), _Decode.entity[StickerPack](handler, options.on_error))
 
     be get_guild_stickers(guild_id: Snowflake, handler: ResponseHandler[Array[Sticker] val]) =>
         """
@@ -1799,7 +1799,7 @@ actor Routes
         Returns an array of sticker objects for the given guild. Includes user fields if the bot has the CREATE_GUILD_EXPRESSIONS or MANAGE_GUILD_EXPRESSIONS permission.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/stickers"), _Decode.list[Sticker](handler, _Stickers))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/stickers"), _Decode.list[Sticker](handler, _Stickers, options.on_error))
 
     be get_guild_sticker(guild_id: Snowflake, sticker_id: Snowflake, handler: ResponseHandler[Sticker]) =>
         """
@@ -1808,7 +1808,7 @@ actor Routes
         Returns a sticker object for the given guild and sticker IDs. Includes the user field if the bot has the CREATE_GUILD_EXPRESSIONS or MANAGE_GUILD_EXPRESSIONS permission.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/stickers/" + sticker_id.string()), _Decode.entity[Sticker](handler))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/stickers/" + sticker_id.string()), _Decode.entity[Sticker](handler, options.on_error))
 
     be create_guild_sticker(guild_id: Snowflake, params: CreateGuildStickerParams, handler: ResponseHandler[Sticker], reason: Reason = None) =>
         """
@@ -1825,7 +1825,7 @@ actor Routes
         Uploaded stickers are constrained to 5 seconds in length for animated stickers, and 320 x 320 pixels.
         """
 
-        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/stickers" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Sticker](handler))
+        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/stickers" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Sticker](handler, options.on_error))
 
     be update_guild_sticker(guild_id: Snowflake, sticker_id: Snowflake, params: UpdateGuildStickerParams, handler: ResponseHandler[Sticker], reason: Reason = None) =>
         """
@@ -1838,7 +1838,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/stickers/" + sticker_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Sticker](handler))
+        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/stickers/" + sticker_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Sticker](handler, options.on_error))
 
     be delete_guild_sticker(guild_id: Snowflake, sticker_id: Snowflake, handler: EmptyResponseHandler, reason: Reason = None) =>
         """
@@ -1849,7 +1849,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/guilds/" + guild_id.string() + "/stickers/" + sticker_id.string() where reason = reason), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.DELETE, "/guilds/" + guild_id.string() + "/stickers/" + sticker_id.string() where reason = reason), _Decode.empty(handler, options.on_error))
 
     be get_sku_subscriptions(sku_id: Snowflake, params: GetSKUSubscriptionsParams, handler: ResponseHandler[Array[Subscription] val]) =>
         """
@@ -1858,7 +1858,7 @@ actor Routes
         Returns all subscriptions containing the SKU, filtered by user. Returns a list of subscription objects.
         """
 
-        api.send_request(options.build_request(courier.GET, "/skus/" + sku_id.string() + "/subscriptions" where query = params.to_query()), _Decode.list[Subscription](handler, _Subscriptions))
+        api.send_request(options.build_request(courier.GET, "/skus/" + sku_id.string() + "/subscriptions" where query = params.to_query()), _Decode.list[Subscription](handler, _Subscriptions, options.on_error))
 
     be get_sku_subscription(sku_id: Snowflake, subscription_id: Snowflake, handler: ResponseHandler[Subscription]) =>
         """
@@ -1867,7 +1867,7 @@ actor Routes
         Get a subscription by its ID. Returns a subscription object.
         """
 
-        api.send_request(options.build_request(courier.GET, "/skus/" + sku_id.string() + "/subscriptions/" + subscription_id.string()), _Decode.entity[Subscription](handler))
+        api.send_request(options.build_request(courier.GET, "/skus/" + sku_id.string() + "/subscriptions/" + subscription_id.string()), _Decode.entity[Subscription](handler, options.on_error))
 
     be get_current_user(handler: ResponseHandler[User]) =>
         """
@@ -1876,7 +1876,7 @@ actor Routes
         Returns the user object of the requester's account. For OAuth2, this requires the identify scope, which will return the object _without_ an email, and optionally the email scope, which returns the object _with_ an email if the user has one.
         """
 
-        api.send_request(options.build_request(courier.GET, "/users/@me"), _Decode.entity[User](handler))
+        api.send_request(options.build_request(courier.GET, "/users/@me"), _Decode.entity[User](handler, options.on_error))
 
     be get_user(user_id: Snowflake, handler: ResponseHandler[User]) =>
         """
@@ -1885,7 +1885,7 @@ actor Routes
         Returns a user object for a given user ID.
         """
 
-        api.send_request(options.build_request(courier.GET, "/users/" + user_id.string()), _Decode.entity[User](handler))
+        api.send_request(options.build_request(courier.GET, "/users/" + user_id.string()), _Decode.entity[User](handler, options.on_error))
 
     be update_current_user(params: UpdateCurrentUserParams, handler: ResponseHandler[User]) =>
         """
@@ -1896,7 +1896,7 @@ actor Routes
         All parameters to this endpoint are optional.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/users/@me" where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[User](handler))
+        api.send_request(options.build_request(courier.PATCH, "/users/@me" where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[User](handler, options.on_error))
 
     be get_current_user_guilds(params: GetCurrentUserGuildsParams, handler: ResponseHandler[Array[Guild] val]) =>
         """
@@ -1905,7 +1905,7 @@ actor Routes
         Returns a list of partial guild objects the current user is a member of. For OAuth2, requires the guilds scope.
         """
 
-        api.send_request(options.build_request(courier.GET, "/users/@me/guilds" where query = params.to_query()), _Decode.list[Guild](handler, _Guilds))
+        api.send_request(options.build_request(courier.GET, "/users/@me/guilds" where query = params.to_query()), _Decode.list[Guild](handler, _Guilds, options.on_error))
 
     be get_current_user_guild_member(guild_id: Snowflake, handler: ResponseHandler[GuildMember]) =>
         """
@@ -1914,7 +1914,7 @@ actor Routes
         Returns a guild member object for the current user. Requires the guilds.members.read OAuth2 scope.
         """
 
-        api.send_request(options.build_request(courier.GET, "/users/@me/guilds/" + guild_id.string() + "/member"), _Decode.entity[GuildMember](handler))
+        api.send_request(options.build_request(courier.GET, "/users/@me/guilds/" + guild_id.string() + "/member"), _Decode.entity[GuildMember](handler, options.on_error))
 
     be leave_guild(guild_id: Snowflake, handler: EmptyResponseHandler) =>
         """
@@ -1923,7 +1923,7 @@ actor Routes
         Leave a guild. Returns a 204 empty response on success. Fires a Guild Delete Gateway event and a Guild Member Remove Gateway event.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/users/@me/guilds/" + guild_id.string()), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.DELETE, "/users/@me/guilds/" + guild_id.string()), _Decode.empty(handler, options.on_error))
 
     be create_dm(params: CreateDMParams, handler: ResponseHandler[Channel]) =>
         """
@@ -1934,7 +1934,7 @@ actor Routes
         You should not use this endpoint to DM everyone in a server about something. DMs should generally be initiated by a user action. If you open a significant amount of DMs too quickly, your bot may be rate limited or blocked from opening new ones.
         """
 
-        api.send_request(options.build_request(courier.POST, "/users/@me/channels" where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Channel](handler))
+        api.send_request(options.build_request(courier.POST, "/users/@me/channels" where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Channel](handler, options.on_error))
 
     be create_group_dm(params: CreateGroupDMParams, handler: ResponseHandler[Channel]) =>
         """
@@ -1945,7 +1945,7 @@ actor Routes
         This endpoint is limited to 10 active group DMs.
         """
 
-        api.send_request(options.build_request(courier.POST, "/users/@me/channels" where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Channel](handler))
+        api.send_request(options.build_request(courier.POST, "/users/@me/channels" where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Channel](handler, options.on_error))
 
     be get_current_user_connections(handler: ResponseHandler[Array[Connection] val]) =>
         """
@@ -1954,7 +1954,7 @@ actor Routes
         Returns a list of connection objects. Requires the connections OAuth2 scope.
         """
 
-        api.send_request(options.build_request(courier.GET, "/users/@me/connections"), _Decode.list[Connection](handler, _Connections))
+        api.send_request(options.build_request(courier.GET, "/users/@me/connections"), _Decode.list[Connection](handler, _Connections, options.on_error))
 
     be get_current_user_application_role_connection(application_id: Snowflake, handler: ResponseHandler[ApplicationRoleConnection]) =>
         """
@@ -1963,7 +1963,7 @@ actor Routes
         Returns the application role connection for the user. Requires an OAuth2 access token with role_connections.write scope for the application specified in the path.
         """
 
-        api.send_request(options.build_request(courier.GET, "/users/@me/applications/" + application_id.string() + "/role-connection"), _Decode.entity[ApplicationRoleConnection](handler))
+        api.send_request(options.build_request(courier.GET, "/users/@me/applications/" + application_id.string() + "/role-connection"), _Decode.entity[ApplicationRoleConnection](handler, options.on_error))
 
     be update_current_user_application_role_connection(application_id: Snowflake, params: UpdateCurrentUserApplicationRoleConnectionParams, handler: ResponseHandler[ApplicationRoleConnection]) =>
         """
@@ -1972,7 +1972,7 @@ actor Routes
         Updates and returns the application role connection for the user. Requires an OAuth2 access token with role_connections.write scope for the application specified in the path.
         """
 
-        api.send_request(options.build_request(courier.PUT, "/users/@me/applications/" + application_id.string() + "/role-connection" where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[ApplicationRoleConnection](handler))
+        api.send_request(options.build_request(courier.PUT, "/users/@me/applications/" + application_id.string() + "/role-connection" where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[ApplicationRoleConnection](handler, options.on_error))
 
     be delete_current_user_application_role_connection(application_id: Snowflake, handler: EmptyResponseHandler) =>
         """
@@ -1981,7 +1981,7 @@ actor Routes
         Deletes the application role connection for the user. Requires an OAuth2 access token with role_connections.write scope for the application specified in the path.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/users/@me/applications/" + application_id.string() + "/role-connection"), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.DELETE, "/users/@me/applications/" + application_id.string() + "/role-connection"), _Decode.empty(handler, options.on_error))
 
     be get_voice_regions(handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -1991,7 +1991,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/voice/regions"), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.GET, "/voice/regions"), _Decode.payload(handler, options.on_error))
 
     be get_current_user_voice_state(guild_id: Snowflake, handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -2001,7 +2001,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/voice-states/@me"), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/voice-states/@me"), _Decode.payload(handler, options.on_error))
 
     be get_user_voice_state(guild_id: Snowflake, user_id: Snowflake, handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -2013,7 +2013,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/voice-states/" + user_id.string()), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/voice-states/" + user_id.string()), _Decode.payload(handler, options.on_error))
 
     be update_current_user_voice_state(guild_id: Snowflake, params: UpdateCurrentUserVoiceStateParams, handler: EmptyResponseHandler) =>
         """
@@ -2022,7 +2022,7 @@ actor Routes
         Updates the current user's voice state. Returns 204 No Content on success. Fires a Voice State Update Gateway event.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/voice-states/@me" where body = json.JsonPrinter.print(params.to_json())), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/voice-states/@me" where body = json.JsonPrinter.print(params.to_json())), _Decode.empty(handler, options.on_error))
 
     be update_user_voice_state(guild_id: Snowflake, user_id: Snowflake, params: UpdateUserVoiceStateParams, handler: EmptyResponseHandler) =>
         """
@@ -2031,7 +2031,7 @@ actor Routes
         Updates another user's voice state. Returns 204 No Content on success. Fires a Voice State Update Gateway event.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/voice-states/" + user_id.string() where body = json.JsonPrinter.print(params.to_json())), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/voice-states/" + user_id.string() where body = json.JsonPrinter.print(params.to_json())), _Decode.empty(handler, options.on_error))
 
     be create_webhook(channel_id: Snowflake, params: CreateWebhookParams, handler: ResponseHandler[Webhook], reason: Reason = None) =>
         """
@@ -2047,7 +2047,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/webhooks" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Webhook](handler))
+        api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/webhooks" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Webhook](handler, options.on_error))
 
     be get_channel_webhooks(channel_id: Snowflake, handler: ResponseHandler[Array[Webhook] val]) =>
         """
@@ -2056,7 +2056,7 @@ actor Routes
         Returns a list of channel webhook objects. Requires the MANAGE_WEBHOOKS permission.
         """
 
-        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/webhooks"), _Decode.list[Webhook](handler, _Webhooks))
+        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/webhooks"), _Decode.list[Webhook](handler, _Webhooks, options.on_error))
 
     be get_guild_webhooks(guild_id: Snowflake, handler: ResponseHandler[Array[Webhook] val]) =>
         """
@@ -2065,7 +2065,7 @@ actor Routes
         Returns a list of guild webhook objects. Requires the MANAGE_WEBHOOKS permission.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/webhooks"), _Decode.list[Webhook](handler, _Webhooks))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/webhooks"), _Decode.list[Webhook](handler, _Webhooks, options.on_error))
 
     be get_webhook(webhook_id: Snowflake, handler: ResponseHandler[Webhook]) =>
         """
@@ -2077,7 +2077,7 @@ actor Routes
         webhook. (see: webhook.application_id)
         """
 
-        api.send_request(options.build_request(courier.GET, "/webhooks/" + webhook_id.string()), _Decode.entity[Webhook](handler))
+        api.send_request(options.build_request(courier.GET, "/webhooks/" + webhook_id.string()), _Decode.entity[Webhook](handler, options.on_error))
 
     be get_webhook_with_token(webhook_id: Snowflake, webhook_token: String, handler: ResponseHandler[Webhook]) =>
         """
@@ -2086,7 +2086,7 @@ actor Routes
         Same as above, except this call does not require authentication and returns no user in the webhook object.
         """
 
-        api.send_request(options.build_request(courier.GET, "/webhooks/" + webhook_id.string() + "/" + webhook_token), _Decode.entity[Webhook](handler))
+        api.send_request(options.build_request(courier.GET, "/webhooks/" + webhook_id.string() + "/" + webhook_token), _Decode.entity[Webhook](handler, options.on_error))
 
     be update_webhook(webhook_id: Snowflake, params: UpdateWebhookParams, handler: ResponseHandler[Webhook], reason: Reason = None) =>
         """
@@ -2099,7 +2099,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/webhooks/" + webhook_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Webhook](handler))
+        api.send_request(options.build_request(courier.PATCH, "/webhooks/" + webhook_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Webhook](handler, options.on_error))
 
     be update_webhook_with_token(webhook_id: Snowflake, webhook_token: String, params: UpdateWebhookWithTokenParams, handler: ResponseHandler[Webhook]) =>
         """
@@ -2108,7 +2108,7 @@ actor Routes
         Same as above, except this call does not require authentication, does not accept a channel_id parameter in the body, and does not return a user in the webhook object.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/webhooks/" + webhook_id.string() + "/" + webhook_token where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Webhook](handler))
+        api.send_request(options.build_request(courier.PATCH, "/webhooks/" + webhook_id.string() + "/" + webhook_token where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Webhook](handler, options.on_error))
 
     be delete_webhook(webhook_id: Snowflake, handler: EmptyResponseHandler, reason: Reason = None) =>
         """
@@ -2119,7 +2119,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/webhooks/" + webhook_id.string() where reason = reason), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.DELETE, "/webhooks/" + webhook_id.string() where reason = reason), _Decode.empty(handler, options.on_error))
 
     be delete_webhook_with_token(webhook_id: Snowflake, webhook_token: String, handler: EmptyResponseHandler) =>
         """
@@ -2128,7 +2128,7 @@ actor Routes
         Same as above, except this call does not require authentication.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/webhooks/" + webhook_id.string() + "/" + webhook_token), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.DELETE, "/webhooks/" + webhook_id.string() + "/" + webhook_token), _Decode.empty(handler, options.on_error))
 
     be execute_webhook(webhook_id: Snowflake, webhook_token: String, params: ExecuteWebhookParams, handler: ResponseHandler[Message]) =>
         """
@@ -2143,7 +2143,7 @@ actor Routes
         Discord may strip certain characters from message content, like invalid unicode characters or characters which cause unexpected message formatting. If you are passing user-generated strings into message content, consider sanitizing the data to prevent unexpected behavior and using allowed_mentions to prevent unexpected mentions.
         """
 
-        api.send_request(options.build_request(courier.POST, "/webhooks/" + webhook_id.string() + "/" + webhook_token where query = params.to_query(), body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Message](handler))
+        api.send_request(options.build_request(courier.POST, "/webhooks/" + webhook_id.string() + "/" + webhook_token where query = params.to_query(), body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Message](handler, options.on_error))
 
     be execute_slack_compatible_webhook(webhook_id: Snowflake, webhook_token: String, params: ExecuteSlackCompatibleWebhookParams, handler: EmptyResponseHandler) =>
         """
@@ -2152,7 +2152,7 @@ actor Routes
         Refer to Slack's documentation for more information. We do not support Slack's channel, icon_emoji, mrkdwn, or mrkdwn_in properties.
         """
 
-        api.send_request(options.build_request(courier.POST, "/webhooks/" + webhook_id.string() + "/" + webhook_token + "/slack" where query = params.to_query(), body = json.JsonPrinter.print(params.to_json())), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.POST, "/webhooks/" + webhook_id.string() + "/" + webhook_token + "/slack" where query = params.to_query(), body = json.JsonPrinter.print(params.to_json())), _Decode.empty(handler, options.on_error))
 
     be execute_github_compatible_webhook(webhook_id: Snowflake, webhook_token: String, params: ExecuteGithubCompatibleWebhookParams, handler: EmptyResponseHandler) =>
         """
@@ -2161,7 +2161,7 @@ actor Routes
         Add a new webhook to your GitHub repo (in the repo's settings), and use this endpoint as the "Payload URL." You can choose what events your Discord channel receives by choosing the "Let me select individual events" option and selecting individual events for the new webhook you're configuring. The supported events are commit_comment, create, delete, fork, issue_comment, issues, member, public, pull_request, pull_request_review, pull_request_review_comment, push, release, watch, check_run, check_suite, discussion, and discussion_comment.
         """
 
-        api.send_request(options.build_request(courier.POST, "/webhooks/" + webhook_id.string() + "/" + webhook_token + "/github" where query = params.to_query(), body = json.JsonPrinter.print(params.to_json())), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.POST, "/webhooks/" + webhook_id.string() + "/" + webhook_token + "/github" where query = params.to_query(), body = json.JsonPrinter.print(params.to_json())), _Decode.empty(handler, options.on_error))
 
     be get_webhook_message(webhook_id: Snowflake, webhook_token: String, message_id: Snowflake, params: GetWebhookMessageParams, handler: ResponseHandler[Message]) =>
         """
@@ -2170,7 +2170,7 @@ actor Routes
         Returns a previously-sent webhook message from the same token. Returns a message object on success.
         """
 
-        api.send_request(options.build_request(courier.GET, "/webhooks/" + webhook_id.string() + "/" + webhook_token + "/messages/" + message_id.string() where query = params.to_query()), _Decode.entity[Message](handler))
+        api.send_request(options.build_request(courier.GET, "/webhooks/" + webhook_id.string() + "/" + webhook_token + "/messages/" + message_id.string() where query = params.to_query()), _Decode.entity[Message](handler, options.on_error))
 
     be update_webhook_message(webhook_id: Snowflake, webhook_token: String, message_id: Snowflake, params: UpdateWebhookMessageParams, handler: ResponseHandler[Message]) =>
         """
@@ -2188,7 +2188,7 @@ actor Routes
         All parameters to this endpoint are optional and nullable.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/webhooks/" + webhook_id.string() + "/" + webhook_token + "/messages/" + message_id.string() where query = params.to_query(), body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Message](handler))
+        api.send_request(options.build_request(courier.PATCH, "/webhooks/" + webhook_id.string() + "/" + webhook_token + "/messages/" + message_id.string() where query = params.to_query(), body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Message](handler, options.on_error))
 
     be delete_webhook_message(webhook_id: Snowflake, webhook_token: String, message_id: Snowflake, params: DeleteWebhookMessageParams, handler: EmptyResponseHandler) =>
         """
@@ -2197,7 +2197,7 @@ actor Routes
         Deletes a message that was created by the webhook. Returns a 204 No Content response on success.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/webhooks/" + webhook_id.string() + "/" + webhook_token + "/messages/" + message_id.string() where query = params.to_query()), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.DELETE, "/webhooks/" + webhook_id.string() + "/" + webhook_token + "/messages/" + message_id.string() where query = params.to_query()), _Decode.empty(handler, options.on_error))
 
     be create_interaction_response(interaction_id: Snowflake, interaction_token: String, params: CreateInteractionResponseParams, handler: ResponseHandler[InteractionCallbackResponse]) =>
         """
@@ -2208,7 +2208,7 @@ actor Routes
         This endpoint also supports file attachments similar to the webhook endpoints. Refer to Uploading Files for details on uploading files and multipart/form-data requests.
         """
 
-        api.send_request(options.build_request(courier.POST, "/interactions/" + interaction_id.string() + "/" + interaction_token + "/callback" where query = params.to_query(), body = json.JsonPrinter.print(params.to_json())), _Decode.entity[InteractionCallbackResponse](handler))
+        api.send_request(options.build_request(courier.POST, "/interactions/" + interaction_id.string() + "/" + interaction_token + "/callback" where query = params.to_query(), body = json.JsonPrinter.print(params.to_json())), _Decode.entity[InteractionCallbackResponse](handler, options.on_error))
 
     be get_original_interaction_response(application_id: Snowflake, interaction_token: String, params: GetOriginalInteractionResponseParams, handler: ResponseHandler[Message]) =>
         """
@@ -2217,7 +2217,7 @@ actor Routes
         Returns the initial Interaction response. Functions the same as Get Webhook Message.
         """
 
-        api.send_request(options.build_request(courier.GET, "/webhooks/" + application_id.string() + "/" + interaction_token + "/messages/@original" where query = params.to_query()), _Decode.entity[Message](handler))
+        api.send_request(options.build_request(courier.GET, "/webhooks/" + application_id.string() + "/" + interaction_token + "/messages/@original" where query = params.to_query()), _Decode.entity[Message](handler, options.on_error))
 
     be update_original_interaction_response(application_id: Snowflake, interaction_token: String, params: UpdateOriginalInteractionResponseParams, handler: ResponseHandler[Message]) =>
         """
@@ -2226,7 +2226,7 @@ actor Routes
         Edits the initial Interaction response. Functions the same as Edit Webhook Message.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/webhooks/" + application_id.string() + "/" + interaction_token + "/messages/@original" where query = params.to_query(), body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Message](handler))
+        api.send_request(options.build_request(courier.PATCH, "/webhooks/" + application_id.string() + "/" + interaction_token + "/messages/@original" where query = params.to_query(), body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Message](handler, options.on_error))
 
     be delete_original_interaction_response(application_id: Snowflake, interaction_token: String, handler: EmptyResponseHandler) =>
         """
@@ -2235,7 +2235,7 @@ actor Routes
         Deletes the initial Interaction response. Returns 204 No Content on success.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/webhooks/" + application_id.string() + "/" + interaction_token + "/messages/@original"), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.DELETE, "/webhooks/" + application_id.string() + "/" + interaction_token + "/messages/@original"), _Decode.empty(handler, options.on_error))
 
     be create_followup_message(application_id: Snowflake, interaction_token: String, params: CreateFollowupMessageParams, handler: ResponseHandler[Message]) =>
         """
@@ -2248,7 +2248,7 @@ actor Routes
         When using this endpoint directly after responding to an interaction with DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE, this endpoint will function as Edit Original Interaction Response for backwards compatibility. In this case, no new message will be created, and the loading message will be edited instead. The ephemeral flag will be ignored, and the value you provided in the initial defer response will be preserved, as an existing message's ephemeral state cannot be changed. This behavior is deprecated, and you should use the Edit Original Interaction Response endpoint in this case instead.
         """
 
-        api.send_request(options.build_request(courier.POST, "/webhooks/" + application_id.string() + "/" + interaction_token where query = params.to_query(), body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Message](handler))
+        api.send_request(options.build_request(courier.POST, "/webhooks/" + application_id.string() + "/" + interaction_token where query = params.to_query(), body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Message](handler, options.on_error))
 
     be get_followup_message(application_id: Snowflake, interaction_token: String, message_id: Snowflake, params: GetFollowupMessageParams, handler: ResponseHandler[Message]) =>
         """
@@ -2257,7 +2257,7 @@ actor Routes
         Returns a followup message for an Interaction. Functions the same as Get Webhook Message.
         """
 
-        api.send_request(options.build_request(courier.GET, "/webhooks/" + application_id.string() + "/" + interaction_token + "/messages/" + message_id.string() where query = params.to_query()), _Decode.entity[Message](handler))
+        api.send_request(options.build_request(courier.GET, "/webhooks/" + application_id.string() + "/" + interaction_token + "/messages/" + message_id.string() where query = params.to_query()), _Decode.entity[Message](handler, options.on_error))
 
     be update_followup_message(application_id: Snowflake, interaction_token: String, message_id: Snowflake, params: UpdateFollowupMessageParams, handler: ResponseHandler[Message]) =>
         """
@@ -2266,7 +2266,7 @@ actor Routes
         Edits a followup message for an Interaction. Functions the same as Edit Webhook Message.
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/webhooks/" + application_id.string() + "/" + interaction_token + "/messages/" + message_id.string() where query = params.to_query(), body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Message](handler))
+        api.send_request(options.build_request(courier.PATCH, "/webhooks/" + application_id.string() + "/" + interaction_token + "/messages/" + message_id.string() where query = params.to_query(), body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Message](handler, options.on_error))
 
     be delete_followup_message(application_id: Snowflake, interaction_token: String, message_id: Snowflake, handler: EmptyResponseHandler) =>
         """
@@ -2275,7 +2275,7 @@ actor Routes
         Deletes a followup message for an Interaction. Returns 204 No Content on success.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/webhooks/" + application_id.string() + "/" + interaction_token + "/messages/" + message_id.string()), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.DELETE, "/webhooks/" + application_id.string() + "/" + interaction_token + "/messages/" + message_id.string()), _Decode.empty(handler, options.on_error))
 
     be get_global_application_commands(application_id: Snowflake, params: GetGlobalApplicationCommandsParams, handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -2287,7 +2287,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/commands" where query = params.to_query()), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/commands" where query = params.to_query()), _Decode.payload(handler, options.on_error))
 
     be create_global_application_command(application_id: Snowflake, params: CreateGlobalApplicationCommandParams, handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -2299,7 +2299,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.POST, "/applications/" + application_id.string() + "/commands" where body = json.JsonPrinter.print(params.to_json())), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.POST, "/applications/" + application_id.string() + "/commands" where body = json.JsonPrinter.print(params.to_json())), _Decode.payload(handler, options.on_error))
 
     be get_global_application_command(application_id: Snowflake, command_id: Snowflake, handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -2309,7 +2309,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/commands/" + command_id.string()), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/commands/" + command_id.string()), _Decode.payload(handler, options.on_error))
 
     be update_global_application_command(application_id: Snowflake, command_id: Snowflake, params: UpdateGlobalApplicationCommandParams, handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -2321,7 +2321,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.PATCH, "/applications/" + application_id.string() + "/commands/" + command_id.string() where body = json.JsonPrinter.print(params.to_json())), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.PATCH, "/applications/" + application_id.string() + "/commands/" + command_id.string() where body = json.JsonPrinter.print(params.to_json())), _Decode.payload(handler, options.on_error))
 
     be delete_global_application_command(application_id: Snowflake, command_id: Snowflake, handler: EmptyResponseHandler) =>
         """
@@ -2330,7 +2330,7 @@ actor Routes
         Deletes a global command. Returns 204 No Content on success.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/applications/" + application_id.string() + "/commands/" + command_id.string()), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.DELETE, "/applications/" + application_id.string() + "/commands/" + command_id.string()), _Decode.empty(handler, options.on_error))
 
     be bulk_overwrite_global_application_commands(application_id: Snowflake, params: BulkOverwriteGlobalApplicationCommandsParams, handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -2342,7 +2342,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.PUT, "/applications/" + application_id.string() + "/commands" where body = json.JsonPrinter.print(params.to_json())), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.PUT, "/applications/" + application_id.string() + "/commands" where body = json.JsonPrinter.print(params.to_json())), _Decode.payload(handler, options.on_error))
 
     be get_guild_application_commands(application_id: Snowflake, guild_id: Snowflake, params: GetGuildApplicationCommandsParams, handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -2354,7 +2354,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands" where query = params.to_query()), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands" where query = params.to_query()), _Decode.payload(handler, options.on_error))
 
     be create_guild_application_command(application_id: Snowflake, guild_id: Snowflake, params: CreateGuildApplicationCommandParams, handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -2366,7 +2366,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.POST, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands" where body = json.JsonPrinter.print(params.to_json())), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.POST, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands" where body = json.JsonPrinter.print(params.to_json())), _Decode.payload(handler, options.on_error))
 
     be get_guild_application_command(application_id: Snowflake, guild_id: Snowflake, command_id: Snowflake, handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -2376,7 +2376,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/" + command_id.string()), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/" + command_id.string()), _Decode.payload(handler, options.on_error))
 
     be update_guild_application_command(application_id: Snowflake, guild_id: Snowflake, command_id: Snowflake, params: UpdateGuildApplicationCommandParams, handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -2388,7 +2388,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.PATCH, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/" + command_id.string() where body = json.JsonPrinter.print(params.to_json())), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.PATCH, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/" + command_id.string() where body = json.JsonPrinter.print(params.to_json())), _Decode.payload(handler, options.on_error))
 
     be delete_guild_application_command(application_id: Snowflake, guild_id: Snowflake, command_id: Snowflake, handler: EmptyResponseHandler) =>
         """
@@ -2397,7 +2397,7 @@ actor Routes
         Delete a guild command. Returns 204 No Content on success.
         """
 
-        api.send_request(options.build_request(courier.DELETE, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/" + command_id.string()), _Decode.empty(handler))
+        api.send_request(options.build_request(courier.DELETE, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/" + command_id.string()), _Decode.empty(handler, options.on_error))
 
     be bulk_overwrite_guild_application_commands(application_id: Snowflake, guild_id: Snowflake, params: BulkOverwriteGuildApplicationCommandsParams, handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -2409,7 +2409,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.PUT, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands" where body = json.JsonPrinter.print(params.to_json())), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.PUT, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands" where body = json.JsonPrinter.print(params.to_json())), _Decode.payload(handler, options.on_error))
 
     be get_guild_application_command_permissions(application_id: Snowflake, guild_id: Snowflake, handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -2419,7 +2419,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/permissions"), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/permissions"), _Decode.payload(handler, options.on_error))
 
     be get_application_command_permissions(application_id: Snowflake, guild_id: Snowflake, command_id: Snowflake, handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -2429,7 +2429,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/" + command_id.string() + "/permissions"), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/" + command_id.string() + "/permissions"), _Decode.payload(handler, options.on_error))
 
     be update_application_command_permissions(application_id: Snowflake, guild_id: Snowflake, command_id: Snowflake, params: UpdateApplicationCommandPermissionsParams, handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -2447,7 +2447,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.PUT, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/" + command_id.string() + "/permissions" where body = json.JsonPrinter.print(params.to_json())), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.PUT, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/" + command_id.string() + "/permissions" where body = json.JsonPrinter.print(params.to_json())), _Decode.payload(handler, options.on_error))
 
     be batch_update_application_command_permissions(application_id: Snowflake, guild_id: Snowflake, params: BatchUpdateApplicationCommandPermissionsParams, handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -2457,7 +2457,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.PUT, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/permissions" where body = json.JsonPrinter.print(params.to_json())), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.PUT, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/permissions" where body = json.JsonPrinter.print(params.to_json())), _Decode.payload(handler, options.on_error))
 
     be get_current_bot_application_information(handler: ResponseHandler[Application]) =>
         """
@@ -2466,7 +2466,7 @@ actor Routes
         Returns the bot's application object.
         """
 
-        api.send_request(options.build_request(courier.GET, "/oauth2/applications/@me"), _Decode.entity[Application](handler))
+        api.send_request(options.build_request(courier.GET, "/oauth2/applications/@me"), _Decode.entity[Application](handler, options.on_error))
 
     be get_current_authorization_information(handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -2476,7 +2476,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/oauth2/@me"), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.GET, "/oauth2/@me"), _Decode.payload(handler, options.on_error))
 
     be get_gateway(handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -2488,7 +2488,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/gateway"), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.GET, "/gateway"), _Decode.payload(handler, options.on_error))
 
     be get_gateway_bot(handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -2500,7 +2500,7 @@ actor Routes
         """
 
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/gateway/bot"), _Decode.payload(handler))
+        api.send_request(options.build_request(courier.GET, "/gateway/bot"), _Decode.payload(handler, options.on_error))
 
 interface val _FromJson
     """
@@ -2514,19 +2514,32 @@ interface val _FromJson
 primitive _Decode
     """
     Adapts typed handlers down to the `RawResponseHandler` that `RestApi` takes.
+
+    Every adapter checks the status before decoding, so a route handler only
+    ever runs on a response Discord actually succeeded at. Anything else — an
+    error status, a body that will not parse, a payload that does not match the
+    type the route returns — goes to `on_error` instead.
     """
 
-    fun entity[A: _FromJson val](handler: ResponseHandler[A]): RawResponseHandler =>
+    fun entity[A: _FromJson val](handler: ResponseHandler[A], on_error: RestErrorHandler): RawResponseHandler =>
         """
         Decodes a lone object, as returned by routes documented as returning
         "a ... object".
         """
 
         {(request: courier.HTTPRequest val, response: courier.HTTPResponse val) =>
-            try handler(A.from_json(_Decode.parse(response)? as json.JsonObject)?) end
+            match _Decode.rejected(request, response)
+            | let rejection: RestError => on_error(rejection)
+            else
+                try
+                    handler(A.from_json(_Decode.parse(response)? as json.JsonObject)?)
+                else
+                    on_error(_Decode.undecodable(request, response))
+                end
+            end
         }
 
-    fun list[A: Any val](handler: ResponseHandler[Array[A] val], decode: {(json.JsonValue): Array[A] val ?} val): RawResponseHandler =>
+    fun list[A: Any val](handler: ResponseHandler[Array[A] val], decode: {(json.JsonValue): Array[A] val ?} val, on_error: RestErrorHandler): RawResponseHandler =>
         """
         Decodes an array, as returned by routes documented as returning "a list
         of ... objects". `decode` is the package's `_As`-style array decoder for
@@ -2534,43 +2547,101 @@ primitive _Decode
         """
 
         {(request: courier.HTTPRequest val, response: courier.HTTPResponse val) =>
-            try handler(decode(_Decode.parse(response)?)?) end
+            match _Decode.rejected(request, response)
+            | let rejection: RestError => on_error(rejection)
+            else
+                try
+                    handler(decode(_Decode.parse(response)?)?)
+                else
+                    on_error(_Decode.undecodable(request, response))
+                end
+            end
         }
 
-    fun payload(handler: {(json.JsonValue)} val): RawResponseHandler =>
+    // Spelled out rather than written as `ResponseHandler[json.JsonValue]`.
+    // ponyc 0.68.0 loses the `json` package alias when a value typed by a
+    // generic type alias reified with a package-qualified type is captured by a
+    // lambda, and fails with "can't find definition of 'JsonValue'":
+    //
+    //     type H[A: Any val] is {(A)} val
+    //     fun p(h: H[json.JsonValue]): {(json.JsonValue)} val => {(v: json.JsonValue) => h(v) }
+    //
+    // Naming the lambda type directly sidesteps the expansion. The routes above
+    // can still write `ResponseHandler[json.JsonValue]`, as they never capture
+    // the handler themselves.
+    fun payload(handler: {(json.JsonValue)} val, on_error: RestErrorHandler): RawResponseHandler =>
         """
         Hands back the parsed JSON as-is, for routes whose response shape this
         package does not model yet.
         """
 
         {(request: courier.HTTPRequest val, response: courier.HTTPResponse val) =>
-            try handler(_Decode.parse(response)?) end
+            match _Decode.rejected(request, response)
+            | let rejection: RestError => on_error(rejection)
+            else
+                try
+                    handler(_Decode.parse(response)?)
+                else
+                    on_error(_Decode.undecodable(request, response))
+                end
+            end
         }
 
-    fun text(handler: ResponseHandler[String]): RawResponseHandler =>
+    fun text(handler: ResponseHandler[String], on_error: RestErrorHandler): RawResponseHandler =>
         """
         Hands back the body as text, for routes that do not respond with JSON.
         """
 
         {(request: courier.HTTPRequest val, response: courier.HTTPResponse val) =>
-            handler(String.from_array(response.body))
+            match _Decode.rejected(request, response)
+            | let rejection: RestError => on_error(rejection)
+            else
+                handler(String.from_array(response.body))
+            end
         }
 
-    fun bytes(handler: ResponseHandler[Array[U8] val]): RawResponseHandler =>
+    fun bytes(handler: ResponseHandler[Array[U8] val], on_error: RestErrorHandler): RawResponseHandler =>
         """
         Hands back the body unchanged, for routes that respond with binary.
         """
 
         {(request: courier.HTTPRequest val, response: courier.HTTPResponse val) =>
-            handler(response.body)
+            match _Decode.rejected(request, response)
+            | let rejection: RestError => on_error(rejection)
+            else
+                handler(response.body)
+            end
         }
 
-    fun empty(handler: EmptyResponseHandler): RawResponseHandler =>
+    fun empty(handler: EmptyResponseHandler, on_error: RestErrorHandler): RawResponseHandler =>
         """
         Discards the body of a route that responds with no content.
         """
 
-        {(request: courier.HTTPRequest val, response: courier.HTTPResponse val) => handler() }
+        {(request: courier.HTTPRequest val, response: courier.HTTPResponse val) =>
+            match _Decode.rejected(request, response)
+            | let rejection: RestError => on_error(rejection)
+            else
+                handler()
+            end
+        }
+
+    fun rejected(request: courier.HTTPRequest val, response: courier.HTTPResponse val): (RestError | None) =>
+        """
+        Turns a non-success status into a `RestError`, carrying Discord's own
+        error body along since that is where the JSON error code lives.
+        """
+
+        if (response.status < 200) or (response.status > 299) then
+            RestError(request, "Discord answered " + response.status.string() + " " + response.reason + ": " + String.from_array(response.body))
+        end
+
+    fun undecodable(request: courier.HTTPRequest val, response: courier.HTTPResponse val): RestError =>
+        """
+        Reports a success response whose body was not what the route expected.
+        """
+
+        RestError(request, "the response body did not match the type this route returns: " + String.from_array(response.body))
 
     fun parse(response: courier.HTTPResponse val): json.JsonValue ? =>
         """

@@ -2,6 +2,6 @@ class Bot
     let rest: Rest
     let gateway: Gateway
 
-    new create(options: RestOptions = RestOptions) =>
-        rest = Rest(options)
+    new create(env: Env, token: String) =>
+        rest = Rest(RestOptions(token))
         gateway = Gateway

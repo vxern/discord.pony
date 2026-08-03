@@ -39,6 +39,32 @@ type Nullable[A: Any val] is (A | Null | None)
     Discord treats the two absences differently — sending `null` resets the field to its default, whereas omitting the key leaves the current value untouched — so the distinction cannot be collapsed.
     """
 
+class val RestError
+    """
+    A request that never reached its handler: the connection failed, the
+    response could not be parsed, or the payload did not match the type the
+    route expected.
+
+    Route handlers take only the value the route returns, so there is nowhere
+    for a failure to go. Until they grow an error channel of their own, every
+    failure is reported here instead — see `RestOptions.on_error`.
+    """
+
+    let request: courier.HTTPRequest val
+    let reason: String
+
+    new val create(request': courier.HTTPRequest val, reason': String) =>
+        request = request'
+        reason = reason'
+
+    fun string(): String =>
+        request.method.string() + " " + request.path + ": " + reason
+
+type RestErrorHandler is {(RestError)} val
+    """
+    Receives every failure that stops a response from reaching a route handler.
+    """
+
 primitive _CommaSeparated
     """
     Joins values for query parameters documented as comma-delimited sets.
@@ -59,7 +85,7 @@ class Rest
     let api: RestApi
     let routes: Routes
 
-    new create(options': RestOptions = RestOptions) =>
+    new create(options': RestOptions) =>
         options = options'
         api = RestApi(options')
         routes = Routes(api, options')
@@ -91,15 +117,28 @@ type RequestBody is String
     """
 
 class val RestOptions
+    let token: String
+        """
+        The bot token every request is authorised with.
+        """
     let version: RestVersion val
     let user_agent: String
+    let on_error: RestErrorHandler
+        """
+        Where failures go, since route handlers only take the value the route
+        returns. Defaults to discarding them.
+        """
 
     new val create(
+        token': String,
         version': RestVersion val = RestDefaults.version(),
-        user_agent': String = RestDefaults.user_agent()
+        user_agent': String = RestDefaults.user_agent(),
+        on_error': RestErrorHandler = RestDefaults.on_error()
     ) =>
+        token = token'
         version = version'
         user_agent = user_agent'
+        on_error = on_error'
 
     fun path(route: String): String =>
         """
@@ -156,7 +195,9 @@ primitive RestVersion10 is RestVersion
     fun value(): U64 => 10
 
 primitive RestDefaults
-    fun version(): RestVersion val => RestVersion6
+    fun version(): RestVersion val => RestVersion10
 
     fun user_agent(): String =>
         "discord.pony (https://github.com/vxern/discord.pony, 1.0.0)"
+
+    fun on_error(): RestErrorHandler => {(error': RestError) => None }
