@@ -2,9 +2,7 @@
 
 (WIP) A complete, documented and battle-tested Pony library for working with Discord's API.
 
-## Supported features
-
-### API Versions
+## API Versions
 
 - ✅ 10
 - ❌ 9
@@ -12,9 +10,9 @@
 - ❌ 7
 - ❌ 6
 
-### REST
+## REST
 
-#### Objects
+### Objects
 
 - ✅ Application
   - ✅ Application
@@ -181,7 +179,8 @@
 - ✅ Webhook
   - ✅ Webhook
 
-#### Routes
+### Routes
+
 - ✅ Application Role Connection Metadata
     - ✅ Get Application Role Connection Metadata Records
     - ✅ Update Application Role Connection Metadata Records
