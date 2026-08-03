@@ -1,55 +1,23 @@
-use courier = "courier"
+use "files"
 use collections = "collections"
+use courier = "courier"
 use json = "json"
+use lori = "lori"
+use ssl = "ssl/net"
 
 type Reason is (String | None)
 
 type ResponseHandler[A: Any val] is {(A)} val
-    """
-    Receives the decoded payload of a route that responds with content.
-
-    The payload type is whatever the route documents itself as returning, so
-    `create_message` hands back a `Message`, `get_channel_messages` an
-    `Array[Message] val`, and so on.
-    """
 
 type EmptyResponseHandler is {()} val
-    """
-    Receives notification that a route documented as returning no content —
-    typically a `204 No Content` — has completed.
-    """
 
 type RawResponseHandler is {(courier.HTTPRequest val, courier.HTTPResponse val)} val
-    """
-    Receives an undecoded response. This is what `RestApi` itself deals in; the
-    typed handlers above are adapted down to it by `_Decode`.
-    """
 
 primitive Null
-    """
-    https://docs.discord.com/developers/reference#nullable-and-optional-resource-fields
-
-    Serialised as JSON `null`, explicitly clearing a field. Distinct from `None`, which omits the field from the request body altogether.
-    """
 
 type Nullable[A: Any val] is (A | Null | None)
-    """
-    A request field Discord documents as nullable: it may carry a value, be cleared with `Null`, or be left out entirely with `None`.
-
-    Discord treats the two absences differently — sending `null` resets the field to its default, whereas omitting the key leaves the current value untouched — so the distinction cannot be collapsed.
-    """
 
 class val RestError
-    """
-    A request that never reached its handler: the connection failed, the
-    response could not be parsed, or the payload did not match the type the
-    route expected.
-
-    Route handlers take only the value the route returns, so there is nowhere
-    for a failure to go. Until they grow an error channel of their own, every
-    failure is reported here instead — see `RestOptions.on_error`.
-    """
-
     let request: courier.HTTPRequest val
     let reason: String
 
@@ -61,15 +29,8 @@ class val RestError
         request.method.string() + " " + request.path + ": " + reason
 
 type RestErrorHandler is {(RestError)} val
-    """
-    Receives every failure that stops a response from reaching a route handler.
-    """
 
 primitive _CommaSeparated
-    """
-    Joins values for query parameters documented as comma-delimited sets.
-    """
-
     fun apply(ids: Array[Snowflake] val): String =>
         var buffer = recover iso String end
         var first = true
@@ -85,26 +46,121 @@ class Rest
     let api: RestApi
     let routes: Routes
 
-    new create(options': RestOptions) =>
+    new create(env: Env, options': RestOptions) =>
         options = options'
-        api = RestApi(options')
+        api = RestApi(env, options')
         routes = Routes(api, options')
 
 actor RestApi
     let options: RestOptions
+    let _auth: lori.TCPConnectAuth
+    let _ssl_context: (ssl.SSLContext val | None)
 
-    new create(options': RestOptions) => options = options'
+    new create(env: Env, options': RestOptions) =>
+        options = options'
+        _auth = lori.TCPConnectAuth(env.root)
+        _ssl_context =
+            try
+                recover val
+                    ssl.SSLContext
+                    .> set_client_verify(true)
+                    .> set_authority(
+                        FilePath(
+                            FileAuth(env.root),
+                            options'.ca_certificates_path
+                        )
+                    )?
+                end
+            end
 
     be send_request(request: courier.HTTPRequest val, handler: RawResponseHandler) =>
         """
         Dispatches `request` and hands the response to `handler`.
         """
 
-        // TODO(vxern): Send the request to `RestConstants.url()`, authorising it with the bot token and respecting rate limits. Until then, every request is answered with an empty `200 OK`.
-        handler(request, courier.HTTPResponse(courier.HTTP11, 200, "OK", recover val courier.Headers end, recover val Array[U8] end))
+        // TODO(vxern): Respect rate limits, routing requests through `Bucket`.
+        match _ssl_context
+        | let ssl_context: ssl.SSLContext val =>
+            _RequestSender(_auth, ssl_context, options, request, handler)
+        else
+            options.on_error(
+                RestError(
+                    request,
+                    "no certificate authority at " + options.ca_certificates_path
+                )
+            )
+        end
+
+actor _RequestSender is courier.HTTPClientConnectionActor
+    var _http: courier.HTTPClientConnection = courier.HTTPClientConnection.none()
+    var _collector: courier.ResponseCollector = courier.ResponseCollector
+    let _options: RestOptions
+    let _request: courier.HTTPRequest val
+    let _handler: RawResponseHandler
+    var _settled: Bool = false
+
+    new create(
+        auth: lori.TCPConnectAuth,
+        ssl_context: ssl.SSLContext val,
+        options: RestOptions,
+        request: courier.HTTPRequest val,
+        handler: RawResponseHandler
+    ) =>
+        _options = options
+        _request = request
+        _handler = handler
+        _http = courier.HTTPClientConnection.ssl(
+            auth,
+            ssl_context,
+            RestConstants.host(),
+            RestConstants.port(),
+            this,
+            courier.ClientConnectionConfig
+        )
+
+    fun ref _http_client_connection(): courier.HTTPClientConnection => _http
+
+    fun ref on_connected() =>
+        _http.send_request(_request)
+
+    fun ref on_response(response: courier.Response val) =>
+        _collector = courier.ResponseCollector
+        _collector.set_response(response)
+
+    fun ref on_body_chunk(data: Array[U8] val) =>
+        _collector.add_chunk(data)
+
+    fun ref on_response_complete() =>
+        try
+            let response = _collector.build()?
+            _settled = true
+            _handler(_request, response)
+        else
+            _fail("response could not be assembled")
+        end
+        _http.close()
+
+    fun ref on_connection_failure(reason: courier.ConnectionFailureReason) =>
+        _fail(reason.string())
+
+    fun ref on_parse_error(err: courier.ParseError) =>
+        _fail(err.string())
+
+    fun ref on_closed() =>
+        _fail("connection closed before a response arrived")
+
+    fun ref _fail(reason: String) =>
+        if not _settled then
+            _settled = true
+            _options.on_error(RestError(_request, reason))
+        end
 
 primitive RestConstants
-    fun url(): String => "https://discord.com/api"
+    fun base_url(): String => "https://discord.com/api"
+
+    fun host(): String => "discord.com"
+
+    fun port(): String => "443"
 
 type RequestQuery is Array[(String, String)] val
     """
@@ -123,21 +179,20 @@ class val RestOptions
         """
     let version: RestVersion val
     let user_agent: String
+    let ca_certificates_path: String
     let on_error: RestErrorHandler
-        """
-        Where failures go, since route handlers only take the value the route
-        returns. Defaults to discarding them.
-        """
 
     new val create(
         token': String,
         version': RestVersion val = RestDefaults.version(),
         user_agent': String = RestDefaults.user_agent(),
+        ca_certificates_path': String = RestDefaults.ca_certificates_path(),
         on_error': RestErrorHandler = RestDefaults.on_error()
     ) =>
         token = token'
         version = version'
         user_agent = user_agent'
+        ca_certificates_path = ca_certificates_path'
         on_error = on_error'
 
     fun path(route: String): String =>
@@ -161,6 +216,7 @@ class val RestOptions
         recover val
             let headers' = courier.Headers
             headers'.set("User-Agent", user_agent)
+            headers'.set("Authorization", "Bot " + token)
 
             match body
             | let _: String => headers'.set("Content-Type", "application/json")
@@ -195,9 +251,18 @@ primitive RestVersion10 is RestVersion
     fun value(): U64 => 10
 
 primitive RestDefaults
+    fun base_url(): String => "https://discord.com"
+
     fun version(): RestVersion val => RestVersion10
 
     fun user_agent(): String =>
         "discord.pony (https://github.com/vxern/discord.pony, 1.0.0)"
+
+    fun ca_certificates_path(): String =>
+        ifdef osx then
+            "/etc/ssl/cert.pem"
+        else
+            "/etc/ssl/certs/ca-certificates.crt"
+        end
 
     fun on_error(): RestErrorHandler => {(error': RestError) => None }
