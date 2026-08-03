@@ -1,5 +1,7 @@
 use collections = "collections"
 
+// TODO(vxern): Swap U64 out for Snowflake.
+
 trait val ImageFormat is (collections.Hashable & Equatable[ImageFormat])
     fun value(): String
 
