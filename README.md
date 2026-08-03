@@ -10,8 +10,6 @@
 - ❌ 7
 - ❌ 6
 
-## REST
-
 ### Objects
 
 - ✅ Application
@@ -179,7 +177,7 @@
 - ✅ Webhook
   - ✅ Webhook
 
-### Routes
+## REST Endpoints
 
 - ✅ Application Role Connection Metadata
     - ✅ Get Application Role Connection Metadata Records
@@ -438,3 +436,11 @@
 - ✅ Gateway
     - ✅ Get Gateway
     - ✅ Get Gateway Bot
+
+## Gateway Endpoints
+
+- ❌ Presence Update
+- ❌ Voice State Update
+- ❌ Request Guild Members
+- ❌ Request Soundboard Sounds
+- ❌ Request Channel Info
