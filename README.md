@@ -1,1 +1,185 @@
 # discord.pony
+
+(WIP) A complete- documented and battle-tested Pony library for working with Discord's API.
+
+## Supported features
+
+### API Versions
+
+- [x] 10
+- [ ] 9
+- [ ] 8
+- [ ] 7
+- [ ] 6
+
+### REST
+
+#### Objects
+
+- [x] Application
+  - [x] Application
+  - [x] ApplicationIntegrationTypeConfiguration
+  - [x] InstallParams
+  - [x] ActivityInstance
+  - [x] ActivityLocation
+- [x] Application Command
+  - [x] ApplicationCommandOptionChoice
+  - [x] ApplicationCommandOption
+  - [x] ApplicationCommandPermission
+- [x] Application Role Connection Metadata
+  - [x] ApplicationRoleConnectionMetadata
+- [x] Audit Log
+  - [x] AuditLog
+  - [x] AuditLogEntry
+  - [x] OptionalAuditEntryInfo
+  - [x] AuditLogChange
+- [x] Auto Moderation
+  - [x] AutoModerationRule
+  - [x] AutoModerationTriggerMetadata
+  - [x] AutoModerationAction
+  - [x] AutoModerationActionMetadata
+- [x] Channel
+  - [x] Channel
+  - [x] FollowedChannel
+  - [x] PermissionOverwrite
+  - [x] ThreadMetadata
+  - [x] ThreadMember
+  - [x] DefaultReaction
+  - [x] ForumTag
+- [x] Component
+  - [x] ActionRowComponent
+  - [x] ButtonComponent
+  - [x] StringSelectComponent
+  - [x] SelectOption
+  - [x] TextInputComponent
+  - [x] UserSelectComponent
+  - [x] RoleSelectComponent
+  - [x] MentionableSelectComponent
+  - [x] ChannelSelectComponent
+  - [x] SelectDefaultValue
+  - [x] SectionComponent
+  - [x] TextDisplayComponent
+  - [x] ThumbnailComponent
+  - [x] MediaGalleryComponent
+  - [x] MediaGalleryItem
+  - [x] FileComponent
+  - [x] SeparatorComponent
+  - [x] ContainerComponent
+  - [x] LabelComponent
+  - [x] FileUploadComponent
+  - [x] RadioGroupComponent
+  - [x] RadioGroupOption
+  - [x] CheckboxGroupComponent
+  - [x] CheckboxGroupOption
+  - [x] CheckboxComponent
+  - [x] UnfurledMediaItem
+- [x] Emoji
+  - [x] Emoji
+- [x] Entitlement
+  - [x] Entitlement
+- [x] Guild
+  - [x] Guild
+  - [x] GuildPreview
+  - [x] GuildWidgetSettings
+  - [x] GuildWidget
+  - [x] GuildMember
+  - [x] Integration
+  - [x] IntegrationAccount
+  - [x] IntegrationApplication
+  - [x] Ban
+  - [x] WelcomeScreen
+  - [x] WelcomeScreenChannel
+  - [x] GuildOnboarding
+  - [x] OnboardingPrompt
+  - [x] OnboardingPromptOption
+  - [x] IncidentsData
+  - [x] GuildChannelPosition
+  - [x] GuildRolePosition
+- [x] Guild Scheduled Event
+  - [x] GuildScheduledEvent
+  - [x] GuildScheduledEventEntityMetadata
+  - [x] GuildScheduledEventRecurrenceRule
+  - [x] GuildScheduledEventRecurrenceRuleNWeekday
+  - [x] GuildScheduledEventUser
+- [x] Guild Template
+  - [x] GuildTemplate
+- [x] Interaction
+  - [x] Interaction
+  - [x] ApplicationCommandData
+  - [x] MessageComponentData
+  - [x] ModalSubmitData
+  - [x] ResolvedData
+  - [x] InteractionResponse
+  - [x] InteractionCallbackResponse
+  - [x] InteractionCallback
+  - [x] InteractionCallbackResource
+  - [x] InteractionCallbackActivityInstanceResource
+- [x] Invite
+  - [x] Invite
+  - [x] InviteMetadata
+  - [x] InviteStageInstance
+- [x] Lobby
+  - [x] Lobby
+  - [x] LobbyMember
+- [x] Message
+  - [x] Message
+  - [x] MessageActivity
+  - [x] ApplicationCommandInteractionMetadata
+  - [x] MessageComponentInteractionMetadata
+  - [x] ModalSubmitInteractionMetadata
+  - [x] MessageInteraction
+  - [x] MessageCall
+  - [x] MessageReference
+  - [x] MessageSnapshot
+  - [x] MessageReaction
+  - [x] MessageReactionCountDetails
+  - [x] MessageEmbed
+  - [x] MessageEmbedVideo
+  - [x] MessageEmbedImage
+  - [x] MessageEmbedProvider
+  - [x] MessageEmbedAuthor
+  - [x] MessageEmbedFooter
+  - [x] MessageEmbedField
+  - [x] MessageAttachment
+  - [x] ChannelMention
+  - [x] AllowedMentions
+  - [x] RoleSubscriptionData
+  - [x] MessagePin
+  - [x] SharedClientTheme
+- [x] Permission
+  - [x] Role
+  - [x] RoleTags
+  - [x] RoleColors
+- [x] Poll
+  - [x] Poll
+  - [x] PollMedia
+  - [x] PollAnswer
+  - [x] PollResults
+  - [x] PollAnswerCount
+- [x] Sku
+  - [x] SKU
+- [x] Snowflake
+  - [x] Snowflake
+- [x] Soundboard
+  - [x] SoundboardSound
+- [x] Stage Instance
+  - [x] StageInstance
+- [x] Sticker
+  - [x] Sticker
+  - [x] StickerItem
+  - [x] StickerPack
+- [x] Subscription
+  - [x] Subscription
+- [x] User
+  - [x] User
+  - [x] AvatarDecorationData
+  - [x] Collectibles
+  - [x] Nameplate
+  - [x] UserPrimaryGuild
+  - [x] Connection
+  - [x] ApplicationRoleConnection
+- [x] Webhook
+  - [x] Webhook
+
+#### Routes
+
