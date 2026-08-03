@@ -10,183 +10,16 @@
 - ❌ 7
 - ❌ 6
 
-## Objects
-
-- ✅ Application
-  - ✅ Application
-  - ✅ ApplicationIntegrationTypeConfiguration
-  - ✅ InstallParams
-  - ✅ ActivityInstance
-  - ✅ ActivityLocation
-- ✅ Application Command
-  - ✅ ApplicationCommandOptionChoice
-  - ✅ ApplicationCommandOption
-  - ✅ ApplicationCommandPermission
-- ✅ Application Role Connection Metadata
-  - ✅ ApplicationRoleConnectionMetadata
-- ✅ Audit Log
-  - ✅ AuditLog
-  - ✅ AuditLogEntry
-  - ✅ OptionalAuditEntryInfo
-  - ✅ AuditLogChange
-- ✅ Auto Moderation
-  - ✅ AutoModerationRule
-  - ✅ AutoModerationTriggerMetadata
-  - ✅ AutoModerationAction
-  - ✅ AutoModerationActionMetadata
-- ✅ Channel
-  - ✅ Channel
-  - ✅ FollowedChannel
-  - ✅ PermissionOverwrite
-  - ✅ ThreadMetadata
-  - ✅ ThreadMember
-  - ✅ DefaultReaction
-  - ✅ ForumTag
-- ✅ Component
-  - ✅ ActionRowComponent
-  - ✅ ButtonComponent
-  - ✅ StringSelectComponent
-  - ✅ SelectOption
-  - ✅ TextInputComponent
-  - ✅ UserSelectComponent
-  - ✅ RoleSelectComponent
-  - ✅ MentionableSelectComponent
-  - ✅ ChannelSelectComponent
-  - ✅ SelectDefaultValue
-  - ✅ SectionComponent
-  - ✅ TextDisplayComponent
-  - ✅ ThumbnailComponent
-  - ✅ MediaGalleryComponent
-  - ✅ MediaGalleryItem
-  - ✅ FileComponent
-  - ✅ SeparatorComponent
-  - ✅ ContainerComponent
-  - ✅ LabelComponent
-  - ✅ FileUploadComponent
-  - ✅ RadioGroupComponent
-  - ✅ RadioGroupOption
-  - ✅ CheckboxGroupComponent
-  - ✅ CheckboxGroupOption
-  - ✅ CheckboxComponent
-  - ✅ UnfurledMediaItem
-- ✅ Emoji
-  - ✅ Emoji
-- ✅ Entitlement
-  - ✅ Entitlement
-- ✅ Guild
-  - ✅ Guild
-  - ✅ GuildPreview
-  - ✅ GuildWidgetSettings
-  - ✅ GuildWidget
-  - ✅ GuildMember
-  - ✅ Integration
-  - ✅ IntegrationAccount
-  - ✅ IntegrationApplication
-  - ✅ Ban
-  - ✅ WelcomeScreen
-  - ✅ WelcomeScreenChannel
-  - ✅ GuildOnboarding
-  - ✅ OnboardingPrompt
-  - ✅ OnboardingPromptOption
-  - ✅ IncidentsData
-  - ✅ GuildChannelPosition
-  - ✅ GuildRolePosition
-- ✅ Guild Scheduled Event
-  - ✅ GuildScheduledEvent
-  - ✅ GuildScheduledEventEntityMetadata
-  - ✅ GuildScheduledEventRecurrenceRule
-  - ✅ GuildScheduledEventRecurrenceRuleNWeekday
-  - ✅ GuildScheduledEventUser
-- ✅ Guild Template
-  - ✅ GuildTemplate
-- ✅ Interaction
-  - ✅ Interaction
-  - ✅ ApplicationCommandData
-  - ✅ MessageComponentData
-  - ✅ ModalSubmitData
-  - ✅ ResolvedData
-  - ✅ InteractionResponse
-  - ✅ InteractionCallbackResponse
-  - ✅ InteractionCallback
-  - ✅ InteractionCallbackResource
-  - ✅ InteractionCallbackActivityInstanceResource
-- ✅ Invite
-  - ✅ Invite
-  - ✅ InviteMetadata
-  - ✅ InviteStageInstance
-- ✅ Lobby
-  - ✅ Lobby
-  - ✅ LobbyMember
-- ✅ Message
-  - ✅ Message
-  - ✅ MessageActivity
-  - ✅ ApplicationCommandInteractionMetadata
-  - ✅ MessageComponentInteractionMetadata
-  - ✅ ModalSubmitInteractionMetadata
-  - ✅ MessageInteraction
-  - ✅ MessageCall
-  - ✅ MessageReference
-  - ✅ MessageSnapshot
-  - ✅ MessageReaction
-  - ✅ MessageReactionCountDetails
-  - ✅ MessageEmbed
-  - ✅ MessageEmbedVideo
-  - ✅ MessageEmbedImage
-  - ✅ MessageEmbedProvider
-  - ✅ MessageEmbedAuthor
-  - ✅ MessageEmbedFooter
-  - ✅ MessageEmbedField
-  - ✅ MessageAttachment
-  - ✅ ChannelMention
-  - ✅ AllowedMentions
-  - ✅ RoleSubscriptionData
-  - ✅ MessagePin
-  - ✅ SharedClientTheme
-- ✅ Permission
-  - ✅ Role
-  - ✅ RoleTags
-  - ✅ RoleColors
-- ✅ Poll
-  - ✅ Poll
-  - ✅ PollMedia
-  - ✅ PollAnswer
-  - ✅ PollResults
-  - ✅ PollAnswerCount
-- ✅ Sku
-  - ✅ SKU
-- ✅ Snowflake
-  - ✅ Snowflake
-- ✅ Soundboard
-  - ✅ SoundboardSound
-- ✅ Stage Instance
-  - ✅ StageInstance
-- ✅ Sticker
-  - ✅ Sticker
-  - ✅ StickerItem
-  - ✅ StickerPack
-- ✅ Subscription
-  - ✅ Subscription
-- ✅ User
-  - ✅ User
-  - ✅ AvatarDecorationData
-  - ✅ Collectibles
-  - ✅ Nameplate
-  - ✅ UserPrimaryGuild
-  - ✅ Connection
-  - ✅ ApplicationRoleConnection
-- ✅ Webhook
-  - ✅ Webhook
-
 ## REST Endpoints
 
-- ✅ Application Role Connection Metadata
+- Application Role Connection Metadata
     - ✅ Get Application Role Connection Metadata Records
     - ✅ Update Application Role Connection Metadata Records
-- ✅ Application
+- Application
     - ✅ Get Current Application
     - ✅ Edit Current Application
     - ✅ Get Application Activity Instance
-- ✅ Audit Log
+- Audit Log
     - ✅ Get Guild Audit Log
 - Auto Moderation
     - ✅ List Auto Moderation Rules for Guild
@@ -194,7 +27,7 @@
     - ✅ Create Auto Moderation Rule
     - ✅ Modify Auto Moderation Rule
     - ✅ Delete Auto Moderation Rule
-- ✅ Channel 
+- Channel 
     - ✅ Get Channel
     - ✅ Modify Channel
     - ✅ Delete/Close Channel
@@ -219,7 +52,7 @@
     - ✅ List Public Archived Threads
     - ✅ List Private Archived Threads
     - ✅ List Joined Private Archived Threads
-- ✅ Emoji 
+- Emoji 
     - ✅ List Guild Emojis
     - ✅ Get Guild Emoji
     - ✅ Create Guild Emoji
@@ -230,13 +63,13 @@
     - ✅ Create Application Emoji
     - ✅ Modify Application Emoji
     - ✅ Delete Application Emoji
-- ✅ Entitlement
+- Entitlement
     - ✅ List Entitlements
     - ✅ Get Entitlement
     - ✅ Consume an Entitlement
     - ✅ Create Test Entitlement
     - ✅ Delete Test Entitlement
-- ✅ Guild 
+- Guild 
     - ✅ Get Guild
     - ✅ Get Guild Preview
     - ✅ Modify Guild
@@ -282,27 +115,27 @@
     - ✅ Get Guild Onboarding
     - ✅ Modify Guild Onboarding
     - ✅ Modify Guild Incident Actions
-- ✅ Guild Scheduled Event
+- Guild Scheduled Event
     - ✅ List Scheduled Events for Guild
     - ✅ Create Guild Scheduled Event
     - ✅ Get Guild Scheduled Event
     - ✅ Modify Guild Scheduled Event
     - ✅ Delete Guild Scheduled Event
     - ✅ Get Guild Scheduled Event Users
-- ✅ Guild Template
+- Guild Template
     - ✅ Get Guild Template
     - ✅ Get Guild Templates
     - ✅ Create Guild Template
     - ✅ Sync Guild Template
     - ✅ Modify Guild Template
     - ✅ Delete Guild Template
-- ✅ Invite
+- Invite
     - ✅ Get Invite
     - ✅ Delete Invite
     - ✅ Get Target Users
     - ✅ Update Target Users
     - ✅ Get Target Users Job Status
-- ✅ Lobby 
+- Lobby 
     - ✅ Create Lobby
     - ✅ Create or Join Lobby
     - ✅ Get Lobby
@@ -319,7 +152,7 @@
     - ✅ Update Lobby Message Moderation Metadata
     - ✅ Create Lobby Channel Invite for Self
     - ✅ Create Lobby Channel Invite for User
-- ✅ Message 
+- Message 
     - ✅ Get Channel Messages
     - ✅ Search Guild Messages
     - ✅ Get Channel Message
@@ -340,14 +173,14 @@
     - ✅ Get Pinned Messages (deprecated)
     - ✅ Pin Message (deprecated)
     - ✅ Unpin Message (deprecated)
-- ✅ Poll
+- Poll
     - ✅ Get Answer Voters
     - ✅ End Poll
-- ✅ SKU (1) & Subscription
+- SKU (1) & Subscription
     - ✅ List SKUs
     - ✅ List SKU Subscriptions
     - ✅ Get SKU Subscription
-- ✅ Soundboard
+- Soundboard
     - ✅ Send Soundboard Sound
     - ✅ List Default Soundboard Sounds
     - ✅ List Guild Soundboard Sounds
@@ -355,12 +188,12 @@
     - ✅ Create Guild Soundboard Sound
     - ✅ Modify Guild Soundboard Sound
     - ✅ Delete Guild Soundboard Sound
-- ✅ Stage Instance
+- Stage Instance
     - ✅ Create Stage Instance
     - ✅ Get Stage Instance
     - ✅ Modify Stage Instance
     - ✅ Delete Stage Instance
-- ✅ Sticker
+- Sticker
     - ✅ Get Sticker
     - ✅ List Sticker Packs
     - ✅ Get Sticker Pack
@@ -369,7 +202,7 @@
     - ✅ Create Guild Sticker
     - ✅ Modify Guild Sticker
     - ✅ Delete Guild Sticker
-- ✅ User 
+- User 
     - ✅ Get Current User
     - ✅ Get User
     - ✅ Modify Current User
@@ -382,13 +215,13 @@
     - ✅ Get Current User Application Role Connection
     - ✅ Update Current User Application Role Connection
     - ✅ Delete Current User Application Role Connection
-- ✅ Voice
+- Voice
     - ✅ List Voice Regions
     - ✅ Get Current User Voice State
     - ✅ Get User Voice State
     - ✅ Modify Current User Voice State
     - ✅ Modify User Voice State
-- ✅ Webhook 
+- Webhook 
     - ✅ Create Webhook
     - ✅ Get Channel Webhooks
     - ✅ Get Guild Webhooks
@@ -404,7 +237,7 @@
     - ✅ Get Webhook Message
     - ✅ Edit Webhook Message
     - ✅ Delete Webhook Message
-- ✅ Receiving and Responding
+- Receiving and Responding
     - ✅ Create Interaction Response
     - ✅ Get Original Interaction Response
     - ✅ Edit Original Interaction Response
@@ -413,7 +246,7 @@
     - ✅ Get Followup Message
     - ✅ Edit Followup Message
     - ✅ Delete Followup Message
-- ✅ Application Commands 
+- Application Commands 
     - ✅ Get Global Application Commands
     - ✅ Create Global Application Command
     - ✅ Get Global Application Command
@@ -430,10 +263,10 @@
     - ✅ Get Application Command Permissions
     - ✅ Edit Application Command Permissions
     - ✅ Batch Edit Application Command Permissions
-- ✅ OAuth2
+- OAuth2
     - ✅ Get Current Bot Application Information
     - ✅ Get Current Authorization Information
-- ✅ Gateway
+- Gateway
     - ✅ Get Gateway
     - ✅ Get Gateway Bot
 
@@ -444,3 +277,170 @@
 - ❌ Request Guild Members
 - ❌ Request Soundboard Sounds
 - ❌ Request Channel Info
+
+## Objects
+
+- Application
+  - ✅ Application
+  - ✅ ApplicationIntegrationTypeConfiguration
+  - ✅ InstallParams
+  - ✅ ActivityInstance
+  - ✅ ActivityLocation
+- Application Command
+  - ✅ ApplicationCommandOptionChoice
+  - ✅ ApplicationCommandOption
+  - ✅ ApplicationCommandPermission
+- Application Role Connection Metadata
+  - ✅ ApplicationRoleConnectionMetadata
+- Audit Log
+  - ✅ AuditLog
+  - ✅ AuditLogEntry
+  - ✅ OptionalAuditEntryInfo
+  - ✅ AuditLogChange
+- Auto Moderation
+  - ✅ AutoModerationRule
+  - ✅ AutoModerationTriggerMetadata
+  - ✅ AutoModerationAction
+  - ✅ AutoModerationActionMetadata
+- Channel
+  - ✅ Channel
+  - ✅ FollowedChannel
+  - ✅ PermissionOverwrite
+  - ✅ ThreadMetadata
+  - ✅ ThreadMember
+  - ✅ DefaultReaction
+  - ✅ ForumTag
+- Component
+  - ✅ ActionRowComponent
+  - ✅ ButtonComponent
+  - ✅ StringSelectComponent
+  - ✅ SelectOption
+  - ✅ TextInputComponent
+  - ✅ UserSelectComponent
+  - ✅ RoleSelectComponent
+  - ✅ MentionableSelectComponent
+  - ✅ ChannelSelectComponent
+  - ✅ SelectDefaultValue
+  - ✅ SectionComponent
+  - ✅ TextDisplayComponent
+  - ✅ ThumbnailComponent
+  - ✅ MediaGalleryComponent
+  - ✅ MediaGalleryItem
+  - ✅ FileComponent
+  - ✅ SeparatorComponent
+  - ✅ ContainerComponent
+  - ✅ LabelComponent
+  - ✅ FileUploadComponent
+  - ✅ RadioGroupComponent
+  - ✅ RadioGroupOption
+  - ✅ CheckboxGroupComponent
+  - ✅ CheckboxGroupOption
+  - ✅ CheckboxComponent
+  - ✅ UnfurledMediaItem
+- Emoji
+  - ✅ Emoji
+- Entitlement
+  - ✅ Entitlement
+- Guild
+  - ✅ Guild
+  - ✅ GuildPreview
+  - ✅ GuildWidgetSettings
+  - ✅ GuildWidget
+  - ✅ GuildMember
+  - ✅ Integration
+  - ✅ IntegrationAccount
+  - ✅ IntegrationApplication
+  - ✅ Ban
+  - ✅ WelcomeScreen
+  - ✅ WelcomeScreenChannel
+  - ✅ GuildOnboarding
+  - ✅ OnboardingPrompt
+  - ✅ OnboardingPromptOption
+  - ✅ IncidentsData
+  - ✅ GuildChannelPosition
+  - ✅ GuildRolePosition
+- Guild Scheduled Event
+  - ✅ GuildScheduledEvent
+  - ✅ GuildScheduledEventEntityMetadata
+  - ✅ GuildScheduledEventRecurrenceRule
+  - ✅ GuildScheduledEventRecurrenceRuleNWeekday
+  - ✅ GuildScheduledEventUser
+- Guild Template
+  - ✅ GuildTemplate
+- Interaction
+  - ✅ Interaction
+  - ✅ ApplicationCommandData
+  - ✅ MessageComponentData
+  - ✅ ModalSubmitData
+  - ✅ ResolvedData
+  - ✅ InteractionResponse
+  - ✅ InteractionCallbackResponse
+  - ✅ InteractionCallback
+  - ✅ InteractionCallbackResource
+  - ✅ InteractionCallbackActivityInstanceResource
+- Invite
+  - ✅ Invite
+  - ✅ InviteMetadata
+  - ✅ InviteStageInstance
+- Lobby
+  - ✅ Lobby
+  - ✅ LobbyMember
+- Message
+  - ✅ Message
+  - ✅ MessageActivity
+  - ✅ ApplicationCommandInteractionMetadata
+  - ✅ MessageComponentInteractionMetadata
+  - ✅ ModalSubmitInteractionMetadata
+  - ✅ MessageInteraction
+  - ✅ MessageCall
+  - ✅ MessageReference
+  - ✅ MessageSnapshot
+  - ✅ MessageReaction
+  - ✅ MessageReactionCountDetails
+  - ✅ MessageEmbed
+  - ✅ MessageEmbedVideo
+  - ✅ MessageEmbedImage
+  - ✅ MessageEmbedProvider
+  - ✅ MessageEmbedAuthor
+  - ✅ MessageEmbedFooter
+  - ✅ MessageEmbedField
+  - ✅ MessageAttachment
+  - ✅ ChannelMention
+  - ✅ AllowedMentions
+  - ✅ RoleSubscriptionData
+  - ✅ MessagePin
+  - ✅ SharedClientTheme
+- Permission
+  - ✅ Role
+  - ✅ RoleTags
+  - ✅ RoleColors
+- Poll
+  - ✅ Poll
+  - ✅ PollMedia
+  - ✅ PollAnswer
+  - ✅ PollResults
+  - ✅ PollAnswerCount
+- Sku
+  - ✅ SKU
+- Snowflake
+  - ✅ Snowflake
+- Soundboard
+  - ✅ SoundboardSound
+- Stage Instance
+  - ✅ StageInstance
+- Sticker
+  - ✅ Sticker
+  - ✅ StickerItem
+  - ✅ StickerPack
+- Subscription
+  - ✅ Subscription
+- User
+  - ✅ User
+  - ✅ AvatarDecorationData
+  - ✅ Collectibles
+  - ✅ Nameplate
+  - ✅ UserPrimaryGuild
+  - ✅ Connection
+  - ✅ ApplicationRoleConnection
+- Webhook
+  - ✅ Webhook
