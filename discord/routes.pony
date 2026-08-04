@@ -1898,14 +1898,14 @@ actor Routes
 
         api.send_request(options.build_request(courier.PATCH, "/users/@me" where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[User](handler, options.on_error))
 
-    be get_current_user_guilds(params: GetCurrentUserGuildsParams, handler: ResponseHandler[Array[Guild] val]) =>
+    be get_current_user_guilds(params: GetCurrentUserGuildsParams, handler: ResponseHandler[Array[PartialGuild] val]) =>
         """
         https://docs.discord.com/developers/resources/user#get-current-user-guilds
 
         Returns a list of partial guild objects the current user is a member of. For OAuth2, requires the guilds scope.
         """
 
-        api.send_request(options.build_request(courier.GET, "/users/@me/guilds" where query = params.to_query()), _Decode.list[Guild](handler, _Guilds, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/users/@me/guilds" where query = params.to_query()), _Decode.list[PartialGuild](handler, _PartialGuilds, options.on_error))
 
     be get_current_user_guild_member(guild_id: Snowflake, handler: ResponseHandler[GuildMember]) =>
         """
