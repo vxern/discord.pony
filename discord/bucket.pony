@@ -129,19 +129,20 @@ class iso _BucketRestart is time.TimerNotify
         false
 
 class val _RateLimit
-    let limit: USize
+    let limit: (USize | None)
     let remaining: USize
     let reset_s: F64
     let reset_after_s: F64
-    let bucket: String
+    let bucket: (String | None)
 
     new val from_headers(headers: courier.Headers val) ? =>
         var limit': (USize | None) = None
         var remaining': (USize | None) = None
         var reset_s': (F64 | None) = None
         var reset_after_s': (F64 | None) = None
+        var retry_after_s': (F64 | None) = None
         var bucket': (String | None) = None
-        
+
         for (key, value) in headers.values() do
             match key
             | "x-ratelimit-limit" => limit' = value.usize()?
@@ -149,14 +150,28 @@ class val _RateLimit
             | "x-ratelimit-reset" => reset_s' = value.f64()?
             | "x-ratelimit-reset-after" => reset_after_s' = value.f64()?
             | "x-ratelimit-bucket" => bucket' = value
+            | "retry-after" => retry_after_s' = value.f64()?
             end
         end
 
-        limit = limit' as USize
-        remaining = remaining' as USize
-        reset_s = reset_s' as F64
-        reset_after_s = reset_after_s' as F64
-        bucket = bucket' as String
+        // A global rate limit only sends `retry-after`, so a response is worth
+        // something as long as it tells us either how much is left or how long
+        // to wait for.
+        if (remaining' is None) and (reset_after_s' is None) and (retry_after_s' is None) then
+            error
+        end
+
+        limit = limit'
+        bucket = bucket'
+        remaining = try remaining' as USize else 0 end
+        reset_s = try reset_s' as F64 else 0 end
+        reset_after_s =
+            match (reset_after_s', retry_after_s')
+            | (let seconds: F64, _) => seconds
+            | (_, let seconds: F64) => seconds
+            else
+                0
+            end
     
     fun is_newer_than(other: (_RateLimit | None)): Bool =>
         match other
