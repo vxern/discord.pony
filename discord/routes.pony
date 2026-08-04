@@ -2277,7 +2277,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/webhooks/" + application_id.string() + "/" + interaction_token + "/messages/" + message_id.string()), _Decode.empty(handler, options.on_error))
 
-    be get_global_application_commands(application_id: Snowflake, params: GetGlobalApplicationCommandsParams, handler: ResponseHandler[json.JsonValue]) =>
+    be get_global_application_commands(application_id: Snowflake, params: GetGlobalApplicationCommandsParams, handler: ResponseHandler[Array[ApplicationCommand] val]) =>
         """
         https://docs.discord.com/developers/interactions/application-commands#get-global-application-commands
 
@@ -2286,10 +2286,9 @@ actor Routes
         Fetch all of the global commands for your application. Returns an array of application command objects.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/commands" where query = params.to_query()), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/commands" where query = params.to_query()), _Decode.list[ApplicationCommand](handler, _ApplicationCommands, options.on_error))
 
-    be create_global_application_command(application_id: Snowflake, params: CreateGlobalApplicationCommandParams, handler: ResponseHandler[json.JsonValue]) =>
+    be create_global_application_command(application_id: Snowflake, params: CreateGlobalApplicationCommandParams, handler: ResponseHandler[ApplicationCommand]) =>
         """
         https://docs.discord.com/developers/interactions/application-commands#create-global-application-command
 
@@ -2298,20 +2297,18 @@ actor Routes
         Create a new global command. Returns 201 if a command with the same name does not already exist, or a 200 if it does (in which case the previous command will be overwritten). Both responses include an application command object.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.POST, "/applications/" + application_id.string() + "/commands" where body = json.JsonPrinter.print(params.to_json())), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.POST, "/applications/" + application_id.string() + "/commands" where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[ApplicationCommand](handler, options.on_error))
 
-    be get_global_application_command(application_id: Snowflake, command_id: Snowflake, handler: ResponseHandler[json.JsonValue]) =>
+    be get_global_application_command(application_id: Snowflake, command_id: Snowflake, handler: ResponseHandler[ApplicationCommand]) =>
         """
         https://docs.discord.com/developers/interactions/application-commands#get-global-application-command
 
         Fetch a global command for your application. Returns an application command object.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/commands/" + command_id.string()), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/commands/" + command_id.string()), _Decode.entity[ApplicationCommand](handler, options.on_error))
 
-    be update_global_application_command(application_id: Snowflake, command_id: Snowflake, params: UpdateGlobalApplicationCommandParams, handler: ResponseHandler[json.JsonValue]) =>
+    be update_global_application_command(application_id: Snowflake, command_id: Snowflake, params: UpdateGlobalApplicationCommandParams, handler: ResponseHandler[ApplicationCommand]) =>
         """
         https://docs.discord.com/developers/interactions/application-commands#edit-global-application-command
 
@@ -2320,8 +2317,7 @@ actor Routes
         Edit a global command. Returns 200 and an application command object. All fields are optional, but any fields provided will entirely overwrite the existing values of those fields.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.PATCH, "/applications/" + application_id.string() + "/commands/" + command_id.string() where body = json.JsonPrinter.print(params.to_json())), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.PATCH, "/applications/" + application_id.string() + "/commands/" + command_id.string() where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[ApplicationCommand](handler, options.on_error))
 
     be delete_global_application_command(application_id: Snowflake, command_id: Snowflake, handler: EmptyResponseHandler) =>
         """
@@ -2332,7 +2328,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/applications/" + application_id.string() + "/commands/" + command_id.string()), _Decode.empty(handler, options.on_error))
 
-    be bulk_overwrite_global_application_commands(application_id: Snowflake, params: BulkOverwriteGlobalApplicationCommandsParams, handler: ResponseHandler[json.JsonValue]) =>
+    be bulk_overwrite_global_application_commands(application_id: Snowflake, params: BulkOverwriteGlobalApplicationCommandsParams, handler: ResponseHandler[Array[ApplicationCommand] val]) =>
         """
         https://docs.discord.com/developers/interactions/application-commands#bulk-overwrite-global-application-commands
 
@@ -2341,10 +2337,9 @@ actor Routes
         This will overwrite all types of application commands: slash commands, user commands, and message commands.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.PUT, "/applications/" + application_id.string() + "/commands" where body = json.JsonPrinter.print(params.to_json())), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.PUT, "/applications/" + application_id.string() + "/commands" where body = json.JsonPrinter.print(params.to_json())), _Decode.list[ApplicationCommand](handler, _ApplicationCommands, options.on_error))
 
-    be get_guild_application_commands(application_id: Snowflake, guild_id: Snowflake, params: GetGuildApplicationCommandsParams, handler: ResponseHandler[json.JsonValue]) =>
+    be get_guild_application_commands(application_id: Snowflake, guild_id: Snowflake, params: GetGuildApplicationCommandsParams, handler: ResponseHandler[Array[ApplicationCommand] val]) =>
         """
         https://docs.discord.com/developers/interactions/application-commands#get-guild-application-commands
 
@@ -2353,10 +2348,9 @@ actor Routes
         Fetch all of the guild commands for your application for a specific guild. Returns an array of application command objects.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands" where query = params.to_query()), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands" where query = params.to_query()), _Decode.list[ApplicationCommand](handler, _ApplicationCommands, options.on_error))
 
-    be create_guild_application_command(application_id: Snowflake, guild_id: Snowflake, params: CreateGuildApplicationCommandParams, handler: ResponseHandler[json.JsonValue]) =>
+    be create_guild_application_command(application_id: Snowflake, guild_id: Snowflake, params: CreateGuildApplicationCommandParams, handler: ResponseHandler[ApplicationCommand]) =>
         """
         https://docs.discord.com/developers/interactions/application-commands#create-guild-application-command
 
@@ -2365,20 +2359,18 @@ actor Routes
         Create a new guild command. New guild commands will be available in the guild immediately. Returns 201 if a command with the same name does not already exist, or a 200 if it does (in which case the previous command will be overwritten). Both responses include an application command object.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.POST, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands" where body = json.JsonPrinter.print(params.to_json())), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.POST, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands" where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[ApplicationCommand](handler, options.on_error))
 
-    be get_guild_application_command(application_id: Snowflake, guild_id: Snowflake, command_id: Snowflake, handler: ResponseHandler[json.JsonValue]) =>
+    be get_guild_application_command(application_id: Snowflake, guild_id: Snowflake, command_id: Snowflake, handler: ResponseHandler[ApplicationCommand]) =>
         """
         https://docs.discord.com/developers/interactions/application-commands#get-guild-application-command
 
         Fetch a guild command for your application. Returns an application command object.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/" + command_id.string()), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/" + command_id.string()), _Decode.entity[ApplicationCommand](handler, options.on_error))
 
-    be update_guild_application_command(application_id: Snowflake, guild_id: Snowflake, command_id: Snowflake, params: UpdateGuildApplicationCommandParams, handler: ResponseHandler[json.JsonValue]) =>
+    be update_guild_application_command(application_id: Snowflake, guild_id: Snowflake, command_id: Snowflake, params: UpdateGuildApplicationCommandParams, handler: ResponseHandler[ApplicationCommand]) =>
         """
         https://docs.discord.com/developers/interactions/application-commands#edit-guild-application-command
 
@@ -2387,8 +2379,7 @@ actor Routes
         Edit a guild command. Updates for guild commands will be available immediately. Returns 200 and an application command object. All fields are optional, but any fields provided will entirely overwrite the existing values of those fields.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.PATCH, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/" + command_id.string() where body = json.JsonPrinter.print(params.to_json())), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.PATCH, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/" + command_id.string() where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[ApplicationCommand](handler, options.on_error))
 
     be delete_guild_application_command(application_id: Snowflake, guild_id: Snowflake, command_id: Snowflake, handler: EmptyResponseHandler) =>
         """
@@ -2399,7 +2390,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/" + command_id.string()), _Decode.empty(handler, options.on_error))
 
-    be bulk_overwrite_guild_application_commands(application_id: Snowflake, guild_id: Snowflake, params: BulkOverwriteGuildApplicationCommandsParams, handler: ResponseHandler[json.JsonValue]) =>
+    be bulk_overwrite_guild_application_commands(application_id: Snowflake, guild_id: Snowflake, params: BulkOverwriteGuildApplicationCommandsParams, handler: ResponseHandler[Array[ApplicationCommand] val]) =>
         """
         https://docs.discord.com/developers/interactions/application-commands#bulk-overwrite-guild-application-commands
 
@@ -2408,28 +2399,25 @@ actor Routes
         This will overwrite all types of application commands: slash commands, user commands, and message commands.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.PUT, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands" where body = json.JsonPrinter.print(params.to_json())), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.PUT, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands" where body = json.JsonPrinter.print(params.to_json())), _Decode.list[ApplicationCommand](handler, _ApplicationCommands, options.on_error))
 
-    be get_guild_application_command_permissions(application_id: Snowflake, guild_id: Snowflake, handler: ResponseHandler[json.JsonValue]) =>
+    be get_guild_application_command_permissions(application_id: Snowflake, guild_id: Snowflake, handler: ResponseHandler[Array[GuildApplicationCommandPermissions] val]) =>
         """
         https://docs.discord.com/developers/interactions/application-commands#get-guild-application-command-permissions
 
         Fetches permissions for all commands for your application in a guild. Returns an array of guild application command permissions objects.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/permissions"), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/permissions"), _Decode.list[GuildApplicationCommandPermissions](handler, _GuildApplicationCommandPermissions, options.on_error))
 
-    be get_application_command_permissions(application_id: Snowflake, guild_id: Snowflake, command_id: Snowflake, handler: ResponseHandler[json.JsonValue]) =>
+    be get_application_command_permissions(application_id: Snowflake, guild_id: Snowflake, command_id: Snowflake, handler: ResponseHandler[GuildApplicationCommandPermissions]) =>
         """
         https://docs.discord.com/developers/interactions/application-commands#get-application-command-permissions
 
         Fetches permissions for a specific command for your application in a guild. Returns a guild application command permissions object.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/" + command_id.string() + "/permissions"), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/" + command_id.string() + "/permissions"), _Decode.entity[GuildApplicationCommandPermissions](handler, options.on_error))
 
     be update_application_command_permissions(application_id: Snowflake, guild_id: Snowflake, command_id: Snowflake, params: UpdateApplicationCommandPermissionsParams, handler: ResponseHandler[json.JsonValue]) =>
         """
@@ -2449,15 +2437,14 @@ actor Routes
         // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
         api.send_request(options.build_request(courier.PUT, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/" + command_id.string() + "/permissions" where body = json.JsonPrinter.print(params.to_json())), _Decode.payload(handler, options.on_error))
 
-    be batch_update_application_command_permissions(application_id: Snowflake, guild_id: Snowflake, params: BatchUpdateApplicationCommandPermissionsParams, handler: ResponseHandler[json.JsonValue]) =>
+    be batch_update_application_command_permissions(application_id: Snowflake, guild_id: Snowflake, params: BatchUpdateApplicationCommandPermissionsParams, handler: ResponseHandler[Array[GuildApplicationCommandPermissions] val]) =>
         """
         https://docs.discord.com/developers/interactions/application-commands#batch-edit-application-command-permissions
 
         This endpoint has been disabled with updates to command permissions (Permissions v2). Instead, you can edit each application command permissions (though you should be careful to handle any potential rate limits).
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.PUT, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/permissions" where body = json.JsonPrinter.print(params.to_json())), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.PUT, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/permissions" where body = json.JsonPrinter.print(params.to_json())), _Decode.list[GuildApplicationCommandPermissions](handler, _GuildApplicationCommandPermissions, options.on_error))
 
     be get_current_bot_application_information(handler: ResponseHandler[Application]) =>
         """
