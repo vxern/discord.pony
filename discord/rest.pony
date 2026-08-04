@@ -1,5 +1,6 @@
 use "files"
 use collections = "collections"
+use time = "time"
 use courier = "courier"
 use json = "json"
 use lori = "lori"
@@ -53,11 +54,15 @@ class Rest
 
 actor RestApi
     let options: RestOptions
+    let _env: Env
     let _auth: lori.TCPConnectAuth
     let _ssl_context: (ssl.SSLContext val | None)
+    let _timers: time.Timers = time.Timers
+    embed _buckets: collections.Map[String, Bucket] = collections.Map[String, Bucket]
 
     new create(env: Env, options': RestOptions) =>
         options = options'
+        _env = env
         _auth = lori.TCPConnectAuth(env.root)
         _ssl_context =
             try
@@ -74,11 +79,19 @@ actor RestApi
             end
 
     be send_request(request: courier.HTTPRequest val, handler: RawResponseHandler) =>
-        """
-        Dispatches `request` and hands the response to `handler`.
-        """
+        let id = _BucketId(request)
+        let bucket =
+            try
+                _buckets(id)?
+            else
+                let bucket' = Bucket(_env, this, id, _timers)
+                _buckets(id) = bucket'
+                bucket'
+            end
 
-        // TODO(vxern): Respect rate limits, routing requests through `Bucket`.
+        bucket.enqueue(request, handler)
+
+    be _raw_send_request(request: courier.HTTPRequest val, handler: RawResponseHandler) =>
         match _ssl_context
         | let ssl_context: ssl.SSLContext val =>
             _RequestSender(_auth, ssl_context, options, request, handler)

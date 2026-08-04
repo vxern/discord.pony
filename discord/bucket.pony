@@ -47,7 +47,7 @@ actor Bucket
                 _requests_remaining = _requests_remaining - 1
 
                 let self: Bucket tag = this
-                _api.send_request(request, {(request': courier.HTTPRequest val, response': courier.HTTPResponse val) =>
+                _api._raw_send_request(request, {(request': courier.HTTPRequest val, response': courier.HTTPResponse val) =>
                     self.on_response_received(request', response', handler)
                 })
             else
@@ -92,6 +92,31 @@ actor Bucket
         end
 
         _drain()
+
+primitive _BucketId
+    fun apply(request: courier.HTTPRequest val): String =>
+        let path = try request.path.split_by("?")(0)? else request.path end
+        let segments: Array[String] ref = path.split_by("/")
+
+        for (index, segment) in segments.pairs() do
+            let previous = try segments(index - 1)? else "" end
+            let major = _BucketConstants.major_parameters().contains(previous, {(a, b) => a == b})
+
+            if _is_id(segment) and not major then
+                try segments(index)? = "*" end
+            end
+        end
+
+        request.method.string() + "/".join(segments.values())
+
+    fun _is_id(segment: String box): Bool =>
+        if segment.size() == 0 then return false end
+
+        for character in segment.values() do
+            if (character < '0') or (character > '9') then return false end
+        end
+
+        true
 
 class iso _BucketRestart is time.TimerNotify
     let _bucket: Bucket
@@ -142,6 +167,14 @@ class val _RateLimit
         else
             true
         end
+
+primitive _BucketConstants
+    fun major_parameters(): Array[String] val =>
+        """
+        The route segments whose id decides which bucket a request falls in.
+        """
+
+        ["channels"; "guilds"; "webhooks"]
 
 primitive _RateLimitConstants
     fun global_rate_limit_max_count(): USize =>
