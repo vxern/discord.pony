@@ -1,4 +1,154 @@
 use collections = "collections"
+use json = "json"
+
+class val GatewayInfo is Jsonable
+    """
+    https://docs.discord.com/developers/events/gateway#get-gateway
+
+    Apps should cache this value and only call the route again when they are
+    unable to properly establish a connection using the cached one.
+    """
+
+    let url: String
+        """
+        WSS URL that can be used for connecting to the Gateway
+        """
+
+    new val create(url': String) =>
+        url = url'
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var url': (String | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "url" => url' = value as String
+            end
+        end
+
+        url = url' as String
+
+    fun to_json(): json.JsonObject =>
+        json.JsonObject.update("url", url)
+
+class val GatewayBotInfo is Jsonable
+    """
+    https://docs.discord.com/developers/events/gateway#get-gateway-bot-json-response
+
+    Unlike `GatewayInfo`, this should not be cached for extended periods of
+    time, as the value is not guaranteed to be the same per-call and changes as
+    the bot joins and leaves guilds.
+    """
+
+    let url: String
+        """
+        WSS URL that can be used for connecting to the Gateway
+        """
+
+    let shards: USize
+        """
+        Recommended number of shards to use when connecting
+        """
+
+    let session_start_limit: SessionStartLimit
+        """
+        Information on the current session start limit
+        """
+
+    new val create(
+        url': String,
+        shards': USize,
+        session_start_limit': SessionStartLimit
+    ) =>
+        url = url'
+        shards = shards'
+        session_start_limit = session_start_limit'
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var url': (String | None) = None
+        var shards': (USize | None) = None
+        var session_start_limit': (SessionStartLimit | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "url" => url' = value as String
+            | "shards" => shards' = (value as I64).usize()
+            | "session_start_limit" => session_start_limit' = SessionStartLimit.from_json(value as json.JsonObject)?
+            end
+        end
+
+        url = url' as String
+        shards = shards' as USize
+        session_start_limit = session_start_limit' as SessionStartLimit
+
+    fun to_json(): json.JsonObject =>
+        json.JsonObject
+            .update("url", url)
+            .update("shards", shards.i64())
+            .update("session_start_limit", session_start_limit.to_json())
+
+class val SessionStartLimit is Jsonable
+    """
+    https://docs.discord.com/developers/events/gateway#session-start-limit-object-session-start-limit-structure
+    """
+
+    let total: USize
+        """
+        Total number of session starts the current user is allowed
+        """
+
+    let remaining: USize
+        """
+        Remaining number of session starts the current user is allowed
+        """
+
+    let reset_after: U64
+        """
+        Number of milliseconds after which the limit resets
+        """
+
+    let max_concurrency: USize
+        """
+        Number of identify requests allowed per 5 seconds
+        """
+
+    new val create(
+        total': USize,
+        remaining': USize,
+        reset_after': U64,
+        max_concurrency': USize
+    ) =>
+        total = total'
+        remaining = remaining'
+        reset_after = reset_after'
+        max_concurrency = max_concurrency'
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var total': (USize | None) = None
+        var remaining': (USize | None) = None
+        var reset_after': (U64 | None) = None
+        var max_concurrency': (USize | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "total" => total' = (value as I64).usize()
+            | "remaining" => remaining' = (value as I64).usize()
+            | "reset_after" => reset_after' = (value as I64).u64()
+            | "max_concurrency" => max_concurrency' = (value as I64).usize()
+            end
+        end
+
+        total = total' as USize
+        remaining = remaining' as USize
+        reset_after = reset_after' as U64
+        max_concurrency = max_concurrency' as USize
+
+    fun to_json(): json.JsonObject =>
+        json.JsonObject
+            .update("total", total.i64())
+            .update("remaining", remaining.i64())
+            .update("reset_after", reset_after.i64())
+            .update("max_concurrency", max_concurrency.i64())
 
 trait val GatewayOpcode is (collections.Hashable & Equatable[GatewayOpcode])
     """

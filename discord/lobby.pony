@@ -229,6 +229,233 @@ primitive _Metadata
         for (key, value) in map.pairs() do obj = obj.update(key, value) end
         obj
 
+class val LobbyMessage is Jsonable
+    """
+    https://docs.discord.com/developers/resources/lobby#lobby-message-object
+    """
+
+    let id: Snowflake
+        """
+        id of the message
+        """
+
+    let type': MessageType
+        """
+        message type
+        """
+
+    let content: String
+        """
+        message content
+        """
+
+    let lobby_id: Snowflake
+        """
+        id of the lobby this message was sent to
+        """
+
+    let channel_id: Snowflake
+        """
+        included for compatibility with the messages interface; equal to `lobby_id`
+        """
+
+    let author: User
+        """
+        the user who sent the message
+        """
+
+    let lobby_member: (LobbyMessageMember | None)
+        """
+        the author's lobby member additional display name, captured when the message was sent
+
+        Omitted if the author had no `additional_name` set.
+        """
+
+    let metadata: (collections.Map[String, String] val | None)
+        """
+        dispatch-only metadata sent with the message
+        """
+
+    let moderation_metadata: (collections.Map[String, String] val | None)
+        """
+        moderation metadata set via Update Lobby Message Moderation Metadata
+        """
+
+    let flags: Array[MessageFlag] val
+        """
+        message flags
+        """
+
+    let application_id: Snowflake
+        """
+        the application that sent the message
+        """
+
+    new val create(
+        id': Snowflake,
+        type'': MessageType,
+        content': String,
+        lobby_id': Snowflake,
+        channel_id': Snowflake,
+        author': User,
+        lobby_member': (LobbyMessageMember | None) = None,
+        metadata': (collections.Map[String, String] val | None) = None,
+        moderation_metadata': (collections.Map[String, String] val | None) = None,
+        flags': Array[MessageFlag] val,
+        application_id': Snowflake
+    ) =>
+        id = id'
+        type' = type''
+        content = content'
+        lobby_id = lobby_id'
+        channel_id = channel_id'
+        author = author'
+        lobby_member = lobby_member'
+        metadata = metadata'
+        moderation_metadata = moderation_metadata'
+        flags = flags'
+        application_id = application_id'
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var id': (Snowflake | None) = None
+        var type'': (MessageType | None) = None
+        var content': (String | None) = None
+        var lobby_id': (Snowflake | None) = None
+        var channel_id': (Snowflake | None) = None
+        var author': (User | None) = None
+        var lobby_member': (LobbyMessageMember | None) = None
+        var metadata': (collections.Map[String, String] val | None) = None
+        var moderation_metadata': (collections.Map[String, String] val | None) = None
+        var flags': (Array[MessageFlag] val | None) = None
+        var application_id': (Snowflake | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "id" => id' = Snowflake.from_json(value)?
+            | "type" => type'' = MessageTypes.from((value as I64).u8())?
+            | "content" => content' = value as String
+            | "lobby_id" => lobby_id' = Snowflake.from_json(value)?
+            | "channel_id" => channel_id' = Snowflake.from_json(value)?
+            | "author" => author' = User.from_json(value as json.JsonObject)?
+            | "lobby_member" => lobby_member' = LobbyMessageMember.from_json(value as json.JsonObject)?
+            | "metadata" => metadata' = _Metadata(value)
+            | "moderation_metadata" => moderation_metadata' = _Metadata(value)
+            | "flags" => flags' = _MessageFlags((value as I64).u64())
+            | "application_id" => application_id' = Snowflake.from_json(value)?
+            end
+        end
+
+        id = id' as Snowflake
+        type' = type'' as MessageType
+        content = content' as String
+        lobby_id = lobby_id' as Snowflake
+        channel_id = channel_id' as Snowflake
+        author = author' as User
+        lobby_member = lobby_member'
+        metadata = metadata'
+        moderation_metadata = moderation_metadata'
+        flags = flags' as Array[MessageFlag] val
+        application_id = application_id' as Snowflake
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+            .update("id", id.to_json())
+            .update("type", type'.value().i64())
+            .update("content", content)
+            .update("lobby_id", lobby_id.to_json())
+            .update("channel_id", channel_id.to_json())
+            .update("author", author.to_json())
+            .update("flags", _MessageFlags.to_json(flags))
+            .update("application_id", application_id.to_json())
+
+        match lobby_member
+        | let lobby_member': LobbyMessageMember => obj = obj.update("lobby_member", lobby_member'.to_json())
+        end
+
+        match metadata
+        | let metadata': collections.Map[String, String] val => obj = obj.update("metadata", _Metadata.to_json(metadata'))
+        end
+
+        match moderation_metadata
+        | let moderation_metadata': collections.Map[String, String] val => obj = obj.update("moderation_metadata", _Metadata.to_json(moderation_metadata'))
+        end
+
+        obj
+
+class val LobbyMessageMember is Jsonable
+    """
+    https://docs.discord.com/developers/resources/lobby#lobby-message-object
+
+    The slice of the author's lobby member the message carries.
+    """
+
+    let additional_name: String
+        """
+        the author's lobby member additional display name, captured when the message was sent
+        """
+
+    new val create(additional_name': String) =>
+        additional_name = additional_name'
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var additional_name': (String | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "additional_name" => additional_name' = value as String
+            end
+        end
+
+        additional_name = additional_name' as String
+
+    fun to_json(): json.JsonObject =>
+        json.JsonObject.update("additional_name", additional_name)
+
+primitive _LobbyMessages
+    fun apply(value: json.JsonValue): Array[LobbyMessage] val ? =>
+        """
+        Decodes an array of lobby messages.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let messages = Array[LobbyMessage](array.size())
+            for message in array.values() do messages.push(LobbyMessage.from_json(message as json.JsonObject)?) end
+            messages
+        end
+
+    fun to_json(messages: Array[LobbyMessage] val): json.JsonArray =>
+        var array = json.JsonArray
+        for message in messages.values() do array = array.push(message.to_json()) end
+        array
+
+class val LobbyInvite is Jsonable
+    """
+    https://docs.discord.com/developers/resources/lobby#lobby-invite-object
+    """
+
+    let code: String
+        """
+        the invite code for the lobby's linked channel
+        """
+
+    new val create(code': String) =>
+        code = code'
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var code': (String | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "code" => code' = value as String
+            end
+        end
+
+        code = code' as String
+
+    fun to_json(): json.JsonObject =>
+        json.JsonObject.update("code", code)
+
 class val CreateLobbyParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/lobby#create-lobby-json-params

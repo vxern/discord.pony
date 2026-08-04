@@ -395,6 +395,24 @@ class val StickerPack is Jsonable
 
         obj
 
+primitive _StickerPacks
+    fun apply(value: json.JsonValue): Array[StickerPack] val ? =>
+        """
+        Decodes an array of sticker packs.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let packs = Array[StickerPack](array.size())
+            for pack in array.values() do packs.push(StickerPack.from_json(pack as json.JsonObject)?) end
+            packs
+        end
+
+    fun to_json(packs: Array[StickerPack] val): json.JsonArray =>
+        var array = json.JsonArray
+        for pack in packs.values() do array = array.push(pack.to_json()) end
+        array
+
 primitive _StickerItems
     fun apply(value: json.JsonValue): Array[StickerItem] val ? =>
         """

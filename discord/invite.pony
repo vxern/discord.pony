@@ -464,6 +464,139 @@ class val InviteStageInstance is Jsonable
             .update("speaker_count", speaker_count.i64())
             .update("topic", topic)
 
+class val TargetUsersJobStatus is Jsonable
+    """
+    https://docs.discord.com/developers/resources/invite#get-target-users-job-status
+
+    Where the asynchronous processing of an invite's target users has got to.
+    """
+
+    let status: TargetUsersJobStatusCode
+        """
+        the current state of the job
+        """
+
+    let total_users: USize
+        """
+        the number of users in the uploaded file
+        """
+
+    let processed_users: USize
+        """
+        the number of users processed so far
+        """
+
+    let created_at: ISO8601
+        """
+        when the job was created
+        """
+
+    let completed_at: (ISO8601 | None)
+        """
+        when the job finished, or `None` while it is still running
+        """
+
+    let error_message: (String | None)
+        """
+        why the job failed, set only for a `FailedTargetUsersJobStatusCode` job
+        """
+
+    new val create(
+        status': TargetUsersJobStatusCode,
+        total_users': USize,
+        processed_users': USize,
+        created_at': ISO8601,
+        completed_at': (ISO8601 | None) = None,
+        error_message': (String | None) = None
+    ) =>
+        status = status'
+        total_users = total_users'
+        processed_users = processed_users'
+        created_at = created_at'
+        completed_at = completed_at'
+        error_message = error_message'
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var status': (TargetUsersJobStatusCode | None) = None
+        var total_users': (USize | None) = None
+        var processed_users': (USize | None) = None
+        var created_at': (ISO8601 | None) = None
+        var completed_at': (ISO8601 | None) = None
+        var error_message': (String | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "status" => status' = TargetUsersJobStatusCodes.from((value as I64).u8())?
+            | "total_users" => total_users' = (value as I64).usize()
+            | "processed_users" => processed_users' = (value as I64).usize()
+            | "created_at" => created_at' = value as String
+            | "completed_at" =>
+                match value | let string: String => completed_at' = string end
+            | "error_message" =>
+                match value | let string: String => error_message' = string end
+            end
+        end
+
+        status = status' as TargetUsersJobStatusCode
+        total_users = total_users' as USize
+        processed_users = processed_users' as USize
+        created_at = created_at' as ISO8601
+        completed_at = completed_at'
+        error_message = error_message'
+
+    fun to_json(): json.JsonObject =>
+        json.JsonObject
+            .update("status", status.value().i64())
+            .update("total_users", total_users.i64())
+            .update("processed_users", processed_users.i64())
+            .update("created_at", created_at)
+            .update("completed_at", completed_at)
+            .update("error_message", error_message)
+
+trait val TargetUsersJobStatusCode is (collections.Hashable & Equatable[TargetUsersJobStatusCode])
+    """
+    https://docs.discord.com/developers/resources/invite#get-target-users-job-status-status-codes
+    """
+
+    fun value(): U8
+
+    fun hash(): USize => value().hash()
+
+    fun eq(that: TargetUsersJobStatusCode): Bool => value() == that.value()
+primitive UnspecifiedTargetUsersJobStatusCode is TargetUsersJobStatusCode
+    """
+    The default value.
+    """
+
+    fun value(): U8 => 0
+primitive ProcessingTargetUsersJobStatusCode is TargetUsersJobStatusCode
+    """
+    The job is still being processed.
+    """
+
+    fun value(): U8 => 1
+primitive CompletedTargetUsersJobStatusCode is TargetUsersJobStatusCode
+    """
+    The job has been completed successfully.
+    """
+
+    fun value(): U8 => 2
+primitive FailedTargetUsersJobStatusCode is TargetUsersJobStatusCode
+    """
+    The job has failed, see the `error_message` field for more details.
+    """
+
+    fun value(): U8 => 3
+primitive TargetUsersJobStatusCodes
+    fun from(value: U8): TargetUsersJobStatusCode ? =>
+        match value
+        | 0 => UnspecifiedTargetUsersJobStatusCode
+        | 1 => ProcessingTargetUsersJobStatusCode
+        | 2 => CompletedTargetUsersJobStatusCode
+        | 3 => FailedTargetUsersJobStatusCode
+        else error
+        end
+
 class val GetInviteParams
     """
     https://docs.discord.com/developers/resources/invite#get-invite-query-string-params

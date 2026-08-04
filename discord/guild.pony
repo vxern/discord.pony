@@ -3408,6 +3408,209 @@ class val IncidentsData is Jsonable
 
         obj
 
+class val ActiveThreads is Jsonable
+    """
+    https://docs.discord.com/developers/resources/guild#list-active-guild-threads-response-body
+
+    Unlike `ArchivedThreads`, this carries no `has_more`: the route hands back
+    every active thread in the guild in one response.
+    """
+
+    let threads: Array[Channel] val
+        """
+        the active threads
+        """
+
+    let members: Array[ThreadMember] val
+        """
+        a thread member object for each returned thread the current user has joined
+        """
+
+    new val create(threads': Array[Channel] val, members': Array[ThreadMember] val) =>
+        threads = threads'
+        members = members'
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var threads': (Array[Channel] val | None) = None
+        var members': (Array[ThreadMember] val | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "threads" => threads' = _Channels(value)?
+            | "members" => members' = _ThreadMembers(value)?
+            end
+        end
+
+        threads = threads' as Array[Channel] val
+        members = members' as Array[ThreadMember] val
+
+    fun to_json(): json.JsonObject =>
+        json.JsonObject
+            .update("threads", _Channels.to_json(threads))
+            .update("members", _ThreadMembers.to_json(members))
+
+class val CurrentUserNick is Jsonable
+    """
+    https://docs.discord.com/developers/resources/guild#modify-current-user-nick
+
+    The nickname the deprecated Modify Current User Nick route answers with.
+    """
+
+    let nick: (String | None)
+        """
+        the nickname the current user now carries in the guild
+        """
+
+    new val create(nick': (String | None) = None) =>
+        nick = nick'
+
+    new val from_json(obj: json.JsonObject) ? =>
+        nick = match obj("nick")? | let string: String => string end
+
+    fun to_json(): json.JsonObject =>
+        json.JsonObject.update("nick", nick)
+
+class val BulkBanResponse is Jsonable
+    """
+    https://docs.discord.com/developers/resources/guild#bulk-guild-ban-bulk-ban-response
+
+    If none of the users could be banned, an error response code `500000: Failed to ban users` is returned instead.
+    """
+
+    let banned_users: Array[Snowflake] val
+        """
+        list of user ids, that were successfully banned
+        """
+
+    let failed_users: Array[Snowflake] val
+        """
+        list of user ids, that were not banned
+        """
+
+    new val create(banned_users': Array[Snowflake] val, failed_users': Array[Snowflake] val) =>
+        banned_users = banned_users'
+        failed_users = failed_users'
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var banned_users': (Array[Snowflake] val | None) = None
+        var failed_users': (Array[Snowflake] val | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "banned_users" => banned_users' = _Snowflakes(value)?
+            | "failed_users" => failed_users' = _Snowflakes(value)?
+            end
+        end
+
+        banned_users = banned_users' as Array[Snowflake] val
+        failed_users = failed_users' as Array[Snowflake] val
+
+    fun to_json(): json.JsonObject =>
+        json.JsonObject
+            .update("banned_users", _Snowflakes.to_json(banned_users))
+            .update("failed_users", _Snowflakes.to_json(failed_users))
+
+class val GuildRoleMemberCounts is Jsonable
+    """
+    https://docs.discord.com/developers/resources/guild#get-guild-role-member-counts
+
+    A map of role IDs to the number of members with the role. Does not include the @everyone role.
+    """
+
+    let counts: collections.Map[Snowflake, USize] val
+        """
+        the number of members carrying each role, keyed by role id
+        """
+
+    new val create(counts': collections.Map[Snowflake, USize] val) =>
+        counts = counts'
+
+    new val from_json(obj: json.JsonObject) ? =>
+        counts = recover val
+            let counts' = collections.Map[Snowflake, USize](obj.size())
+            for (key, value) in obj.pairs() do
+                counts'(Snowflake(key.u64()?)) = (value as I64).usize()
+            end
+            counts'
+        end
+
+    fun apply(role_id: Snowflake): USize ? =>
+        """
+        The number of members carrying `role_id`, erroring if the role was not
+        counted — because it does not exist, or because it is @everyone.
+        """
+
+        counts(role_id)?
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+        for (role_id, count) in counts.pairs() do obj = obj.update(role_id.string(), count.i64()) end
+        obj
+
+class val GuildPruneCount is Jsonable
+    """
+    https://docs.discord.com/developers/resources/guild#get-guild-prune-count
+
+    Handed back by both Get Guild Prune Count and Begin Guild Prune.
+    """
+
+    let pruned: (USize | None)
+        """
+        the number of members that would be, or were, removed in the prune operation
+
+        `None` only for Begin Guild Prune called with `compute_prune_count` set to `false`.
+        """
+
+    new val create(pruned': (USize | None) = None) =>
+        pruned = pruned'
+
+    new val from_json(obj: json.JsonObject) ? =>
+        pruned = match obj("pruned")? | let integer: I64 => integer.usize() end
+
+    fun to_json(): json.JsonObject =>
+        json.JsonObject.update("pruned", match pruned | let pruned': USize => pruned'.i64() end)
+
+class val GuildVanityUrl is Jsonable
+    """
+    https://docs.discord.com/developers/resources/guild#get-guild-vanity-url
+
+    The partial invite object Get Guild Vanity URL answers with.
+    """
+
+    let code: (String | None)
+        """
+        the vanity invite code, or `None` if a vanity url for the guild is not set
+        """
+
+    let uses: USize
+        """
+        number of times this invite has been used
+        """
+
+    new val create(code': (String | None) = None, uses': USize) =>
+        code = code'
+        uses = uses'
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var code': (String | None) = None
+        var uses': (USize | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "code" =>
+                match value | let string: String => code' = string end
+            | "uses" => uses' = (value as I64).usize()
+            end
+        end
+
+        code = code'
+        uses = uses' as USize
+
+    fun to_json(): json.JsonObject =>
+        json.JsonObject
+            .update("code", code)
+            .update("uses", uses.i64())
+
 class val GetGuildParams
     """
     https://docs.discord.com/developers/resources/guild#get-guild-query-string-params

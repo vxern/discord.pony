@@ -1568,6 +1568,61 @@ primitive _ThreadMembers
         for member in members.values() do array = array.push(member.to_json()) end
         array
 
+class val ArchivedThreads is Jsonable
+    """
+    https://docs.discord.com/developers/resources/channel#list-public-archived-threads-response-body
+
+    A page of archived threads, as handed back by the three routes that list
+    them: public, private, and joined private.
+    """
+
+    let threads: Array[Channel] val
+        """
+        the archived threads
+        """
+
+    let members: Array[ThreadMember] val
+        """
+        a thread member object for each returned thread the current user has joined
+        """
+
+    let has_more: Bool
+        """
+        whether there are potentially additional threads that could be returned on a subsequent call
+        """
+
+    new val create(
+        threads': Array[Channel] val,
+        members': Array[ThreadMember] val,
+        has_more': Bool
+    ) =>
+        threads = threads'
+        members = members'
+        has_more = has_more'
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var threads': (Array[Channel] val | None) = None
+        var members': (Array[ThreadMember] val | None) = None
+        var has_more': (Bool | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "threads" => threads' = _Channels(value)?
+            | "members" => members' = _ThreadMembers(value)?
+            | "has_more" => has_more' = value as Bool
+            end
+        end
+
+        threads = threads' as Array[Channel] val
+        members = members' as Array[ThreadMember] val
+        has_more = has_more' as Bool
+
+    fun to_json(): json.JsonObject =>
+        json.JsonObject
+            .update("threads", _Channels.to_json(threads))
+            .update("members", _ThreadMembers.to_json(members))
+            .update("has_more", has_more)
+
 class val DefaultReaction is Jsonable
     """
     https://docs.discord.com/developers/resources/channel#default-reaction-object-default-reaction-structure

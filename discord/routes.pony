@@ -318,35 +318,32 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/thread-members" where query = params.to_query()), _Decode.list[ThreadMember](handler, _ThreadMembers, options.on_error))
 
-    be get_public_archived_threads(channel_id: Snowflake, params: GetPublicArchivedThreadsParams, handler: ResponseHandler[json.JsonValue]) =>
+    be get_public_archived_threads(channel_id: Snowflake, params: GetPublicArchivedThreadsParams, handler: ResponseHandler[ArchivedThreads]) =>
         """
         https://docs.discord.com/developers/resources/channel#list-public-archived-threads
 
         Returns archived threads in the channel that are public. When called on a GUILD_TEXT channel, returns threads of type PUBLIC_THREAD. When called on a GUILD_ANNOUNCEMENT channel returns threads of type ANNOUNCEMENT_THREAD. Threads are ordered by archive_timestamp, in descending order. Requires the READ_MESSAGE_HISTORY permission.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/threads/archived/public" where query = params.to_query()), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/threads/archived/public" where query = params.to_query()), _Decode.entity[ArchivedThreads](handler, options.on_error))
 
-    be get_private_archived_threads(channel_id: Snowflake, params: GetPrivateArchivedThreadsParams, handler: ResponseHandler[json.JsonValue]) =>
+    be get_private_archived_threads(channel_id: Snowflake, params: GetPrivateArchivedThreadsParams, handler: ResponseHandler[ArchivedThreads]) =>
         """
         https://docs.discord.com/developers/resources/channel#list-private-archived-threads
 
         Returns archived threads in the channel that are of type PRIVATE_THREAD. Threads are ordered by archive_timestamp, in descending order. Requires both the READ_MESSAGE_HISTORY and MANAGE_THREADS permissions.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/threads/archived/private" where query = params.to_query()), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/threads/archived/private" where query = params.to_query()), _Decode.entity[ArchivedThreads](handler, options.on_error))
 
-    be get_joined_private_archived_threads(channel_id: Snowflake, params: GetJoinedPrivateArchivedThreadsParams, handler: ResponseHandler[json.JsonValue]) =>
+    be get_joined_private_archived_threads(channel_id: Snowflake, params: GetJoinedPrivateArchivedThreadsParams, handler: ResponseHandler[ArchivedThreads]) =>
         """
         https://docs.discord.com/developers/resources/channel#list-joined-private-archived-threads
 
         Returns archived threads in the channel that are of type PRIVATE_THREAD, and the user has joined. Threads are ordered by their id, in descending order. Requires the READ_MESSAGE_HISTORY permission.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/users/@me/threads/archived/private" where query = params.to_query()), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/users/@me/threads/archived/private" where query = params.to_query()), _Decode.entity[ArchivedThreads](handler, options.on_error))
 
     be get_guild_emojis(guild_id: Snowflake, handler: ResponseHandler[Array[Emoji] val]) =>
         """
@@ -393,15 +390,14 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/guilds/" + guild_id.string() + "/emojis/" + emoji_id.string() where reason = reason), _Decode.empty(handler, options.on_error))
 
-    be get_application_emojis(application_id: Snowflake, handler: ResponseHandler[json.JsonValue]) =>
+    be get_application_emojis(application_id: Snowflake, handler: ResponseHandler[Array[Emoji] val]) =>
         """
         https://docs.discord.com/developers/resources/emoji#list-application-emojis
 
         Returns an object containing a list of emoji objects for the given application under the items key. Includes a user object for the team member that uploaded the emoji from the app’s settings, or for the bot user if uploaded using the API.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/emojis"), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/emojis"), _Decode.wrapped[Emoji](handler, "items", _Emojis, options.on_error))
 
     be get_application_emoji(application_id: Snowflake, emoji_id: Snowflake, handler: ResponseHandler[Emoji]) =>
         """
@@ -561,15 +557,14 @@ actor Routes
 
         api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/channels" where body = json.JsonPrinter.print(params.to_json())), _Decode.empty(handler, options.on_error))
 
-    be get_active_guild_threads(guild_id: Snowflake, handler: ResponseHandler[json.JsonValue]) =>
+    be get_active_guild_threads(guild_id: Snowflake, handler: ResponseHandler[ActiveThreads]) =>
         """
         https://docs.discord.com/developers/resources/guild#list-active-guild-threads
 
         Returns all active threads in the guild, including public and private threads. Threads are ordered by their id, in descending order.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/threads/active"), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/threads/active"), _Decode.entity[ActiveThreads](handler, options.on_error))
 
     be get_guild_member(guild_id: Snowflake, user_id: Snowflake, handler: ResponseHandler[GuildMember]) =>
         """
@@ -643,7 +638,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/members/@me" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[GuildMember](handler, options.on_error))
 
-    be update_current_user_nick(guild_id: Snowflake, params: UpdateCurrentUserNickParams, handler: ResponseHandler[json.JsonValue], reason: Reason = None) =>
+    be update_current_user_nick(guild_id: Snowflake, params: UpdateCurrentUserNickParams, handler: ResponseHandler[CurrentUserNick], reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/guild#modify-current-user-nick
 
@@ -654,8 +649,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/members/@me/nick" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/members/@me/nick" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[CurrentUserNick](handler, options.on_error))
 
     be add_guild_member_role(guild_id: Snowflake, user_id: Snowflake, role_id: Snowflake, handler: EmptyResponseHandler, reason: Reason = None) =>
         """
@@ -730,7 +724,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/guilds/" + guild_id.string() + "/bans/" + user_id.string() where reason = reason), _Decode.empty(handler, options.on_error))
 
-    be bulk_guild_ban(guild_id: Snowflake, params: BulkGuildBanParams, handler: ResponseHandler[json.JsonValue], reason: Reason = None) =>
+    be bulk_guild_ban(guild_id: Snowflake, params: BulkGuildBanParams, handler: ResponseHandler[BulkBanResponse], reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/guild#bulk-guild-ban
 
@@ -739,8 +733,7 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/bulk-ban" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/bulk-ban" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[BulkBanResponse](handler, options.on_error))
 
     be get_guild_roles(guild_id: Snowflake, handler: ResponseHandler[Array[Role] val]) =>
         """
@@ -760,15 +753,14 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/roles/" + role_id.string()), _Decode.entity[Role](handler, options.on_error))
 
-    be get_guild_role_member_counts(guild_id: Snowflake, handler: ResponseHandler[json.JsonValue]) =>
+    be get_guild_role_member_counts(guild_id: Snowflake, handler: ResponseHandler[GuildRoleMemberCounts]) =>
         """
         https://docs.discord.com/developers/resources/guild#get-guild-role-member-counts
 
         Returns a map of role IDs to the number of members with the role. Does not include the @everyone role.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/roles/member-counts"), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/roles/member-counts"), _Decode.entity[GuildRoleMemberCounts](handler, options.on_error))
 
     be create_guild_role(guild_id: Snowflake, params: CreateGuildRoleParams, handler: ResponseHandler[Role], reason: Reason = None) =>
         """
@@ -818,7 +810,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/guilds/" + guild_id.string() + "/roles/" + role_id.string() where reason = reason), _Decode.empty(handler, options.on_error))
 
-    be get_guild_prune_count(guild_id: Snowflake, params: GetGuildPruneCountParams, handler: ResponseHandler[json.JsonValue]) =>
+    be get_guild_prune_count(guild_id: Snowflake, params: GetGuildPruneCountParams, handler: ResponseHandler[GuildPruneCount]) =>
         """
         https://docs.discord.com/developers/resources/guild#get-guild-prune-count
 
@@ -827,10 +819,9 @@ actor Routes
         By default, prune will not remove users with roles. You can optionally include specific roles in your prune by providing the include_roles parameter. Any inactive user that has a subset of the provided role(s) will be counted in the prune and users with additional roles will not.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/prune" where query = params.to_query()), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/prune" where query = params.to_query()), _Decode.entity[GuildPruneCount](handler, options.on_error))
 
-    be begin_guild_prune(guild_id: Snowflake, params: BeginGuildPruneParams, handler: ResponseHandler[json.JsonValue], reason: Reason = None) =>
+    be begin_guild_prune(guild_id: Snowflake, params: BeginGuildPruneParams, handler: ResponseHandler[GuildPruneCount], reason: Reason = None) =>
         """
         https://docs.discord.com/developers/resources/guild#begin-guild-prune
 
@@ -841,18 +832,16 @@ actor Routes
         This endpoint supports the X-Audit-Log-Reason header.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/prune" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/prune" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[GuildPruneCount](handler, options.on_error))
 
-    be get_guild_voice_regions(guild_id: Snowflake, handler: ResponseHandler[json.JsonValue]) =>
+    be get_guild_voice_regions(guild_id: Snowflake, handler: ResponseHandler[Array[VoiceRegion] val]) =>
         """
         https://docs.discord.com/developers/resources/guild#get-guild-voice-regions
 
         Returns a list of voice region objects for the guild. Unlike the similar /voice route, this returns VIP servers when the guild is VIP-enabled.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/regions"), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/regions"), _Decode.list[VoiceRegion](handler, _VoiceRegions, options.on_error))
 
     be get_guild_invites(guild_id: Snowflake, handler: ResponseHandler[Array[Invite] val]) =>
         """
@@ -914,7 +903,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/widget.json"), _Decode.entity[GuildWidget](handler, options.on_error))
 
-    be get_guild_vanity_url(guild_id: Snowflake, handler: ResponseHandler[json.JsonValue]) =>
+    be get_guild_vanity_url(guild_id: Snowflake, handler: ResponseHandler[GuildVanityUrl]) =>
         """
         https://docs.discord.com/developers/resources/guild#get-guild-vanity-url
 
@@ -923,8 +912,7 @@ actor Routes
         This endpoint is required to get the usage count of the vanity invite, but the invite code can be accessed as vanity_url_code in the guild object without having the MANAGE_GUILD permission.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/vanity-url"), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/vanity-url"), _Decode.entity[GuildVanityUrl](handler, options.on_error))
 
     be get_guild_widget_image(guild_id: Snowflake, params: GetGuildWidgetImageParams, handler: ResponseHandler[Array[U8] val]) =>
         """
@@ -1146,20 +1134,23 @@ actor Routes
         https://docs.discord.com/developers/resources/invite#update-target-users
 
         Updates the users allowed to see and accept this invite. Uploading a file with invalid user IDs will result in a 400 with the invalid IDs described. Requires the caller to be the inviter or have the MANAGE_GUILD permission.
+
+        Discord documents no success body for this route, only the 400 it answers
+        with for invalid user IDs, so the payload is handed back unmodelled.
+        `get_invite_target_users_job_status` is how the asynchronous processing
+        this route kicks off is followed.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
         api.send_request(options.build_request(courier.PUT, "/invites/" + invite_code + "/target-users" where body = json.JsonPrinter.print(params.to_json())), _Decode.payload(handler, options.on_error))
 
-    be get_invite_target_users_job_status(invite_code: String, handler: ResponseHandler[json.JsonValue]) =>
+    be get_invite_target_users_job_status(invite_code: String, handler: ResponseHandler[TargetUsersJobStatus]) =>
         """
         https://docs.discord.com/developers/resources/invite#get-target-users-job-status
 
         Processing target users from a CSV when creating or updating an invite is done asynchronously. This endpoint allows you to check the status of that job. Requires the caller to be the inviter, or have MANAGE_GUILD permission, or have VIEW_AUDIT_LOG permission.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/invites/" + invite_code + "/target-users/job-status"), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/invites/" + invite_code + "/target-users/job-status"), _Decode.entity[TargetUsersJobStatus](handler, options.on_error))
 
     be create_lobby(params: CreateLobbyParams, handler: ResponseHandler[Lobby]) =>
         """
@@ -1296,7 +1287,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.PATCH, "/lobbies/" + lobby_id.string() + "/channel-linking"), _Decode.entity[Lobby](handler, options.on_error))
 
-    be send_lobby_message(lobby_id: Snowflake, params: SendLobbyMessageParams, handler: ResponseHandler[json.JsonValue]) =>
+    be send_lobby_message(lobby_id: Snowflake, params: SendLobbyMessageParams, handler: ResponseHandler[LobbyMessage]) =>
         """
         https://docs.discord.com/developers/resources/lobby#send-lobby-message
 
@@ -1309,10 +1300,9 @@ actor Routes
         If the lobby has a linked channel, the message is also forwarded to that channel. If forwarding fails (for example, due to AutoMod), the lobby message is still delivered to other lobby members.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.POST, "/lobbies/" + lobby_id.string() + "/messages" where body = json.JsonPrinter.print(params.to_json())), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.POST, "/lobbies/" + lobby_id.string() + "/messages" where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[LobbyMessage](handler, options.on_error))
 
-    be get_lobby_messages(lobby_id: Snowflake, params: GetLobbyMessagesParams, handler: ResponseHandler[json.JsonValue]) =>
+    be get_lobby_messages(lobby_id: Snowflake, params: GetLobbyMessagesParams, handler: ResponseHandler[Array[LobbyMessage] val]) =>
         """
         https://docs.discord.com/developers/resources/lobby#get-lobby-messages
 
@@ -1323,8 +1313,7 @@ actor Routes
         Returns an array of lobby message objects (see Send Lobby Message for the object shape).
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/lobbies/" + lobby_id.string() + "/messages" where query = params.to_query()), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/lobbies/" + lobby_id.string() + "/messages" where query = params.to_query()), _Decode.list[LobbyMessage](handler, _LobbyMessages, options.on_error))
 
     be update_lobby_message_moderation_metadata(lobby_id: Snowflake, message_id: Snowflake, params: UpdateLobbyMessageModerationMetadataParams, handler: EmptyResponseHandler) =>
         """
@@ -1341,7 +1330,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.PUT, "/lobbies/" + lobby_id.string() + "/messages/" + message_id.string() + "/moderation-metadata" where body = json.JsonPrinter.print(params.to_json())), _Decode.empty(handler, options.on_error))
 
-    be create_lobby_channel_invite_for_self(lobby_id: Snowflake, handler: ResponseHandler[json.JsonValue]) =>
+    be create_lobby_channel_invite_for_self(lobby_id: Snowflake, handler: ResponseHandler[LobbyInvite]) =>
         """
         https://docs.discord.com/developers/resources/lobby#create-lobby-channel-invite-for-self
 
@@ -1352,10 +1341,9 @@ actor Routes
         Returns a lobby invite object.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.POST, "/lobbies/" + lobby_id.string() + "/members/@me/invites"), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.POST, "/lobbies/" + lobby_id.string() + "/members/@me/invites"), _Decode.entity[LobbyInvite](handler, options.on_error))
 
-    be create_lobby_channel_invite_for_user(lobby_id: Snowflake, user_id: Snowflake, handler: ResponseHandler[json.JsonValue]) =>
+    be create_lobby_channel_invite_for_user(lobby_id: Snowflake, user_id: Snowflake, handler: ResponseHandler[LobbyInvite]) =>
         """
         https://docs.discord.com/developers/resources/lobby#create-lobby-channel-invite-for-user
 
@@ -1366,8 +1354,7 @@ actor Routes
         Returns a lobby invite object.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.POST, "/lobbies/" + lobby_id.string() + "/members/" + user_id.string() + "/invites"), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.POST, "/lobbies/" + lobby_id.string() + "/members/" + user_id.string() + "/invites"), _Decode.entity[LobbyInvite](handler, options.on_error))
 
     be get_channel_messages(channel_id: Snowflake, params: GetChannelMessagesParams, handler: ResponseHandler[Array[Message] val]) =>
         """
@@ -1384,7 +1371,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/messages" where query = params.to_query()), _Decode.list[Message](handler, _Messages, options.on_error))
 
-    be search_guild_messages(guild_id: Snowflake, params: SearchGuildMessagesParams, handler: ResponseHandler[json.JsonValue]) =>
+    be search_guild_messages(guild_id: Snowflake, params: SearchGuildMessagesParams, handler: ResponseHandler[MessageSearchResults]) =>
         """
         https://docs.discord.com/developers/resources/message#search-guild-messages
 
@@ -1402,8 +1389,7 @@ actor Routes
         Additionally, when messages are actively being created or deleted, the total_results field may not be accurate.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/messages/search" where query = params.to_query()), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/messages/search" where query = params.to_query()), _Decode.entity[MessageSearchResults](handler, options.on_error))
 
     be get_channel_message(channel_id: Snowflake, message_id: Snowflake, handler: ResponseHandler[Message]) =>
         """
@@ -1548,15 +1534,14 @@ actor Routes
 
         api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/messages/bulk-delete" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.empty(handler, options.on_error))
 
-    be get_channel_pins(channel_id: Snowflake, params: GetChannelPinsParams, handler: ResponseHandler[json.JsonValue]) =>
+    be get_channel_pins(channel_id: Snowflake, params: GetChannelPinsParams, handler: ResponseHandler[ChannelPins]) =>
         """
         https://docs.discord.com/developers/resources/message#get-channel-pins
 
         Retrieves the list of pins in a channel. Requires the VIEW_CHANNEL permission. If the user is missing the READ_MESSAGE_HISTORY permission in the channel, then no pins will be returned.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/messages/pins" where query = params.to_query()), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/messages/pins" where query = params.to_query()), _Decode.entity[ChannelPins](handler, options.on_error))
 
     be pin_message(channel_id: Snowflake, message_id: Snowflake, handler: EmptyResponseHandler, reason: Reason = None) =>
         """
@@ -1608,15 +1593,14 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() + "/pins/" + message_id.string()), _Decode.empty(handler, options.on_error))
 
-    be get_answer_voters(channel_id: Snowflake, message_id: Snowflake, answer_id: U64, params: GetAnswerVotersParams, handler: ResponseHandler[json.JsonValue]) =>
+    be get_answer_voters(channel_id: Snowflake, message_id: Snowflake, answer_id: U64, params: GetAnswerVotersParams, handler: ResponseHandler[Array[User] val]) =>
         """
         https://docs.discord.com/developers/resources/poll#get-answer-voters
 
         Get a list of users that voted for this specific answer.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/polls/" + message_id.string() + "/answers/" + answer_id.string() where query = params.to_query()), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/polls/" + message_id.string() + "/answers/" + answer_id.string() where query = params.to_query()), _Decode.wrapped[User](handler, "users", _Users, options.on_error))
 
     be end_poll(channel_id: Snowflake, message_id: Snowflake, handler: ResponseHandler[Message]) =>
         """
@@ -1660,15 +1644,14 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/soundboard-default-sounds"), _Decode.list[SoundboardSound](handler, _SoundboardSounds, options.on_error))
 
-    be get_guild_soundboard_sounds(guild_id: Snowflake, handler: ResponseHandler[json.JsonValue]) =>
+    be get_guild_soundboard_sounds(guild_id: Snowflake, handler: ResponseHandler[Array[SoundboardSound] val]) =>
         """
         https://docs.discord.com/developers/resources/soundboard#list-guild-soundboard-sounds
 
         Returns a list of the guild's soundboard sounds. Includes user fields if the bot has the CREATE_GUILD_EXPRESSIONS or MANAGE_GUILD_EXPRESSIONS permission.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/soundboard-sounds"), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/soundboard-sounds"), _Decode.wrapped[SoundboardSound](handler, "items", _SoundboardSounds, options.on_error))
 
     be get_guild_soundboard_sound(guild_id: Snowflake, sound_id: Snowflake, handler: ResponseHandler[SoundboardSound]) =>
         """
@@ -1773,15 +1756,14 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/stickers/" + sticker_id.string()), _Decode.entity[Sticker](handler, options.on_error))
 
-    be get_sticker_packs(handler: ResponseHandler[json.JsonValue]) =>
+    be get_sticker_packs(handler: ResponseHandler[Array[StickerPack] val]) =>
         """
         https://docs.discord.com/developers/resources/sticker#list-sticker-packs
 
         Returns a list of available sticker packs.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/sticker-packs"), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/sticker-packs"), _Decode.wrapped[StickerPack](handler, "sticker_packs", _StickerPacks, options.on_error))
 
     be get_sticker_pack(sticker_pack_id: Snowflake, handler: ResponseHandler[StickerPack]) =>
         """
@@ -1983,27 +1965,25 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/users/@me/applications/" + application_id.string() + "/role-connection"), _Decode.empty(handler, options.on_error))
 
-    be get_voice_regions(handler: ResponseHandler[json.JsonValue]) =>
+    be get_voice_regions(handler: ResponseHandler[Array[VoiceRegion] val]) =>
         """
         https://docs.discord.com/developers/resources/voice#list-voice-regions
 
         Returns an array of voice region objects that can be used when setting a voice or stage channel's rtc_region.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/voice/regions"), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/voice/regions"), _Decode.list[VoiceRegion](handler, _VoiceRegions, options.on_error))
 
-    be get_current_user_voice_state(guild_id: Snowflake, handler: ResponseHandler[json.JsonValue]) =>
+    be get_current_user_voice_state(guild_id: Snowflake, handler: ResponseHandler[VoiceState]) =>
         """
         https://docs.discord.com/developers/resources/voice#get-current-user-voice-state
 
         Returns the current user's voice state in the guild.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/voice-states/@me"), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/voice-states/@me"), _Decode.entity[VoiceState](handler, options.on_error))
 
-    be get_user_voice_state(guild_id: Snowflake, user_id: Snowflake, handler: ResponseHandler[json.JsonValue]) =>
+    be get_user_voice_state(guild_id: Snowflake, user_id: Snowflake, handler: ResponseHandler[VoiceState]) =>
         """
         https://docs.discord.com/developers/resources/voice#get-user-voice-state
 
@@ -2012,8 +1992,7 @@ actor Routes
         If the specified user is connected to a voice channel, the current user must have permission to connect to the channel.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/voice-states/" + user_id.string()), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/voice-states/" + user_id.string()), _Decode.entity[VoiceState](handler, options.on_error))
 
     be update_current_user_voice_state(guild_id: Snowflake, params: UpdateCurrentUserVoiceStateParams, handler: EmptyResponseHandler) =>
         """
@@ -2419,7 +2398,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/" + command_id.string() + "/permissions"), _Decode.entity[GuildApplicationCommandPermissions](handler, options.on_error))
 
-    be update_application_command_permissions(application_id: Snowflake, guild_id: Snowflake, command_id: Snowflake, params: UpdateApplicationCommandPermissionsParams, handler: ResponseHandler[json.JsonValue]) =>
+    be update_application_command_permissions(application_id: Snowflake, guild_id: Snowflake, command_id: Snowflake, params: UpdateApplicationCommandPermissionsParams, handler: ResponseHandler[GuildApplicationCommandPermissions]) =>
         """
         https://docs.discord.com/developers/interactions/application-commands#edit-application-command-permissions
 
@@ -2434,8 +2413,7 @@ actor Routes
         Deleting or renaming a command will permanently delete all permissions for the command
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.PUT, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/" + command_id.string() + "/permissions" where body = json.JsonPrinter.print(params.to_json())), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.PUT, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/" + command_id.string() + "/permissions" where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[GuildApplicationCommandPermissions](handler, options.on_error))
 
     be batch_update_application_command_permissions(application_id: Snowflake, guild_id: Snowflake, params: BatchUpdateApplicationCommandPermissionsParams, handler: ResponseHandler[Array[GuildApplicationCommandPermissions] val]) =>
         """
@@ -2455,17 +2433,16 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/oauth2/applications/@me"), _Decode.entity[Application](handler, options.on_error))
 
-    be get_current_authorization_information(handler: ResponseHandler[json.JsonValue]) =>
+    be get_current_authorization_information(handler: ResponseHandler[AuthorizationInformation]) =>
         """
         https://docs.discord.com/developers/topics/oauth2#get-current-authorization-information
 
         Returns info about the current authorization. Requires authentication with a bearer token.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/oauth2/@me"), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/oauth2/@me"), _Decode.entity[AuthorizationInformation](handler, options.on_error))
 
-    be get_gateway(handler: ResponseHandler[json.JsonValue]) =>
+    be get_gateway(handler: ResponseHandler[GatewayInfo]) =>
         """
         https://docs.discord.com/developers/events/gateway#get-gateway
 
@@ -2474,10 +2451,9 @@ actor Routes
         Returns an object with a valid WSS URL which the app can use when Connecting to the Gateway. Apps should cache this value and only call this endpoint to retrieve a new URL when they are unable to properly establish a connection using the cached one.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/gateway"), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/gateway"), _Decode.entity[GatewayInfo](handler, options.on_error))
 
-    be get_gateway_bot(handler: ResponseHandler[json.JsonValue]) =>
+    be get_gateway_bot(handler: ResponseHandler[GatewayBotInfo]) =>
         """
         https://docs.discord.com/developers/events/gateway#get-gateway-bot
 
@@ -2486,8 +2462,7 @@ actor Routes
         Returns an object based on the information in Get Gateway, plus additional metadata that can help during the operation of large or sharded bots. Unlike the Get Gateway, this route should not be cached for extended periods of time as the value is not guaranteed to be the same per-call, and changes as the bot joins/leaves guilds.
         """
 
-        // TODO(vxern): Hand back a dedicated type once this response shape is modelled.
-        api.send_request(options.build_request(courier.GET, "/gateway/bot"), _Decode.payload(handler, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/gateway/bot"), _Decode.entity[GatewayBotInfo](handler, options.on_error))
 
 primitive _Decode
     """
@@ -2530,6 +2505,26 @@ primitive _Decode
             else
                 try
                     handler(decode(_Decode.parse(response)?)?)
+                else
+                    on_error(_Decode.undecodable(request, response))
+                end
+            end
+        }
+
+    fun wrapped[A: Any val](handler: ResponseHandler[Array[A] val], key: String, decode: {(json.JsonValue): Array[A] val ?} val, on_error: RestErrorHandler): RawResponseHandler =>
+        """
+        Decodes an array held under `key` of an enclosing object, as returned by
+        routes documented as returning "an object containing a list of ...
+        objects". The enclosing object carries nothing else, so it is unwrapped
+        rather than modelled.
+        """
+
+        {(request: courier.HTTPRequest val, response: courier.HTTPResponse val) =>
+            match _Decode.rejected(request, response)
+            | let rejection: RestError => on_error(rejection)
+            else
+                try
+                    handler(decode((_Decode.parse(response)? as json.JsonObject)(key)?)?)
                 else
                     on_error(_Decode.undecodable(request, response))
                 end

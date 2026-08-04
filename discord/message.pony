@@ -3488,6 +3488,166 @@ primitive _MessagePins
         for pin in pins.values() do array = array.push(pin.to_json()) end
         array
 
+class val ChannelPins is Jsonable
+    """
+    https://docs.discord.com/developers/resources/message#get-channel-pins-response-structure
+    """
+
+    let items: Array[MessagePin] val
+        """
+        the pins in the channel
+        """
+
+    let has_more: Bool
+        """
+        whether there are potentially additional pins that could be returned on a subsequent call
+        """
+
+    new val create(items': Array[MessagePin] val, has_more': Bool) =>
+        items = items'
+        has_more = has_more'
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var items': (Array[MessagePin] val | None) = None
+        var has_more': (Bool | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "items" => items' = _MessagePins(value)?
+            | "has_more" => has_more' = value as Bool
+            end
+        end
+
+        items = items' as Array[MessagePin] val
+        has_more = has_more' as Bool
+
+    fun to_json(): json.JsonObject =>
+        json.JsonObject
+            .update("items", _MessagePins.to_json(items))
+            .update("has_more", has_more)
+
+class val MessageSearchResults is Jsonable
+    """
+    https://docs.discord.com/developers/resources/message#search-guild-messages-response-body
+
+    Only a 200 carries this shape. A guild that is not yet indexed answers 202
+    with an error-shaped body instead, which is reported through `on_error`
+    along with the `retry_after` it carries.
+    """
+
+    let doing_deep_historical_index: Bool
+        """
+        Whether the guild is undergoing a deep historical indexing operation
+        """
+
+    let documents_indexed: (USize | None)
+        """
+        The number of documents that have been indexed during the current index operation, if any
+        """
+
+    let total_results: USize
+        """
+        The total number of results that match the query
+
+        When messages are actively being created or deleted, this may not be accurate.
+        """
+
+    let messages: Array[Array[Message] val] val
+        """
+        A nested array of messages that match the query
+
+        The nested array was used to provide surrounding context to search results. However, surrounding context is no longer returned.
+        """
+
+    let threads: (Array[Channel] val | None)
+        """
+        The threads that contain the returned messages
+        """
+
+    let members: (Array[ThreadMember] val | None)
+        """
+        A thread member object for each returned thread the current user has joined
+        """
+
+    new val create(
+        doing_deep_historical_index': Bool,
+        documents_indexed': (USize | None) = None,
+        total_results': USize,
+        messages': Array[Array[Message] val] val,
+        threads': (Array[Channel] val | None) = None,
+        members': (Array[ThreadMember] val | None) = None
+    ) =>
+        doing_deep_historical_index = doing_deep_historical_index'
+        documents_indexed = documents_indexed'
+        total_results = total_results'
+        messages = messages'
+        threads = threads'
+        members = members'
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var doing_deep_historical_index': (Bool | None) = None
+        var documents_indexed': (USize | None) = None
+        var total_results': (USize | None) = None
+        var messages': (Array[Array[Message] val] val | None) = None
+        var threads': (Array[Channel] val | None) = None
+        var members': (Array[ThreadMember] val | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "doing_deep_historical_index" => doing_deep_historical_index' = value as Bool
+            | "documents_indexed" => documents_indexed' = (value as I64).usize()
+            | "total_results" => total_results' = (value as I64).usize()
+            | "messages" => messages' = _MessageGroups(value)?
+            | "threads" => threads' = _Channels(value)?
+            | "members" => members' = _ThreadMembers(value)?
+            end
+        end
+
+        doing_deep_historical_index = doing_deep_historical_index' as Bool
+        documents_indexed = documents_indexed'
+        total_results = total_results' as USize
+        messages = messages' as Array[Array[Message] val] val
+        threads = threads'
+        members = members'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+            .update("doing_deep_historical_index", doing_deep_historical_index)
+            .update("total_results", total_results.i64())
+            .update("messages", _MessageGroups.to_json(messages))
+
+        match documents_indexed
+        | let documents_indexed': USize => obj = obj.update("documents_indexed", documents_indexed'.i64())
+        end
+
+        match threads
+        | let threads': Array[Channel] val => obj = obj.update("threads", _Channels.to_json(threads'))
+        end
+
+        match members
+        | let members': Array[ThreadMember] val => obj = obj.update("members", _ThreadMembers.to_json(members'))
+        end
+
+        obj
+
+primitive _MessageGroups
+    fun apply(value: json.JsonValue): Array[Array[Message] val] val ? =>
+        """
+        Decodes an array of arrays of messages, as search results arrive in.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let groups = Array[Array[Message] val](array.size())
+            for group in array.values() do groups.push(_Messages(group)?) end
+            groups
+        end
+
+    fun to_json(groups: Array[Array[Message] val] val): json.JsonArray =>
+        var array = json.JsonArray
+        for group in groups.values() do array = array.push(_Messages.to_json(group)) end
+        array
+
 class val SharedClientTheme is Jsonable
     """
     https://docs.discord.com/developers/resources/message#shared-client-theme-object-shared-client-theme-object-structure

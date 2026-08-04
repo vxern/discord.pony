@@ -1,6 +1,275 @@
 use collections = "collections"
 use json = "json"
 
+class val VoiceState is Jsonable
+    """
+    https://docs.discord.com/developers/resources/voice#voice-state-object-voice-state-structure
+
+    Used to represent a user's voice connection status.
+    """
+
+    let guild_id: (Snowflake | None)
+        """
+        the guild id this voice state is for
+        """
+
+    let channel_id: (Snowflake | None)
+        """
+        the channel id this user is connected to
+        """
+
+    let user_id: Snowflake
+        """
+        the user id this voice state is for
+        """
+
+    let member: (GuildMember | None)
+        """
+        the guild member this voice state is for
+        """
+
+    let session_id: String
+        """
+        the session id for this voice state
+        """
+
+    let deaf: Bool
+        """
+        whether this user is deafened by the server
+        """
+
+    let mute: Bool
+        """
+        whether this user is muted by the server
+        """
+
+    let self_deaf: Bool
+        """
+        whether this user is locally deafened
+        """
+
+    let self_mute: Bool
+        """
+        whether this user is locally muted
+        """
+
+    let self_stream: (Bool | None)
+        """
+        whether this user is streaming using "Go Live"
+        """
+
+    let self_video: Bool
+        """
+        whether this user's camera is enabled
+        """
+
+    let suppress: Bool
+        """
+        whether this user's permission to speak is denied
+        """
+
+    let request_to_speak_timestamp: (ISO8601 | None)
+        """
+        the time at which the user requested to speak
+        """
+
+    new val create(
+        guild_id': (Snowflake | None) = None,
+        channel_id': (Snowflake | None) = None,
+        user_id': Snowflake,
+        member': (GuildMember | None) = None,
+        session_id': String,
+        deaf': Bool,
+        mute': Bool,
+        self_deaf': Bool,
+        self_mute': Bool,
+        self_stream': (Bool | None) = None,
+        self_video': Bool,
+        suppress': Bool,
+        request_to_speak_timestamp': (ISO8601 | None) = None
+    ) =>
+        guild_id = guild_id'
+        channel_id = channel_id'
+        user_id = user_id'
+        member = member'
+        session_id = session_id'
+        deaf = deaf'
+        mute = mute'
+        self_deaf = self_deaf'
+        self_mute = self_mute'
+        self_stream = self_stream'
+        self_video = self_video'
+        suppress = suppress'
+        request_to_speak_timestamp = request_to_speak_timestamp'
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var guild_id': (Snowflake | None) = None
+        var channel_id': (Snowflake | None) = None
+        var user_id': (Snowflake | None) = None
+        var member': (GuildMember | None) = None
+        var session_id': (String | None) = None
+        var deaf': (Bool | None) = None
+        var mute': (Bool | None) = None
+        var self_deaf': (Bool | None) = None
+        var self_mute': (Bool | None) = None
+        var self_stream': (Bool | None) = None
+        var self_video': (Bool | None) = None
+        var suppress': (Bool | None) = None
+        var request_to_speak_timestamp': (ISO8601 | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "guild_id" => guild_id' = Snowflake.from_json(value)?
+            | "channel_id" =>
+                match value | let string: String => channel_id' = Snowflake.from_json(string)? end
+            | "user_id" => user_id' = Snowflake.from_json(value)?
+            | "member" => member' = GuildMember.from_json(value as json.JsonObject)?
+            | "session_id" => session_id' = value as String
+            | "deaf" => deaf' = value as Bool
+            | "mute" => mute' = value as Bool
+            | "self_deaf" => self_deaf' = value as Bool
+            | "self_mute" => self_mute' = value as Bool
+            | "self_stream" => self_stream' = value as Bool
+            | "self_video" => self_video' = value as Bool
+            | "suppress" => suppress' = value as Bool
+            | "request_to_speak_timestamp" =>
+                match value | let string: String => request_to_speak_timestamp' = string end
+            end
+        end
+
+        guild_id = guild_id'
+        channel_id = channel_id'
+        user_id = user_id' as Snowflake
+        member = member'
+        session_id = session_id' as String
+        deaf = deaf' as Bool
+        mute = mute' as Bool
+        self_deaf = self_deaf' as Bool
+        self_mute = self_mute' as Bool
+        self_stream = self_stream'
+        self_video = self_video' as Bool
+        suppress = suppress' as Bool
+        request_to_speak_timestamp = request_to_speak_timestamp'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+            .update("channel_id", match channel_id | let channel_id': Snowflake => channel_id'.to_json() end)
+            .update("user_id", user_id.to_json())
+            .update("session_id", session_id)
+            .update("deaf", deaf)
+            .update("mute", mute)
+            .update("self_deaf", self_deaf)
+            .update("self_mute", self_mute)
+            .update("self_video", self_video)
+            .update("suppress", suppress)
+            .update("request_to_speak_timestamp", request_to_speak_timestamp)
+
+        match guild_id
+        | let guild_id': Snowflake => obj = obj.update("guild_id", guild_id'.to_json())
+        end
+
+        match member
+        | let member': GuildMember => obj = obj.update("member", member'.to_json())
+        end
+
+        match self_stream
+        | let self_stream': Bool => obj = obj.update("self_stream", self_stream')
+        end
+
+        obj
+
+class val VoiceRegion is Jsonable
+    """
+    https://docs.discord.com/developers/resources/voice#voice-region-object-voice-region-structure
+    """
+
+    let id: String
+        """
+        unique ID for the region
+        """
+
+    let name: String
+        """
+        name of the region
+        """
+
+    let optimal: Bool
+        """
+        true for a single server that is closest to the current user's client
+        """
+
+    let deprecated: Bool
+        """
+        whether this is a deprecated voice region (avoid switching to these)
+        """
+
+    let custom: Bool
+        """
+        whether this is a custom voice region (used for events/etc)
+        """
+
+    new val create(
+        id': String,
+        name': String,
+        optimal': Bool,
+        deprecated': Bool,
+        custom': Bool
+    ) =>
+        id = id'
+        name = name'
+        optimal = optimal'
+        deprecated = deprecated'
+        custom = custom'
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var id': (String | None) = None
+        var name': (String | None) = None
+        var optimal': (Bool | None) = None
+        var deprecated': (Bool | None) = None
+        var custom': (Bool | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "id" => id' = value as String
+            | "name" => name' = value as String
+            | "optimal" => optimal' = value as Bool
+            | "deprecated" => deprecated' = value as Bool
+            | "custom" => custom' = value as Bool
+            end
+        end
+
+        id = id' as String
+        name = name' as String
+        optimal = optimal' as Bool
+        deprecated = deprecated' as Bool
+        custom = custom' as Bool
+
+    fun to_json(): json.JsonObject =>
+        json.JsonObject
+            .update("id", id)
+            .update("name", name)
+            .update("optimal", optimal)
+            .update("deprecated", deprecated)
+            .update("custom", custom)
+
+primitive _VoiceRegions
+    fun apply(value: json.JsonValue): Array[VoiceRegion] val ? =>
+        """
+        Decodes an array of voice regions.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let regions = Array[VoiceRegion](array.size())
+            for region in array.values() do regions.push(VoiceRegion.from_json(region as json.JsonObject)?) end
+            regions
+        end
+
+    fun to_json(regions: Array[VoiceRegion] val): json.JsonArray =>
+        var array = json.JsonArray
+        for region in regions.values() do array = array.push(region.to_json()) end
+        array
+
 trait val VoiceOpcode is (collections.Hashable & Equatable[VoiceOpcode])
     """
     Our voice gateways have their own set of opcodes and close codes.
