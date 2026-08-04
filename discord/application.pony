@@ -68,7 +68,10 @@ class val Application is Jsonable
         Hex encoded key for verification in interactions and the GameSDK’s GetTicket
         """
 
-    // TODO(vxern): Add `team` (team object; If the app belongs to a team, this will be a list of the members of that team) once `Team` is implemented.
+    let team: (Team | None)
+        """
+        If the app belongs to a team, this will be a list of the members of that team
+        """
 
     let guild_id: (Snowflake | None)
         """
@@ -182,6 +185,7 @@ class val Application is Jsonable
         privacy_policy_url': (String | None) = None,
         owner': (User | None) = None,
         verify_key': String,
+        team': (Team | None) = None,
         guild_id': (Snowflake | None) = None,
         guild': (PartialGuild | None) = None,
         primary_sku_id': (Snowflake | None) = None,
@@ -214,6 +218,7 @@ class val Application is Jsonable
         privacy_policy_url = privacy_policy_url'
         owner = owner'
         verify_key = verify_key'
+        team = team'
         guild_id = guild_id'
         guild = guild'
         primary_sku_id = primary_sku_id'
@@ -247,6 +252,7 @@ class val Application is Jsonable
         var terms_of_service_url': (String | None) = None
         var privacy_policy_url': (String | None) = None
         var verify_key': (String | None) = None
+        var team': (Team | None) = None
         var guild_id': (Snowflake | None) = None
         var guild': (PartialGuild | None) = None
         var primary_sku_id': (Snowflake | None) = None
@@ -283,6 +289,8 @@ class val Application is Jsonable
             | "terms_of_service_url" => terms_of_service_url' = value as String
             | "privacy_policy_url" => privacy_policy_url' = value as String
             | "verify_key" => verify_key' = value as String
+            | "team" =>
+                match value | let obj': json.JsonObject => team' = Team.from_json(obj')? end
             | "guild_id" => guild_id' = Snowflake.from_json(value)?
             | "guild" => guild' = PartialGuild.from_json(value as json.JsonObject)?
             | "primary_sku_id" => primary_sku_id' = Snowflake.from_json(value)?
@@ -321,6 +329,7 @@ class val Application is Jsonable
         terms_of_service_url = terms_of_service_url'
         privacy_policy_url = privacy_policy_url'
         verify_key = verify_key' as String
+        team = team'
         guild_id = guild_id'
         guild = guild'
         primary_sku_id = primary_sku_id'
@@ -373,6 +382,10 @@ class val Application is Jsonable
 
         match privacy_policy_url
         | let privacy_policy_url': String => obj = obj.update("privacy_policy_url", privacy_policy_url')
+        end
+
+        match team
+        | let team': Team => obj = obj.update("team", team'.to_json())
         end
 
         match guild_id
@@ -881,6 +894,24 @@ primitive _IntegrationTypesConfiguration
         for (type', configuration) in map.pairs() do obj = obj.update(type'.value().string(), configuration.to_json()) end
         obj
 
+primitive _ApplicationIntegrationTypes
+    fun apply(value: json.JsonValue): Array[ApplicationIntegrationType] val ? =>
+        """
+        Decodes an array of application integration types.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let types = Array[ApplicationIntegrationType](array.size())
+            for type' in array.values() do types.push(ApplicationIntegrationTypes.from((type' as I64).u8())?) end
+            types
+        end
+
+    fun to_json(types: Array[ApplicationIntegrationType] val): json.JsonArray =>
+        var array = json.JsonArray
+        for type' in types.values() do array = array.push(type'.value().i64()) end
+        array
+
 trait val ApplicationEventWebhookStatus is (collections.Hashable & Equatable[ApplicationEventWebhookStatus])
     """
     https://docs.discord.com/developers/resources/application#application-object-application-event-webhook-status
@@ -1067,6 +1098,226 @@ class val InstallParams is Jsonable
         json.JsonObject
             .update("scopes", _Strings.to_json(scopes))
             .update("permissions", _Permissions.to_json(permissions))
+
+class val Team is Jsonable
+    """
+    https://docs.discord.com/developers/topics/teams#data-models-team-object
+
+    Teams are groups of developers on Discord who want to collaborate on apps.
+    """
+
+    let icon: (String | None)
+        """
+        Hash of the image of the team's icon
+        """
+
+    let id: Snowflake
+        """
+        Unique ID of the team
+        """
+
+    let members: Array[TeamMember] val
+        """
+        Members of the team
+        """
+
+    let name: String
+        """
+        Name of the team
+        """
+
+    let owner_user_id: Snowflake
+        """
+        User ID of the current team owner
+        """
+
+    new val create(
+        id': Snowflake,
+        members': Array[TeamMember] val,
+        name': String,
+        owner_user_id': Snowflake,
+        icon': (String | None) = None
+    ) =>
+        icon = icon'
+        id = id'
+        members = members'
+        name = name'
+        owner_user_id = owner_user_id'
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var icon': (String | None) = None
+        var id': (Snowflake | None) = None
+        var members': (Array[TeamMember] val | None) = None
+        var name': (String | None) = None
+        var owner_user_id': (Snowflake | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "icon" =>
+                match value | let string: String => icon' = string end
+            | "id" => id' = Snowflake.from_json(value)?
+            | "members" => members' = _TeamMembers(value)?
+            | "name" => name' = value as String
+            | "owner_user_id" => owner_user_id' = Snowflake.from_json(value)?
+            end
+        end
+
+        icon = icon'
+        id = id' as Snowflake
+        members = members' as Array[TeamMember] val
+        name = name' as String
+        owner_user_id = owner_user_id' as Snowflake
+
+    fun to_json(): json.JsonObject =>
+        json.JsonObject
+            .update("icon", icon)
+            .update("id", id.to_json())
+            .update("members", _TeamMembers.to_json(members))
+            .update("name", name)
+            .update("owner_user_id", owner_user_id.to_json())
+
+class val TeamMember is Jsonable
+    """
+    https://docs.discord.com/developers/topics/teams#data-models-team-member-object
+    """
+
+    let membership_state: TeamMembershipState
+        """
+        User's membership state on the team
+        """
+
+    let team_id: Snowflake
+        """
+        ID of the parent team of which they are a member
+        """
+
+    let user: User
+        """
+        Avatar, discriminator, ID, and username of the user
+        """
+
+    let role: TeamMemberRole
+        """
+        Role of the team member
+        """
+
+    new val create(
+        membership_state': TeamMembershipState,
+        team_id': Snowflake,
+        user': User,
+        role': TeamMemberRole
+    ) =>
+        membership_state = membership_state'
+        team_id = team_id'
+        user = user'
+        role = role'
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var membership_state': (TeamMembershipState | None) = None
+        var team_id': (Snowflake | None) = None
+        var user': (User | None) = None
+        var role': (TeamMemberRole | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "membership_state" => membership_state' = TeamMembershipStates.from((value as I64).u8())?
+            | "team_id" => team_id' = Snowflake.from_json(value)?
+            | "user" => user' = User.from_json(value as json.JsonObject)?
+            | "role" => role' = TeamMemberRoles.from(value as String)?
+            end
+        end
+
+        membership_state = membership_state' as TeamMembershipState
+        team_id = team_id' as Snowflake
+        user = user' as User
+        role = role' as TeamMemberRole
+
+    fun to_json(): json.JsonObject =>
+        json.JsonObject
+            .update("membership_state", membership_state.value().i64())
+            .update("team_id", team_id.to_json())
+            .update("user", user.to_json())
+            .update("role", role.value())
+
+primitive _TeamMembers
+    fun apply(value: json.JsonValue): Array[TeamMember] val ? =>
+        """
+        Decodes an array of team members.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let members = Array[TeamMember](array.size())
+            for member in array.values() do members.push(TeamMember.from_json(member as json.JsonObject)?) end
+            members
+        end
+
+    fun to_json(members: Array[TeamMember] val): json.JsonArray =>
+        var array = json.JsonArray
+        for member in members.values() do array = array.push(member.to_json()) end
+        array
+
+trait val TeamMembershipState is (collections.Hashable & Equatable[TeamMembershipState])
+    """
+    https://docs.discord.com/developers/topics/teams#data-models-membership-state-enum
+    """
+
+    fun value(): U8
+
+    fun hash(): USize => value().hash()
+
+    fun eq(that: TeamMembershipState): Bool => value() == that.value()
+primitive InvitedTeamMembershipState is TeamMembershipState
+    fun value(): U8 => 1
+primitive AcceptedTeamMembershipState is TeamMembershipState
+    fun value(): U8 => 2
+primitive TeamMembershipStates
+    fun from(value: U8): TeamMembershipState ? =>
+        match value
+        | 1 => InvitedTeamMembershipState
+        | 2 => AcceptedTeamMembershipState
+        else error
+        end
+
+trait val TeamMemberRole is (collections.Hashable & Equatable[TeamMemberRole])
+    """
+    https://docs.discord.com/developers/topics/teams#team-member-roles-team-member-role-types
+
+    Team member roles are hierarchical, with the owner — who is identified by the team's `owner_user_id` rather than by a role — sitting above all of them.
+    """
+
+    fun value(): String
+
+    fun hash(): USize => value().hash()
+
+    fun eq(that: TeamMemberRole): Bool => value() == that.value()
+primitive AdminTeamMemberRole is TeamMemberRole
+    """
+    Admins have similar access to owners, except they cannot take destructive actions on the team or team-owned apps.
+    """
+
+    fun value(): String => "admin"
+primitive DeveloperTeamMemberRole is TeamMemberRole
+    """
+    Developers can access information about team-owned apps, like the client secret or public key. They can also take limited actions on team-owned apps, like configuring interaction endpoints or resetting the bot token. Members with the Developer role *cannot* manage the team or its membership, or take destructive actions on team-owned apps.
+    """
+
+    fun value(): String => "developer"
+primitive ReadOnlyTeamMemberRole is TeamMemberRole
+    """
+    Read-only members can access information about a team and any team-owned apps. Some examples include getting the IDs of applications and exporting payout records. Members can also invite a bot associated with a team-owned app that is marked private.
+    """
+
+    fun value(): String => "read_only"
+primitive TeamMemberRoles
+    fun from(value: String): TeamMemberRole ? =>
+        match value
+        | "admin" => AdminTeamMemberRole
+        | "developer" => DeveloperTeamMemberRole
+        | "read_only" => ReadOnlyTeamMemberRole
+        else error
+        end
+
 
 class val ActivityInstance is Jsonable
     """

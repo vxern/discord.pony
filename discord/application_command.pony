@@ -230,7 +230,7 @@ primitive _ApplicationCommandOptionChoices
         for choice in choices.values() do array = array.push(choice.to_json()) end
         array
 
-class val ApplicationCommandOption is ToJsonable
+class val ApplicationCommandOption is Jsonable
     """
     https://docs.discord.com/developers/interactions/application-commands#application-command-object-application-command-option-structure
 
@@ -340,6 +340,64 @@ class val ApplicationCommandOption is ToJsonable
         max_length = max_length'
         autocomplete = autocomplete'
 
+    new val from_json(obj: json.JsonObject) ? =>
+        var type'': (ApplicationCommandOptionType | None) = None
+        var name': (String | None) = None
+        var description': (String | None) = None
+        var name_localizations': (collections.Map[Locale, String] val | None) = None
+        var description_localizations': (collections.Map[Locale, String] val | None) = None
+        var required': (Bool | None) = None
+        var choices': (Array[ApplicationCommandOptionChoice] val | None) = None
+        var options': (Array[ApplicationCommandOption] val | None) = None
+        var channel_types': (Array[ChannelType] val | None) = None
+        var min_value': ((I64 | F64) | None) = None
+        var max_value': ((I64 | F64) | None) = None
+        var min_length': (USize | None) = None
+        var max_length': (USize | None) = None
+        var autocomplete': (Bool | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "type" => type'' = ApplicationCommandOptionTypes.from((value as I64).u8())?
+            | "name" => name' = value as String
+            | "description" => description' = value as String
+            | "name_localizations" => name_localizations' = _Localizations(value)?
+            | "description_localizations" => description_localizations' = _Localizations(value)?
+            | "required" => required' = value as Bool
+            | "choices" => choices' = _ApplicationCommandOptionChoices(value)?
+            | "options" => options' = _ApplicationCommandOptions(value)?
+            | "channel_types" => channel_types' = _ChannelTypes(value)?
+            | "min_value" =>
+                match value
+                | let integer: I64 => min_value' = integer
+                | let float: F64 => min_value' = float
+                end
+            | "max_value" =>
+                match value
+                | let integer: I64 => max_value' = integer
+                | let float: F64 => max_value' = float
+                end
+            | "min_length" => min_length' = (value as I64).usize()
+            | "max_length" => max_length' = (value as I64).usize()
+            | "autocomplete" => autocomplete' = value as Bool
+            end
+        end
+
+        type' = type'' as ApplicationCommandOptionType
+        name = name' as String
+        description = description' as String
+        name_localizations = name_localizations'
+        description_localizations = description_localizations'
+        required = required'
+        choices = choices'
+        options = options'
+        channel_types = channel_types'
+        min_value = min_value'
+        max_value = max_value'
+        min_length = min_length'
+        max_length = max_length'
+        autocomplete = autocomplete'
+
     fun to_json(): json.JsonObject =>
         var obj = json.JsonObject
             .update("type", type'.value().i64())
@@ -400,10 +458,240 @@ class val ApplicationCommandOption is ToJsonable
         obj
 
 primitive _ApplicationCommandOptions
+    fun apply(value: json.JsonValue): Array[ApplicationCommandOption] val ? =>
+        """
+        Decodes an array of application command options.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let options = Array[ApplicationCommandOption](array.size())
+            for option in array.values() do options.push(ApplicationCommandOption.from_json(option as json.JsonObject)?) end
+            options
+        end
+
     fun to_json(options: Array[ApplicationCommandOption] val): json.JsonArray =>
         var array = json.JsonArray
         for option in options.values() do array = array.push(option.to_json()) end
         array
+
+class val ApplicationCommand is Jsonable
+    """
+    https://docs.discord.com/developers/interactions/application-commands#application-command-object-application-command-structure
+
+    Application commands are native ways to interact with apps in the Discord client.
+
+    The deprecated `dm_permission` and `default_permission` fields are not modelled; `contexts` supersedes the former and `default_member_permissions` the latter.
+    """
+
+    let id: Snowflake
+        """
+        Unique ID of command
+        """
+
+    let type': (ApplicationCommandType | None)
+        """
+        Type of command, defaults to `1`
+        """
+
+    let application_id: Snowflake
+        """
+        ID of the parent application
+        """
+
+    let guild_id: (Snowflake | None)
+        """
+        Guild ID of the command, if not global
+        """
+
+    let name: String
+        """
+        Name of command, 1-32 characters
+        """
+
+    let name_localizations: Nullable[collections.Map[Locale, String] val]
+        """
+        Localization dictionary for `name` field. Values follow the same restrictions as `name`
+        """
+
+    let description: String
+        """
+        Description for `CHAT_INPUT` commands, 1-100 characters. Empty string for `USER` and `MESSAGE` commands
+        """
+
+    let description_localizations: Nullable[collections.Map[Locale, String] val]
+        """
+        Localization dictionary for `description` field. Values follow the same restrictions as `description`
+        """
+
+    let options: (Array[ApplicationCommandOption] val | None)
+        """
+        Parameters for the command, max of 25
+
+        Only available for `CHAT_INPUT` commands.
+        """
+
+    let default_member_permissions: Nullable[Array[Permission] val]
+        """
+        Set of permissions represented as a bit set
+        """
+
+    let nsfw: (Bool | None)
+        """
+        Indicates whether the command is age-restricted, defaults to `false`
+        """
+
+    let integration_types: (Array[ApplicationIntegrationType] val | None)
+        """
+        Installation contexts where the command is available, only for globally-scoped commands. Defaults to your app's configured contexts
+        """
+
+    let contexts: (Array[InteractionContextType] val | None)
+        """
+        Interaction context(s) where the command can be used, only for globally-scoped commands
+        """
+
+    let version: Snowflake
+        """
+        Autoincrementing version identifier updated during substantial record changes
+        """
+
+    let handler: (ApplicationCommandHandlerType | None)
+        """
+        Determines whether the interaction is handled by the app's interactions handler or by Discord
+
+        Only available for `PRIMARY_ENTRY_POINT` commands.
+        """
+
+    new val create(
+        id': Snowflake,
+        application_id': Snowflake,
+        name': String,
+        description': String,
+        version': Snowflake,
+        type'': (ApplicationCommandType | None) = None,
+        guild_id': (Snowflake | None) = None,
+        name_localizations': Nullable[collections.Map[Locale, String] val] = None,
+        description_localizations': Nullable[collections.Map[Locale, String] val] = None,
+        options': (Array[ApplicationCommandOption] val | None) = None,
+        default_member_permissions': Nullable[Array[Permission] val] = None,
+        nsfw': (Bool | None) = None,
+        integration_types': (Array[ApplicationIntegrationType] val | None) = None,
+        contexts': (Array[InteractionContextType] val | None) = None,
+        handler': (ApplicationCommandHandlerType | None) = None
+    ) =>
+        id = id'
+        type' = type''
+        application_id = application_id'
+        guild_id = guild_id'
+        name = name'
+        name_localizations = name_localizations'
+        description = description'
+        description_localizations = description_localizations'
+        options = options'
+        default_member_permissions = default_member_permissions'
+        nsfw = nsfw'
+        integration_types = integration_types'
+        contexts = contexts'
+        version = version'
+        handler = handler'
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var id': (Snowflake | None) = None
+        var type'': (ApplicationCommandType | None) = None
+        var application_id': (Snowflake | None) = None
+        var guild_id': (Snowflake | None) = None
+        var name': (String | None) = None
+        var name_localizations': (collections.Map[Locale, String] val | None) = None
+        var description': (String | None) = None
+        var description_localizations': (collections.Map[Locale, String] val | None) = None
+        var options': (Array[ApplicationCommandOption] val | None) = None
+        var default_member_permissions': (Array[Permission] val | None) = None
+        var nsfw': (Bool | None) = None
+        var integration_types': (Array[ApplicationIntegrationType] val | None) = None
+        var contexts': (Array[InteractionContextType] val | None) = None
+        var version': (Snowflake | None) = None
+        var handler': (ApplicationCommandHandlerType | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "id" => id' = Snowflake.from_json(value)?
+            | "type" => type'' = ApplicationCommandTypes.from((value as I64).u8())?
+            | "application_id" => application_id' = Snowflake.from_json(value)?
+            | "guild_id" => guild_id' = Snowflake.from_json(value)?
+            | "name" => name' = value as String
+            | "name_localizations" => name_localizations' = _Localizations(value)?
+            | "description" => description' = value as String
+            | "description_localizations" => description_localizations' = _Localizations(value)?
+            | "options" => options' = _ApplicationCommandOptions(value)?
+            | "default_member_permissions" =>
+                match value | let string: String => default_member_permissions' = _Permissions(string)? end
+            | "nsfw" => nsfw' = value as Bool
+            | "integration_types" => integration_types' = _ApplicationIntegrationTypes(value)?
+            | "contexts" =>
+                match value | let array: json.JsonArray => contexts' = _InteractionContextTypes(array)? end
+            | "version" => version' = Snowflake.from_json(value)?
+            | "handler" => handler' = ApplicationCommandHandlerTypes.from((value as I64).u8())?
+            end
+        end
+
+        id = id' as Snowflake
+        type' = type''
+        application_id = application_id' as Snowflake
+        guild_id = guild_id'
+        name = name' as String
+        name_localizations = name_localizations'
+        description = description' as String
+        description_localizations = description_localizations'
+        options = options'
+        default_member_permissions = default_member_permissions'
+        nsfw = nsfw'
+        integration_types = integration_types'
+        contexts = contexts'
+        version = version' as Snowflake
+        handler = handler'
+
+    fun to_json(): json.JsonObject =>
+        var obj = _ApplicationCommandJson(
+            name,
+            name_localizations,
+            description,
+            description_localizations,
+            options,
+            default_member_permissions,
+            integration_types,
+            contexts,
+            type',
+            nsfw,
+            handler)
+            .update("id", id.to_json())
+            .update("application_id", application_id.to_json())
+            .update("version", version.to_json())
+
+        match guild_id
+        | let guild_id': Snowflake => obj = obj.update("guild_id", guild_id'.to_json())
+        end
+
+        obj
+
+primitive _ApplicationCommands
+    fun apply(value: json.JsonValue): Array[ApplicationCommand] val ? =>
+        """
+        Decodes an array of application commands.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let commands = Array[ApplicationCommand](array.size())
+            for command in array.values() do commands.push(ApplicationCommand.from_json(command as json.JsonObject)?) end
+            commands
+        end
+
+    fun to_json(commands: Array[ApplicationCommand] val): json.JsonArray =>
+        var array = json.JsonArray
+        for command in commands.values() do array = array.push(command.to_json()) end
+        array
+
 
 trait val ApplicationCommandPermissionType is (collections.Hashable & Equatable[ApplicationCommandPermissionType])
     """
@@ -497,6 +785,92 @@ primitive _ApplicationCommandPermissions
         var array = json.JsonArray
         for permission in permissions.values() do array = array.push(permission.to_json()) end
         array
+
+class val GuildApplicationCommandPermissions is Jsonable
+    """
+    https://docs.discord.com/developers/interactions/application-commands#application-command-permissions-object-guild-application-command-permissions-structure
+
+    Returned when fetching the permissions for an app's command(s) in a guild.
+
+    When the `id` field is the application ID instead of a command ID, the permissions apply to all commands that do not contain explicit overwrites.
+    """
+
+    let id: Snowflake
+        """
+        ID of the command or the application ID
+        """
+
+    let application_id: Snowflake
+        """
+        ID of the application the command belongs to
+        """
+
+    let guild_id: Snowflake
+        """
+        ID of the guild
+        """
+
+    let permissions: Array[ApplicationCommandPermission] val
+        """
+        Permissions for the command in the guild, max of 100
+        """
+
+    new val create(
+        id': Snowflake,
+        application_id': Snowflake,
+        guild_id': Snowflake,
+        permissions': Array[ApplicationCommandPermission] val
+    ) =>
+        id = id'
+        application_id = application_id'
+        guild_id = guild_id'
+        permissions = permissions'
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var id': (Snowflake | None) = None
+        var application_id': (Snowflake | None) = None
+        var guild_id': (Snowflake | None) = None
+        var permissions': (Array[ApplicationCommandPermission] val | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "id" => id' = Snowflake.from_json(value)?
+            | "application_id" => application_id' = Snowflake.from_json(value)?
+            | "guild_id" => guild_id' = Snowflake.from_json(value)?
+            | "permissions" => permissions' = _ApplicationCommandPermissions(value)?
+            end
+        end
+
+        id = id' as Snowflake
+        application_id = application_id' as Snowflake
+        guild_id = guild_id' as Snowflake
+        permissions = permissions' as Array[ApplicationCommandPermission] val
+
+    fun to_json(): json.JsonObject =>
+        json.JsonObject
+            .update("id", id.to_json())
+            .update("application_id", application_id.to_json())
+            .update("guild_id", guild_id.to_json())
+            .update("permissions", _ApplicationCommandPermissions.to_json(permissions))
+
+primitive _GuildApplicationCommandPermissions
+    fun apply(value: json.JsonValue): Array[GuildApplicationCommandPermissions] val ? =>
+        """
+        Decodes an array of guild application command permissions.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let permissions = Array[GuildApplicationCommandPermissions](array.size())
+            for entry in array.values() do permissions.push(GuildApplicationCommandPermissions.from_json(entry as json.JsonObject)?) end
+            permissions
+        end
+
+    fun to_json(permissions: Array[GuildApplicationCommandPermissions] val): json.JsonArray =>
+        var array = json.JsonArray
+        for entry in permissions.values() do array = array.push(entry.to_json()) end
+        array
+
 
 class val GetGlobalApplicationCommandsParams
     """

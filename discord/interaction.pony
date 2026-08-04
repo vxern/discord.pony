@@ -399,6 +399,145 @@ primitive InteractionContextTypes
         else error
         end
 
+type ApplicationCommandInteractionDataOptionValue is (String | I64 | F64 | Bool)
+    """
+    The value a user supplied for an application command option, whose type follows the option's own `type`.
+    """
+
+class val ApplicationCommandInteractionDataOption is Jsonable
+    """
+    https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-object-application-command-interaction-data-option-structure
+
+    All options have names, and an option can either be a parameter and input value — in which case `value` will be set — or it can denote a subcommand or group, in which case it will contain a top-level key and another array of `options`.
+
+    `value` and `options` are mutually exclusive.
+    """
+
+    let name: String
+        """
+        Name of the parameter
+        """
+
+    let type': ApplicationCommandOptionType
+        """
+        Value of application command option type
+        """
+
+    let value: (ApplicationCommandInteractionDataOptionValue | None)
+        """
+        Value of the option resulting from user input
+        """
+
+    let options: (Array[ApplicationCommandInteractionDataOption] val | None)
+        """
+        Present if this option is a group or subcommand
+        """
+
+    let focused: (Bool | None)
+        """
+        `true` if this option is the currently focused option for autocomplete
+        """
+
+    new val create(
+        name': String,
+        type'': ApplicationCommandOptionType,
+        value': (ApplicationCommandInteractionDataOptionValue | None) = None,
+        options': (Array[ApplicationCommandInteractionDataOption] val | None) = None,
+        focused': (Bool | None) = None
+    ) =>
+        name = name'
+        type' = type''
+        value = value'
+        options = options'
+        focused = focused'
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var name': (String | None) = None
+        var type'': (ApplicationCommandOptionType | None) = None
+        var value': (ApplicationCommandInteractionDataOptionValue | None) = None
+        var options': (Array[ApplicationCommandInteractionDataOption] val | None) = None
+        var focused': (Bool | None) = None
+
+        for (key, value'') in obj.pairs() do
+            match key
+            | "name" => name' = value'' as String
+            | "type" => type'' = ApplicationCommandOptionTypes.from((value'' as I64).u8())?
+            | "value" =>
+                match value''
+                | let string: String => value' = string
+                | let integer: I64 => value' = integer
+                | let float: F64 => value' = float
+                | let boolean: Bool => value' = boolean
+                end
+            | "options" => options' = _ApplicationCommandInteractionDataOptions(value'')?
+            | "focused" => focused' = value'' as Bool
+            end
+        end
+
+        name = name' as String
+        type' = type'' as ApplicationCommandOptionType
+        value = value'
+        options = options'
+        focused = focused'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+            .update("name", name)
+            .update("type", type'.value().i64())
+
+        match value
+        | let value': String => obj = obj.update("value", value')
+        | let value': I64 => obj = obj.update("value", value')
+        | let value': F64 => obj = obj.update("value", value')
+        | let value': Bool => obj = obj.update("value", value')
+        end
+
+        match options
+        | let options': Array[ApplicationCommandInteractionDataOption] val => obj = obj.update("options", _ApplicationCommandInteractionDataOptions.to_json(options'))
+        end
+
+        match focused
+        | let focused': Bool => obj = obj.update("focused", focused')
+        end
+
+        obj
+
+primitive _ApplicationCommandInteractionDataOptions
+    fun apply(value: json.JsonValue): Array[ApplicationCommandInteractionDataOption] val ? =>
+        """
+        Decodes an array of application command interaction data options.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let options = Array[ApplicationCommandInteractionDataOption](array.size())
+            for option in array.values() do options.push(ApplicationCommandInteractionDataOption.from_json(option as json.JsonObject)?) end
+            options
+        end
+
+    fun to_json(options: Array[ApplicationCommandInteractionDataOption] val): json.JsonArray =>
+        var array = json.JsonArray
+        for option in options.values() do array = array.push(option.to_json()) end
+        array
+
+primitive _InteractionContextTypes
+    fun apply(value: json.JsonValue): Array[InteractionContextType] val ? =>
+        """
+        Decodes an array of interaction context types.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let types = Array[InteractionContextType](array.size())
+            for type' in array.values() do types.push(InteractionContextTypes.from((type' as I64).u8())?) end
+            types
+        end
+
+    fun to_json(types: Array[InteractionContextType] val): json.JsonArray =>
+        var array = json.JsonArray
+        for type' in types.values() do array = array.push(type'.value().i64()) end
+        array
+
 class val ApplicationCommandData is Jsonable
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-object-application-command-data-structure
@@ -416,14 +555,20 @@ class val ApplicationCommandData is Jsonable
         the name of the invoked command
         """
 
-    // TODO(vxern): Add `type` (integer; the type of the invoked command) once `ApplicationCommandType` is implemented.
+    let type': ApplicationCommandType
+        """
+        the type of the invoked command
+        """
 
     let resolved: (ResolvedData | None)
         """
         converted users + roles + channels + attachments
         """
 
-    // TODO(vxern): Add `options` (array of application command interaction data option objects; the params + values from the user) once `ApplicationCommandInteractionDataOption` is implemented.
+    let options: (Array[ApplicationCommandInteractionDataOption] val | None)
+        """
+        the params + values from the user
+        """
 
     let guild_id: (Snowflake | None)
         """
@@ -438,20 +583,26 @@ class val ApplicationCommandData is Jsonable
     new val create(
         id': Snowflake,
         name': String,
+        type'': ApplicationCommandType,
         resolved': (ResolvedData | None) = None,
+        options': (Array[ApplicationCommandInteractionDataOption] val | None) = None,
         guild_id': (Snowflake | None) = None,
         target_id': (Snowflake | None) = None
     ) =>
         id = id'
         name = name'
+        type' = type''
         resolved = resolved'
+        options = options'
         guild_id = guild_id'
         target_id = target_id'
 
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
         var name': (String | None) = None
+        var type'': (ApplicationCommandType | None) = None
         var resolved': (ResolvedData | None) = None
+        var options': (Array[ApplicationCommandInteractionDataOption] val | None) = None
         var guild_id': (Snowflake | None) = None
         var target_id': (Snowflake | None) = None
 
@@ -459,7 +610,9 @@ class val ApplicationCommandData is Jsonable
             match key
             | "id" => id' = Snowflake.from_json(value)?
             | "name" => name' = value as String
+            | "type" => type'' = ApplicationCommandTypes.from((value as I64).u8())?
             | "resolved" => resolved' = ResolvedData.from_json(value as json.JsonObject)?
+            | "options" => options' = _ApplicationCommandInteractionDataOptions(value)?
             | "guild_id" => guild_id' = Snowflake.from_json(value)?
             | "target_id" => target_id' = Snowflake.from_json(value)?
             end
@@ -467,7 +620,9 @@ class val ApplicationCommandData is Jsonable
 
         id = id' as Snowflake
         name = name' as String
+        type' = type'' as ApplicationCommandType
         resolved = resolved'
+        options = options'
         guild_id = guild_id'
         target_id = target_id'
 
@@ -475,9 +630,14 @@ class val ApplicationCommandData is Jsonable
         var obj = json.JsonObject
             .update("id", id.to_json())
             .update("name", name)
+            .update("type", type'.value().i64())
 
         match resolved
         | let resolved': ResolvedData => obj = obj.update("resolved", resolved'.to_json())
+        end
+
+        match options
+        | let options': Array[ApplicationCommandInteractionDataOption] val => obj = obj.update("options", _ApplicationCommandInteractionDataOptions.to_json(options'))
         end
 
         match guild_id
@@ -836,9 +996,11 @@ primitive _ResolvedAttachments
         for (id, attachment) in map.pairs() do obj = obj.update(id.string(), attachment.to_json()) end
         obj
 
-class val InteractionResponse is Jsonable
+class val InteractionResponse is ToJsonable
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-response-object-interaction-response-structure
+
+    An app returns this to respond to an interaction. Discord never sends one, so this is serialised only — the callback data shapes are request bodies with no decoded form.
     """
 
     let type': InteractionCallbackType
@@ -846,25 +1008,27 @@ class val InteractionResponse is Jsonable
         the type of response
         """
 
-    // TODO(vxern): Add `data` (interaction callback data; an optional response message) once `ApplicationCommandOptionChoice` is implemented. The messages and modal variants are now expressible, but the autocomplete variant carries `choices`, and the variant in play is determined by `type` rather than by a tag on `data` itself.
+    let data: (InteractionCallbackData | None)
+        """
+        an optional response message
 
-    new val create(type'': InteractionCallbackType) =>
+        Which of the three shapes this holds is determined by `type` rather than by a tag on the data itself: messages for the message callback types, `choices` for `APPLICATION_COMMAND_AUTOCOMPLETE_RESULT`, and a modal for `MODAL`.
+        """
+
+    new val create(type'': InteractionCallbackType, data': (InteractionCallbackData | None) = None) =>
         type' = type''
-
-    new val from_json(obj: json.JsonObject) ? =>
-        var type'': (InteractionCallbackType | None) = None
-
-        for (key, value) in obj.pairs() do
-            match key
-            | "type" => type'' = InteractionCallbackTypes.from((value as I64).u8())?
-            end
-        end
-
-        type' = type'' as InteractionCallbackType
+        data = data'
 
     fun to_json(): json.JsonObject =>
-        json.JsonObject
-            .update("type", type'.value().i64())
+        var obj = json.JsonObject.update("type", type'.value().i64())
+
+        match data
+        | let data': InteractionCallbackMessageParams => obj = obj.update("data", data'.to_json())
+        | let data': InteractionCallbackAutocompleteParams => obj = obj.update("data", data'.to_json())
+        | let data': InteractionCallbackModalParams => obj = obj.update("data", data'.to_json())
+        end
+
+        obj
 
 trait val InteractionCallbackType is (collections.Hashable & Equatable[InteractionCallbackType])
     """

@@ -10,7 +10,10 @@ class val AuditLog is Jsonable
     When an app is performing an eligible action using the APIs, it can pass an X-Audit-Log-Reason header to indicate why the action was taken. More information is in the audit log entry section.
     """
 
-    // TODO(vxern): Add `application_commands` (array of application command objects; List of application commands referenced in the audit log) once `ApplicationCommand` is implemented.
+    let application_commands: Array[ApplicationCommand] val
+        """
+        List of application commands referenced in the audit log
+        """
 
     let audit_log_entries: Array[AuditLogEntry] val
         """
@@ -52,6 +55,7 @@ class val AuditLog is Jsonable
         """
 
     new val create(
+        application_commands': Array[ApplicationCommand] val,
         audit_log_entries': Array[AuditLogEntry] val,
         auto_moderation_rules': Array[AutoModerationRule] val,
         guild_scheduled_events': Array[GuildScheduledEvent] val,
@@ -60,6 +64,7 @@ class val AuditLog is Jsonable
         users': Array[User] val,
         webhooks': Array[Webhook] val
     ) =>
+        application_commands = application_commands'
         audit_log_entries = audit_log_entries'
         auto_moderation_rules = auto_moderation_rules'
         guild_scheduled_events = guild_scheduled_events'
@@ -69,6 +74,7 @@ class val AuditLog is Jsonable
         webhooks = webhooks'
 
     new val from_json(obj: json.JsonObject) ? =>
+        var application_commands': (Array[ApplicationCommand] val | None) = None
         var audit_log_entries': (Array[AuditLogEntry] val | None) = None
         var auto_moderation_rules': (Array[AutoModerationRule] val | None) = None
         var guild_scheduled_events': (Array[GuildScheduledEvent] val | None) = None
@@ -79,6 +85,7 @@ class val AuditLog is Jsonable
 
         for (key, value) in obj.pairs() do
             match key
+            | "application_commands" => application_commands' = _ApplicationCommands(value)?
             | "audit_log_entries" => audit_log_entries' = _AuditLogEntries(value)?
             | "auto_moderation_rules" => auto_moderation_rules' = _AutoModerationRules(value)?
             | "guild_scheduled_events" => guild_scheduled_events' = _GuildScheduledEvents(value)?
@@ -89,6 +96,7 @@ class val AuditLog is Jsonable
             end
         end
 
+        application_commands = application_commands' as Array[ApplicationCommand] val
         audit_log_entries = audit_log_entries' as Array[AuditLogEntry] val
         auto_moderation_rules = auto_moderation_rules' as Array[AutoModerationRule] val
         guild_scheduled_events = guild_scheduled_events' as Array[GuildScheduledEvent] val
@@ -99,6 +107,7 @@ class val AuditLog is Jsonable
 
     fun to_json(): json.JsonObject =>
         json.JsonObject
+            .update("application_commands", _ApplicationCommands.to_json(application_commands))
             .update("audit_log_entries", _AuditLogEntries.to_json(audit_log_entries))
             .update("auto_moderation_rules", _AutoModerationRules.to_json(auto_moderation_rules))
             .update("guild_scheduled_events", _GuildScheduledEvents.to_json(guild_scheduled_events))
