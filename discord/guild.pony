@@ -575,6 +575,499 @@ primitive _Guilds
         for guild in guilds.values() do array = array.push(guild.to_json()) end
         array
 
+class val PartialGuild is Jsonable
+    """
+    https://docs.discord.com/developers/resources/guild#guild-object-guild-structure
+
+    A guild Discord sent as a *partial* object: the same structure as `Guild`,
+    but carrying only some of its fields. Invites, webhooks, interactions and
+    applications all embed guilds this way, and none of them agree on which
+    fields they include, so every field here but `id` is optional.
+
+    The fields mean exactly what their `Guild` counterparts do, and are
+    documented there. `Guild` is what a route hands back when it promises a whole
+    guild; this is what it hands back when it promises a piece of one. A field
+    Discord omits is indistinguishable from a field Discord sent as `null`.
+    """
+
+    let id: Snowflake
+    let name: (String | None)
+    let icon: (String | None)
+    let icon_hash: (String | None)
+    let splash: (String | None)
+    let discovery_splash: (String | None)
+    let owner: (Bool | None)
+    let owner_id: (Snowflake | None)
+    let permissions: (Array[Permission] val | None)
+    let afk_channel_id: (Snowflake | None)
+    let afk_timeout: (USize | None)
+    let widget_enabled: (Bool | None)
+    let widget_channel_id: (Snowflake | None)
+    let verification_level: (VerificationLevel | None)
+    let default_message_notifications: (DefaultMessageNotificationLevel | None)
+    let explicit_content_filter: (ExplicitContentFilterLevel | None)
+    let roles: (Array[Role] val | None)
+    let emojis: (Array[Emoji] val | None)
+    let features: (Array[String] val | None)
+    let mfa_level: (MFALevel | None)
+    let application_id: (Snowflake | None)
+    let system_channel_id: (Snowflake | None)
+    let system_channel_flags: (Array[SystemChannelFlag] val | None)
+    let rules_channel_id: (Snowflake | None)
+    let max_presences: (USize | None)
+    let max_members: (USize | None)
+    let vanity_url_code: (String | None)
+    let description: (String | None)
+    let banner: (String | None)
+    let premium_tier: (PremiumTier | None)
+    let premium_subscription_count: (USize | None)
+    let preferred_locale: (Locale | None)
+    let public_updates_channel_id: (Snowflake | None)
+    let max_video_channel_users: (USize | None)
+    let max_stage_video_channel_users: (USize | None)
+    let approximate_member_count: (USize | None)
+    let approximate_presence_count: (USize | None)
+    let welcome_screen: (WelcomeScreen | None)
+    let nsfw_level: (GuildNSFWLevel | None)
+    let stickers: (Array[Sticker] val | None)
+    let premium_progress_bar_enabled: (Bool | None)
+    let safety_alerts_channel_id: (Snowflake | None)
+    let incidents_data: (IncidentsData | None)
+
+    new val create(
+        id': Snowflake,
+        name': (String | None) = None,
+        icon': (String | None) = None,
+        icon_hash': (String | None) = None,
+        splash': (String | None) = None,
+        discovery_splash': (String | None) = None,
+        owner': (Bool | None) = None,
+        owner_id': (Snowflake | None) = None,
+        permissions': (Array[Permission] val | None) = None,
+        afk_channel_id': (Snowflake | None) = None,
+        afk_timeout': (USize | None) = None,
+        widget_enabled': (Bool | None) = None,
+        widget_channel_id': (Snowflake | None) = None,
+        verification_level': (VerificationLevel | None) = None,
+        default_message_notifications': (DefaultMessageNotificationLevel | None) = None,
+        explicit_content_filter': (ExplicitContentFilterLevel | None) = None,
+        roles': (Array[Role] val | None) = None,
+        emojis': (Array[Emoji] val | None) = None,
+        features': (Array[String] val | None) = None,
+        mfa_level': (MFALevel | None) = None,
+        application_id': (Snowflake | None) = None,
+        system_channel_id': (Snowflake | None) = None,
+        system_channel_flags': (Array[SystemChannelFlag] val | None) = None,
+        rules_channel_id': (Snowflake | None) = None,
+        max_presences': (USize | None) = None,
+        max_members': (USize | None) = None,
+        vanity_url_code': (String | None) = None,
+        description': (String | None) = None,
+        banner': (String | None) = None,
+        premium_tier': (PremiumTier | None) = None,
+        premium_subscription_count': (USize | None) = None,
+        preferred_locale': (Locale | None) = None,
+        public_updates_channel_id': (Snowflake | None) = None,
+        max_video_channel_users': (USize | None) = None,
+        max_stage_video_channel_users': (USize | None) = None,
+        approximate_member_count': (USize | None) = None,
+        approximate_presence_count': (USize | None) = None,
+        welcome_screen': (WelcomeScreen | None) = None,
+        nsfw_level': (GuildNSFWLevel | None) = None,
+        stickers': (Array[Sticker] val | None) = None,
+        premium_progress_bar_enabled': (Bool | None) = None,
+        safety_alerts_channel_id': (Snowflake | None) = None,
+        incidents_data': (IncidentsData | None) = None
+    ) =>
+        id = id'
+        name = name'
+        icon = icon'
+        icon_hash = icon_hash'
+        splash = splash'
+        discovery_splash = discovery_splash'
+        owner = owner'
+        owner_id = owner_id'
+        permissions = permissions'
+        afk_channel_id = afk_channel_id'
+        afk_timeout = afk_timeout'
+        widget_enabled = widget_enabled'
+        widget_channel_id = widget_channel_id'
+        verification_level = verification_level'
+        default_message_notifications = default_message_notifications'
+        explicit_content_filter = explicit_content_filter'
+        roles = roles'
+        emojis = emojis'
+        features = features'
+        mfa_level = mfa_level'
+        application_id = application_id'
+        system_channel_id = system_channel_id'
+        system_channel_flags = system_channel_flags'
+        rules_channel_id = rules_channel_id'
+        max_presences = max_presences'
+        max_members = max_members'
+        vanity_url_code = vanity_url_code'
+        description = description'
+        banner = banner'
+        premium_tier = premium_tier'
+        premium_subscription_count = premium_subscription_count'
+        preferred_locale = preferred_locale'
+        public_updates_channel_id = public_updates_channel_id'
+        max_video_channel_users = max_video_channel_users'
+        max_stage_video_channel_users = max_stage_video_channel_users'
+        approximate_member_count = approximate_member_count'
+        approximate_presence_count = approximate_presence_count'
+        welcome_screen = welcome_screen'
+        nsfw_level = nsfw_level'
+        stickers = stickers'
+        premium_progress_bar_enabled = premium_progress_bar_enabled'
+        safety_alerts_channel_id = safety_alerts_channel_id'
+        incidents_data = incidents_data'
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var id': (Snowflake | None) = None
+        var name': (String | None) = None
+        var icon': (String | None) = None
+        var icon_hash': (String | None) = None
+        var splash': (String | None) = None
+        var discovery_splash': (String | None) = None
+        var owner': (Bool | None) = None
+        var owner_id': (Snowflake | None) = None
+        var permissions': (Array[Permission] val | None) = None
+        var afk_channel_id': (Snowflake | None) = None
+        var afk_timeout': (USize | None) = None
+        var widget_enabled': (Bool | None) = None
+        var widget_channel_id': (Snowflake | None) = None
+        var verification_level': (VerificationLevel | None) = None
+        var default_message_notifications': (DefaultMessageNotificationLevel | None) = None
+        var explicit_content_filter': (ExplicitContentFilterLevel | None) = None
+        var roles': (Array[Role] val | None) = None
+        var emojis': (Array[Emoji] val | None) = None
+        var features': (Array[String] val | None) = None
+        var mfa_level': (MFALevel | None) = None
+        var application_id': (Snowflake | None) = None
+        var system_channel_id': (Snowflake | None) = None
+        var system_channel_flags': (Array[SystemChannelFlag] val | None) = None
+        var rules_channel_id': (Snowflake | None) = None
+        var max_presences': (USize | None) = None
+        var max_members': (USize | None) = None
+        var vanity_url_code': (String | None) = None
+        var description': (String | None) = None
+        var banner': (String | None) = None
+        var premium_tier': (PremiumTier | None) = None
+        var premium_subscription_count': (USize | None) = None
+        var preferred_locale': (Locale | None) = None
+        var public_updates_channel_id': (Snowflake | None) = None
+        var max_video_channel_users': (USize | None) = None
+        var max_stage_video_channel_users': (USize | None) = None
+        var approximate_member_count': (USize | None) = None
+        var approximate_presence_count': (USize | None) = None
+        var welcome_screen': (WelcomeScreen | None) = None
+        var nsfw_level': (GuildNSFWLevel | None) = None
+        var stickers': (Array[Sticker] val | None) = None
+        var premium_progress_bar_enabled': (Bool | None) = None
+        var safety_alerts_channel_id': (Snowflake | None) = None
+        var incidents_data': (IncidentsData | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "id" => id' = Snowflake.from_json(value)?
+            | "name" =>
+                match value | let string: String => name' = string end
+            | "icon" =>
+                match value | let string: String => icon' = string end
+            | "icon_hash" =>
+                match value | let string: String => icon_hash' = string end
+            | "splash" =>
+                match value | let string: String => splash' = string end
+            | "discovery_splash" =>
+                match value | let string: String => discovery_splash' = string end
+            | "owner" => owner' = value as Bool
+            | "owner_id" => owner_id' = Snowflake.from_json(value)?
+            | "permissions" => permissions' = _Permissions(value)?
+            | "afk_channel_id" =>
+                match value | let string: String => afk_channel_id' = Snowflake.from_json(string)? end
+            | "afk_timeout" => afk_timeout' = (value as I64).usize()
+            | "widget_enabled" => widget_enabled' = value as Bool
+            | "widget_channel_id" =>
+                match value | let string: String => widget_channel_id' = Snowflake.from_json(string)? end
+            | "verification_level" => verification_level' = VerificationLevels.from((value as I64).u8())?
+            | "default_message_notifications" => default_message_notifications' = DefaultMessageNotificationLevels.from((value as I64).u8())?
+            | "explicit_content_filter" => explicit_content_filter' = ExplicitContentFilterLevels.from((value as I64).u8())?
+            | "roles" => roles' = _Roles(value)?
+            | "emojis" => emojis' = _Emojis(value)?
+            | "features" => features' = _Strings(value)?
+            | "mfa_level" => mfa_level' = MFALevels.from((value as I64).u8())?
+            | "application_id" =>
+                match value | let string: String => application_id' = Snowflake.from_json(string)? end
+            | "system_channel_id" =>
+                match value | let string: String => system_channel_id' = Snowflake.from_json(string)? end
+            | "system_channel_flags" => system_channel_flags' = _SystemChannelFlags((value as I64).u64())
+            | "rules_channel_id" =>
+                match value | let string: String => rules_channel_id' = Snowflake.from_json(string)? end
+            | "max_presences" =>
+                match value | let integer: I64 => max_presences' = integer.usize() end
+            | "max_members" => max_members' = (value as I64).usize()
+            | "vanity_url_code" =>
+                match value | let string: String => vanity_url_code' = string end
+            | "description" =>
+                match value | let string: String => description' = string end
+            | "banner" =>
+                match value | let string: String => banner' = string end
+            | "premium_tier" => premium_tier' = PremiumTiers.from((value as I64).u8())?
+            | "premium_subscription_count" => premium_subscription_count' = (value as I64).usize()
+            | "preferred_locale" => preferred_locale' = Locales.from(value as String)?
+            | "public_updates_channel_id" =>
+                match value | let string: String => public_updates_channel_id' = Snowflake.from_json(string)? end
+            | "max_video_channel_users" => max_video_channel_users' = (value as I64).usize()
+            | "max_stage_video_channel_users" => max_stage_video_channel_users' = (value as I64).usize()
+            | "approximate_member_count" => approximate_member_count' = (value as I64).usize()
+            | "approximate_presence_count" => approximate_presence_count' = (value as I64).usize()
+            | "welcome_screen" => welcome_screen' = WelcomeScreen.from_json(value as json.JsonObject)?
+            | "nsfw_level" => nsfw_level' = GuildNSFWLevels.from((value as I64).u8())?
+            | "stickers" => stickers' = _Stickers(value)?
+            | "premium_progress_bar_enabled" => premium_progress_bar_enabled' = value as Bool
+            | "safety_alerts_channel_id" =>
+                match value | let string: String => safety_alerts_channel_id' = Snowflake.from_json(string)? end
+            | "incidents_data" =>
+                match value | let obj': json.JsonObject => incidents_data' = IncidentsData.from_json(obj') end
+            end
+        end
+
+        id = id' as Snowflake
+        name = name'
+        icon = icon'
+        icon_hash = icon_hash'
+        splash = splash'
+        discovery_splash = discovery_splash'
+        owner = owner'
+        owner_id = owner_id'
+        permissions = permissions'
+        afk_channel_id = afk_channel_id'
+        afk_timeout = afk_timeout'
+        widget_enabled = widget_enabled'
+        widget_channel_id = widget_channel_id'
+        verification_level = verification_level'
+        default_message_notifications = default_message_notifications'
+        explicit_content_filter = explicit_content_filter'
+        roles = roles'
+        emojis = emojis'
+        features = features'
+        mfa_level = mfa_level'
+        application_id = application_id'
+        system_channel_id = system_channel_id'
+        system_channel_flags = system_channel_flags'
+        rules_channel_id = rules_channel_id'
+        max_presences = max_presences'
+        max_members = max_members'
+        vanity_url_code = vanity_url_code'
+        description = description'
+        banner = banner'
+        premium_tier = premium_tier'
+        premium_subscription_count = premium_subscription_count'
+        preferred_locale = preferred_locale'
+        public_updates_channel_id = public_updates_channel_id'
+        max_video_channel_users = max_video_channel_users'
+        max_stage_video_channel_users = max_stage_video_channel_users'
+        approximate_member_count = approximate_member_count'
+        approximate_presence_count = approximate_presence_count'
+        welcome_screen = welcome_screen'
+        nsfw_level = nsfw_level'
+        stickers = stickers'
+        premium_progress_bar_enabled = premium_progress_bar_enabled'
+        safety_alerts_channel_id = safety_alerts_channel_id'
+        incidents_data = incidents_data'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject.update("id", id.to_json())
+
+        match name
+        | let name': String => obj = obj.update("name", name')
+        end
+
+        match icon
+        | let icon': String => obj = obj.update("icon", icon')
+        end
+
+        match icon_hash
+        | let icon_hash': String => obj = obj.update("icon_hash", icon_hash')
+        end
+
+        match splash
+        | let splash': String => obj = obj.update("splash", splash')
+        end
+
+        match discovery_splash
+        | let discovery_splash': String => obj = obj.update("discovery_splash", discovery_splash')
+        end
+
+        match owner
+        | let owner': Bool => obj = obj.update("owner", owner')
+        end
+
+        match owner_id
+        | let owner_id': Snowflake => obj = obj.update("owner_id", owner_id'.to_json())
+        end
+
+        match permissions
+        | let permissions': Array[Permission] val => obj = obj.update("permissions", _Permissions.to_json(permissions'))
+        end
+
+        match afk_channel_id
+        | let afk_channel_id': Snowflake => obj = obj.update("afk_channel_id", afk_channel_id'.to_json())
+        end
+
+        match afk_timeout
+        | let afk_timeout': USize => obj = obj.update("afk_timeout", afk_timeout'.i64())
+        end
+
+        match widget_enabled
+        | let widget_enabled': Bool => obj = obj.update("widget_enabled", widget_enabled')
+        end
+
+        match widget_channel_id
+        | let widget_channel_id': Snowflake => obj = obj.update("widget_channel_id", widget_channel_id'.to_json())
+        end
+
+        match verification_level
+        | let verification_level': VerificationLevel => obj = obj.update("verification_level", verification_level'.value().i64())
+        end
+
+        match default_message_notifications
+        | let default_message_notifications': DefaultMessageNotificationLevel => obj = obj.update("default_message_notifications", default_message_notifications'.value().i64())
+        end
+
+        match explicit_content_filter
+        | let explicit_content_filter': ExplicitContentFilterLevel => obj = obj.update("explicit_content_filter", explicit_content_filter'.value().i64())
+        end
+
+        match roles
+        | let roles': Array[Role] val => obj = obj.update("roles", _Roles.to_json(roles'))
+        end
+
+        match emojis
+        | let emojis': Array[Emoji] val => obj = obj.update("emojis", _Emojis.to_json(emojis'))
+        end
+
+        match features
+        | let features': Array[String] val => obj = obj.update("features", _Strings.to_json(features'))
+        end
+
+        match mfa_level
+        | let mfa_level': MFALevel => obj = obj.update("mfa_level", mfa_level'.value().i64())
+        end
+
+        match application_id
+        | let application_id': Snowflake => obj = obj.update("application_id", application_id'.to_json())
+        end
+
+        match system_channel_id
+        | let system_channel_id': Snowflake => obj = obj.update("system_channel_id", system_channel_id'.to_json())
+        end
+
+        match system_channel_flags
+        | let system_channel_flags': Array[SystemChannelFlag] val => obj = obj.update("system_channel_flags", _SystemChannelFlags.to_json(system_channel_flags'))
+        end
+
+        match rules_channel_id
+        | let rules_channel_id': Snowflake => obj = obj.update("rules_channel_id", rules_channel_id'.to_json())
+        end
+
+        match max_presences
+        | let max_presences': USize => obj = obj.update("max_presences", max_presences'.i64())
+        end
+
+        match max_members
+        | let max_members': USize => obj = obj.update("max_members", max_members'.i64())
+        end
+
+        match vanity_url_code
+        | let vanity_url_code': String => obj = obj.update("vanity_url_code", vanity_url_code')
+        end
+
+        match description
+        | let description': String => obj = obj.update("description", description')
+        end
+
+        match banner
+        | let banner': String => obj = obj.update("banner", banner')
+        end
+
+        match premium_tier
+        | let premium_tier': PremiumTier => obj = obj.update("premium_tier", premium_tier'.value().i64())
+        end
+
+        match premium_subscription_count
+        | let premium_subscription_count': USize => obj = obj.update("premium_subscription_count", premium_subscription_count'.i64())
+        end
+
+        match preferred_locale
+        | let preferred_locale': Locale => obj = obj.update("preferred_locale", preferred_locale'.value())
+        end
+
+        match public_updates_channel_id
+        | let public_updates_channel_id': Snowflake => obj = obj.update("public_updates_channel_id", public_updates_channel_id'.to_json())
+        end
+
+        match max_video_channel_users
+        | let max_video_channel_users': USize => obj = obj.update("max_video_channel_users", max_video_channel_users'.i64())
+        end
+
+        match max_stage_video_channel_users
+        | let max_stage_video_channel_users': USize => obj = obj.update("max_stage_video_channel_users", max_stage_video_channel_users'.i64())
+        end
+
+        match approximate_member_count
+        | let approximate_member_count': USize => obj = obj.update("approximate_member_count", approximate_member_count'.i64())
+        end
+
+        match approximate_presence_count
+        | let approximate_presence_count': USize => obj = obj.update("approximate_presence_count", approximate_presence_count'.i64())
+        end
+
+        match welcome_screen
+        | let welcome_screen': WelcomeScreen => obj = obj.update("welcome_screen", welcome_screen'.to_json())
+        end
+
+        match nsfw_level
+        | let nsfw_level': GuildNSFWLevel => obj = obj.update("nsfw_level", nsfw_level'.value().i64())
+        end
+
+        match stickers
+        | let stickers': Array[Sticker] val => obj = obj.update("stickers", _Stickers.to_json(stickers'))
+        end
+
+        match premium_progress_bar_enabled
+        | let premium_progress_bar_enabled': Bool => obj = obj.update("premium_progress_bar_enabled", premium_progress_bar_enabled')
+        end
+
+        match safety_alerts_channel_id
+        | let safety_alerts_channel_id': Snowflake => obj = obj.update("safety_alerts_channel_id", safety_alerts_channel_id'.to_json())
+        end
+
+        match incidents_data
+        | let incidents_data': IncidentsData => obj = obj.update("incidents_data", incidents_data'.to_json())
+        end
+
+        obj
+
+primitive _PartialGuilds
+    fun apply(value: json.JsonValue): Array[PartialGuild] val ? =>
+        """
+        Decodes an array of partial guilds.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let guilds = Array[PartialGuild](array.size())
+            for guild in array.values() do guilds.push(PartialGuild.from_json(guild as json.JsonObject)?) end
+            guilds
+        end
+
+    fun to_json(guilds: Array[PartialGuild] val): json.JsonArray =>
+        var array = json.JsonArray
+        for guild in guilds.values() do array = array.push(guild.to_json()) end
+        array
+
 trait val DefaultMessageNotificationLevel is (collections.Hashable & Equatable[DefaultMessageNotificationLevel])
     """
     https://docs.discord.com/developers/resources/guild#guild-object-default-message-notification-level

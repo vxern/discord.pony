@@ -18,9 +18,11 @@ class val Invite is Jsonable
         the invite code (unique ID)
         """
 
-    let guild: (Guild | None)
+    let guild: (PartialGuild | None)
         """
         the guild this invite is for
+
+        This is a partial guild object, so most of its fields may be absent.
         """
 
     let channel: (Channel | None)
@@ -78,7 +80,7 @@ class val Invite is Jsonable
     new val create(
         type'': InviteType,
         code': String,
-        guild': (Guild | None) = None,
+        guild': (PartialGuild | None) = None,
         channel': (Channel | None) = None,
         inviter': (User | None) = None,
         target_type': (InviteTargetType | None) = None,
@@ -107,7 +109,7 @@ class val Invite is Jsonable
     new val from_json(obj: json.JsonObject) ? =>
         var type'': (InviteType | None) = None
         var code': (String | None) = None
-        var guild': (Guild | None) = None
+        var guild': (PartialGuild | None) = None
         var channel': (Channel | None) = None
         var inviter': (User | None) = None
         var target_type': (InviteTargetType | None) = None
@@ -123,7 +125,8 @@ class val Invite is Jsonable
             match key
             | "type" => type'' = InviteTypes.from((value as I64).u8())?
             | "code" => code' = value as String
-            | "guild" => guild' = Guild.from_json(value as json.JsonObject)?
+            | "guild" =>
+                match value | let obj': json.JsonObject => guild' = PartialGuild.from_json(obj')? end
             | "channel" =>
                 match value | let obj': json.JsonObject => channel' = Channel.from_json(obj')? end
             | "inviter" => inviter' = User.from_json(value as json.JsonObject)?
@@ -159,7 +162,7 @@ class val Invite is Jsonable
             .update("code", code)
 
         match guild
-        | let guild': Guild => obj = obj.update("guild", guild'.to_json())
+        | let guild': PartialGuild => obj = obj.update("guild", guild'.to_json())
         end
 
         match channel
