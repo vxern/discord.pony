@@ -441,6 +441,345 @@ class val Application is Jsonable
 
         obj
 
+class val PartialApplication is Jsonable
+    """
+    https://docs.discord.com/developers/resources/application#application-object-application-structure
+
+    An application Discord sent as a *partial* object: the same structure as
+    `Application`, but carrying only some of its fields. A Rich Presence chat
+    embed sends only `id`, `name`, `icon`, `description` and `cover_image`, so
+    every field here but `id` is optional.
+
+    The fields mean exactly what their `Application` counterparts do, and are
+    documented there. A field Discord omits is indistinguishable from a field
+    Discord sent as `null`.
+    """
+
+    let id: Snowflake
+    let name: (String | None)
+    let icon: (String | None)
+    let description: (String | None)
+    let rpc_origins: (Array[String] val | None)
+    let bot_public: (Bool | None)
+    let bot_require_code_grant: (Bool | None)
+    let bot: (User | None)
+    let terms_of_service_url: (String | None)
+    let privacy_policy_url: (String | None)
+    let owner: (User | None)
+    let verify_key: (String | None)
+    let guild_id: (Snowflake | None)
+    let primary_sku_id: (Snowflake | None)
+    let slug: (String | None)
+    let cover_image: (String | None)
+    let flags: (Array[ApplicationFlag] val | None)
+    let approximate_guild_count: (USize | None)
+    let approximate_user_install_count: (USize | None)
+    let approximate_user_authorization_count: (USize | None)
+    let redirect_uris: (Array[String] val | None)
+    let interactions_endpoint_url: (String | None)
+    let role_connections_verification_url: (String | None)
+    let event_webhooks_url: (String | None)
+    let event_webhooks_status: (ApplicationEventWebhookStatus | None)
+    let event_webhooks_types: (Array[String] val | None)
+    let tags: (Array[String] val | None)
+    let install_params: (InstallParams | None)
+    let integration_types_config: (collections.Map[ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration] val | None)
+    let custom_install_url: (String | None)
+
+    new val create(
+        id': Snowflake,
+        name': (String | None) = None,
+        icon': (String | None) = None,
+        description': (String | None) = None,
+        rpc_origins': (Array[String] val | None) = None,
+        bot_public': (Bool | None) = None,
+        bot_require_code_grant': (Bool | None) = None,
+        bot': (User | None) = None,
+        terms_of_service_url': (String | None) = None,
+        privacy_policy_url': (String | None) = None,
+        owner': (User | None) = None,
+        verify_key': (String | None) = None,
+        guild_id': (Snowflake | None) = None,
+        primary_sku_id': (Snowflake | None) = None,
+        slug': (String | None) = None,
+        cover_image': (String | None) = None,
+        flags': (Array[ApplicationFlag] val | None) = None,
+        approximate_guild_count': (USize | None) = None,
+        approximate_user_install_count': (USize | None) = None,
+        approximate_user_authorization_count': (USize | None) = None,
+        redirect_uris': (Array[String] val | None) = None,
+        interactions_endpoint_url': (String | None) = None,
+        role_connections_verification_url': (String | None) = None,
+        event_webhooks_url': (String | None) = None,
+        event_webhooks_status': (ApplicationEventWebhookStatus | None) = None,
+        event_webhooks_types': (Array[String] val | None) = None,
+        tags': (Array[String] val | None) = None,
+        install_params': (InstallParams | None) = None,
+        integration_types_config': (collections.Map[ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration] val | None) = None,
+        custom_install_url': (String | None) = None
+    ) =>
+        id = id'
+        name = name'
+        icon = icon'
+        description = description'
+        rpc_origins = rpc_origins'
+        bot_public = bot_public'
+        bot_require_code_grant = bot_require_code_grant'
+        bot = bot'
+        terms_of_service_url = terms_of_service_url'
+        privacy_policy_url = privacy_policy_url'
+        owner = owner'
+        verify_key = verify_key'
+        guild_id = guild_id'
+        primary_sku_id = primary_sku_id'
+        slug = slug'
+        cover_image = cover_image'
+        flags = flags'
+        approximate_guild_count = approximate_guild_count'
+        approximate_user_install_count = approximate_user_install_count'
+        approximate_user_authorization_count = approximate_user_authorization_count'
+        redirect_uris = redirect_uris'
+        interactions_endpoint_url = interactions_endpoint_url'
+        role_connections_verification_url = role_connections_verification_url'
+        event_webhooks_url = event_webhooks_url'
+        event_webhooks_status = event_webhooks_status'
+        event_webhooks_types = event_webhooks_types'
+        tags = tags'
+        install_params = install_params'
+        integration_types_config = integration_types_config'
+        custom_install_url = custom_install_url'
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var id': (Snowflake | None) = None
+        var name': (String | None) = None
+        var icon': (String | None) = None
+        var description': (String | None) = None
+        var rpc_origins': (Array[String] val | None) = None
+        var bot_public': (Bool | None) = None
+        var bot_require_code_grant': (Bool | None) = None
+        var bot': (User | None) = None
+        var owner': (User | None) = None
+        var terms_of_service_url': (String | None) = None
+        var privacy_policy_url': (String | None) = None
+        var verify_key': (String | None) = None
+        var guild_id': (Snowflake | None) = None
+        var primary_sku_id': (Snowflake | None) = None
+        var slug': (String | None) = None
+        var cover_image': (String | None) = None
+        var flags': (U64 | None) = None
+        var flags_new': (U64 | None) = None
+        var approximate_guild_count': (USize | None) = None
+        var approximate_user_install_count': (USize | None) = None
+        var approximate_user_authorization_count': (USize | None) = None
+        var redirect_uris': (Array[String] val | None) = None
+        var interactions_endpoint_url': (String | None) = None
+        var role_connections_verification_url': (String | None) = None
+        var event_webhooks_url': (String | None) = None
+        var event_webhooks_status': (ApplicationEventWebhookStatus | None) = None
+        var event_webhooks_types': (Array[String] val | None) = None
+        var tags': (Array[String] val | None) = None
+        var install_params': (InstallParams | None) = None
+        var integration_types_config': (collections.Map[ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration] val | None) = None
+        var custom_install_url': (String | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "id" => id' = Snowflake.from_json(value)?
+            | "name" => name' = value as String
+            | "icon" =>
+                match value | let string: String => icon' = string end
+            | "description" => description' = value as String
+            | "rpc_origins" => rpc_origins' = _Strings(value)?
+            | "bot_public" => bot_public' = value as Bool
+            | "bot_require_code_grant" => bot_require_code_grant' = value as Bool
+            | "bot" => bot' = User.from_json(value as json.JsonObject)?
+            | "owner" => owner' = User.from_json(value as json.JsonObject)?
+            | "terms_of_service_url" => terms_of_service_url' = value as String
+            | "privacy_policy_url" => privacy_policy_url' = value as String
+            | "verify_key" => verify_key' = value as String
+            | "guild_id" => guild_id' = Snowflake.from_json(value)?
+            | "primary_sku_id" => primary_sku_id' = Snowflake.from_json(value)?
+            | "slug" => slug' = value as String
+            | "cover_image" => cover_image' = value as String
+            | "flags" => flags' = (value as I64).u64()
+            | "flags_new" => flags_new' = (value as String).u64()?
+            | "approximate_guild_count" => approximate_guild_count' = (value as I64).usize()
+            | "approximate_user_install_count" => approximate_user_install_count' = (value as I64).usize()
+            | "approximate_user_authorization_count" => approximate_user_authorization_count' = (value as I64).usize()
+            | "redirect_uris" => redirect_uris' = _Strings(value)?
+            | "interactions_endpoint_url" =>
+                match value | let string: String => interactions_endpoint_url' = string end
+            | "role_connections_verification_url" =>
+                match value | let string: String => role_connections_verification_url' = string end
+            | "event_webhooks_url" =>
+                match value | let string: String => event_webhooks_url' = string end
+            | "event_webhooks_status" => event_webhooks_status' = ApplicationEventWebhookStatuses.from((value as I64).u8())?
+            | "event_webhooks_types" => event_webhooks_types' = _Strings(value)?
+            | "tags" => tags' = _Strings(value)?
+            | "install_params" => install_params' = InstallParams.from_json(value as json.JsonObject)?
+            | "integration_types_config" => integration_types_config' = _IntegrationTypesConfiguration(value)?
+            | "custom_install_url" => custom_install_url' = value as String
+            end
+        end
+
+        id = id' as Snowflake
+        name = name'
+        icon = icon'
+        description = description'
+        rpc_origins = rpc_origins'
+        bot_public = bot_public'
+        bot_require_code_grant = bot_require_code_grant'
+        bot = bot'
+        owner = owner'
+        terms_of_service_url = terms_of_service_url'
+        privacy_policy_url = privacy_policy_url'
+        verify_key = verify_key'
+        guild_id = guild_id'
+        primary_sku_id = primary_sku_id'
+        slug = slug'
+        cover_image = cover_image'
+        flags =
+            match (flags_new', flags')
+            | (let bits: U64, _) => _ApplicationFlags(bits)
+            | (None, let bits: U64) => _ApplicationFlags(bits)
+            end
+        approximate_guild_count = approximate_guild_count'
+        approximate_user_install_count = approximate_user_install_count'
+        approximate_user_authorization_count = approximate_user_authorization_count'
+        redirect_uris = redirect_uris'
+        interactions_endpoint_url = interactions_endpoint_url'
+        role_connections_verification_url = role_connections_verification_url'
+        event_webhooks_url = event_webhooks_url'
+        event_webhooks_status = event_webhooks_status'
+        event_webhooks_types = event_webhooks_types'
+        tags = tags'
+        install_params = install_params'
+        integration_types_config = integration_types_config'
+        custom_install_url = custom_install_url'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject.update("id", id.to_json())
+
+        match name
+        | let name': String => obj = obj.update("name", name')
+        end
+
+        match icon
+        | let icon': String => obj = obj.update("icon", icon')
+        end
+
+        match description
+        | let description': String => obj = obj.update("description", description')
+        end
+
+        match rpc_origins
+        | let rpc_origins': Array[String] val => obj = obj.update("rpc_origins", _Strings.to_json(rpc_origins'))
+        end
+
+        match bot_public
+        | let bot_public': Bool => obj = obj.update("bot_public", bot_public')
+        end
+
+        match bot_require_code_grant
+        | let bot_require_code_grant': Bool => obj = obj.update("bot_require_code_grant", bot_require_code_grant')
+        end
+
+        match bot
+        | let bot': User => obj = obj.update("bot", bot'.to_json())
+        end
+
+        match terms_of_service_url
+        | let terms_of_service_url': String => obj = obj.update("terms_of_service_url", terms_of_service_url')
+        end
+
+        match privacy_policy_url
+        | let privacy_policy_url': String => obj = obj.update("privacy_policy_url", privacy_policy_url')
+        end
+
+        match owner
+        | let owner': User => obj = obj.update("owner", owner'.to_json())
+        end
+
+        match verify_key
+        | let verify_key': String => obj = obj.update("verify_key", verify_key')
+        end
+
+        match guild_id
+        | let guild_id': Snowflake => obj = obj.update("guild_id", guild_id'.to_json())
+        end
+
+        match primary_sku_id
+        | let primary_sku_id': Snowflake => obj = obj.update("primary_sku_id", primary_sku_id'.to_json())
+        end
+
+        match slug
+        | let slug': String => obj = obj.update("slug", slug')
+        end
+
+        match cover_image
+        | let cover_image': String => obj = obj.update("cover_image", cover_image')
+        end
+
+        // `flags_new` is for response serialization only; requests that accept flag values are expected to use `flags`.
+        match flags
+        | let flags': Array[ApplicationFlag] val => obj = obj.update("flags", _ApplicationFlags.to_json(flags'))
+        end
+
+        match approximate_guild_count
+        | let approximate_guild_count': USize => obj = obj.update("approximate_guild_count", approximate_guild_count'.i64())
+        end
+
+        match approximate_user_install_count
+        | let approximate_user_install_count': USize => obj = obj.update("approximate_user_install_count", approximate_user_install_count'.i64())
+        end
+
+        match approximate_user_authorization_count
+        | let approximate_user_authorization_count': USize => obj = obj.update("approximate_user_authorization_count", approximate_user_authorization_count'.i64())
+        end
+
+        match redirect_uris
+        | let redirect_uris': Array[String] val => obj = obj.update("redirect_uris", _Strings.to_json(redirect_uris'))
+        end
+
+        match interactions_endpoint_url
+        | let interactions_endpoint_url': String => obj = obj.update("interactions_endpoint_url", interactions_endpoint_url')
+        end
+
+        match role_connections_verification_url
+        | let role_connections_verification_url': String => obj = obj.update("role_connections_verification_url", role_connections_verification_url')
+        end
+
+        match event_webhooks_url
+        | let event_webhooks_url': String => obj = obj.update("event_webhooks_url", event_webhooks_url')
+        end
+
+        match event_webhooks_status
+        | let event_webhooks_status': ApplicationEventWebhookStatus => obj = obj.update("event_webhooks_status", event_webhooks_status'.value().i64())
+        end
+
+        match event_webhooks_types
+        | let event_webhooks_types': Array[String] val => obj = obj.update("event_webhooks_types", _Strings.to_json(event_webhooks_types'))
+        end
+
+        match tags
+        | let tags': Array[String] val => obj = obj.update("tags", _Strings.to_json(tags'))
+        end
+
+        match install_params
+        | let install_params': InstallParams => obj = obj.update("install_params", install_params'.to_json())
+        end
+
+        match integration_types_config
+        | let integration_types_config': collections.Map[ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration] val =>
+            obj = obj.update("integration_types_config", _IntegrationTypesConfiguration.to_json(integration_types_config'))
+        end
+
+        match custom_install_url
+        | let custom_install_url': String => obj = obj.update("custom_install_url", custom_install_url')
+        end
+
+        obj
+
 trait val ApplicationIntegrationType is (collections.Hashable & Equatable[ApplicationIntegrationType])
     """
     https://docs.discord.com/developers/resources/application#application-object-application-integration-types
