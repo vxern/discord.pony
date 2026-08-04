@@ -18,7 +18,7 @@ actor Bucket
     let _api: RestApi
     let _id: String
     let _timers: time.Timers
-    embed _queue: Queue[courier.HTTPRequest] = Queue[courier.HTTPRequest]
+    embed _queue: Queue[(courier.HTTPRequest, RawResponseHandler)] = Queue[(courier.HTTPRequest, RawResponseHandler)]
 
     var _rate_limit: (_RateLimit | None) = None
     var _requests_in_flight: USize = 0
@@ -32,8 +32,8 @@ actor Bucket
         _id = id
         _timers = timers
 
-    be enqueue(request: courier.HTTPRequest) =>
-        _queue.enqueue(request)
+    be enqueue(request: courier.HTTPRequest, handler: RawResponseHandler) =>
+        _queue.enqueue((request, handler))
         _drain()
 
     be _drain() =>
@@ -41,14 +41,14 @@ actor Bucket
 
         while (_requests_remaining > 0) and (_queue.size() > 0) do
             try
-                let request = _queue.dequeue()?
+                (let request, let handler) = _queue.dequeue()?
 
                 _requests_in_flight = _requests_in_flight + 1
                 _requests_remaining = _requests_remaining - 1
 
                 let self: Bucket tag = this
                 _api.send_request(request, {(request': courier.HTTPRequest val, response': courier.HTTPResponse val) =>
-                    self.on_response_received(request', response')
+                    self.on_response_received(request', response', handler)
                 })
             else
                 break
@@ -73,11 +73,9 @@ actor Bucket
         _requests_remaining = 1
         _drain()
 
-    be on_response_received(request: courier.HTTPRequest, response: courier.HTTPResponse) =>
+    be on_response_received(request: courier.HTTPRequest, response: courier.HTTPResponse, handler: RawResponseHandler) =>
         _requests_in_flight = _requests_in_flight - 1
 
-        // Not every response carries rate limit headers, which is fine.
-        // In that case, we just default to the standard rate limit.
         try
             let rate_limit = _RateLimit.from_headers(response.headers)?
             if rate_limit.is_newer_than(_rate_limit) then
@@ -87,11 +85,11 @@ actor Bucket
         end
 
         if response.status == 429 then
-            _queue.enqueue_at_beginning(request)
+            _queue.enqueue_at_beginning((request, handler))
             _requests_remaining = 0
+        else
+            handler(request, response)
         end
-
-        // TODO(vxern): Send the response back in a callback.
 
         _drain()
 
