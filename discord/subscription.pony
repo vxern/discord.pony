@@ -66,6 +66,29 @@ class val Subscription is Jsonable
         ISO3166-1 alpha-2 country code of the payment source used to purchase the subscription. Missing unless queried with a private OAuth scope.
         """
 
+    new val create(
+        id': Snowflake,
+        user_id': Snowflake,
+        sku_ids': Array[Snowflake] val,
+        entitlement_ids': Array[Snowflake] val,
+        renewal_sku_ids': (Array[Snowflake] val | None) = None,
+        current_period_start': ISO8601,
+        current_period_end': ISO8601,
+        status': SubscriptionStatus,
+        canceled_at': (ISO8601 | None) = None,
+        country': (String | None) = None
+    ) =>
+        id = id'
+        user_id = user_id'
+        sku_ids = sku_ids'
+        entitlement_ids = entitlement_ids'
+        renewal_sku_ids = renewal_sku_ids'
+        current_period_start = current_period_start'
+        current_period_end = current_period_end'
+        status = status'
+        canceled_at = canceled_at'
+        country = country'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
         var user_id': (Snowflake | None) = None

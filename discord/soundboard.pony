@@ -49,6 +49,25 @@ class val SoundboardSound is Jsonable
         the user who created this sound
         """
 
+    new val create(
+        name': String,
+        sound_id': Snowflake,
+        volume': F64,
+        emoji_id': (Snowflake | None) = None,
+        emoji_name': (String | None) = None,
+        guild_id': (Snowflake | None) = None,
+        available': Bool,
+        user': (User | None) = None
+    ) =>
+        name = name'
+        sound_id = sound_id'
+        volume = volume'
+        emoji_id = emoji_id'
+        emoji_name = emoji_name'
+        guild_id = guild_id'
+        available = available'
+        user = user'
+
     new val from_json(obj: json.JsonObject) ? =>
         var name': (String | None) = None
         var sound_id': (Snowflake | None) = None

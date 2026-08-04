@@ -64,6 +64,29 @@ class val Entitlement is Jsonable
         For consumable items, whether or not the entitlement has been consumed
         """
 
+    new val create(
+        id': Snowflake,
+        sku_id': Snowflake,
+        application_id': Snowflake,
+        user_id': (Snowflake | None) = None,
+        type'': EntitlementType,
+        deleted': Bool,
+        starts_at': (ISO8601 | None) = None,
+        ends_at': (ISO8601 | None) = None,
+        guild_id': (Snowflake | None) = None,
+        consumed': (Bool | None) = None
+    ) =>
+        id = id'
+        sku_id = sku_id'
+        application_id = application_id'
+        user_id = user_id'
+        type' = type''
+        deleted = deleted'
+        starts_at = starts_at'
+        ends_at = ends_at'
+        guild_id = guild_id'
+        consumed = consumed'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
         var sku_id': (Snowflake | None) = None

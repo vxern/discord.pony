@@ -565,6 +565,35 @@ class val Role is Jsonable
         role flags combined as a bitfield
         """
 
+    new val create(
+        id': Snowflake,
+        name': String,
+        color': I64,
+        colors': RoleColors,
+        hoist': Bool,
+        icon': (String | None) = None,
+        unicode_emoji': (String | None) = None,
+        position': USize,
+        permissions': Array[Permission] val,
+        managed': Bool,
+        mentionable': Bool,
+        tags': (RoleTags | None) = None,
+        flags': Array[RoleFlag] val
+    ) =>
+        id = id'
+        name = name'
+        color = color'
+        colors = colors'
+        hoist = hoist'
+        icon = icon'
+        unicode_emoji = unicode_emoji'
+        position = position'
+        permissions = permissions'
+        managed = managed'
+        mentionable = mentionable'
+        tags = tags'
+        flags = flags'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
         var name': (String | None) = None
@@ -690,6 +719,21 @@ class val RoleTags is Jsonable
         whether this role is a guild's linked role
         """
 
+    new val create(
+        bot_id': (Snowflake | None) = None,
+        integration_id': (Snowflake | None) = None,
+        premium_subscriber': Bool,
+        subscription_listing_id': (Snowflake | None) = None,
+        available_for_purchase': Bool,
+        guild_connections': Bool
+    ) =>
+        bot_id = bot_id'
+        integration_id = integration_id'
+        premium_subscriber = premium_subscriber'
+        subscription_listing_id = subscription_listing_id'
+        available_for_purchase = available_for_purchase'
+        guild_connections = guild_connections'
+
     new val from_json(obj: json.JsonObject) ? =>
         var bot_id': (Snowflake | None) = None
         var integration_id': (Snowflake | None) = None
@@ -760,6 +804,11 @@ class val RoleColors is Jsonable
         """
         the tertiary color for the role, this will turn the gradient into a holographic style
         """
+
+    new val create(primary_color': I64, secondary_color': (I64 | None) = None, tertiary_color': (I64 | None) = None) =>
+        primary_color = primary_color'
+        secondary_color = secondary_color'
+        tertiary_color = tertiary_color'
 
     new val from_json(obj: json.JsonObject) ? =>
         var primary_color': (I64 | None) = None

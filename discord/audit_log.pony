@@ -46,6 +46,21 @@ class val AuditLog is Jsonable
         List of webhooks referenced in the audit log
         """
 
+    new val create(
+        audit_log_entries': Array[AuditLogEntry] val,
+        auto_moderation_rules': Array[AutoModerationRule] val,
+        guild_scheduled_events': Array[GuildScheduledEvent] val,
+        threads': Array[Channel] val,
+        users': Array[User] val,
+        webhooks': Array[Webhook] val
+    ) =>
+        audit_log_entries = audit_log_entries'
+        auto_moderation_rules = auto_moderation_rules'
+        guild_scheduled_events = guild_scheduled_events'
+        threads = threads'
+        users = users'
+        webhooks = webhooks'
+
     new val from_json(obj: json.JsonObject) ? =>
         var audit_log_entries': (Array[AuditLogEntry] val | None) = None
         var auto_moderation_rules': (Array[AutoModerationRule] val | None) = None
@@ -126,6 +141,23 @@ class val AuditLogEntry is Jsonable
         """
         Reason for the change (1-512 characters)
         """
+
+    new val create(
+        target_id': (String | None) = None,
+        changes': (Array[AuditLogChange] val | None) = None,
+        user_id': (Snowflake | None) = None,
+        id': Snowflake,
+        action_type': AuditLogEvent,
+        options': (OptionalAuditEntryInfo | None) = None,
+        reason': (String | None) = None
+    ) =>
+        target_id = target_id'
+        changes = changes'
+        user_id = user_id'
+        id = id'
+        action_type = action_type'
+        options = options'
+        reason = reason'
 
     new val from_json(obj: json.JsonObject) ? =>
         var target_id': (String | None) = None
@@ -895,6 +927,35 @@ class val OptionalAuditEntryInfo is Jsonable
         Event types: VOICE_CHANNEL_STATUS_CREATE
         """
 
+    new val create(
+        application_id': (Snowflake | None) = None,
+        auto_moderation_rule_name': (String | None) = None,
+        auto_moderation_rule_trigger_type': (String | None) = None,
+        channel_id': (Snowflake | None) = None,
+        count': (String | None) = None,
+        delete_member_days': (String | None) = None,
+        id': (Snowflake | None) = None,
+        members_removed': (String | None) = None,
+        message_id': (Snowflake | None) = None,
+        role_name': (String | None) = None,
+        type'': (String | None) = None,
+        integration_type': (String | None) = None,
+        status': (String | None) = None
+    ) =>
+        application_id = application_id'
+        auto_moderation_rule_name = auto_moderation_rule_name'
+        auto_moderation_rule_trigger_type = auto_moderation_rule_trigger_type'
+        channel_id = channel_id'
+        count = count'
+        delete_member_days = delete_member_days'
+        id = id'
+        members_removed = members_removed'
+        message_id = message_id'
+        role_name = role_name'
+        type' = type''
+        integration_type = integration_type'
+        status = status'
+
     new val from_json(obj: json.JsonObject) ? =>
         var application_id': (Snowflake | None) = None
         var auto_moderation_rule_name': (String | None) = None
@@ -1046,6 +1107,11 @@ class val AuditLogChange is Jsonable
         """
         Name of the changed entity, with a few exceptions
         """
+
+    new val create(new_value': json.JsonValue, old_value': json.JsonValue, key': String) =>
+        new_value = new_value'
+        old_value = old_value'
+        key = key'
 
     new val from_json(obj: json.JsonObject) ? =>
         var new_value': json.JsonValue = None

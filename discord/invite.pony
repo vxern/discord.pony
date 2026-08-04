@@ -75,6 +75,35 @@ class val Invite is Jsonable
         invite flags
         """
 
+    new val create(
+        type'': InviteType,
+        code': String,
+        guild': (Guild | None) = None,
+        channel': (Channel | None) = None,
+        inviter': (User | None) = None,
+        target_type': (InviteTargetType | None) = None,
+        target_user': (User | None) = None,
+        target_application': (Application | None) = None,
+        approximate_presence_count': (USize | None) = None,
+        approximate_member_count': (USize | None) = None,
+        expires_at': (ISO8601 | None) = None,
+        guild_scheduled_event': (GuildScheduledEvent | None) = None,
+        flags': (Array[InviteFlag] val | None) = None
+    ) =>
+        type' = type''
+        code = code'
+        guild = guild'
+        channel = channel'
+        inviter = inviter'
+        target_type = target_type'
+        target_user = target_user'
+        target_application = target_application'
+        approximate_presence_count = approximate_presence_count'
+        approximate_member_count = approximate_member_count'
+        expires_at = expires_at'
+        guild_scheduled_event = guild_scheduled_event'
+        flags = flags'
+
     new val from_json(obj: json.JsonObject) ? =>
         var type'': (InviteType | None) = None
         var code': (String | None) = None
@@ -321,6 +350,19 @@ class val InviteMetadata is Jsonable
         when this invite was created
         """
 
+    new val create(
+        uses': USize,
+        max_uses': USize,
+        max_age': USize,
+        temporary': Bool,
+        created_at': ISO8601
+    ) =>
+        uses = uses'
+        max_uses = max_uses'
+        max_age = max_age'
+        temporary = temporary'
+        created_at = created_at'
+
     new val from_json(obj: json.JsonObject) ? =>
         var uses': (USize | None) = None
         var max_uses': (USize | None) = None
@@ -380,6 +422,17 @@ class val InviteStageInstance is Jsonable
         """
         the topic of the Stage instance (1-120 characters)
         """
+
+    new val create(
+        members': Array[GuildMember] val,
+        participant_count': USize,
+        speaker_count': USize,
+        topic': String
+    ) =>
+        members = members'
+        participant_count = participant_count'
+        speaker_count = speaker_count'
+        topic = topic'
 
     new val from_json(obj: json.JsonObject) ? =>
         var members': (Array[GuildMember] val | None) = None

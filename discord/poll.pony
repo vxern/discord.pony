@@ -42,6 +42,21 @@ class val Poll is Jsonable
         The results of the poll
         """
 
+    new val create(
+        question': PollMedia,
+        answers': Array[PollAnswer] val,
+        expiry': (ISO8601 | None) = None,
+        allow_multiselect': Bool,
+        layout_type': PollLayoutType,
+        results': (PollResults | None) = None
+    ) =>
+        question = question'
+        answers = answers'
+        expiry = expiry'
+        allow_multiselect = allow_multiselect'
+        layout_type = layout_type'
+        results = results'
+
     new val from_json(obj: json.JsonObject) ? =>
         var question': (PollMedia | None) = None
         var answers': (Array[PollAnswer] val | None) = None
@@ -127,6 +142,10 @@ class val PollMedia is Jsonable
         When creating a poll answer with an emoji, one only needs to send either the `id` (custom emoji) or `name` (default emoji) as the only field.
         """
 
+    new val create(text': (String | None) = None, emoji': (Emoji | None) = None) =>
+        text = text'
+        emoji = emoji'
+
     new val from_json(obj: json.JsonObject) ? =>
         var text': (String | None) = None
         var emoji': (Emoji | None) = None
@@ -174,6 +193,10 @@ class val PollAnswer is Jsonable
         """
         The data of the answer
         """
+
+    new val create(answer_id': USize, poll_media': PollMedia) =>
+        answer_id = answer_id'
+        poll_media = poll_media'
 
     new val from_json(obj: json.JsonObject) ? =>
         var answer_id': (USize | None) = None
@@ -235,6 +258,10 @@ class val PollResults is Jsonable
         The counts for each answer
         """
 
+    new val create(is_finalized': Bool, answer_counts': Array[PollAnswerCount] val) =>
+        is_finalized = is_finalized'
+        answer_counts = answer_counts'
+
     new val from_json(obj: json.JsonObject) ? =>
         var is_finalized': (Bool | None) = None
         var answer_counts': (Array[PollAnswerCount] val | None) = None
@@ -273,6 +300,11 @@ class val PollAnswerCount is Jsonable
         """
         Whether the current user voted for this answer
         """
+
+    new val create(id': USize, count': USize, me_voted': Bool) =>
+        id = id'
+        count = count'
+        me_voted = me_voted'
 
     new val from_json(obj: json.JsonObject) ? =>
         var id': (USize | None) = None

@@ -103,6 +103,47 @@ class val User is Jsonable
         the user's primary guild
         """
 
+    new val create(
+        id': Snowflake,
+        username': String,
+        discriminator': String,
+        global_name': (String | None) = None,
+        avatar': (String | None) = None,
+        bot': (Bool | None) = None,
+        system': (Bool | None) = None,
+        mfa_enabled': (Bool | None) = None,
+        banner': (String | None) = None,
+        accent_color': (I64 | None) = None,
+        locale': (Locale | None) = None,
+        verified': (Bool | None) = None,
+        email': (String | None) = None,
+        flags': (Array[UserFlag] val | None) = None,
+        premium_type': (PremiumType | None) = None,
+        public_flags': (Array[UserFlag] val | None) = None,
+        avatar_decoration_data': (AvatarDecorationData | None) = None,
+        collectibles': (Collectibles | None) = None,
+        primary_guild': (UserPrimaryGuild | None) = None
+    ) =>
+        id = id'
+        username = username'
+        discriminator = discriminator'
+        global_name = global_name'
+        avatar = avatar'
+        bot = bot'
+        system = system'
+        mfa_enabled = mfa_enabled'
+        banner = banner'
+        accent_color = accent_color'
+        locale = locale'
+        verified = verified'
+        email = email'
+        flags = flags'
+        premium_type = premium_type'
+        public_flags = public_flags'
+        avatar_decoration_data = avatar_decoration_data'
+        collectibles = collectibles'
+        primary_guild = primary_guild'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
         var username': (String | None) = None
@@ -447,6 +488,10 @@ class val AvatarDecorationData is Jsonable
         id of the avatar decoration's SKU
         """
 
+    new val create(asset': String, sku_id': Snowflake) =>
+        asset = asset'
+        sku_id = sku_id'
+
     new val from_json(obj: json.JsonObject) ? =>
         var asset': (String | None) = None
         var sku_id': (Snowflake | None) = None
@@ -477,6 +522,9 @@ class val Collectibles is Jsonable
         """
         object mapping of the user's nameplate
         """
+
+    new val create(nameplate': (Nameplate | None) = None) =>
+        nameplate = nameplate'
 
     new val from_json(obj: json.JsonObject) ? =>
         var nameplate': (Nameplate | None) = None
@@ -525,6 +573,17 @@ class val Nameplate is Jsonable
         """
         background color of the nameplate
         """
+
+    new val create(
+        sku_id': Snowflake,
+        asset': String,
+        label': String,
+        palette': String
+    ) =>
+        sku_id = sku_id'
+        asset = asset'
+        label = label'
+        palette = palette'
 
     new val from_json(obj: json.JsonObject) ? =>
         var sku_id': (Snowflake | None) = None
@@ -577,6 +636,17 @@ class val UserPrimaryGuild is Jsonable
         """
         the server tag badge hash
         """
+
+    new val create(
+        identity_guild_id': (Snowflake | None) = None,
+        identity_enabled': (Bool | None) = None,
+        tag'': (String | None) = None,
+        badge': (String | None) = None
+    ) =>
+        identity_guild_id = identity_guild_id'
+        identity_enabled = identity_enabled'
+        tag' = tag''
+        badge = badge'
 
     new val from_json(obj: json.JsonObject) ? =>
         var identity_guild_id': (Snowflake | None) = None
@@ -665,6 +735,29 @@ class val Connection is Jsonable
         """
         visibility of this connection
         """
+
+    new val create(
+        id': String,
+        name': String,
+        type'': String,
+        revoked': (Bool | None) = None,
+        integrations': (Array[Integration] val | None) = None,
+        verified': Bool,
+        friend_sync': Bool,
+        show_activity': Bool,
+        two_way_link': Bool,
+        visibility': ConnectionVisibility
+    ) =>
+        id = id'
+        name = name'
+        type' = type''
+        revoked = revoked'
+        integrations = integrations'
+        verified = verified'
+        friend_sync = friend_sync'
+        show_activity = show_activity'
+        two_way_link = two_way_link'
+        visibility = visibility'
 
     new val from_json(obj: json.JsonObject) ? =>
         var id': (String | None) = None
@@ -790,15 +883,24 @@ class val ApplicationRoleConnection is Jsonable
         the username on the platform a bot has connected (max 100 characters)
         """
 
-    let metadata: (collections.Map[String, String] | None)
+    let metadata: (collections.Map[String, String] val | None)
         """
         object mapping application role connection metadata keys to their string-ified value (max 100 characters) for the user on the platform a bot has connected
         """
 
+    new val create(
+        platform_name': (String | None) = None,
+        platform_username': (String | None) = None,
+        metadata': (collections.Map[String, String] val | None) = None
+    ) =>
+        platform_name = platform_name'
+        platform_username = platform_username'
+        metadata = metadata'
+
     new val from_json(obj: json.JsonObject) =>
         var platform_name': (String | None) = None
         var platform_username': (String | None) = None
-        var metadata': (collections.Map[String, String] | None) = None
+        var metadata': (collections.Map[String, String] val | None) = None
 
         for (key, value) in obj.pairs() do
             match key
@@ -820,7 +922,7 @@ class val ApplicationRoleConnection is Jsonable
             .update("platform_username", platform_username)
 
         match metadata
-        | let metadata': collections.Map[String, String] box => obj = obj.update("metadata", _Metadata.to_json(metadata'))
+        | let metadata': collections.Map[String, String] val => obj = obj.update("metadata", _Metadata.to_json(metadata'))
         end
 
         obj

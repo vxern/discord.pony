@@ -59,6 +59,25 @@ class val Emoji is Jsonable
         whether this emoji can be used, may be false due to loss of Server Boosts
         """
 
+    new val create(
+        id': (Snowflake | None) = None,
+        name': (String | None) = None,
+        roles': (Array[Snowflake] val | None) = None,
+        user': (User | None) = None,
+        require_colons': (Bool | None) = None,
+        managed': (Bool | None) = None,
+        animated': (Bool | None) = None,
+        available': (Bool | None) = None
+    ) =>
+        id = id'
+        name = name'
+        roles = roles'
+        user = user'
+        require_colons = require_colons'
+        managed = managed'
+        animated = animated'
+        available = available'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
         var name': (String | None) = None

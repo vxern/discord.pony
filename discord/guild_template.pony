@@ -64,6 +64,31 @@ class val GuildTemplate is Jsonable
         whether the template has unsynced changes
         """
 
+    new val create(
+        code': String,
+        name': String,
+        description': (String | None) = None,
+        usage_count': USize,
+        creator_id': Snowflake,
+        creator': User,
+        created_at': ISO8601,
+        updated_at': ISO8601,
+        source_guild_id': Snowflake,
+        serialized_source_guild': json.JsonObject,
+        is_dirty': (Bool | None) = None
+    ) =>
+        code = code'
+        name = name'
+        description = description'
+        usage_count = usage_count'
+        creator_id = creator_id'
+        creator = creator'
+        created_at = created_at'
+        updated_at = updated_at'
+        source_guild_id = source_guild_id'
+        serialized_source_guild = serialized_source_guild'
+        is_dirty = is_dirty'
+
     new val from_json(obj: json.JsonObject) ? =>
         var code': (String | None) = None
         var name': (String | None) = None

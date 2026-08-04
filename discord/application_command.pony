@@ -192,7 +192,7 @@ class val ApplicationCommandOptionChoice is Jsonable
                 | let integer: I64 => value' = integer
                 | let float: F64 => value' = float
                 end
-            | "name_localizations" => name_localizations' = _Localizations.immutable(value'')?
+            | "name_localizations" => name_localizations' = _Localizations(value'')?
             end
         end
 

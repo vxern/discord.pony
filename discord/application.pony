@@ -154,7 +154,7 @@ class val Application is Jsonable
         Settings for the app’s default in-app authorization link, if enabled
         """
 
-    let integration_types_config: (collections.Map[ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration] | None)
+    let integration_types_config: (collections.Map[ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration] val | None)
         """
         Default scopes and permissions for each supported installation context. Value for each key is an integration type configuration object
         """
@@ -163,6 +163,69 @@ class val Application is Jsonable
         """
         Default custom authorization URL for the app, if enabled
         """
+
+    new val create(
+        id': Snowflake,
+        name': String,
+        icon': (String | None) = None,
+        description': String,
+        rpc_origins': (Array[String] val | None) = None,
+        bot_public': Bool,
+        bot_require_code_grant': Bool,
+        bot': (User | None) = None,
+        terms_of_service_url': (String | None) = None,
+        privacy_policy_url': (String | None) = None,
+        owner': (User | None) = None,
+        verify_key': String,
+        guild_id': (Snowflake | None) = None,
+        primary_sku_id': (Snowflake | None) = None,
+        slug': (String | None) = None,
+        cover_image': (String | None) = None,
+        flags': (Array[ApplicationFlag] val | None) = None,
+        approximate_guild_count': (USize | None) = None,
+        approximate_user_install_count': (USize | None) = None,
+        approximate_user_authorization_count': (USize | None) = None,
+        redirect_uris': (Array[String] val | None) = None,
+        interactions_endpoint_url': (String | None) = None,
+        role_connections_verification_url': (String | None) = None,
+        event_webhooks_url': (String | None) = None,
+        event_webhooks_status': (ApplicationEventWebhookStatus | None) = None,
+        event_webhooks_types': (Array[String] val | None) = None,
+        tags': (Array[String] val | None) = None,
+        install_params': (InstallParams | None) = None,
+        integration_types_config': (collections.Map[ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration] val | None) = None,
+        custom_install_url': (String | None) = None
+    ) =>
+        id = id'
+        name = name'
+        icon = icon'
+        description = description'
+        rpc_origins = rpc_origins'
+        bot_public = bot_public'
+        bot_require_code_grant = bot_require_code_grant'
+        bot = bot'
+        terms_of_service_url = terms_of_service_url'
+        privacy_policy_url = privacy_policy_url'
+        owner = owner'
+        verify_key = verify_key'
+        guild_id = guild_id'
+        primary_sku_id = primary_sku_id'
+        slug = slug'
+        cover_image = cover_image'
+        flags = flags'
+        approximate_guild_count = approximate_guild_count'
+        approximate_user_install_count = approximate_user_install_count'
+        approximate_user_authorization_count = approximate_user_authorization_count'
+        redirect_uris = redirect_uris'
+        interactions_endpoint_url = interactions_endpoint_url'
+        role_connections_verification_url = role_connections_verification_url'
+        event_webhooks_url = event_webhooks_url'
+        event_webhooks_status = event_webhooks_status'
+        event_webhooks_types = event_webhooks_types'
+        tags = tags'
+        install_params = install_params'
+        integration_types_config = integration_types_config'
+        custom_install_url = custom_install_url'
 
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
@@ -194,7 +257,7 @@ class val Application is Jsonable
         var event_webhooks_types': (Array[String] val | None) = None
         var tags': (Array[String] val | None) = None
         var install_params': (InstallParams | None) = None
-        var integration_types_config': (collections.Map[ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration] | None) = None
+        var integration_types_config': (collections.Map[ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration] val | None) = None
         var custom_install_url': (String | None) = None
 
         for (key, value) in obj.pairs() do
@@ -368,7 +431,7 @@ class val Application is Jsonable
         end
 
         match integration_types_config
-        | let integration_types_config': collections.Map[ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration] box =>
+        | let integration_types_config': collections.Map[ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration] val =>
             obj = obj.update("integration_types_config", _IntegrationTypesConfiguration.to_json(integration_types_config'))
         end
 
@@ -420,6 +483,9 @@ class val ApplicationIntegrationTypeConfiguration is Jsonable
         Install params for each installation context’s default in-app authorization link
         """
 
+    new val create(oauth2_install_params': (InstallParams | None) = None) =>
+        oauth2_install_params = oauth2_install_params'
+
     new val from_json(obj: json.JsonObject) ? =>
         var oauth2_install_params': (InstallParams | None) = None
 
@@ -441,18 +507,20 @@ class val ApplicationIntegrationTypeConfiguration is Jsonable
         obj
 
 primitive _IntegrationTypesConfiguration
-    fun apply(value: json.JsonValue): (collections.Map[ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration] | None) ? =>
+    fun apply(value: json.JsonValue): (collections.Map[ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration] val | None) ? =>
         """
         Decodes a dictionary keyed by application integration type.
         """
 
         match value
         | let obj: json.JsonObject =>
-            let map = collections.Map[ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration](obj.size())
-            for (key, value') in obj.pairs() do
-                map(ApplicationIntegrationTypes.from(key.u8()?)?) = ApplicationIntegrationTypeConfiguration.from_json(value' as json.JsonObject)?
+            recover val
+                let map = collections.Map[ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration](obj.size())
+                for (key, value') in obj.pairs() do
+                    map(ApplicationIntegrationTypes.from(key.u8()?)?) = ApplicationIntegrationTypeConfiguration.from_json(value' as json.JsonObject)?
+                end
+                map
             end
-            map
         end
 
     fun to_json(map: collections.Map[ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration] box): json.JsonObject =>
@@ -624,6 +692,10 @@ class val InstallParams is Jsonable
         Permissions to request for the bot role
         """
 
+    new val create(scopes': Array[String] val, permissions': Array[Permission] val) =>
+        scopes = scopes'
+        permissions = permissions'
+
     new val from_json(obj: json.JsonObject) ? =>
         var scopes': (Array[String] val | None) = None
         var permissions': (Array[Permission] val | None) = None
@@ -674,6 +746,19 @@ class val ActivityInstance is Jsonable
         """
         IDs of the Users currently connected to the instance
         """
+
+    new val create(
+        application_id': Snowflake,
+        instance_id': String,
+        launch_id': Snowflake,
+        location': ActivityLocation,
+        users': Array[Snowflake] val
+    ) =>
+        application_id = application_id'
+        instance_id = instance_id'
+        launch_id = launch_id'
+        location = location'
+        users = users'
 
     new val from_json(obj: json.JsonObject) ? =>
         var application_id': (Snowflake | None) = None
@@ -732,6 +817,17 @@ class val ActivityLocation is Jsonable
         """
         ID of the Guild
         """
+
+    new val create(
+        id': String,
+        kind': ActivityLocationKind,
+        channel_id': Snowflake,
+        guild_id': (Snowflake | None) = None
+    ) =>
+        id = id'
+        kind = kind'
+        channel_id = channel_id'
+        guild_id = guild_id'
 
     new val from_json(obj: json.JsonObject) ? =>
         var id': (String | None) = None

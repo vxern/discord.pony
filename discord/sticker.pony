@@ -65,6 +65,31 @@ class val Sticker is Jsonable
         the standard sticker's sort order within its pack
         """
 
+    new val create(
+        id': Snowflake,
+        pack_id': (Snowflake | None) = None,
+        name': String,
+        description': (String | None) = None,
+        tags': String,
+        type'': StickerType,
+        format_type': StickerFormatType,
+        available': (Bool | None) = None,
+        guild_id': (Snowflake | None) = None,
+        user': (User | None) = None,
+        sort_value': (USize | None) = None
+    ) =>
+        id = id'
+        pack_id = pack_id'
+        name = name'
+        description = description'
+        tags = tags'
+        type' = type''
+        format_type = format_type'
+        available = available'
+        guild_id = guild_id'
+        user = user'
+        sort_value = sort_value'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
         var pack_id': (Snowflake | None) = None
@@ -236,6 +261,11 @@ class val StickerItem is Jsonable
         type of sticker format
         """
 
+    new val create(id': Snowflake, name': String, format_type': StickerFormatType) =>
+        id = id'
+        name = name'
+        format_type = format_type'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
         var name': (String | None) = None
@@ -300,6 +330,23 @@ class val StickerPack is Jsonable
         """
         id of the sticker pack's banner image
         """
+
+    new val create(
+        id': Snowflake,
+        stickers': Array[Sticker] val,
+        name': String,
+        sku_id': Snowflake,
+        cover_sticker_id': (Snowflake | None) = None,
+        description': String,
+        banner_asset_id': (Snowflake | None) = None
+    ) =>
+        id = id'
+        stickers = stickers'
+        name = name'
+        sku_id = sku_id'
+        cover_sticker_id = cover_sticker_id'
+        description = description'
+        banner_asset_id = banner_asset_id'
 
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None

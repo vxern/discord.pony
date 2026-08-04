@@ -15,6 +15,6 @@ actor Main
 
         bot.rest.routes.create_message(
             channel_id,
-            discord.CreateMessageParams(where content' = content),
+            discord.CreateMessageParams(where embeds' = [discord.MessageEmbed(where title' = "woah", description' = "so cool!")]),
             { (message: discord.Message) => env.out.print("sent " + message.id.string()) }
         )

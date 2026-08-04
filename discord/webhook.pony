@@ -62,6 +62,29 @@ class val Webhook is Jsonable
         the url used for executing the webhook (returned by the webhooks OAuth2 flow)
         """
 
+    new val create(
+        id': Snowflake,
+        type'': WebhookType,
+        guild_id': (Snowflake | None) = None,
+        channel_id': (Snowflake | None) = None,
+        user': (User | None) = None,
+        name': (String | None) = None,
+        avatar': (String | None) = None,
+        token': (String | None) = None,
+        application_id': (Snowflake | None) = None,
+        url': (String | None) = None
+    ) =>
+        id = id'
+        type' = type''
+        guild_id = guild_id'
+        channel_id = channel_id'
+        user = user'
+        name = name'
+        avatar = avatar'
+        token = token'
+        application_id = application_id'
+        url = url'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
         var type'': (WebhookType | None) = None

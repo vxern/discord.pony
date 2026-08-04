@@ -298,6 +298,10 @@ class val ActionRowComponent is Component
         Up to 5 interactive button components or a single select component
         """
 
+    new val create(id': (U32 | None) = None, components': Array[ActionRowChildComponent] val) =>
+        id = id'
+        components = components'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (U32 | None) = None
         var components': (Array[ActionRowChildComponent] val | None) = None
@@ -398,6 +402,25 @@ class val ButtonComponent is Component
         """
         Whether the button is disabled (defaults to `false`)
         """
+
+    new val create(
+        id': (U32 | None) = None,
+        style': ButtonStyle,
+        label': (String | None) = None,
+        emoji': (Emoji | None) = None,
+        custom_id': (String | None) = None,
+        sku_id': (Snowflake | None) = None,
+        url': (String | None) = None,
+        disabled': (Bool | None) = None
+    ) =>
+        id = id'
+        style = style'
+        label = label'
+        emoji = emoji'
+        custom_id = custom_id'
+        sku_id = sku_id'
+        url = url'
+        disabled = disabled'
 
     new val from_json(obj: json.JsonObject) ? =>
         var id': (U32 | None) = None
@@ -590,6 +613,25 @@ class val StringSelectComponent is Component
         Using this in a modal will result in an error. Modals can not currently have disabled components in them.
         """
 
+    new val create(
+        id': (U32 | None) = None,
+        custom_id': String,
+        options': Array[SelectOption] val,
+        placeholder': (String | None) = None,
+        min_values': (USize | None) = None,
+        max_values': (USize | None) = None,
+        required': (Bool | None) = None,
+        disabled': (Bool | None) = None
+    ) =>
+        id = id'
+        custom_id = custom_id'
+        options = options'
+        placeholder = placeholder'
+        min_values = min_values'
+        max_values = max_values'
+        required = required'
+        disabled = disabled'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (U32 | None) = None
         var custom_id': (String | None) = None
@@ -680,6 +722,19 @@ class val SelectOption is Jsonable
         """
         Will show this option as selected by default
         """
+
+    new val create(
+        label': String,
+        value': String,
+        description': (String | None) = None,
+        emoji': (Emoji | None) = None,
+        default': (Bool | None) = None
+    ) =>
+        label = label'
+        value = value'
+        description = description'
+        emoji = emoji'
+        default = default'
 
     new val from_json(obj: json.JsonObject) ? =>
         var label': (String | None) = None
@@ -791,6 +846,25 @@ class val TextInputComponent is Component
         """
         Custom placeholder text if the input is empty; max 100 characters
         """
+
+    new val create(
+        id': (U32 | None) = None,
+        custom_id': String,
+        style': TextInputStyle,
+        min_length': (USize | None) = None,
+        max_length': (USize | None) = None,
+        required': (Bool | None) = None,
+        value': (String | None) = None,
+        placeholder': (String | None) = None
+    ) =>
+        id = id'
+        custom_id = custom_id'
+        style = style'
+        min_length = min_length'
+        max_length = max_length'
+        required = required'
+        value = value'
+        placeholder = placeholder'
 
     new val from_json(obj: json.JsonObject) ? =>
         var id': (U32 | None) = None
@@ -938,6 +1012,25 @@ class val UserSelectComponent is Component
         Using this in a modal will result in an error. Modals can not currently have disabled components in them.
         """
 
+    new val create(
+        id': (U32 | None) = None,
+        custom_id': String,
+        placeholder': (String | None) = None,
+        default_values': (Array[SelectDefaultValue] val | None) = None,
+        min_values': (USize | None) = None,
+        max_values': (USize | None) = None,
+        required': (Bool | None) = None,
+        disabled': (Bool | None) = None
+    ) =>
+        id = id'
+        custom_id = custom_id'
+        placeholder = placeholder'
+        default_values = default_values'
+        min_values = min_values'
+        max_values = max_values'
+        required = required'
+        disabled = disabled'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (U32 | None) = None
         var custom_id': (String | None) = None
@@ -1030,6 +1123,25 @@ class val RoleSelectComponent is Component
         Using this in a modal will result in an error. Modals can not currently have disabled components in them.
         """
 
+    new val create(
+        id': (U32 | None) = None,
+        custom_id': String,
+        placeholder': (String | None) = None,
+        default_values': (Array[SelectDefaultValue] val | None) = None,
+        min_values': (USize | None) = None,
+        max_values': (USize | None) = None,
+        required': (Bool | None) = None,
+        disabled': (Bool | None) = None
+    ) =>
+        id = id'
+        custom_id = custom_id'
+        placeholder = placeholder'
+        default_values = default_values'
+        min_values = min_values'
+        max_values = max_values'
+        required = required'
+        disabled = disabled'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (U32 | None) = None
         var custom_id': (String | None) = None
@@ -1121,6 +1233,25 @@ class val MentionableSelectComponent is Component
 
         Using this in a modal will result in an error. Modals can not currently have disabled components in them.
         """
+
+    new val create(
+        id': (U32 | None) = None,
+        custom_id': String,
+        placeholder': (String | None) = None,
+        default_values': (Array[SelectDefaultValue] val | None) = None,
+        min_values': (USize | None) = None,
+        max_values': (USize | None) = None,
+        required': (Bool | None) = None,
+        disabled': (Bool | None) = None
+    ) =>
+        id = id'
+        custom_id = custom_id'
+        placeholder = placeholder'
+        default_values = default_values'
+        min_values = min_values'
+        max_values = max_values'
+        required = required'
+        disabled = disabled'
 
     new val from_json(obj: json.JsonObject) ? =>
         var id': (U32 | None) = None
@@ -1219,6 +1350,27 @@ class val ChannelSelectComponent is Component
         Using this in a modal will result in an error. Modals can not currently have disabled components in them.
         """
 
+    new val create(
+        id': (U32 | None) = None,
+        custom_id': String,
+        channel_types': (Array[ChannelType] val | None) = None,
+        placeholder': (String | None) = None,
+        default_values': (Array[SelectDefaultValue] val | None) = None,
+        min_values': (USize | None) = None,
+        max_values': (USize | None) = None,
+        required': (Bool | None) = None,
+        disabled': (Bool | None) = None
+    ) =>
+        id = id'
+        custom_id = custom_id'
+        channel_types = channel_types'
+        placeholder = placeholder'
+        default_values = default_values'
+        min_values = min_values'
+        max_values = max_values'
+        required = required'
+        disabled = disabled'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (U32 | None) = None
         var custom_id': (String | None) = None
@@ -1316,6 +1468,10 @@ class val SelectDefaultValue is Jsonable
         Type of value that `id` represents
         """
 
+    new val create(id': Snowflake, type'': SelectDefaultValueType) =>
+        id = id'
+        type' = type''
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
         var type'': (SelectDefaultValueType | None) = None
@@ -1404,6 +1560,15 @@ class val SectionComponent is Component
         A component that is contextually associated to the content of the section
         """
 
+    new val create(
+        id': (U32 | None) = None,
+        components': Array[SectionChildComponent] val,
+        accessory': SectionAccessoryComponent
+    ) =>
+        id = id'
+        components = components'
+        accessory = accessory'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (U32 | None) = None
         var components': (Array[SectionChildComponent] val | None) = None
@@ -1479,6 +1644,10 @@ class val TextDisplayComponent is Component
         Text that will be displayed similar to a message
         """
 
+    new val create(id': (U32 | None) = None, content': String) =>
+        id = id'
+        content = content'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (U32 | None) = None
         var content': (String | None) = None
@@ -1531,6 +1700,17 @@ class val ThumbnailComponent is Component
         """
         Whether the thumbnail should be a spoiler (or blurred out). Defaults to `false`
         """
+
+    new val create(
+        id': (U32 | None) = None,
+        media': UnfurledMediaItem,
+        description': (String | None) = None,
+        spoiler': (Bool | None) = None
+    ) =>
+        id = id'
+        media = media'
+        description = description'
+        spoiler = spoiler'
 
     new val from_json(obj: json.JsonObject) ? =>
         var id': (U32 | None) = None
@@ -1587,6 +1767,10 @@ class val MediaGalleryComponent is Component
         1 to 10 media gallery items
         """
 
+    new val create(id': (U32 | None) = None, items': Array[MediaGalleryItem] val) =>
+        id = id'
+        items = items'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (U32 | None) = None
         var items': (Array[MediaGalleryItem] val | None) = None
@@ -1626,6 +1810,11 @@ class val MediaGalleryItem is Jsonable
         """
         Whether the media should be a spoiler (or blurred out). Defaults to `false`
         """
+
+    new val create(media': UnfurledMediaItem, description': (String | None) = None, spoiler': (Bool | None) = None) =>
+        media = media'
+        description = description'
+        spoiler = spoiler'
 
     new val from_json(obj: json.JsonObject) ? =>
         var media': (UnfurledMediaItem | None) = None
@@ -1716,6 +1905,19 @@ class val FileComponent is Component
         This field is ignored and provided by the API as part of the response.
         """
 
+    new val create(
+        id': (U32 | None) = None,
+        file': UnfurledMediaItem,
+        spoiler': (Bool | None) = None,
+        name': (String | None) = None,
+        size': (USize | None) = None
+    ) =>
+        id = id'
+        file = file'
+        spoiler = spoiler'
+        name = name'
+        size = size'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (U32 | None) = None
         var file': (UnfurledMediaItem | None) = None
@@ -1784,6 +1986,15 @@ class val SeparatorComponent is Component
         """
         Size of separator padding. Defaults to `SmallSeparatorSpacingSize`
         """
+
+    new val create(
+        id': (U32 | None) = None,
+        divider': (Bool | None) = None,
+        spacing': (SeparatorSpacingSize | None) = None
+    ) =>
+        id = id'
+        divider = divider'
+        spacing = spacing'
 
     new val from_json(obj: json.JsonObject) ? =>
         var id': (U32 | None) = None
@@ -1878,6 +2089,17 @@ class val ContainerComponent is Component
         Whether the container should be a spoiler (or blurred out). Defaults to `false`
         """
 
+    new val create(
+        id': (U32 | None) = None,
+        components': Array[ContainerChildComponent] val,
+        accent_color': (I64 | None) = None,
+        spoiler': (Bool | None) = None
+    ) =>
+        id = id'
+        components = components'
+        accent_color = accent_color'
+        spoiler = spoiler'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (U32 | None) = None
         var components': (Array[ContainerChildComponent] val | None) = None
@@ -1964,6 +2186,17 @@ class val LabelComponent is Component
         The component within the label
         """
 
+    new val create(
+        id': (U32 | None) = None,
+        label': String,
+        description': (String | None) = None,
+        component': LabelChildComponent
+    ) =>
+        id = id'
+        label = label'
+        description = description'
+        component = component'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (U32 | None) = None
         var label': (String | None) = None
@@ -2036,6 +2269,19 @@ class val FileUploadComponent is Component
         Whether the file upload requires files to be uploaded before submitting the modal (defaults to `true`)
         """
 
+    new val create(
+        id': (U32 | None) = None,
+        custom_id': String,
+        min_values': (USize | None) = None,
+        max_values': (USize | None) = None,
+        required': (Bool | None) = None
+    ) =>
+        id = id'
+        custom_id = custom_id'
+        min_values = min_values'
+        max_values = max_values'
+        required = required'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (U32 | None) = None
         var custom_id': (String | None) = None
@@ -2106,6 +2352,17 @@ class val RadioGroupComponent is Component
         Whether a selection is required to submit the modal (defaults to `true`)
         """
 
+    new val create(
+        id': (U32 | None) = None,
+        custom_id': String,
+        options': Array[RadioGroupOption] val,
+        required': (Bool | None) = None
+    ) =>
+        id = id'
+        custom_id = custom_id'
+        options = options'
+        required = required'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (U32 | None) = None
         var custom_id': (String | None) = None
@@ -2163,6 +2420,17 @@ class val RadioGroupOption is Jsonable
         """
         Shows the option as selected by default
         """
+
+    new val create(
+        value': String,
+        label': String,
+        description': (String | None) = None,
+        default': (Bool | None) = None
+    ) =>
+        value = value'
+        label = label'
+        description = description'
+        default = default'
 
     new val from_json(obj: json.JsonObject) ? =>
         var value': (String | None) = None
@@ -2256,6 +2524,21 @@ class val CheckboxGroupComponent is Component
         Whether selecting within the group is required (defaults to `true`)
         """
 
+    new val create(
+        id': (U32 | None) = None,
+        custom_id': String,
+        options': Array[CheckboxGroupOption] val,
+        min_values': (USize | None) = None,
+        max_values': (USize | None) = None,
+        required': (Bool | None) = None
+    ) =>
+        id = id'
+        custom_id = custom_id'
+        options = options'
+        min_values = min_values'
+        max_values = max_values'
+        required = required'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (U32 | None) = None
         var custom_id': (String | None) = None
@@ -2327,6 +2610,17 @@ class val CheckboxGroupOption is Jsonable
         """
         Shows the option as selected by default
         """
+
+    new val create(
+        value': String,
+        label': String,
+        description': (String | None) = None,
+        default': (Bool | None) = None
+    ) =>
+        value = value'
+        label = label'
+        description = description'
+        default = default'
 
     new val from_json(obj: json.JsonObject) ? =>
         var value': (String | None) = None
@@ -2404,6 +2698,11 @@ class val CheckboxComponent is Component
         """
         Whether the checkbox is selected by default
         """
+
+    new val create(id': (U32 | None) = None, custom_id': String, default': (Bool | None) = None) =>
+        id = id'
+        custom_id = custom_id'
+        default = default'
 
     new val from_json(obj: json.JsonObject) ? =>
         var id': (U32 | None) = None
@@ -2503,6 +2802,27 @@ class val UnfurledMediaItem is Jsonable
 
         This field is ignored and provided by the API as part of the response, and is only present if the media item was uploaded as an attachment.
         """
+
+    new val create(
+        url': String,
+        proxy_url': (String | None) = None,
+        height': (USize | None) = None,
+        width': (USize | None) = None,
+        placeholder': (String | None) = None,
+        placeholder_version': (USize | None) = None,
+        content_type': (String | None) = None,
+        flags': (Array[UnfurledMediaItemFlag] val | None) = None,
+        attachment_id': (Snowflake | None) = None
+    ) =>
+        url = url'
+        proxy_url = proxy_url'
+        height = height'
+        width = width'
+        placeholder = placeholder'
+        placeholder_version = placeholder_version'
+        content_type = content_type'
+        flags = flags'
+        attachment_id = attachment_id'
 
     new val from_json(obj: json.JsonObject) ? =>
         var url': (String | None) = None

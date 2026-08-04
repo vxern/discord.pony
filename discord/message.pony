@@ -198,6 +198,81 @@ class val Message is Jsonable
         the custom client-side theme shared via the message
         """
 
+    new val create(
+        id': Snowflake,
+        channel_id': Snowflake,
+        author': User,
+        content': String,
+        timestamp': ISO8601,
+        edited_timestamp': (ISO8601 | None) = None,
+        tts': Bool,
+        mention_everyone': Bool,
+        mentions': Array[User] val,
+        mention_roles': Array[Snowflake] val,
+        mention_channels': (Array[ChannelMention] val | None) = None,
+        attachments': Array[MessageAttachment] val,
+        embeds': Array[MessageEmbed] val,
+        reactions': (Array[MessageReaction] val | None) = None,
+        nonce': (USize | String | None) = None,
+        pinned': Bool,
+        webhook_id': (Snowflake | None) = None,
+        type'': MessageType,
+        activity': (MessageActivity | None) = None,
+        application_id': (Snowflake | None) = None,
+        flags': (Array[MessageFlag] val | None) = None,
+        message_reference': (MessageReference | None) = None,
+        message_snapshots': (Array[MessageSnapshot] val | None) = None,
+        referenced_message': (Message | None) = None,
+        interaction_metadata': (MessageInteractionMetadata | None) = None,
+        interaction': (MessageInteraction | None) = None,
+        thread': (Channel | None) = None,
+        components': (Array[Component] val | None) = None,
+        sticker_items': (Array[StickerItem] val | None) = None,
+        stickers': (Array[Sticker] val | None) = None,
+        position': (USize | None) = None,
+        role_subscription_data': (RoleSubscriptionData | None) = None,
+        resolved': (ResolvedData | None) = None,
+        poll': (Poll | None) = None,
+        call': (MessageCall | None) = None,
+        shared_client_theme': (SharedClientTheme | None) = None
+    ) =>
+        id = id'
+        channel_id = channel_id'
+        author = author'
+        content = content'
+        timestamp = timestamp'
+        edited_timestamp = edited_timestamp'
+        tts = tts'
+        mention_everyone = mention_everyone'
+        mentions = mentions'
+        mention_roles = mention_roles'
+        mention_channels = mention_channels'
+        attachments = attachments'
+        embeds = embeds'
+        reactions = reactions'
+        nonce = nonce'
+        pinned = pinned'
+        webhook_id = webhook_id'
+        type' = type''
+        activity = activity'
+        application_id = application_id'
+        flags = flags'
+        message_reference = message_reference'
+        message_snapshots = message_snapshots'
+        referenced_message = referenced_message'
+        interaction_metadata = interaction_metadata'
+        interaction = interaction'
+        thread = thread'
+        components = components'
+        sticker_items = sticker_items'
+        stickers = stickers'
+        position = position'
+        role_subscription_data = role_subscription_data'
+        resolved = resolved'
+        poll = poll'
+        call = call'
+        shared_client_theme = shared_client_theme'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
         var channel_id': (Snowflake | None) = None
@@ -670,6 +745,10 @@ class val MessageActivity is Jsonable
         `party_id` from a Rich Presence event
         """
 
+    new val create(type'': MessageActivityType, party_id': (String | None) = None) =>
+        type' = type''
+        party_id = party_id'
+
     new val from_json(obj: json.JsonObject) ? =>
         var type'': (MessageActivityType | None) = None
         var party_id': (String | None) = None
@@ -891,7 +970,7 @@ class val ApplicationCommandInteractionMetadata is Jsonable
         User who triggered the interaction
         """
 
-    let authorizing_integration_owners: collections.Map[ApplicationIntegrationType, Snowflake]
+    let authorizing_integration_owners: collections.Map[ApplicationIntegrationType, Snowflake] val
         """
         IDs for installation context(s) related to an interaction
         """
@@ -911,11 +990,28 @@ class val ApplicationCommandInteractionMetadata is Jsonable
         The ID of the message the command was run on, present only on message command interactions. The original response message will also have `message_reference` and `referenced_message` pointing to this message.
         """
 
+    new val create(
+        id': Snowflake,
+        type'': InteractionType,
+        user': User,
+        authorizing_integration_owners': collections.Map[ApplicationIntegrationType, Snowflake] val,
+        original_response_message_id': (Snowflake | None) = None,
+        target_user': (User | None) = None,
+        target_message_id': (Snowflake | None) = None
+    ) =>
+        id = id'
+        type' = type''
+        user = user'
+        authorizing_integration_owners = authorizing_integration_owners'
+        original_response_message_id = original_response_message_id'
+        target_user = target_user'
+        target_message_id = target_message_id'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
         var type'': (InteractionType | None) = None
         var user': (User | None) = None
-        var authorizing_integration_owners': (collections.Map[ApplicationIntegrationType, Snowflake] | None) = None
+        var authorizing_integration_owners': (collections.Map[ApplicationIntegrationType, Snowflake] val | None) = None
         var original_response_message_id': (Snowflake | None) = None
         var target_user': (User | None) = None
         var target_message_id': (Snowflake | None) = None
@@ -935,7 +1031,7 @@ class val ApplicationCommandInteractionMetadata is Jsonable
         id = id' as Snowflake
         type' = type'' as InteractionType
         user = user' as User
-        authorizing_integration_owners = authorizing_integration_owners' as collections.Map[ApplicationIntegrationType, Snowflake]
+        authorizing_integration_owners = authorizing_integration_owners' as collections.Map[ApplicationIntegrationType, Snowflake] val
         original_response_message_id = original_response_message_id'
         target_user = target_user'
         target_message_id = target_message_id'
@@ -981,7 +1077,7 @@ class val MessageComponentInteractionMetadata is Jsonable
         User who triggered the interaction
         """
 
-    let authorizing_integration_owners: collections.Map[ApplicationIntegrationType, Snowflake]
+    let authorizing_integration_owners: collections.Map[ApplicationIntegrationType, Snowflake] val
         """
         IDs for installation context(s) related to an interaction
         """
@@ -996,11 +1092,26 @@ class val MessageComponentInteractionMetadata is Jsonable
         ID of the message that contained the interactive component
         """
 
+    new val create(
+        id': Snowflake,
+        type'': InteractionType,
+        user': User,
+        authorizing_integration_owners': collections.Map[ApplicationIntegrationType, Snowflake] val,
+        original_response_message_id': (Snowflake | None) = None,
+        interacted_message_id': Snowflake
+    ) =>
+        id = id'
+        type' = type''
+        user = user'
+        authorizing_integration_owners = authorizing_integration_owners'
+        original_response_message_id = original_response_message_id'
+        interacted_message_id = interacted_message_id'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
         var type'': (InteractionType | None) = None
         var user': (User | None) = None
-        var authorizing_integration_owners': (collections.Map[ApplicationIntegrationType, Snowflake] | None) = None
+        var authorizing_integration_owners': (collections.Map[ApplicationIntegrationType, Snowflake] val | None) = None
         var original_response_message_id': (Snowflake | None) = None
         var interacted_message_id': (Snowflake | None) = None
 
@@ -1018,7 +1129,7 @@ class val MessageComponentInteractionMetadata is Jsonable
         id = id' as Snowflake
         type' = type'' as InteractionType
         user = user' as User
-        authorizing_integration_owners = authorizing_integration_owners' as collections.Map[ApplicationIntegrationType, Snowflake]
+        authorizing_integration_owners = authorizing_integration_owners' as collections.Map[ApplicationIntegrationType, Snowflake] val
         original_response_message_id = original_response_message_id'
         interacted_message_id = interacted_message_id' as Snowflake
 
@@ -1056,7 +1167,7 @@ class val ModalSubmitInteractionMetadata is Jsonable
         User who triggered the interaction
         """
 
-    let authorizing_integration_owners: collections.Map[ApplicationIntegrationType, Snowflake]
+    let authorizing_integration_owners: collections.Map[ApplicationIntegrationType, Snowflake] val
         """
         IDs for installation context(s) related to an interaction
         """
@@ -1071,11 +1182,26 @@ class val ModalSubmitInteractionMetadata is Jsonable
         Metadata for the interaction that was used to open the modal
         """
 
+    new val create(
+        id': Snowflake,
+        type'': InteractionType,
+        user': User,
+        authorizing_integration_owners': collections.Map[ApplicationIntegrationType, Snowflake] val,
+        original_response_message_id': (Snowflake | None) = None,
+        triggering_interaction_metadata': (ApplicationCommandInteractionMetadata | MessageComponentInteractionMetadata)
+    ) =>
+        id = id'
+        type' = type''
+        user = user'
+        authorizing_integration_owners = authorizing_integration_owners'
+        original_response_message_id = original_response_message_id'
+        triggering_interaction_metadata = triggering_interaction_metadata'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
         var type'': (InteractionType | None) = None
         var user': (User | None) = None
-        var authorizing_integration_owners': (collections.Map[ApplicationIntegrationType, Snowflake] | None) = None
+        var authorizing_integration_owners': (collections.Map[ApplicationIntegrationType, Snowflake] val | None) = None
         var original_response_message_id': (Snowflake | None) = None
         var triggering_interaction_metadata': (ApplicationCommandInteractionMetadata | MessageComponentInteractionMetadata | None) = None
 
@@ -1096,7 +1222,7 @@ class val ModalSubmitInteractionMetadata is Jsonable
         id = id' as Snowflake
         type' = type'' as InteractionType
         user = user' as User
-        authorizing_integration_owners = authorizing_integration_owners' as collections.Map[ApplicationIntegrationType, Snowflake]
+        authorizing_integration_owners = authorizing_integration_owners' as collections.Map[ApplicationIntegrationType, Snowflake] val
         original_response_message_id = original_response_message_id'
         triggering_interaction_metadata = triggering_interaction_metadata' as (ApplicationCommandInteractionMetadata | MessageComponentInteractionMetadata)
 
@@ -1143,6 +1269,17 @@ class val MessageInteraction is Jsonable
 
     // TODO(vxern): Add `member` (partial member object; Member who invoked the interaction in the guild) once a partial variant of `GuildMember` is implemented.
 
+    new val create(
+        id': Snowflake,
+        type'': InteractionType,
+        name': String,
+        user': User
+    ) =>
+        id = id'
+        type' = type''
+        name = name'
+        user = user'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
         var type'': (InteractionType | None) = None
@@ -1186,6 +1323,10 @@ class val MessageCall is Jsonable
         """
         time when call ended
         """
+
+    new val create(participants': Array[Snowflake] val, ended_timestamp': (ISO8601 | None) = None) =>
+        participants = participants'
+        ended_timestamp = ended_timestamp'
 
     new val from_json(obj: json.JsonObject) ? =>
         var participants': (Array[Snowflake] val | None) = None
@@ -1242,6 +1383,19 @@ class val MessageReference is Jsonable
         """
         when sending, whether to error if the referenced message doesn't exist instead of sending as a normal (non-reply) message, default true
         """
+
+    new val create(
+        type'': (MessageReferenceType | None) = None,
+        message_id': (Snowflake | None) = None,
+        channel_id': (Snowflake | None) = None,
+        guild_id': (Snowflake | None) = None,
+        fail_if_not_exists': (Bool | None) = None
+    ) =>
+        type' = type''
+        message_id = message_id'
+        channel_id = channel_id'
+        guild_id = guild_id'
+        fail_if_not_exists = fail_if_not_exists'
 
     new val from_json(obj: json.JsonObject) ? =>
         var type'': (MessageReferenceType | None) = None
@@ -1405,6 +1559,33 @@ class val MessageSnapshot is Jsonable
         sent if the message contains components like buttons, action rows, or other interactive components
         """
 
+    new val create(
+        type'': MessageType,
+        content': String,
+        embeds': Array[MessageEmbed] val,
+        attachments': Array[MessageAttachment] val,
+        timestamp': ISO8601,
+        edited_timestamp': (ISO8601 | None) = None,
+        flags': (Array[MessageFlag] val | None) = None,
+        mentions': Array[User] val,
+        mention_roles': Array[Snowflake] val,
+        stickers': (Array[Sticker] val | None) = None,
+        sticker_items': (Array[StickerItem] val | None) = None,
+        components': (Array[Component] val | None) = None
+    ) =>
+        type' = type''
+        content = content'
+        embeds = embeds'
+        attachments = attachments'
+        timestamp = timestamp'
+        edited_timestamp = edited_timestamp'
+        flags = flags'
+        mentions = mentions'
+        mention_roles = mention_roles'
+        stickers = stickers'
+        sticker_items = sticker_items'
+        components = components'
+
     new val from_json(obj: json.JsonObject) ? =>
         let message = obj("message")? as json.JsonObject
 
@@ -1534,6 +1715,21 @@ class val MessageReaction is Jsonable
         HEX colors used for super reaction
         """
 
+    new val create(
+        count': USize,
+        count_details': MessageReactionCountDetails,
+        me': Bool,
+        me_burst': Bool,
+        emoji': Emoji,
+        burst_colors': Array[String] val
+    ) =>
+        count = count'
+        count_details = count_details'
+        me = me'
+        me_burst = me_burst'
+        emoji = emoji'
+        burst_colors = burst_colors'
+
     new val from_json(obj: json.JsonObject) ? =>
         var count': (USize | None) = None
         var count_details': (MessageReactionCountDetails | None) = None
@@ -1603,6 +1799,10 @@ class val MessageReactionCountDetails is Jsonable
         """
         Count of normal reactions
         """
+
+    new val create(burst': USize, normal': USize) =>
+        burst = burst'
+        normal = normal'
 
     new val from_json(obj: json.JsonObject) ? =>
         var burst': (USize | None) = None
@@ -1701,6 +1901,37 @@ class val MessageEmbed is Jsonable
         """
         embed flags combined as a bitfield
         """
+
+    new val create(
+        title': (String | None) = None,
+        type'': (MessageEmbedType | None) = None,
+        description': (String | None) = None,
+        url': (String | None) = None,
+        timestamp': (ISO8601 | None) = None,
+        color': (I64 | None) = None,
+        footer': (MessageEmbedFooter | None) = None,
+        image': (MessageEmbedImage | None) = None,
+        thumbnail': (MessageEmbedImage | None) = None,
+        video': (MessageEmbedVideo | None) = None,
+        provider': (MessageEmbedProvider | None) = None,
+        author': (MessageEmbedAuthor | None) = None,
+        fields': (Array[MessageEmbedField] val | None) = None,
+        flags': (Array[MessageEmbedFlag] val | None) = None
+    ) =>
+        title = title'
+        type' = type''
+        description = description'
+        url = url'
+        timestamp = timestamp'
+        color = color'
+        footer = footer'
+        image = image'
+        thumbnail = thumbnail'
+        video = video'
+        provider = provider'
+        author = author'
+        fields = fields'
+        flags = flags'
 
     new val from_json(obj: json.JsonObject) ? =>
         var title': (String | None) = None
@@ -1992,6 +2223,27 @@ class val MessageEmbedVideo is Jsonable
         embed media flags combined as a bitfield
         """
 
+    new val create(
+        url': (String | None) = None,
+        proxy_url': (String | None) = None,
+        height': (USize | None) = None,
+        width': (USize | None) = None,
+        content_type': (String | None) = None,
+        placeholder': (String | None) = None,
+        placeholder_version': (USize | None) = None,
+        description': (String | None) = None,
+        flags': (Array[MessageEmbedMediaFlag] val | None) = None
+    ) =>
+        url = url'
+        proxy_url = proxy_url'
+        height = height'
+        width = width'
+        content_type = content_type'
+        placeholder = placeholder'
+        placeholder_version = placeholder_version'
+        description = description'
+        flags = flags'
+
     new val from_json(obj: json.JsonObject) ? =>
         var url': (String | None) = None
         var proxy_url': (String | None) = None
@@ -2119,6 +2371,27 @@ class val MessageEmbedImage is Jsonable
         """
         embed media flags combined as a bitfield
         """
+
+    new val create(
+        url': String,
+        proxy_url': (String | None) = None,
+        height': (USize | None) = None,
+        width': (USize | None) = None,
+        content_type': (String | None) = None,
+        placeholder': (String | None) = None,
+        placeholder_version': (USize | None) = None,
+        description': (String | None) = None,
+        flags': (Array[MessageEmbedMediaFlag] val | None) = None
+    ) =>
+        url = url'
+        proxy_url = proxy_url'
+        height = height'
+        width = width'
+        content_type = content_type'
+        placeholder = placeholder'
+        placeholder_version = placeholder_version'
+        description = description'
+        flags = flags'
 
     new val from_json(obj: json.JsonObject) ? =>
         var url': (String | None) = None
@@ -2250,6 +2523,10 @@ class val MessageEmbedProvider is Jsonable
         url of provider
         """
 
+    new val create(name': (String | None) = None, url': (String | None) = None) =>
+        name = name'
+        url = url'
+
     new val from_json(obj: json.JsonObject) ? =>
         var name': (String | None) = None
         var url': (String | None) = None
@@ -2301,6 +2578,17 @@ class val MessageEmbedAuthor is Jsonable
         """
         a proxied url of author icon
         """
+
+    new val create(
+        name': String,
+        url': (String | None) = None,
+        icon_url': (String | None) = None,
+        proxy_icon_url': (String | None) = None
+    ) =>
+        name = name'
+        url = url'
+        icon_url = icon_url'
+        proxy_icon_url = proxy_icon_url'
 
     new val from_json(obj: json.JsonObject) ? =>
         var name': (String | None) = None
@@ -2360,6 +2648,11 @@ class val MessageEmbedFooter is Jsonable
         a proxied url of footer icon
         """
 
+    new val create(text': String, icon_url': (String | None) = None, proxy_icon_url': (String | None) = None) =>
+        text = text'
+        icon_url = icon_url'
+        proxy_icon_url = proxy_icon_url'
+
     new val from_json(obj: json.JsonObject) ? =>
         var text': (String | None) = None
         var icon_url': (String | None) = None
@@ -2410,6 +2703,11 @@ class val MessageEmbedField is Jsonable
         """
         whether or not this field should display inline
         """
+
+    new val create(name': String, value': String, inline': (Bool | None) = None) =>
+        name = name'
+        value = value'
+        inline = inline'
 
     new val from_json(obj: json.JsonObject) ? =>
         var name': (String | None) = None
@@ -2558,6 +2856,47 @@ class val MessageAttachment is Jsonable
         """
         for Clips, the application in the stream, if recognized
         """
+
+    new val create(
+        id': Snowflake,
+        filename': String,
+        title': (String | None) = None,
+        description': (String | None) = None,
+        content_type': (String | None) = None,
+        size': USize,
+        url': String,
+        proxy_url': String,
+        height': (USize | None) = None,
+        width': (USize | None) = None,
+        placeholder': (String | None) = None,
+        placeholder_version': (USize | None) = None,
+        ephemeral': (Bool | None) = None,
+        duration_secs': (F64 | None) = None,
+        waveform': (String | None) = None,
+        flags': (Array[MessageAttachmentFlag] val | None) = None,
+        clip_participants': (Array[User] val | None) = None,
+        clip_created_at': (ISO8601 | None) = None,
+        application': (Application | None) = None
+    ) =>
+        id = id'
+        filename = filename'
+        title = title'
+        description = description'
+        content_type = content_type'
+        size = size'
+        url = url'
+        proxy_url = proxy_url'
+        height = height'
+        width = width'
+        placeholder = placeholder'
+        placeholder_version = placeholder_version'
+        ephemeral = ephemeral'
+        duration_secs = duration_secs'
+        waveform = waveform'
+        flags = flags'
+        clip_participants = clip_participants'
+        clip_created_at = clip_created_at'
+        application = application'
 
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
@@ -2806,6 +3145,17 @@ class val ChannelMention is Jsonable
         the name of the channel
         """
 
+    new val create(
+        id': Snowflake,
+        guild_id': Snowflake,
+        type'': ChannelType,
+        name': String
+    ) =>
+        id = id'
+        guild_id = guild_id'
+        type' = type''
+        name = name'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
         var guild_id': (Snowflake | None) = None
@@ -2881,6 +3231,17 @@ class val AllowedMentions is Jsonable
         """
         For replies, whether to mention the author of the message being replied to, defaults to false
         """
+
+    new val create(
+        parse': (Array[AllowedMention] val | None) = None,
+        roles': (Array[Snowflake] val | None) = None,
+        users': (Array[Snowflake] val | None) = None,
+        replied_user': (Bool | None) = None
+    ) =>
+        parse = parse'
+        roles = roles'
+        users = users'
+        replied_user = replied_user'
 
     new val from_json(obj: json.JsonObject) ? =>
         var parse': (Array[AllowedMention] val | None) = None
@@ -3003,6 +3364,17 @@ class val RoleSubscriptionData is Jsonable
         whether this notification is for a renewal rather than a new purchase
         """
 
+    new val create(
+        role_subscription_listing_id': Snowflake,
+        tier_name': String,
+        total_months_subscribed': USize,
+        is_renewal': Bool
+    ) =>
+        role_subscription_listing_id = role_subscription_listing_id'
+        tier_name = tier_name'
+        total_months_subscribed = total_months_subscribed'
+        is_renewal = is_renewal'
+
     new val from_json(obj: json.JsonObject) ? =>
         var role_subscription_listing_id': (Snowflake | None) = None
         var tier_name': (String | None) = None
@@ -3044,6 +3416,10 @@ class val MessagePin is Jsonable
         """
         the pinned message
         """
+
+    new val create(pinned_at': ISO8601, message': Message) =>
+        pinned_at = pinned_at'
+        message = message'
 
     new val from_json(obj: json.JsonObject) ? =>
         var pinned_at': (ISO8601 | None) = None
@@ -3106,6 +3482,17 @@ class val SharedClientTheme is Jsonable
         """
         the mode of the theme
         """
+
+    new val create(
+        colors': Array[String] val,
+        gradient_angle': USize,
+        base_mix': USize,
+        base_theme': (BaseThemeType | None) = None
+    ) =>
+        colors = colors'
+        gradient_angle = gradient_angle'
+        base_mix = base_mix'
+        base_theme = base_theme'
 
     new val from_json(obj: json.JsonObject) ? =>
         var colors': (Array[String] val | None) = None

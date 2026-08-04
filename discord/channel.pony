@@ -183,6 +183,79 @@ class val Channel is Jsonable
         the default forum layout view used to display posts in GUILD_FORUM channels. Defaults to 0, which indicates a layout view has not been set by a channel admin
         """
 
+    new val create(
+        id': Snowflake,
+        type'': ChannelType,
+        guild_id': (Snowflake | None) = None,
+        position': (USize | None) = None,
+        permission_overwrites': (Array[PermissionOverwrite] val | None) = None,
+        name': (String | None) = None,
+        topic': (String | None) = None,
+        nsfw': (Bool | None) = None,
+        last_message_id': (Snowflake | None) = None,
+        bitrate': (USize | None) = None,
+        user_limit': (USize | None) = None,
+        rate_limit_per_user': (USize | None) = None,
+        recipients': (Array[User] val | None) = None,
+        icon': (String | None) = None,
+        owner_id': (Snowflake | None) = None,
+        application_id': (Snowflake | None) = None,
+        managed': (Bool | None) = None,
+        parent_id': (Snowflake | None) = None,
+        last_pin_timestamp': (ISO8601 | None) = None,
+        rtc_region': (String | None) = None,
+        video_quality_mode': (VideoQualityMode | None) = None,
+        message_count': (USize | None) = None,
+        member_count': (USize | None) = None,
+        thread_metadata': (ThreadMetadata | None) = None,
+        member': (ThreadMember | None) = None,
+        default_auto_archive_duration': (USize | None) = None,
+        permissions': (Array[Permission] val | None) = None,
+        flags': (Array[ChannelFlag] val | None) = None,
+        total_message_sent': (USize | None) = None,
+        available_tags': (Array[ForumTag] val | None) = None,
+        applied_tags': (Array[Snowflake] val | None) = None,
+        default_reaction_emoji': (DefaultReaction | None) = None,
+        default_thread_rate_limit_per_user': (USize | None) = None,
+        default_sort_order': (SortOrderType | None) = None,
+        default_forum_layout': (ForumLayoutType | None) = None
+    ) =>
+        id = id'
+        type' = type''
+        guild_id = guild_id'
+        position = position'
+        permission_overwrites = permission_overwrites'
+        name = name'
+        topic = topic'
+        nsfw = nsfw'
+        last_message_id = last_message_id'
+        bitrate = bitrate'
+        user_limit = user_limit'
+        rate_limit_per_user = rate_limit_per_user'
+        recipients = recipients'
+        icon = icon'
+        owner_id = owner_id'
+        application_id = application_id'
+        managed = managed'
+        parent_id = parent_id'
+        last_pin_timestamp = last_pin_timestamp'
+        rtc_region = rtc_region'
+        video_quality_mode = video_quality_mode'
+        message_count = message_count'
+        member_count = member_count'
+        thread_metadata = thread_metadata'
+        member = member'
+        default_auto_archive_duration = default_auto_archive_duration'
+        permissions = permissions'
+        flags = flags'
+        total_message_sent = total_message_sent'
+        available_tags = available_tags'
+        applied_tags = applied_tags'
+        default_reaction_emoji = default_reaction_emoji'
+        default_thread_rate_limit_per_user = default_thread_rate_limit_per_user'
+        default_sort_order = default_sort_order'
+        default_forum_layout = default_forum_layout'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
         var type'': (ChannelType | None) = None
@@ -755,6 +828,10 @@ class val FollowedChannel is Jsonable
         created target webhook id
         """
 
+    new val create(channel_id': Snowflake, webhook_id': Snowflake) =>
+        channel_id = channel_id'
+        webhook_id = webhook_id'
+
     new val from_json(obj: json.JsonObject) ? =>
         var channel_id': (Snowflake | None) = None
         var webhook_id': (Snowflake | None) = None
@@ -800,6 +877,17 @@ class val PermissionOverwrite is Jsonable
         """
         permission bit set
         """
+
+    new val create(
+        id': Snowflake,
+        type'': PermissionOverwriteType,
+        allow': Array[Permission] val,
+        deny': Array[Permission] val
+    ) =>
+        id = id'
+        type' = type''
+        allow = allow'
+        deny = deny'
 
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
@@ -905,6 +993,21 @@ class val ThreadMetadata is Jsonable
         timestamp when the thread was created; only populated for threads created after 2022-01-09
         """
 
+    new val create(
+        archived': Bool,
+        auto_archive_duration': USize,
+        archive_timestamp': ISO8601,
+        locked': Bool,
+        invitable': (Bool | None) = None,
+        create_timestamp': (ISO8601 | None) = None
+    ) =>
+        archived = archived'
+        auto_archive_duration = auto_archive_duration'
+        archive_timestamp = archive_timestamp'
+        locked = locked'
+        invitable = invitable'
+        create_timestamp = create_timestamp'
+
     new val from_json(obj: json.JsonObject) ? =>
         var archived': (Bool | None) = None
         var auto_archive_duration': (USize | None) = None
@@ -987,6 +1090,19 @@ class val ThreadMember is Jsonable
         Only included when `with_member` is set to true when calling List Thread Members or Get Thread Member.
         """
 
+    new val create(
+        id': (Snowflake | None) = None,
+        user_id': (Snowflake | None) = None,
+        join_timestamp': ISO8601,
+        flags': USize,
+        member': (GuildMember | None) = None
+    ) =>
+        id = id'
+        user_id = user_id'
+        join_timestamp = join_timestamp'
+        flags = flags'
+        member = member'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
         var user_id': (Snowflake | None) = None
@@ -1064,6 +1180,10 @@ class val DefaultReaction is Jsonable
         the unicode character of the emoji
         """
 
+    new val create(emoji_id': (Snowflake | None) = None, emoji_name': (String | None) = None) =>
+        emoji_id = emoji_id'
+        emoji_name = emoji_name'
+
     new val from_json(obj: json.JsonObject) ? =>
         var emoji_id': (Snowflake | None) = None
         var emoji_name': (String | None) = None
@@ -1118,6 +1238,19 @@ class val ForumTag is Jsonable
         """
         the unicode character of the emoji
         """
+
+    new val create(
+        id': Snowflake,
+        name': String,
+        moderated': Bool,
+        emoji_id': (Snowflake | None) = None,
+        emoji_name': (String | None) = None
+    ) =>
+        id = id'
+        name = name'
+        moderated = moderated'
+        emoji_id = emoji_id'
+        emoji_name = emoji_name'
 
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None

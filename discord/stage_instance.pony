@@ -51,6 +51,23 @@ class val StageInstance is Jsonable
         The id of the scheduled event for this Stage instance
         """
 
+    new val create(
+        id': Snowflake,
+        guild_id': Snowflake,
+        channel_id': Snowflake,
+        topic': String,
+        privacy_level': StageInstancePrivacyLevel,
+        discoverable_disabled': Bool,
+        guild_scheduled_event_id': (Snowflake | None) = None
+    ) =>
+        id = id'
+        guild_id = guild_id'
+        channel_id = channel_id'
+        topic = topic'
+        privacy_level = privacy_level'
+        discoverable_disabled = discoverable_disabled'
+        guild_scheduled_event_id = guild_scheduled_event_id'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
         var guild_id': (Snowflake | None) = None

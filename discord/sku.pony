@@ -40,6 +40,21 @@ class val SKU is Jsonable
         SKU flags combined as a bitfield
         """
 
+    new val create(
+        id': Snowflake,
+        type'': SKUType,
+        application_id': Snowflake,
+        name': String,
+        slug': String,
+        flags': Array[SKUFlag] val
+    ) =>
+        id = id'
+        type' = type''
+        application_id = application_id'
+        name = name'
+        slug = slug'
+        flags = flags'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
         var type'': (SKUType | None) = None

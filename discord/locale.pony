@@ -110,21 +110,9 @@ primitive Locales
         end
 
 primitive _Localizations
-    fun apply(value: json.JsonValue): (collections.Map[Locale, String] | None) ? =>
-        match value
-        | let obj: json.JsonObject =>
-            let map = collections.Map[Locale, String](obj.size())
-            for (key, value') in obj.pairs() do
-                match (Locales.from(key)?, value')
-                | (let locale: Locale, let string: String) => map(locale) = string
-                end
-            end
-            map
-        end
-
-    fun immutable(value: json.JsonValue): (collections.Map[Locale, String] val | None) ? =>
+    fun apply(value: json.JsonValue): (collections.Map[Locale, String] val | None) ? =>
         """
-        Decodes a localisation dictionary as an immutable map, for values that have to be sendable.
+        Decodes a localisation dictionary.
         """
 
         match value

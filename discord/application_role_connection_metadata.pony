@@ -29,7 +29,7 @@ class val ApplicationRoleConnectionMetadata is Jsonable
         name of the metadata field (1-100 characters)
         """
 
-    let name_localizations: (collections.Map[Locale, String] | None)
+    let name_localizations: (collections.Map[Locale, String] val | None)
         """
         translations of the name
         """
@@ -39,18 +39,33 @@ class val ApplicationRoleConnectionMetadata is Jsonable
         description of the metadata field (1-200 characters)
         """
 
-    let description_localizations: (collections.Map[Locale, String] | None)
+    let description_localizations: (collections.Map[Locale, String] val | None)
         """
         translations of the description
         """
+
+    new val create(
+        type'': ApplicationRoleConnectionMetadataType,
+        key': String,
+        name': String,
+        name_localizations': (collections.Map[Locale, String] val | None) = None,
+        description': String,
+        description_localizations': (collections.Map[Locale, String] val | None) = None
+    ) =>
+        type' = type''
+        key = key'
+        name = name'
+        name_localizations = name_localizations'
+        description = description'
+        description_localizations = description_localizations'
 
     new val from_json(obj: json.JsonObject) ? =>
         var type'': (ApplicationRoleConnectionMetadataType | None) = None
         var key': (String | None) = None
         var name': (String | None) = None
         var description': (String | None) = None
-        var name_localizations': (collections.Map[Locale, String] | None) = None
-        var description_localizations': (collections.Map[Locale, String] | None) = None
+        var name_localizations': (collections.Map[Locale, String] val | None) = None
+        var description_localizations': (collections.Map[Locale, String] val | None) = None
 
         for (k, v) in obj.pairs() do
             match k
@@ -78,12 +93,12 @@ class val ApplicationRoleConnectionMetadata is Jsonable
             .update("description", description)
 
         match name_localizations
-        | let m: collections.Map[Locale, String] box =>
+        | let m: collections.Map[Locale, String] val =>
             obj = obj.update("name_localizations", _Localizations.to_json(m))
         end
 
         match description_localizations
-        | let m: collections.Map[Locale, String] box =>
+        | let m: collections.Map[Locale, String] val =>
             obj = obj.update("description_localizations", _Localizations.to_json(m))
         end
 

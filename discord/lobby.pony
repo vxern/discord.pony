@@ -18,7 +18,7 @@ class val Lobby is Jsonable
         application that created the lobby
         """
 
-    let metadata: (collections.Map[String, String] | None)
+    let metadata: (collections.Map[String, String] val | None)
         """
         dictionary of string key/value pairs. The max total length is 1000.
         """
@@ -33,10 +33,23 @@ class val Lobby is Jsonable
         the guild channel linked to the lobby
         """
 
+    new val create(
+        id': Snowflake,
+        application_id': Snowflake,
+        metadata': (collections.Map[String, String] val | None) = None,
+        members': Array[LobbyMember] val,
+        linked_channel': (Channel | None) = None
+    ) =>
+        id = id'
+        application_id = application_id'
+        metadata = metadata'
+        members = members'
+        linked_channel = linked_channel'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
         var application_id': (Snowflake | None) = None
-        var metadata': (collections.Map[String, String] | None) = None
+        var metadata': (collections.Map[String, String] val | None) = None
         var members': (Array[LobbyMember] val | None) = None
         var linked_channel': (Channel | None) = None
 
@@ -63,7 +76,7 @@ class val Lobby is Jsonable
             .update("members", _LobbyMembers.to_json(members))
 
         match metadata
-        | let metadata': collections.Map[String, String] box => obj = obj.update("metadata", _Metadata.to_json(metadata'))
+        | let metadata': collections.Map[String, String] val => obj = obj.update("metadata", _Metadata.to_json(metadata'))
         end
 
         match linked_channel
@@ -84,7 +97,7 @@ class val LobbyMember is Jsonable
         the id of the user
         """
 
-    let metadata: (collections.Map[String, String] | None)
+    let metadata: (collections.Map[String, String] val | None)
         """
         dictionary of string key/value pairs. The max total length is 1000.
         """
@@ -94,9 +107,18 @@ class val LobbyMember is Jsonable
         lobby member flags combined as a bitfield
         """
 
+    new val create(
+        id': Snowflake,
+        metadata': (collections.Map[String, String] val | None) = None,
+        flags': (Array[LobbyMemberFlag] val | None) = None
+    ) =>
+        id = id'
+        metadata = metadata'
+        flags = flags'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
-        var metadata': (collections.Map[String, String] | None) = None
+        var metadata': (collections.Map[String, String] val | None) = None
         var flags': (Array[LobbyMemberFlag] val | None) = None
 
         for (key, value) in obj.pairs() do
@@ -116,7 +138,7 @@ class val LobbyMember is Jsonable
             .update("id", id.to_json())
 
         match metadata
-        | let metadata': collections.Map[String, String] box => obj = obj.update("metadata", _Metadata.to_json(metadata'))
+        | let metadata': collections.Map[String, String] val => obj = obj.update("metadata", _Metadata.to_json(metadata'))
         end
 
         match flags
@@ -186,18 +208,20 @@ primitive _LobbyMemberFlags
         bits.i64()
 
 primitive _Metadata
-    fun apply(value: json.JsonValue): (collections.Map[String, String] | None) =>
+    fun apply(value: json.JsonValue): (collections.Map[String, String] val | None) =>
         """
         Decodes a dictionary of string key/value pairs.
         """
 
         match value
         | let obj: json.JsonObject =>
-            let map = collections.Map[String, String](obj.size())
-            for (key, value') in obj.pairs() do
-                match value' | let string: String => map(key) = string end
+            recover val
+                let map = collections.Map[String, String](obj.size())
+                for (key, value') in obj.pairs() do
+                    match value' | let string: String => map(key) = string end
+                end
+                map
             end
-            map
         end
 
     fun to_json(map: collections.Map[String, String] box): json.JsonObject =>

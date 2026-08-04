@@ -65,6 +65,31 @@ class val AutoModerationRule is Jsonable
         the channel ids that should not be affected by the rule (Maximum of 50)
         """
 
+    new val create(
+        id': Snowflake,
+        guild_id': Snowflake,
+        name': String,
+        creator_id': Snowflake,
+        event_type': AutoModerationEventType,
+        trigger_type': AutoModerationTriggerType,
+        trigger_metadata': AutoModerationTriggerMetadata,
+        actions': Array[AutoModerationAction] val,
+        enabled': Bool,
+        exempt_roles': Array[Snowflake] val,
+        exempt_channels': Array[Snowflake] val
+    ) =>
+        id = id'
+        guild_id = guild_id'
+        name = name'
+        creator_id = creator_id'
+        event_type = event_type'
+        trigger_type = trigger_type'
+        trigger_metadata = trigger_metadata'
+        actions = actions'
+        enabled = enabled'
+        exempt_roles = exempt_roles'
+        exempt_channels = exempt_channels'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
         var guild_id': (Snowflake | None) = None
@@ -250,6 +275,21 @@ class val AutoModerationTriggerMetadata is Jsonable
         Trigger types: MENTION_SPAM
         """
 
+    new val create(
+        keyword_filter': (Array[String] val | None) = None,
+        regex_patterns': (Array[String] val | None) = None,
+        presets': (Array[KeywordPresetType] val | None) = None,
+        allow_list': (Array[String] val | None) = None,
+        mention_total_limit': (USize | None) = None,
+        mention_raid_protection_enabled': (Bool | None) = None
+    ) =>
+        keyword_filter = keyword_filter'
+        regex_patterns = regex_patterns'
+        presets = presets'
+        allow_list = allow_list'
+        mention_total_limit = mention_total_limit'
+        mention_raid_protection_enabled = mention_raid_protection_enabled'
+
     new val from_json(obj: json.JsonObject) ? =>
         var keyword_filter': (Array[String] val | None) = None
         var regex_patterns': (Array[String] val | None) = None
@@ -409,6 +449,10 @@ class val AutoModerationAction is Jsonable
         additional metadata needed during execution for this specific action type
         """
 
+    new val create(type'': AutoModerationActionType, metadata': (AutoModerationActionMetadata | None) = None) =>
+        type' = type''
+        metadata = metadata'
+
     new val from_json(obj: json.JsonObject) ? =>
         var type'': (AutoModerationActionType | None) = None
         var metadata': (AutoModerationActionMetadata | None) = None
@@ -524,6 +568,15 @@ class val AutoModerationActionMetadata is Jsonable
 
         Action types: BLOCK_MESSAGE
         """
+
+    new val create(
+        channel_id': (Snowflake | None) = None,
+        duration_seconds': (USize | None) = None,
+        custom_message': (String | None) = None
+    ) =>
+        channel_id = channel_id'
+        duration_seconds = duration_seconds'
+        custom_message = custom_message'
 
     new val from_json(obj: json.JsonObject) ? =>
         var channel_id': (Snowflake | None) = None

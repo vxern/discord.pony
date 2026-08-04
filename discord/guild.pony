@@ -225,6 +225,95 @@ class val Guild is Jsonable
         the incidents data for this guild
         """
 
+    new val create(
+        id': Snowflake,
+        name': String,
+        icon': (String | None) = None,
+        icon_hash': (String | None) = None,
+        splash': (String | None) = None,
+        discovery_splash': (String | None) = None,
+        owner': (Bool | None) = None,
+        owner_id': Snowflake,
+        permissions': (Array[Permission] val | None) = None,
+        afk_channel_id': (Snowflake | None) = None,
+        afk_timeout': USize,
+        widget_enabled': (Bool | None) = None,
+        widget_channel_id': (Snowflake | None) = None,
+        verification_level': VerificationLevel,
+        default_message_notifications': DefaultMessageNotificationLevel,
+        explicit_content_filter': ExplicitContentFilterLevel,
+        roles': Array[Role] val,
+        emojis': Array[Emoji] val,
+        features': Array[String] val,
+        mfa_level': MFALevel,
+        application_id': (Snowflake | None) = None,
+        system_channel_id': (Snowflake | None) = None,
+        system_channel_flags': Array[SystemChannelFlag] val,
+        rules_channel_id': (Snowflake | None) = None,
+        max_presences': (USize | None) = None,
+        max_members': (USize | None) = None,
+        vanity_url_code': (String | None) = None,
+        description': (String | None) = None,
+        banner': (String | None) = None,
+        premium_tier': PremiumTier,
+        premium_subscription_count': (USize | None) = None,
+        preferred_locale': Locale,
+        public_updates_channel_id': (Snowflake | None) = None,
+        max_video_channel_users': (USize | None) = None,
+        max_stage_video_channel_users': (USize | None) = None,
+        approximate_member_count': (USize | None) = None,
+        approximate_presence_count': (USize | None) = None,
+        welcome_screen': (WelcomeScreen | None) = None,
+        nsfw_level': GuildNSFWLevel,
+        stickers': (Array[Sticker] val | None) = None,
+        premium_progress_bar_enabled': Bool,
+        safety_alerts_channel_id': (Snowflake | None) = None,
+        incidents_data': (IncidentsData | None) = None
+    ) =>
+        id = id'
+        name = name'
+        icon = icon'
+        icon_hash = icon_hash'
+        splash = splash'
+        discovery_splash = discovery_splash'
+        owner = owner'
+        owner_id = owner_id'
+        permissions = permissions'
+        afk_channel_id = afk_channel_id'
+        afk_timeout = afk_timeout'
+        widget_enabled = widget_enabled'
+        widget_channel_id = widget_channel_id'
+        verification_level = verification_level'
+        default_message_notifications = default_message_notifications'
+        explicit_content_filter = explicit_content_filter'
+        roles = roles'
+        emojis = emojis'
+        features = features'
+        mfa_level = mfa_level'
+        application_id = application_id'
+        system_channel_id = system_channel_id'
+        system_channel_flags = system_channel_flags'
+        rules_channel_id = rules_channel_id'
+        max_presences = max_presences'
+        max_members = max_members'
+        vanity_url_code = vanity_url_code'
+        description = description'
+        banner = banner'
+        premium_tier = premium_tier'
+        premium_subscription_count = premium_subscription_count'
+        preferred_locale = preferred_locale'
+        public_updates_channel_id = public_updates_channel_id'
+        max_video_channel_users = max_video_channel_users'
+        max_stage_video_channel_users = max_stage_video_channel_users'
+        approximate_member_count = approximate_member_count'
+        approximate_presence_count = approximate_presence_count'
+        welcome_screen = welcome_screen'
+        nsfw_level = nsfw_level'
+        stickers = stickers'
+        premium_progress_bar_enabled = premium_progress_bar_enabled'
+        safety_alerts_channel_id = safety_alerts_channel_id'
+        incidents_data = incidents_data'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
         var name': (String | None) = None
@@ -843,6 +932,31 @@ class val GuildPreview is Jsonable
         custom guild stickers
         """
 
+    new val create(
+        id': Snowflake,
+        name': String,
+        icon': (String | None) = None,
+        splash': (String | None) = None,
+        discovery_splash': (String | None) = None,
+        emojis': Array[Emoji] val,
+        features': Array[String] val,
+        approximate_member_count': USize,
+        approximate_presence_count': USize,
+        description': (String | None) = None,
+        stickers': Array[Sticker] val
+    ) =>
+        id = id'
+        name = name'
+        icon = icon'
+        splash = splash'
+        discovery_splash = discovery_splash'
+        emojis = emojis'
+        features = features'
+        approximate_member_count = approximate_member_count'
+        approximate_presence_count = approximate_presence_count'
+        description = description'
+        stickers = stickers'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
         var name': (String | None) = None
@@ -917,6 +1031,10 @@ class val GuildWidgetSettings is Jsonable
         the widget channel id
         """
 
+    new val create(enabled': Bool, channel_id': (Snowflake | None) = None) =>
+        enabled = enabled'
+        channel_id = channel_id'
+
     new val from_json(obj: json.JsonObject) ? =>
         var enabled': (Bool | None) = None
         var channel_id': (Snowflake | None) = None
@@ -970,6 +1088,19 @@ class val GuildWidget is Jsonable
         """
         number of online members in this guild
         """
+
+    new val create(
+        id': Snowflake,
+        name': String,
+        instant_invite': (String | None) = None,
+        members': Array[User] val,
+        presence_count': USize
+    ) =>
+        id = id'
+        name = name'
+        instant_invite = instant_invite'
+        members = members'
+        presence_count = presence_count'
 
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
@@ -1081,6 +1212,37 @@ class val GuildMember is Jsonable
         """
         data for the member's guild avatar decoration
         """
+
+    new val create(
+        user': (User | None) = None,
+        nick': (String | None) = None,
+        avatar': (String | None) = None,
+        banner': (String | None) = None,
+        roles': Array[Snowflake] val,
+        joined_at': ISO8601,
+        premium_since': (ISO8601 | None) = None,
+        deaf': Bool,
+        mute': Bool,
+        flags': Array[GuildMemberFlag] val,
+        pending': (Bool | None) = None,
+        permissions': (Array[Permission] val | None) = None,
+        communication_disabled_until': (ISO8601 | None) = None,
+        avatar_decoration_data': (AvatarDecorationData | None) = None
+    ) =>
+        user = user'
+        nick = nick'
+        avatar = avatar'
+        banner = banner'
+        roles = roles'
+        joined_at = joined_at'
+        premium_since = premium_since'
+        deaf = deaf'
+        mute = mute'
+        flags = flags'
+        pending = pending'
+        permissions = permissions'
+        communication_disabled_until = communication_disabled_until'
+        avatar_decoration_data = avatar_decoration_data'
 
     new val from_json(obj: json.JsonObject) ? =>
         var user': (User | None) = None
@@ -1387,6 +1549,41 @@ class val Integration is Jsonable
         the scopes the application has been authorized for
         """
 
+    new val create(
+        id': Snowflake,
+        name': String,
+        type'': String,
+        enabled': Bool,
+        syncing': (Bool | None) = None,
+        role_id': (Snowflake | None) = None,
+        enable_emoticons': (Bool | None) = None,
+        expire_behavior': (IntegrationExpireBehavior | None) = None,
+        expire_grace_period': (USize | None) = None,
+        user': (User | None) = None,
+        account': IntegrationAccount,
+        synced_at': (ISO8601 | None) = None,
+        subscriber_count': (USize | None) = None,
+        revoked': (Bool | None) = None,
+        application': (IntegrationApplication | None) = None,
+        scopes': (Array[String] val | None) = None
+    ) =>
+        id = id'
+        name = name'
+        type' = type''
+        enabled = enabled'
+        syncing = syncing'
+        role_id = role_id'
+        enable_emoticons = enable_emoticons'
+        expire_behavior = expire_behavior'
+        expire_grace_period = expire_grace_period'
+        user = user'
+        account = account'
+        synced_at = synced_at'
+        subscriber_count = subscriber_count'
+        revoked = revoked'
+        application = application'
+        scopes = scopes'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
         var name': (String | None) = None
@@ -1552,6 +1749,10 @@ class val IntegrationAccount is Jsonable
         name of the account
         """
 
+    new val create(id': String, name': String) =>
+        id = id'
+        name = name'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (String | None) = None
         var name': (String | None) = None
@@ -1600,6 +1801,19 @@ class val IntegrationApplication is Jsonable
         """
         the bot associated with this application
         """
+
+    new val create(
+        id': Snowflake,
+        name': String,
+        icon': (String | None) = None,
+        description': String,
+        bot': (User | None) = None
+    ) =>
+        id = id'
+        name = name'
+        icon = icon'
+        description = description'
+        bot = bot'
 
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
@@ -1652,6 +1866,10 @@ class val Ban is Jsonable
         """
         the banned user
         """
+
+    new val create(reason': (String | None) = None, user': User) =>
+        reason = reason'
+        user = user'
 
     new val from_json(obj: json.JsonObject) ? =>
         var reason': (String | None) = None
@@ -1706,6 +1924,10 @@ class val WelcomeScreen is Jsonable
         the channels shown in the welcome screen, up to 5
         """
 
+    new val create(description': (String | None) = None, welcome_channels': Array[WelcomeScreenChannel] val) =>
+        description = description'
+        welcome_channels = welcome_channels'
+
     new val from_json(obj: json.JsonObject) ? =>
         var description': (String | None) = None
         var welcome_channels': (Array[WelcomeScreenChannel] val | None) = None
@@ -1750,6 +1972,17 @@ class val WelcomeScreenChannel is Jsonable
         """
         the emoji name if custom, the unicode character if standard, or null if no emoji is set
         """
+
+    new val create(
+        channel_id': Snowflake,
+        description': String,
+        emoji_id': (Snowflake | None) = None,
+        emoji_name': (String | None) = None
+    ) =>
+        channel_id = channel_id'
+        description = description'
+        emoji_id = emoji_id'
+        emoji_name = emoji_name'
 
     new val from_json(obj: json.JsonObject) ? =>
         var channel_id': (Snowflake | None) = None
@@ -1829,6 +2062,19 @@ class val GuildOnboarding is Jsonable
         """
         Current mode of onboarding
         """
+
+    new val create(
+        guild_id': Snowflake,
+        prompts': Array[OnboardingPrompt] val,
+        default_channel_ids': Array[Snowflake] val,
+        enabled': Bool,
+        mode': OnboardingMode
+    ) =>
+        guild_id = guild_id'
+        prompts = prompts'
+        default_channel_ids = default_channel_ids'
+        enabled = enabled'
+        mode = mode'
 
     new val from_json(obj: json.JsonObject) ? =>
         var guild_id': (Snowflake | None) = None
@@ -1932,6 +2178,23 @@ class val OnboardingPrompt is Jsonable
         """
         Indicates whether the prompt is present in the onboarding flow. If false, the prompt will only appear in the Channels & Roles tab
         """
+
+    new val create(
+        id': Snowflake,
+        type'': OnboardingPromptType,
+        options': Array[OnboardingPromptOption] val,
+        title': String,
+        single_select': Bool,
+        required': Bool,
+        in_onboarding': Bool
+    ) =>
+        id = id'
+        type' = type''
+        options = options'
+        title = title'
+        single_select = single_select'
+        required = required'
+        in_onboarding = in_onboarding'
 
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
@@ -2064,6 +2327,27 @@ class val OnboardingPromptOption is Jsonable
         Description of the option
         """
 
+    new val create(
+        id': Snowflake,
+        channel_ids': Array[Snowflake] val,
+        role_ids': Array[Snowflake] val,
+        emoji': (Emoji | None) = None,
+        emoji_id': (Snowflake | None) = None,
+        emoji_name': (String | None) = None,
+        emoji_animated': (Bool | None) = None,
+        title': String,
+        description': (String | None) = None
+    ) =>
+        id = id'
+        channel_ids = channel_ids'
+        role_ids = role_ids'
+        emoji = emoji'
+        emoji_id = emoji_id'
+        emoji_name = emoji_name'
+        emoji_animated = emoji_animated'
+        title = title'
+        description = description'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
         var channel_ids': (Array[Snowflake] val | None) = None
@@ -2168,6 +2452,17 @@ class val IncidentsData is Jsonable
         """
         when the raid was detected
         """
+
+    new val create(
+        invites_disabled_until': (ISO8601 | None) = None,
+        dms_disabled_until': (ISO8601 | None) = None,
+        dm_spam_detected_at': (ISO8601 | None) = None,
+        raid_detected_at': (ISO8601 | None) = None
+    ) =>
+        invites_disabled_until = invites_disabled_until'
+        dms_disabled_until = dms_disabled_until'
+        dm_spam_detected_at = dm_spam_detected_at'
+        raid_detected_at = raid_detected_at'
 
     new val from_json(obj: json.JsonObject) =>
         var invites_disabled_until': (ISO8601 | None) = None

@@ -93,6 +93,43 @@ class val GuildScheduledEvent is Jsonable
         the definition for how often this event should recur
         """
 
+    new val create(
+        id': Snowflake,
+        guild_id': Snowflake,
+        channel_id': (Snowflake | None) = None,
+        creator_id': (Snowflake | None) = None,
+        name': String,
+        description': (String | None) = None,
+        scheduled_start_time': ISO8601,
+        scheduled_end_time': (ISO8601 | None) = None,
+        privacy_level': GuildScheduledEventPrivacyLevel,
+        status': GuildScheduledEventStatus,
+        entity_type': GuildScheduledEventEntityType,
+        entity_id': (Snowflake | None) = None,
+        entity_metadata': (GuildScheduledEventEntityMetadata | None) = None,
+        creator': (User | None) = None,
+        user_count': (USize | None) = None,
+        image': (String | None) = None,
+        recurrence_rule': (GuildScheduledEventRecurrenceRule | None) = None
+    ) =>
+        id = id'
+        guild_id = guild_id'
+        channel_id = channel_id'
+        creator_id = creator_id'
+        name = name'
+        description = description'
+        scheduled_start_time = scheduled_start_time'
+        scheduled_end_time = scheduled_end_time'
+        privacy_level = privacy_level'
+        status = status'
+        entity_type = entity_type'
+        entity_id = entity_id'
+        entity_metadata = entity_metadata'
+        creator = creator'
+        user_count = user_count'
+        image = image'
+        recurrence_rule = recurrence_rule'
+
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
         var guild_id': (Snowflake | None) = None
@@ -325,6 +362,9 @@ class val GuildScheduledEventEntityMetadata is Jsonable
         Required for events with an `entity_type` of EXTERNAL.
         """
 
+    new val create(location': (String | None) = None) =>
+        location = location'
+
     new val from_json(obj: json.JsonObject) ? =>
         var location': (String | None) = None
 
@@ -403,6 +443,29 @@ class val GuildScheduledEventRecurrenceRule is Jsonable
         """
         The total amount of times that the event is allowed to recur before stopping
         """
+
+    new val create(
+        start': ISO8601,
+        end'': (ISO8601 | None) = None,
+        frequency': GuildScheduledEventRecurrenceRuleFrequency,
+        interval': USize,
+        by_weekday': (Array[GuildScheduledEventRecurrenceRuleWeekday] val | None) = None,
+        by_n_weekday': (Array[GuildScheduledEventRecurrenceRuleNWeekday] val | None) = None,
+        by_month': (Array[GuildScheduledEventRecurrenceRuleMonth] val | None) = None,
+        by_month_day': (Array[USize] val | None) = None,
+        by_year_day': (Array[USize] val | None) = None,
+        count': (USize | None) = None
+    ) =>
+        start = start'
+        end' = end''
+        frequency = frequency'
+        interval = interval'
+        by_weekday = by_weekday'
+        by_n_weekday = by_n_weekday'
+        by_month = by_month'
+        by_month_day = by_month_day'
+        by_year_day = by_year_day'
+        count = count'
 
     new val from_json(obj: json.JsonObject) ? =>
         var start': (ISO8601 | None) = None
@@ -561,6 +624,10 @@ class val GuildScheduledEventRecurrenceRuleNWeekday is Jsonable
         The day within the week to reoccur on
         """
 
+    new val create(n': USize, day': GuildScheduledEventRecurrenceRuleWeekday) =>
+        n = n'
+        day = day'
+
     new val from_json(obj: json.JsonObject) ? =>
         var n': (USize | None) = None
         var day': (GuildScheduledEventRecurrenceRuleWeekday | None) = None
@@ -685,6 +752,11 @@ class val GuildScheduledEventUser is Jsonable
         """
         guild member data for this user for the guild which this event belongs to, if any
         """
+
+    new val create(guild_scheduled_event_id': Snowflake, user': User, member': (GuildMember | None) = None) =>
+        guild_scheduled_event_id = guild_scheduled_event_id'
+        user = user'
+        member = member'
 
     new val from_json(obj: json.JsonObject) ? =>
         var guild_scheduled_event_id': (Snowflake | None) = None
