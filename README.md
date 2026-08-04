@@ -369,7 +369,9 @@
   - ✅ GuildTemplate
 - Interaction
   - ✅ Interaction
+  - ✅ ApplicationCommand
   - ✅ ApplicationCommandData
+  - ✅ ApplicationCommandInteractionDataOption
   - ✅ MessageComponentData
   - ✅ ModalSubmitData
   - ✅ ResolvedData
@@ -378,6 +380,7 @@
   - ✅ InteractionCallback
   - ✅ InteractionCallbackResource
   - ✅ InteractionCallbackActivityInstanceResource
+  - ✅ GuildApplicationCommandPermissions
 - Invite
   - ✅ Invite
   - ✅ InviteMetadata
@@ -385,6 +388,7 @@
 - Lobby
   - ✅ Lobby
   - ✅ LobbyMember
+  - ✅ LobbyMessage
 - Message
   - ✅ Message
   - ✅ MessageActivity
@@ -434,6 +438,9 @@
   - ✅ StickerPack
 - Subscription
   - ✅ Subscription
+- Team
+  - ✅ Team
+  - ✅ TeamMember
 - User
   - ✅ User
   - ✅ AvatarDecorationData
