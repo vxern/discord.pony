@@ -43,14 +43,24 @@ class val Interaction is Jsonable
         Which of the three shapes this holds is determined by `type`.
         """
 
-    // TODO(vxern): Add `guild` (partial guild object; Guild that the interaction was sent from) once a partial variant of `Guild` is implemented.
+    let guild: (PartialGuild | None)
+        """
+        Guild that the interaction was sent from
+
+        This is a partial guild object, so most of its fields may be absent.
+        """
 
     let guild_id: (Snowflake | None)
         """
         Guild that the interaction was sent from
         """
 
-    // TODO(vxern): Add `channel` (partial channel object; Channel that the interaction was sent from) once a partial variant of `Channel` is implemented.
+    let channel: (PartialChannel | None)
+        """
+        Channel that the interaction was sent from
+
+        This is a partial channel object, so most of its fields may be absent.
+        """
 
     let channel_id: (Snowflake | None)
         """
@@ -124,7 +134,9 @@ class val Interaction is Jsonable
         application_id': Snowflake,
         type'': InteractionType,
         data': (InteractionData | None) = None,
+        guild': (PartialGuild | None) = None,
         guild_id': (Snowflake | None) = None,
+        channel': (PartialChannel | None) = None,
         channel_id': (Snowflake | None) = None,
         member': (GuildMember | None) = None,
         user': (User | None) = None,
@@ -143,7 +155,9 @@ class val Interaction is Jsonable
         application_id = application_id'
         type' = type''
         data = data'
+        guild = guild'
         guild_id = guild_id'
+        channel = channel'
         channel_id = channel_id'
         member = member'
         user = user'
@@ -162,7 +176,9 @@ class val Interaction is Jsonable
         var id': (Snowflake | None) = None
         var application_id': (Snowflake | None) = None
         var type'': (InteractionType | None) = None
+        var guild': (PartialGuild | None) = None
         var guild_id': (Snowflake | None) = None
+        var channel': (PartialChannel | None) = None
         var channel_id': (Snowflake | None) = None
         var member': (GuildMember | None) = None
         var user': (User | None) = None
@@ -186,7 +202,9 @@ class val Interaction is Jsonable
             | "application_id" => application_id' = Snowflake.from_json(value)?
             | "type" => type'' = InteractionTypes.from((value as I64).u8())?
             | "data" => data' = value as json.JsonObject
+            | "guild" => guild' = PartialGuild.from_json(value as json.JsonObject)?
             | "guild_id" => guild_id' = Snowflake.from_json(value)?
+            | "channel" => channel' = PartialChannel.from_json(value as json.JsonObject)?
             | "channel_id" => channel_id' = Snowflake.from_json(value)?
             | "member" => member' = GuildMember.from_json(value as json.JsonObject)?
             | "user" => user' = User.from_json(value as json.JsonObject)?
@@ -206,7 +224,9 @@ class val Interaction is Jsonable
         id = id' as Snowflake
         application_id = application_id' as Snowflake
         type' = type'' as InteractionType
+        guild = guild'
         guild_id = guild_id'
+        channel = channel'
         channel_id = channel_id'
         member = member'
         user = user'
@@ -247,8 +267,16 @@ class val Interaction is Jsonable
         | let data': ModalSubmitData => obj = obj.update("data", data'.to_json())
         end
 
+        match guild
+        | let guild': PartialGuild => obj = obj.update("guild", guild'.to_json())
+        end
+
         match guild_id
         | let guild_id': Snowflake => obj = obj.update("guild_id", guild_id'.to_json())
+        end
+
+        match channel
+        | let channel': PartialChannel => obj = obj.update("channel", channel'.to_json())
         end
 
         match channel_id
