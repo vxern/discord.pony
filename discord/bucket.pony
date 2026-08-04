@@ -7,8 +7,9 @@ actor GlobalBucket
     let _timers: time.Timers
     embed _queue: Queue[(courier.HTTPRequest, RawResponseHandler)] = Queue[(courier.HTTPRequest, RawResponseHandler)]
 
-    var _requests_remaining: USize = _RateLimitConstants.global_rate_limit_max_count()
-    var _window_open: Bool = false
+    // A request only goes out if every window has requests remaining.
+    let _windows: Array[_RateLimitWindow] = _RateLimitConstants.windows()
+
     var _disposed: Bool = false
 
     new create(api: RestApi, timers: time.Timers) =>
@@ -25,34 +26,45 @@ actor GlobalBucket
         _disposed = true
         _queue.clear()
 
-    be _open_window() =>
-        _window_open = false
-        _requests_remaining = _RateLimitConstants.global_rate_limit_max_count()
+    be _reset_window(index: USize) =>
+        try _windows(index)?.reset() end
         _drain()
 
     fun ref _drain() =>
-        while (_requests_remaining > 0) and (_queue.size() > 0) do
+        let self: GlobalBucket tag = this
+
+        while _can_send() and (_queue.size() > 0) do
             try
                 (let request, let handler) = _queue.dequeue()?
 
-                if not _window_open then
-                    _window_open = true
-                    _timers(
-                        time.Timer(
-                            _GlobalBucketOpen(this),
-                            time.Nanos.from_millis(
-                                _RateLimitConstants.global_rate_limit_window_ms().u64()
+                for (index, window) in _windows.pairs() do
+                    // A window starts with the first request spent in it, rather
+                    // than ticking along on its own.
+                    if not window.started then
+                        window.started = true
+                        _timers(
+                            time.Timer(
+                                _OnceElapsed({() => self._reset_window(index)}),
+                                time.Nanos.from_millis(window.duration_ms.u64())
                             )
                         )
-                    )
+                    end
+
+                    window.spend()
                 end
 
-                _requests_remaining = _requests_remaining - 1
                 _api._raw_send_request(request, handler)
             else
                 break
             end
         end
+
+    fun _can_send(): Bool =>
+        for window in _windows.values() do
+            if window.remaining == 0 then return false end
+        end
+
+        true
 
 actor Bucket
     let _env: Env
@@ -80,6 +92,8 @@ actor Bucket
     be _drain() =>
         if _restarting then return end
 
+        let self: Bucket tag = this
+
         while (_requests_remaining > 0) and (_queue.size() > 0) do
             try
                 (let request, let handler) = _queue.dequeue()?
@@ -87,7 +101,6 @@ actor Bucket
                 _requests_in_flight = _requests_in_flight + 1
                 _requests_remaining = _requests_remaining - 1
 
-                let self: Bucket tag = this
                 _global.enqueue(request, {(request': courier.HTTPRequest val, response': courier.HTTPResponse val) =>
                     self.on_response_received(request', response', handler)
                 })
@@ -98,14 +111,8 @@ actor Bucket
 
         if (_requests_remaining == 0) and (_queue.size() > 0) then
             _restarting = true
-            let delay =
-                match _rate_limit
-                | let rate_limit: _RateLimit =>
-                    time.Nanos.from_seconds_f(rate_limit.reset_after_s)
-                else
-                    0
-                end
-            _timers(time.Timer(_BucketRestart(this), delay))
+            let delay = try time.Nanos.from_seconds_f((_rate_limit as _RateLimit).reset_after_s) else 0 end
+            _timers(time.Timer(_OnceElapsed({() => self._restart()}), delay))
         end
 
     be _restart() =>
@@ -159,25 +166,41 @@ primitive _BucketId
 
         true
 
-class iso _BucketRestart is time.TimerNotify
-    let _bucket: Bucket
+class iso _OnceElapsed is time.TimerNotify
+    """
+    Runs `action` when the timer elapses, and does not run again.
+    """
 
-    new iso create(bucket: Bucket) =>
-        _bucket = bucket
+    let _action: {()} val
 
-    fun ref apply(timer: time.Timer, count: U64): Bool =>
-        _bucket._restart()
-        false
-
-class iso _GlobalBucketOpen is time.TimerNotify
-    let _bucket: GlobalBucket
-
-    new iso create(bucket: GlobalBucket) =>
-        _bucket = bucket
+    new iso create(action: {()} val) =>
+        _action = action
 
     fun ref apply(timer: time.Timer, count: U64): Bool =>
-        _bucket._open_window()
+        _action()
         false
+
+class _RateLimitWindow
+    let max_count: USize
+    let duration_ms: USize
+
+    var remaining: USize
+    var started: Bool = false
+        """
+        Whether the span is under way, and so a timer is set to end it.
+        """
+
+    new create(max_count': USize, duration_ms': USize) =>
+        max_count = max_count'
+        duration_ms = duration_ms'
+        remaining = max_count'
+
+    fun ref spend() =>
+        remaining = remaining - remaining.min(1)
+
+    fun ref reset() =>
+        remaining = max_count
+        started = false
 
 class val _RateLimit
     let limit: (USize | None)
@@ -205,7 +228,7 @@ class val _RateLimit
             end
         end
 
-        // A global rate limit only sends `retry-after`, so a response is worth
+        // A global rate limit only sends `X-RateLimit-Retry-After`, so a response is worth
         // something as long as it tells us either how much is left or how long
         // to wait for.
         if (remaining' is None) and (reset_after_s' is None) and (retry_after_s' is None) then
@@ -223,7 +246,7 @@ class val _RateLimit
             else
                 0
             end
-    
+
     fun is_newer_than(other: (_RateLimit | None)): Bool =>
         match other
         | let other': _RateLimit =>
@@ -243,33 +266,19 @@ primitive _BucketConstants
         ["channels"; "guilds"; "webhooks"]
 
 primitive _RateLimitConstants
-    fun global_rate_limit_max_count(): USize =>
+    fun windows(): Array[_RateLimitWindow] =>
         """
-        How many requests can be made to the API.
+        How many requests the API takes, and in what span of time.
+
+        Going over the Cloudflare limit results in an hour-long ban, so it's extremely key we don't exceed that.
         """
 
-        50
-
-    fun global_rate_limit_window_ms(): USize =>
-        """
-        What window of time the requests can be made to the API in.
-        """
-
-        1000 // 1 second
-
-    fun cloudflare_rate_limit_max_count(): USize =>
-        """
-        How many requests can be made via Cloudflare's proxy.
-        """
-
-        10_000
-
-    fun cloudflare_rate_limit_window_ms(): USize =>
-        """
-        What window of time the requests can be made via Cloudflare's proxy in.
-        """
-
-        10 * 60 * 1000 // 10 minutes
+        [
+            // Discord: 50 a second
+            _RateLimitWindow(50, 1000)
+            // Cloudflare: 10,000 in 10 minutes (~16.7 requests per second)
+            _RateLimitWindow(10_000, 10 * 60 * 1000)
+        ]
 
     fun global_header_name(): String => "X-RateLimit-Global".lower()
 
