@@ -34,8 +34,6 @@ type ImageData is String
     """
 
 primitive CDN
-    fun base_url(): String => "https://cdn.discordapp.com"
-
     fun emoji(id: Snowflake, format: (ImageFormatPNG | ImageFormatJPEG | ImageFormatWEBP | ImageFormatGIF), size: ImageSize = CDNDefaults.size(), animated: Bool = CDNDefaults.animated()): String => "/emojis/" + id.string() + format.extension() + _CDNQuery(size, animated)
 
     fun guild_icon(id: Snowflake, icon: String, format: (ImageFormatPNG | ImageFormatJPEG | ImageFormatWEBP | ImageFormatGIF), size: ImageSize = CDNDefaults.size(), animated: Bool = CDNDefaults.animated()): String => "/icons/" + id.string() + "/" + icon + format.extension() + _CDNQuery(size, animated)
@@ -98,6 +96,9 @@ primitive CDN
         so take neither a format nor a size.
         """
         "/soundboard-sounds/" + id.string()
+
+primitive CDNConstants
+    fun base_url(): String => "https://cdn.discordapp.com"
 
 primitive _CDNQuery
     fun apply(size: ImageSize, animated: Bool = false): String =>

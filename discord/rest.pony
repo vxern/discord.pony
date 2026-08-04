@@ -156,8 +156,6 @@ actor _RequestSender is courier.HTTPClientConnectionActor
         end
 
 primitive RestConstants
-    fun base_url(): String => "https://discord.com/api"
-
     fun host(): String => "discord.com"
 
     fun port(): String => "443"
@@ -251,8 +249,6 @@ primitive RestVersion10 is RestVersion
     fun value(): U64 => 10
 
 primitive RestDefaults
-    fun base_url(): String => "https://discord.com"
-
     fun version(): RestVersion val => RestVersion10
 
     fun user_agent(): String =>
