@@ -1857,6 +1857,203 @@ primitive _GuildMembers
         for member in members.values() do array = array.push(member.to_json()) end
         array
 
+class val PartialGuildMember is Jsonable
+    """
+    https://docs.discord.com/developers/resources/guild#guild-member-object-guild-member-structure
+
+    A guild member Discord sent as a *partial* object: the same structure as
+    `GuildMember`, but carrying only some of its fields. Interaction resolved
+    data omits `user`, `deaf` and `mute`; message interactions and invite stage
+    instances trim their own sets. A guild member has no id of its own — it is
+    identified by the `user` it wraps, or by the key it is filed under — so every
+    field here is optional.
+
+    The fields mean exactly what their `GuildMember` counterparts do, and are
+    documented there. A field Discord omits is indistinguishable from a field
+    Discord sent as `null`.
+    """
+
+    let user: (User | None)
+    let nick: (String | None)
+    let avatar: (String | None)
+    let banner: (String | None)
+    let roles: (Array[Snowflake] val | None)
+    let joined_at: (ISO8601 | None)
+    let premium_since: (ISO8601 | None)
+    let deaf: (Bool | None)
+    let mute: (Bool | None)
+    let flags: (Array[GuildMemberFlag] val | None)
+    let pending: (Bool | None)
+    let permissions: (Array[Permission] val | None)
+    let communication_disabled_until: (ISO8601 | None)
+    let avatar_decoration_data: (AvatarDecorationData | None)
+
+    new val create(
+        user': (User | None) = None,
+        nick': (String | None) = None,
+        avatar': (String | None) = None,
+        banner': (String | None) = None,
+        roles': (Array[Snowflake] val | None) = None,
+        joined_at': (ISO8601 | None) = None,
+        premium_since': (ISO8601 | None) = None,
+        deaf': (Bool | None) = None,
+        mute': (Bool | None) = None,
+        flags': (Array[GuildMemberFlag] val | None) = None,
+        pending': (Bool | None) = None,
+        permissions': (Array[Permission] val | None) = None,
+        communication_disabled_until': (ISO8601 | None) = None,
+        avatar_decoration_data': (AvatarDecorationData | None) = None
+    ) =>
+        user = user'
+        nick = nick'
+        avatar = avatar'
+        banner = banner'
+        roles = roles'
+        joined_at = joined_at'
+        premium_since = premium_since'
+        deaf = deaf'
+        mute = mute'
+        flags = flags'
+        pending = pending'
+        permissions = permissions'
+        communication_disabled_until = communication_disabled_until'
+        avatar_decoration_data = avatar_decoration_data'
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var user': (User | None) = None
+        var nick': (String | None) = None
+        var avatar': (String | None) = None
+        var banner': (String | None) = None
+        var roles': (Array[Snowflake] val | None) = None
+        var joined_at': (ISO8601 | None) = None
+        var premium_since': (ISO8601 | None) = None
+        var deaf': (Bool | None) = None
+        var mute': (Bool | None) = None
+        var flags': (Array[GuildMemberFlag] val | None) = None
+        var pending': (Bool | None) = None
+        var permissions': (Array[Permission] val | None) = None
+        var communication_disabled_until': (ISO8601 | None) = None
+        var avatar_decoration_data': (AvatarDecorationData | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "user" => user' = User.from_json(value as json.JsonObject)?
+            | "nick" =>
+                match value | let string: String => nick' = string end
+            | "avatar" =>
+                match value | let string: String => avatar' = string end
+            | "banner" =>
+                match value | let string: String => banner' = string end
+            | "roles" => roles' = _Snowflakes(value)?
+            | "joined_at" => joined_at' = value as String
+            | "premium_since" =>
+                match value | let string: String => premium_since' = string end
+            | "deaf" => deaf' = value as Bool
+            | "mute" => mute' = value as Bool
+            | "flags" => flags' = _GuildMemberFlags((value as I64).u64())
+            | "pending" => pending' = value as Bool
+            | "permissions" => permissions' = _Permissions(value)?
+            | "communication_disabled_until" =>
+                match value | let string: String => communication_disabled_until' = string end
+            | "avatar_decoration_data" =>
+                match value | let obj': json.JsonObject => avatar_decoration_data' = AvatarDecorationData.from_json(obj')? end
+            end
+        end
+
+        user = user'
+        nick = nick'
+        avatar = avatar'
+        banner = banner'
+        roles = roles'
+        joined_at = joined_at'
+        premium_since = premium_since'
+        deaf = deaf'
+        mute = mute'
+        flags = flags'
+        pending = pending'
+        permissions = permissions'
+        communication_disabled_until = communication_disabled_until'
+        avatar_decoration_data = avatar_decoration_data'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match user
+        | let user': User => obj = obj.update("user", user'.to_json())
+        end
+
+        match nick
+        | let nick': String => obj = obj.update("nick", nick')
+        end
+
+        match avatar
+        | let avatar': String => obj = obj.update("avatar", avatar')
+        end
+
+        match banner
+        | let banner': String => obj = obj.update("banner", banner')
+        end
+
+        match roles
+        | let roles': Array[Snowflake] val => obj = obj.update("roles", _Snowflakes.to_json(roles'))
+        end
+
+        match joined_at
+        | let joined_at': ISO8601 => obj = obj.update("joined_at", joined_at')
+        end
+
+        match premium_since
+        | let premium_since': ISO8601 => obj = obj.update("premium_since", premium_since')
+        end
+
+        match deaf
+        | let deaf': Bool => obj = obj.update("deaf", deaf')
+        end
+
+        match mute
+        | let mute': Bool => obj = obj.update("mute", mute')
+        end
+
+        match flags
+        | let flags': Array[GuildMemberFlag] val => obj = obj.update("flags", _GuildMemberFlags.to_json(flags'))
+        end
+
+        match pending
+        | let pending': Bool => obj = obj.update("pending", pending')
+        end
+
+        match permissions
+        | let permissions': Array[Permission] val => obj = obj.update("permissions", _Permissions.to_json(permissions'))
+        end
+
+        match communication_disabled_until
+        | let communication_disabled_until': ISO8601 => obj = obj.update("communication_disabled_until", communication_disabled_until')
+        end
+
+        match avatar_decoration_data
+        | let avatar_decoration_data': AvatarDecorationData => obj = obj.update("avatar_decoration_data", avatar_decoration_data'.to_json())
+        end
+
+        obj
+
+primitive _PartialGuildMembers
+    fun apply(value: json.JsonValue): Array[PartialGuildMember] val ? =>
+        """
+        Decodes an array of partial guild members.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let members = Array[PartialGuildMember](array.size())
+            for member in array.values() do members.push(PartialGuildMember.from_json(member as json.JsonObject)?) end
+            members
+        end
+
+    fun to_json(members: Array[PartialGuildMember] val): json.JsonArray =>
+        var array = json.JsonArray
+        for member in members.values() do array = array.push(member.to_json()) end
+        array
+
 trait val GuildMemberFlag is (collections.Hashable & Equatable[GuildMemberFlag])
     """
     https://docs.discord.com/developers/resources/guild#guild-member-object-guild-member-flags
@@ -2201,6 +2398,210 @@ primitive _Integrations
         end
 
     fun to_json(integrations: Array[Integration] val): json.JsonArray =>
+        var array = json.JsonArray
+        for integration in integrations.values() do array = array.push(integration.to_json()) end
+        array
+
+class val PartialIntegration is Jsonable
+    """
+    https://docs.discord.com/developers/resources/guild#integration-object-integration-structure
+
+    An integration Discord sent as a *partial* object: the same structure as
+    `Integration`, but carrying only some of its fields. An audit log sends only
+    `id`, `name`, `type` and `account`, so every field here but `id` is optional.
+
+    The fields mean exactly what their `Integration` counterparts do, and are
+    documented there. A field Discord omits is indistinguishable from a field
+    Discord sent as `null`.
+    """
+
+    let id: Snowflake
+    let name: (String | None)
+    let type': (String | None)
+    let enabled: (Bool | None)
+    let syncing: (Bool | None)
+    let role_id: (Snowflake | None)
+    let enable_emoticons: (Bool | None)
+    let expire_behavior: (IntegrationExpireBehavior | None)
+    let expire_grace_period: (USize | None)
+    let user: (User | None)
+    let account: (IntegrationAccount | None)
+    let synced_at: (ISO8601 | None)
+    let subscriber_count: (USize | None)
+    let revoked: (Bool | None)
+    let application: (IntegrationApplication | None)
+    let scopes: (Array[String] val | None)
+
+    new val create(
+        id': Snowflake,
+        name': (String | None) = None,
+        type'': (String | None) = None,
+        enabled': (Bool | None) = None,
+        syncing': (Bool | None) = None,
+        role_id': (Snowflake | None) = None,
+        enable_emoticons': (Bool | None) = None,
+        expire_behavior': (IntegrationExpireBehavior | None) = None,
+        expire_grace_period': (USize | None) = None,
+        user': (User | None) = None,
+        account': (IntegrationAccount | None) = None,
+        synced_at': (ISO8601 | None) = None,
+        subscriber_count': (USize | None) = None,
+        revoked': (Bool | None) = None,
+        application': (IntegrationApplication | None) = None,
+        scopes': (Array[String] val | None) = None
+    ) =>
+        id = id'
+        name = name'
+        type' = type''
+        enabled = enabled'
+        syncing = syncing'
+        role_id = role_id'
+        enable_emoticons = enable_emoticons'
+        expire_behavior = expire_behavior'
+        expire_grace_period = expire_grace_period'
+        user = user'
+        account = account'
+        synced_at = synced_at'
+        subscriber_count = subscriber_count'
+        revoked = revoked'
+        application = application'
+        scopes = scopes'
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var id': (Snowflake | None) = None
+        var name': (String | None) = None
+        var type'': (String | None) = None
+        var enabled': (Bool | None) = None
+        var syncing': (Bool | None) = None
+        var role_id': (Snowflake | None) = None
+        var enable_emoticons': (Bool | None) = None
+        var expire_behavior': (IntegrationExpireBehavior | None) = None
+        var expire_grace_period': (USize | None) = None
+        var user': (User | None) = None
+        var account': (IntegrationAccount | None) = None
+        var synced_at': (ISO8601 | None) = None
+        var subscriber_count': (USize | None) = None
+        var revoked': (Bool | None) = None
+        var application': (IntegrationApplication | None) = None
+        var scopes': (Array[String] val | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "id" => id' = Snowflake.from_json(value)?
+            | "name" => name' = value as String
+            | "type" => type'' = value as String
+            | "enabled" => enabled' = value as Bool
+            | "syncing" => syncing' = value as Bool
+            | "role_id" => role_id' = Snowflake.from_json(value)?
+            | "enable_emoticons" => enable_emoticons' = value as Bool
+            | "expire_behavior" => expire_behavior' = IntegrationExpireBehaviors.from((value as I64).u8())?
+            | "expire_grace_period" => expire_grace_period' = (value as I64).usize()
+            | "user" => user' = User.from_json(value as json.JsonObject)?
+            | "account" => account' = IntegrationAccount.from_json(value as json.JsonObject)?
+            | "synced_at" => synced_at' = value as String
+            | "subscriber_count" => subscriber_count' = (value as I64).usize()
+            | "revoked" => revoked' = value as Bool
+            | "application" => application' = IntegrationApplication.from_json(value as json.JsonObject)?
+            | "scopes" => scopes' = _Strings(value)?
+            end
+        end
+
+        id = id' as Snowflake
+        name = name'
+        type' = type''
+        enabled = enabled'
+        syncing = syncing'
+        role_id = role_id'
+        enable_emoticons = enable_emoticons'
+        expire_behavior = expire_behavior'
+        expire_grace_period = expire_grace_period'
+        user = user'
+        account = account'
+        synced_at = synced_at'
+        subscriber_count = subscriber_count'
+        revoked = revoked'
+        application = application'
+        scopes = scopes'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject.update("id", id.to_json())
+
+        match name
+        | let name': String => obj = obj.update("name", name')
+        end
+
+        match type'
+        | let type'': String => obj = obj.update("type", type'')
+        end
+
+        match enabled
+        | let enabled': Bool => obj = obj.update("enabled", enabled')
+        end
+
+        match syncing
+        | let syncing': Bool => obj = obj.update("syncing", syncing')
+        end
+
+        match role_id
+        | let role_id': Snowflake => obj = obj.update("role_id", role_id'.to_json())
+        end
+
+        match enable_emoticons
+        | let enable_emoticons': Bool => obj = obj.update("enable_emoticons", enable_emoticons')
+        end
+
+        match expire_behavior
+        | let expire_behavior': IntegrationExpireBehavior => obj = obj.update("expire_behavior", expire_behavior'.value().i64())
+        end
+
+        match expire_grace_period
+        | let expire_grace_period': USize => obj = obj.update("expire_grace_period", expire_grace_period'.i64())
+        end
+
+        match user
+        | let user': User => obj = obj.update("user", user'.to_json())
+        end
+
+        match account
+        | let account': IntegrationAccount => obj = obj.update("account", account'.to_json())
+        end
+
+        match synced_at
+        | let synced_at': ISO8601 => obj = obj.update("synced_at", synced_at')
+        end
+
+        match subscriber_count
+        | let subscriber_count': USize => obj = obj.update("subscriber_count", subscriber_count'.i64())
+        end
+
+        match revoked
+        | let revoked': Bool => obj = obj.update("revoked", revoked')
+        end
+
+        match application
+        | let application': IntegrationApplication => obj = obj.update("application", application'.to_json())
+        end
+
+        match scopes
+        | let scopes': Array[String] val => obj = obj.update("scopes", _Strings.to_json(scopes'))
+        end
+
+        obj
+
+primitive _PartialIntegrations
+    fun apply(value: json.JsonValue): Array[PartialIntegration] val ? =>
+        """
+        Decodes an array of partial integrations.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let integrations = Array[PartialIntegration](array.size())
+            for integration in array.values() do integrations.push(PartialIntegration.from_json(integration as json.JsonObject)?) end
+            integrations
+        end
+
+    fun to_json(integrations: Array[PartialIntegration] val): json.JsonArray =>
         var array = json.JsonArray
         for integration in integrations.values() do array = array.push(integration.to_json()) end
         array
