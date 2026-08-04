@@ -314,6 +314,8 @@ actor Routes
         Returns array of thread members objects that are members of the thread.
 
         When with_member is set to true, the results will be paginated and each thread member object will include a member field containing a guild member object.
+
+        This endpoint is restricted according to whether the GUILD_MEMBERS Privileged Intent is enabled for your application. Without it Discord answers 403 Missing Access, even for a thread the bot is itself a member of.
         """
 
         api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/thread-members" where query = params.to_query()), _Decode.list[ThreadMember](handler, _ThreadMembers, options.on_error))
