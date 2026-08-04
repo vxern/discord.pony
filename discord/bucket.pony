@@ -1,3 +1,4 @@
+use time = "time"
 use courier = "courier"
 use collections = "collections"
 
@@ -13,23 +14,31 @@ class Queue[A: Any #send]
     fun ref dequeue(): A^ ? => _queue.shift()?
 
 actor Bucket
+    let _env: Env
     let _api: RestApi
     let _id: String
+    let _timers: time.Timers
     embed _queue: Queue[courier.HTTPRequest] = Queue[courier.HTTPRequest]
 
     var _rate_limit: (_RateLimit | None) = None
     var _requests_in_flight: USize = 0
     var _requests_remaining: USize = 1
-    
-    new create(api: RestApi, id: String) =>
+
+    var _restarting: Bool = false
+
+    new create(env: Env, api: RestApi, id: String, timers: time.Timers = time.Timers) =>
+        _env = env
         _api = api
         _id = id
+        _timers = timers
 
     be enqueue(request: courier.HTTPRequest) =>
         _queue.enqueue(request)
         _drain()
 
     be _drain() =>
+        if _restarting then return end
+
         while (_requests_remaining > 0) and (_queue.size() > 0) do
             try
                 let request = _queue.dequeue()?
@@ -45,7 +54,25 @@ actor Bucket
                 break
             end
         end
-    
+
+        if (_requests_remaining == 0) and (_queue.size() > 0) then
+            _restarting = true
+            let delay =
+                match _rate_limit
+                | let rate_limit: _RateLimit =>
+                    time.Nanos.from_seconds_f(rate_limit.reset_after_s)
+                else
+                    0
+                end
+            _timers(time.Timer(_BucketRestart(this), delay))
+        end
+
+    be _restart() =>
+        _restarting = false
+        _rate_limit = None
+        _requests_remaining = 1
+        _drain()
+
     be on_response_received(request: courier.HTTPRequest, response: courier.HTTPResponse) =>
         _requests_in_flight = _requests_in_flight - 1
 
@@ -61,11 +88,22 @@ actor Bucket
 
         if response.status == 429 then
             _queue.enqueue_at_beginning(request)
+            _requests_remaining = 0
         end
-        
+
         // TODO(vxern): Send the response back in a callback.
 
         _drain()
+
+class iso _BucketRestart is time.TimerNotify
+    let _bucket: Bucket
+
+    new iso create(bucket: Bucket) =>
+        _bucket = bucket
+
+    fun ref apply(timer: time.Timer, count: U64): Bool =>
+        _bucket._restart()
+        false
 
 class val _RateLimit
     let limit: USize
@@ -86,7 +124,7 @@ class val _RateLimit
             | "x-ratelimit-limit" => limit' = value.usize()?
             | "x-ratelimit-remaining" => remaining' = value.usize()?
             | "x-ratelimit-reset" => reset_s' = value.f64()?
-            | "x-ratelimit-reset-After" => reset_after_s' = value.f64()?
+            | "x-ratelimit-reset-after" => reset_after_s' = value.f64()?
             | "x-ratelimit-bucket" => bucket' = value
             end
         end
