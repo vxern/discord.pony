@@ -535,6 +535,411 @@ primitive _Channels
         for channel in channels.values() do array = array.push(channel.to_json()) end
         array
 
+class val PartialChannel is Jsonable
+    """
+    https://docs.discord.com/developers/resources/channel#channel-object-channel-structure
+
+    A channel Discord sent as a *partial* object: the same structure as `Channel`,
+    but carrying only some of its fields. Invites, webhooks, interactions and
+    guild widgets all embed channels this way, and none of them agree on which
+    fields they include — a guild widget omits even `type` — so every field here
+    but `id` is optional.
+
+    The fields mean exactly what their `Channel` counterparts do, and are
+    documented there. A field Discord omits is indistinguishable from a field
+    Discord sent as `null`.
+    """
+
+    let id: Snowflake
+    let type': (ChannelType | None)
+    let guild_id: (Snowflake | None)
+    let position: (USize | None)
+    let permission_overwrites: (Array[PermissionOverwrite] val | None)
+    let name: (String | None)
+    let topic: (String | None)
+    let nsfw: (Bool | None)
+    let last_message_id: (Snowflake | None)
+    let bitrate: (USize | None)
+    let user_limit: (USize | None)
+    let rate_limit_per_user: (USize | None)
+    let recipients: (Array[User] val | None)
+    let icon: (String | None)
+    let owner_id: (Snowflake | None)
+    let application_id: (Snowflake | None)
+    let managed: (Bool | None)
+    let parent_id: (Snowflake | None)
+    let last_pin_timestamp: (ISO8601 | None)
+    let rtc_region: (String | None)
+    let video_quality_mode: (VideoQualityMode | None)
+    let message_count: (USize | None)
+    let member_count: (USize | None)
+    let thread_metadata: (ThreadMetadata | None)
+    let member: (ThreadMember | None)
+    let default_auto_archive_duration: (USize | None)
+    let permissions: (Array[Permission] val | None)
+    let flags: (Array[ChannelFlag] val | None)
+    let total_message_sent: (USize | None)
+    let available_tags: (Array[ForumTag] val | None)
+    let applied_tags: (Array[Snowflake] val | None)
+    let default_reaction_emoji: (DefaultReaction | None)
+    let default_thread_rate_limit_per_user: (USize | None)
+    let default_sort_order: (SortOrderType | None)
+    let default_forum_layout: (ForumLayoutType | None)
+
+    new val create(
+        id': Snowflake,
+        type'': (ChannelType | None) = None,
+        guild_id': (Snowflake | None) = None,
+        position': (USize | None) = None,
+        permission_overwrites': (Array[PermissionOverwrite] val | None) = None,
+        name': (String | None) = None,
+        topic': (String | None) = None,
+        nsfw': (Bool | None) = None,
+        last_message_id': (Snowflake | None) = None,
+        bitrate': (USize | None) = None,
+        user_limit': (USize | None) = None,
+        rate_limit_per_user': (USize | None) = None,
+        recipients': (Array[User] val | None) = None,
+        icon': (String | None) = None,
+        owner_id': (Snowflake | None) = None,
+        application_id': (Snowflake | None) = None,
+        managed': (Bool | None) = None,
+        parent_id': (Snowflake | None) = None,
+        last_pin_timestamp': (ISO8601 | None) = None,
+        rtc_region': (String | None) = None,
+        video_quality_mode': (VideoQualityMode | None) = None,
+        message_count': (USize | None) = None,
+        member_count': (USize | None) = None,
+        thread_metadata': (ThreadMetadata | None) = None,
+        member': (ThreadMember | None) = None,
+        default_auto_archive_duration': (USize | None) = None,
+        permissions': (Array[Permission] val | None) = None,
+        flags': (Array[ChannelFlag] val | None) = None,
+        total_message_sent': (USize | None) = None,
+        available_tags': (Array[ForumTag] val | None) = None,
+        applied_tags': (Array[Snowflake] val | None) = None,
+        default_reaction_emoji': (DefaultReaction | None) = None,
+        default_thread_rate_limit_per_user': (USize | None) = None,
+        default_sort_order': (SortOrderType | None) = None,
+        default_forum_layout': (ForumLayoutType | None) = None
+    ) =>
+        id = id'
+        type' = type''
+        guild_id = guild_id'
+        position = position'
+        permission_overwrites = permission_overwrites'
+        name = name'
+        topic = topic'
+        nsfw = nsfw'
+        last_message_id = last_message_id'
+        bitrate = bitrate'
+        user_limit = user_limit'
+        rate_limit_per_user = rate_limit_per_user'
+        recipients = recipients'
+        icon = icon'
+        owner_id = owner_id'
+        application_id = application_id'
+        managed = managed'
+        parent_id = parent_id'
+        last_pin_timestamp = last_pin_timestamp'
+        rtc_region = rtc_region'
+        video_quality_mode = video_quality_mode'
+        message_count = message_count'
+        member_count = member_count'
+        thread_metadata = thread_metadata'
+        member = member'
+        default_auto_archive_duration = default_auto_archive_duration'
+        permissions = permissions'
+        flags = flags'
+        total_message_sent = total_message_sent'
+        available_tags = available_tags'
+        applied_tags = applied_tags'
+        default_reaction_emoji = default_reaction_emoji'
+        default_thread_rate_limit_per_user = default_thread_rate_limit_per_user'
+        default_sort_order = default_sort_order'
+        default_forum_layout = default_forum_layout'
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var id': (Snowflake | None) = None
+        var type'': (ChannelType | None) = None
+        var guild_id': (Snowflake | None) = None
+        var position': (USize | None) = None
+        var permission_overwrites': (Array[PermissionOverwrite] val | None) = None
+        var name': (String | None) = None
+        var topic': (String | None) = None
+        var nsfw': (Bool | None) = None
+        var last_message_id': (Snowflake | None) = None
+        var bitrate': (USize | None) = None
+        var user_limit': (USize | None) = None
+        var rate_limit_per_user': (USize | None) = None
+        var recipients': (Array[User] val | None) = None
+        var icon': (String | None) = None
+        var owner_id': (Snowflake | None) = None
+        var application_id': (Snowflake | None) = None
+        var managed': (Bool | None) = None
+        var parent_id': (Snowflake | None) = None
+        var last_pin_timestamp': (ISO8601 | None) = None
+        var rtc_region': (String | None) = None
+        var video_quality_mode': (VideoQualityMode | None) = None
+        var message_count': (USize | None) = None
+        var member_count': (USize | None) = None
+        var thread_metadata': (ThreadMetadata | None) = None
+        var member': (ThreadMember | None) = None
+        var default_auto_archive_duration': (USize | None) = None
+        var permissions': (Array[Permission] val | None) = None
+        var flags': (Array[ChannelFlag] val | None) = None
+        var total_message_sent': (USize | None) = None
+        var available_tags': (Array[ForumTag] val | None) = None
+        var applied_tags': (Array[Snowflake] val | None) = None
+        var default_reaction_emoji': (DefaultReaction | None) = None
+        var default_thread_rate_limit_per_user': (USize | None) = None
+        var default_sort_order': (SortOrderType | None) = None
+        var default_forum_layout': (ForumLayoutType | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "id" => id' = Snowflake.from_json(value)?
+            | "type" => type'' = ChannelTypes.from((value as I64).u8())?
+            | "guild_id" => guild_id' = Snowflake.from_json(value)?
+            | "position" => position' = (value as I64).usize()
+            | "permission_overwrites" => permission_overwrites' = _PermissionOverwrites(value)?
+            | "name" =>
+                match value | let string: String => name' = string end
+            | "topic" =>
+                match value | let string: String => topic' = string end
+            | "nsfw" => nsfw' = value as Bool
+            | "last_message_id" =>
+                match value | let string: String => last_message_id' = Snowflake.from_json(string)? end
+            | "bitrate" => bitrate' = (value as I64).usize()
+            | "user_limit" => user_limit' = (value as I64).usize()
+            | "rate_limit_per_user" => rate_limit_per_user' = (value as I64).usize()
+            | "recipients" => recipients' = _Users(value)?
+            | "icon" =>
+                match value | let string: String => icon' = string end
+            | "owner_id" => owner_id' = Snowflake.from_json(value)?
+            | "application_id" => application_id' = Snowflake.from_json(value)?
+            | "managed" => managed' = value as Bool
+            | "parent_id" =>
+                match value | let string: String => parent_id' = Snowflake.from_json(string)? end
+            | "last_pin_timestamp" =>
+                match value | let string: String => last_pin_timestamp' = string end
+            | "rtc_region" =>
+                match value | let string: String => rtc_region' = string end
+            | "video_quality_mode" => video_quality_mode' = VideoQualityModes.from((value as I64).u8())?
+            | "message_count" => message_count' = (value as I64).usize()
+            | "member_count" => member_count' = (value as I64).usize()
+            | "thread_metadata" => thread_metadata' = ThreadMetadata.from_json(value as json.JsonObject)?
+            | "member" => member' = ThreadMember.from_json(value as json.JsonObject)?
+            | "default_auto_archive_duration" => default_auto_archive_duration' = (value as I64).usize()
+            | "permissions" => permissions' = _Permissions(value)?
+            | "flags" => flags' = _ChannelFlags((value as I64).u64())
+            | "total_message_sent" => total_message_sent' = (value as I64).usize()
+            | "available_tags" => available_tags' = _ForumTags(value)?
+            | "applied_tags" => applied_tags' = _Snowflakes(value)?
+            | "default_reaction_emoji" =>
+                match value | let obj': json.JsonObject => default_reaction_emoji' = DefaultReaction.from_json(obj')? end
+            | "default_thread_rate_limit_per_user" => default_thread_rate_limit_per_user' = (value as I64).usize()
+            | "default_sort_order" =>
+                match value | let integer: I64 => default_sort_order' = SortOrderTypes.from(integer.u8())? end
+            | "default_forum_layout" => default_forum_layout' = ForumLayoutTypes.from((value as I64).u8())?
+            end
+        end
+
+        id = id' as Snowflake
+        type' = type''
+        guild_id = guild_id'
+        position = position'
+        permission_overwrites = permission_overwrites'
+        name = name'
+        topic = topic'
+        nsfw = nsfw'
+        last_message_id = last_message_id'
+        bitrate = bitrate'
+        user_limit = user_limit'
+        rate_limit_per_user = rate_limit_per_user'
+        recipients = recipients'
+        icon = icon'
+        owner_id = owner_id'
+        application_id = application_id'
+        managed = managed'
+        parent_id = parent_id'
+        last_pin_timestamp = last_pin_timestamp'
+        rtc_region = rtc_region'
+        video_quality_mode = video_quality_mode'
+        message_count = message_count'
+        member_count = member_count'
+        thread_metadata = thread_metadata'
+        member = member'
+        default_auto_archive_duration = default_auto_archive_duration'
+        permissions = permissions'
+        flags = flags'
+        total_message_sent = total_message_sent'
+        available_tags = available_tags'
+        applied_tags = applied_tags'
+        default_reaction_emoji = default_reaction_emoji'
+        default_thread_rate_limit_per_user = default_thread_rate_limit_per_user'
+        default_sort_order = default_sort_order'
+        default_forum_layout = default_forum_layout'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject.update("id", id.to_json())
+
+        match type'
+        | let type'': ChannelType => obj = obj.update("type", type''.value().i64())
+        end
+
+        match guild_id
+        | let guild_id': Snowflake => obj = obj.update("guild_id", guild_id'.to_json())
+        end
+
+        match position
+        | let position': USize => obj = obj.update("position", position'.i64())
+        end
+
+        match permission_overwrites
+        | let permission_overwrites': Array[PermissionOverwrite] val => obj = obj.update("permission_overwrites", _PermissionOverwrites.to_json(permission_overwrites'))
+        end
+
+        match name
+        | let name': String => obj = obj.update("name", name')
+        end
+
+        match topic
+        | let topic': String => obj = obj.update("topic", topic')
+        end
+
+        match nsfw
+        | let nsfw': Bool => obj = obj.update("nsfw", nsfw')
+        end
+
+        match last_message_id
+        | let last_message_id': Snowflake => obj = obj.update("last_message_id", last_message_id'.to_json())
+        end
+
+        match bitrate
+        | let bitrate': USize => obj = obj.update("bitrate", bitrate'.i64())
+        end
+
+        match user_limit
+        | let user_limit': USize => obj = obj.update("user_limit", user_limit'.i64())
+        end
+
+        match rate_limit_per_user
+        | let rate_limit_per_user': USize => obj = obj.update("rate_limit_per_user", rate_limit_per_user'.i64())
+        end
+
+        match recipients
+        | let recipients': Array[User] val => obj = obj.update("recipients", _Users.to_json(recipients'))
+        end
+
+        match icon
+        | let icon': String => obj = obj.update("icon", icon')
+        end
+
+        match owner_id
+        | let owner_id': Snowflake => obj = obj.update("owner_id", owner_id'.to_json())
+        end
+
+        match application_id
+        | let application_id': Snowflake => obj = obj.update("application_id", application_id'.to_json())
+        end
+
+        match managed
+        | let managed': Bool => obj = obj.update("managed", managed')
+        end
+
+        match parent_id
+        | let parent_id': Snowflake => obj = obj.update("parent_id", parent_id'.to_json())
+        end
+
+        match last_pin_timestamp
+        | let last_pin_timestamp': ISO8601 => obj = obj.update("last_pin_timestamp", last_pin_timestamp')
+        end
+
+        match rtc_region
+        | let rtc_region': String => obj = obj.update("rtc_region", rtc_region')
+        end
+
+        match video_quality_mode
+        | let video_quality_mode': VideoQualityMode => obj = obj.update("video_quality_mode", video_quality_mode'.value().i64())
+        end
+
+        match message_count
+        | let message_count': USize => obj = obj.update("message_count", message_count'.i64())
+        end
+
+        match member_count
+        | let member_count': USize => obj = obj.update("member_count", member_count'.i64())
+        end
+
+        match thread_metadata
+        | let thread_metadata': ThreadMetadata => obj = obj.update("thread_metadata", thread_metadata'.to_json())
+        end
+
+        match member
+        | let member': ThreadMember => obj = obj.update("member", member'.to_json())
+        end
+
+        match default_auto_archive_duration
+        | let default_auto_archive_duration': USize => obj = obj.update("default_auto_archive_duration", default_auto_archive_duration'.i64())
+        end
+
+        match permissions
+        | let permissions': Array[Permission] val => obj = obj.update("permissions", _Permissions.to_json(permissions'))
+        end
+
+        match flags
+        | let flags': Array[ChannelFlag] val => obj = obj.update("flags", _ChannelFlags.to_json(flags'))
+        end
+
+        match total_message_sent
+        | let total_message_sent': USize => obj = obj.update("total_message_sent", total_message_sent'.i64())
+        end
+
+        match available_tags
+        | let available_tags': Array[ForumTag] val => obj = obj.update("available_tags", _ForumTags.to_json(available_tags'))
+        end
+
+        match applied_tags
+        | let applied_tags': Array[Snowflake] val => obj = obj.update("applied_tags", _Snowflakes.to_json(applied_tags'))
+        end
+
+        match default_reaction_emoji
+        | let default_reaction_emoji': DefaultReaction => obj = obj.update("default_reaction_emoji", default_reaction_emoji'.to_json())
+        end
+
+        match default_thread_rate_limit_per_user
+        | let default_thread_rate_limit_per_user': USize => obj = obj.update("default_thread_rate_limit_per_user", default_thread_rate_limit_per_user'.i64())
+        end
+
+        match default_sort_order
+        | let default_sort_order': SortOrderType => obj = obj.update("default_sort_order", default_sort_order'.value().i64())
+        end
+
+        match default_forum_layout
+        | let default_forum_layout': ForumLayoutType => obj = obj.update("default_forum_layout", default_forum_layout'.value().i64())
+        end
+
+        obj
+
+primitive _PartialChannels
+    fun apply(value: json.JsonValue): Array[PartialChannel] val ? =>
+        """
+        Decodes an array of partial channels.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let channels = Array[PartialChannel](array.size())
+            for channel in array.values() do channels.push(PartialChannel.from_json(channel as json.JsonObject)?) end
+            channels
+        end
+
+    fun to_json(channels: Array[PartialChannel] val): json.JsonArray =>
+        var array = json.JsonArray
+        for channel in channels.values() do array = array.push(channel.to_json()) end
+        array
+
 trait val ChannelType is (collections.Hashable & Equatable[ChannelType])
     """
     https://docs.discord.com/developers/resources/channel#channel-object-channel-types
