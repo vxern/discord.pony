@@ -27,7 +27,12 @@ class val AuditLog is Jsonable
         List of guild scheduled events referenced in the audit log
         """
 
-    // TODO(vxern): Add `integrations` (array of partial integration objects; List of partial integration objects) once a partial variant of `Integration` is implemented. Discord sends only `id`, `name`, `type` and `account`, so `Integration` — which requires `enabled` — cannot decode them.
+    let integrations: Array[PartialIntegration] val
+        """
+        List of partial integration objects
+
+        Discord sends only `id`, `name`, `type` and `account` for these.
+        """
 
     let threads: Array[Channel] val
         """
@@ -50,6 +55,7 @@ class val AuditLog is Jsonable
         audit_log_entries': Array[AuditLogEntry] val,
         auto_moderation_rules': Array[AutoModerationRule] val,
         guild_scheduled_events': Array[GuildScheduledEvent] val,
+        integrations': Array[PartialIntegration] val,
         threads': Array[Channel] val,
         users': Array[User] val,
         webhooks': Array[Webhook] val
@@ -57,6 +63,7 @@ class val AuditLog is Jsonable
         audit_log_entries = audit_log_entries'
         auto_moderation_rules = auto_moderation_rules'
         guild_scheduled_events = guild_scheduled_events'
+        integrations = integrations'
         threads = threads'
         users = users'
         webhooks = webhooks'
@@ -65,6 +72,7 @@ class val AuditLog is Jsonable
         var audit_log_entries': (Array[AuditLogEntry] val | None) = None
         var auto_moderation_rules': (Array[AutoModerationRule] val | None) = None
         var guild_scheduled_events': (Array[GuildScheduledEvent] val | None) = None
+        var integrations': (Array[PartialIntegration] val | None) = None
         var threads': (Array[Channel] val | None) = None
         var users': (Array[User] val | None) = None
         var webhooks': (Array[Webhook] val | None) = None
@@ -74,6 +82,7 @@ class val AuditLog is Jsonable
             | "audit_log_entries" => audit_log_entries' = _AuditLogEntries(value)?
             | "auto_moderation_rules" => auto_moderation_rules' = _AutoModerationRules(value)?
             | "guild_scheduled_events" => guild_scheduled_events' = _GuildScheduledEvents(value)?
+            | "integrations" => integrations' = _PartialIntegrations(value)?
             | "threads" => threads' = _Channels(value)?
             | "users" => users' = _Users(value)?
             | "webhooks" => webhooks' = _Webhooks(value)?
@@ -83,6 +92,7 @@ class val AuditLog is Jsonable
         audit_log_entries = audit_log_entries' as Array[AuditLogEntry] val
         auto_moderation_rules = auto_moderation_rules' as Array[AutoModerationRule] val
         guild_scheduled_events = guild_scheduled_events' as Array[GuildScheduledEvent] val
+        integrations = integrations' as Array[PartialIntegration] val
         threads = threads' as Array[Channel] val
         users = users' as Array[User] val
         webhooks = webhooks' as Array[Webhook] val
@@ -92,6 +102,7 @@ class val AuditLog is Jsonable
             .update("audit_log_entries", _AuditLogEntries.to_json(audit_log_entries))
             .update("auto_moderation_rules", _AutoModerationRules.to_json(auto_moderation_rules))
             .update("guild_scheduled_events", _GuildScheduledEvents.to_json(guild_scheduled_events))
+            .update("integrations", _PartialIntegrations.to_json(integrations))
             .update("threads", _Channels.to_json(threads))
             .update("users", _Users.to_json(users))
             .update("webhooks", _Webhooks.to_json(webhooks))

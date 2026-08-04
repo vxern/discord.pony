@@ -25,7 +25,7 @@ class val Invite is Jsonable
         This is a partial guild object, so most of its fields may be absent.
         """
 
-    let channel: (Channel | None)
+    let channel: (PartialChannel | None)
         """
         the channel this invite is for
 
@@ -81,7 +81,7 @@ class val Invite is Jsonable
         type'': InviteType,
         code': String,
         guild': (PartialGuild | None) = None,
-        channel': (Channel | None) = None,
+        channel': (PartialChannel | None) = None,
         inviter': (User | None) = None,
         target_type': (InviteTargetType | None) = None,
         target_user': (User | None) = None,
@@ -110,7 +110,7 @@ class val Invite is Jsonable
         var type'': (InviteType | None) = None
         var code': (String | None) = None
         var guild': (PartialGuild | None) = None
-        var channel': (Channel | None) = None
+        var channel': (PartialChannel | None) = None
         var inviter': (User | None) = None
         var target_type': (InviteTargetType | None) = None
         var target_user': (User | None) = None
@@ -128,7 +128,7 @@ class val Invite is Jsonable
             | "guild" =>
                 match value | let obj': json.JsonObject => guild' = PartialGuild.from_json(obj')? end
             | "channel" =>
-                match value | let obj': json.JsonObject => channel' = Channel.from_json(obj')? end
+                match value | let obj': json.JsonObject => channel' = PartialChannel.from_json(obj')? end
             | "inviter" => inviter' = User.from_json(value as json.JsonObject)?
             | "target_type" => target_type' = InviteTargetTypes.from((value as I64).u8())?
             | "target_user" => target_user' = User.from_json(value as json.JsonObject)?
@@ -166,7 +166,7 @@ class val Invite is Jsonable
         end
 
         match channel
-        | let channel': Channel => obj = obj.update("channel", channel'.to_json())
+        | let channel': PartialChannel => obj = obj.update("channel", channel'.to_json())
         end
 
         match inviter
@@ -404,12 +404,12 @@ class val InviteStageInstance is Jsonable
     Deprecated.
     """
 
-    let members: Array[GuildMember] val
+    let members: Array[PartialGuildMember] val
         """
         the members speaking in the Stage
-        """
 
-    // TODO(vxern): These are *partial* guild members, so a payload that omits any of the fields `GuildMember` requires will fail to decode. Needs a partial variant of `GuildMember`.
+        These are partial guild member objects, so most of their fields may be absent.
+        """
 
     let participant_count: USize
         """
@@ -427,7 +427,7 @@ class val InviteStageInstance is Jsonable
         """
 
     new val create(
-        members': Array[GuildMember] val,
+        members': Array[PartialGuildMember] val,
         participant_count': USize,
         speaker_count': USize,
         topic': String
@@ -438,28 +438,28 @@ class val InviteStageInstance is Jsonable
         topic = topic'
 
     new val from_json(obj: json.JsonObject) ? =>
-        var members': (Array[GuildMember] val | None) = None
+        var members': (Array[PartialGuildMember] val | None) = None
         var participant_count': (USize | None) = None
         var speaker_count': (USize | None) = None
         var topic': (String | None) = None
 
         for (key, value) in obj.pairs() do
             match key
-            | "members" => members' = _GuildMembers(value)?
+            | "members" => members' = _PartialGuildMembers(value)?
             | "participant_count" => participant_count' = (value as I64).usize()
             | "speaker_count" => speaker_count' = (value as I64).usize()
             | "topic" => topic' = value as String
             end
         end
 
-        members = members' as Array[GuildMember] val
+        members = members' as Array[PartialGuildMember] val
         participant_count = participant_count' as USize
         speaker_count = speaker_count' as USize
         topic = topic' as String
 
     fun to_json(): json.JsonObject =>
         json.JsonObject
-            .update("members", _GuildMembers.to_json(members))
+            .update("members", _PartialGuildMembers.to_json(members))
             .update("participant_count", participant_count.i64())
             .update("speaker_count", speaker_count.i64())
             .update("topic", topic)

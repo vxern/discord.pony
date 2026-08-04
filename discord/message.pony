@@ -109,7 +109,12 @@ class val Message is Jsonable
         sent with Rich Presence-related chat embeds
         """
 
-    // TODO(vxern): Add `application` (partial application object; sent with Rich Presence-related chat embeds) once a partial variant of `Application` is implemented. Discord sends only `id`, `name`, `icon`, `description` and `cover_image`, so `Application` — which requires `bot_public`, `bot_require_code_grant` and `verify_key` — cannot decode it.
+    let application: (PartialApplication | None)
+        """
+        sent with Rich Presence-related chat embeds
+
+        This is a partial application object: Discord sends only `id`, `name`, `icon`, `description` and `cover_image`.
+        """
 
     let application_id: (Snowflake | None)
         """
@@ -218,6 +223,7 @@ class val Message is Jsonable
         webhook_id': (Snowflake | None) = None,
         type'': MessageType,
         activity': (MessageActivity | None) = None,
+        application': (PartialApplication | None) = None,
         application_id': (Snowflake | None) = None,
         flags': (Array[MessageFlag] val | None) = None,
         message_reference': (MessageReference | None) = None,
@@ -255,6 +261,7 @@ class val Message is Jsonable
         webhook_id = webhook_id'
         type' = type''
         activity = activity'
+        application = application'
         application_id = application_id'
         flags = flags'
         message_reference = message_reference'
@@ -293,6 +300,7 @@ class val Message is Jsonable
         var webhook_id': (Snowflake | None) = None
         var type'': (MessageType | None) = None
         var activity': (MessageActivity | None) = None
+        var application': (PartialApplication | None) = None
         var application_id': (Snowflake | None) = None
         var flags': (Array[MessageFlag] val | None) = None
         var message_reference': (MessageReference | None) = None
@@ -337,6 +345,7 @@ class val Message is Jsonable
             | "webhook_id" => webhook_id' = Snowflake.from_json(value)?
             | "type" => type'' = MessageTypes.from((value as I64).u8())?
             | "activity" => activity' = MessageActivity.from_json(value as json.JsonObject)?
+            | "application" => application' = PartialApplication.from_json(value as json.JsonObject)?
             | "application_id" => application_id' = Snowflake.from_json(value)?
             | "flags" => flags' = _MessageFlags((value as I64).u64())
             | "message_reference" => message_reference' = MessageReference.from_json(value as json.JsonObject)?
@@ -377,6 +386,7 @@ class val Message is Jsonable
         webhook_id = webhook_id'
         type' = type'' as MessageType
         activity = activity'
+        application = application'
         application_id = application_id'
         flags = flags'
         message_reference = message_reference'
@@ -431,6 +441,10 @@ class val Message is Jsonable
 
         match activity
         | let activity': MessageActivity => obj = obj.update("activity", activity'.to_json())
+        end
+
+        match application
+        | let application': PartialApplication => obj = obj.update("application", application'.to_json())
         end
 
         match application_id
@@ -1267,24 +1281,32 @@ class val MessageInteraction is Jsonable
         User who invoked the interaction
         """
 
-    // TODO(vxern): Add `member` (partial member object; Member who invoked the interaction in the guild) once a partial variant of `GuildMember` is implemented.
+    let member: (PartialGuildMember | None)
+        """
+        Member who invoked the interaction in the guild
+
+        This is a partial guild member object, so most of its fields may be absent.
+        """
 
     new val create(
         id': Snowflake,
         type'': InteractionType,
         name': String,
-        user': User
+        user': User,
+        member': (PartialGuildMember | None) = None
     ) =>
         id = id'
         type' = type''
         name = name'
         user = user'
+        member = member'
 
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
         var type'': (InteractionType | None) = None
         var name': (String | None) = None
         var user': (User | None) = None
+        var member': (PartialGuildMember | None) = None
 
         for (key, value) in obj.pairs() do
             match key
@@ -1292,6 +1314,7 @@ class val MessageInteraction is Jsonable
             | "type" => type'' = InteractionTypes.from((value as I64).u8())?
             | "name" => name' = value as String
             | "user" => user' = User.from_json(value as json.JsonObject)?
+            | "member" => member' = PartialGuildMember.from_json(value as json.JsonObject)?
             end
         end
 
@@ -1299,13 +1322,20 @@ class val MessageInteraction is Jsonable
         type' = type'' as InteractionType
         name = name' as String
         user = user' as User
+        member = member'
 
     fun to_json(): json.JsonObject =>
-        json.JsonObject
+        var obj = json.JsonObject
             .update("id", id.to_json())
             .update("type", type'.value().i64())
             .update("name", name)
             .update("user", user.to_json())
+
+        match member
+        | let member': PartialGuildMember => obj = obj.update("member", member'.to_json())
+        end
+
+        obj
 
 class val MessageCall is Jsonable
     """

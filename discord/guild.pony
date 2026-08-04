@@ -1568,7 +1568,12 @@ class val GuildWidget is Jsonable
         instant invite for the guilds specified widget invite channel
         """
 
-    // TODO(vxern): Add `channels` (array of partial channel objects; voice and stage channels which are accessible by @everyone) once a partial variant of `Channel` is implemented. The widget carries only `id`, `name` and `position`, so `Channel` — which requires `type` — cannot decode them.
+    let channels: Array[PartialChannel] val
+        """
+        voice and stage channels which are accessible by @everyone
+
+        These are partial channel objects: the widget carries only `id`, `name` and `position`.
+        """
 
     let members: Array[User] val
         """
@@ -1586,12 +1591,14 @@ class val GuildWidget is Jsonable
         id': Snowflake,
         name': String,
         instant_invite': (String | None) = None,
+        channels': Array[PartialChannel] val,
         members': Array[User] val,
         presence_count': USize
     ) =>
         id = id'
         name = name'
         instant_invite = instant_invite'
+        channels = channels'
         members = members'
         presence_count = presence_count'
 
@@ -1599,6 +1606,7 @@ class val GuildWidget is Jsonable
         var id': (Snowflake | None) = None
         var name': (String | None) = None
         var instant_invite': (String | None) = None
+        var channels': (Array[PartialChannel] val | None) = None
         var members': (Array[User] val | None) = None
         var presence_count': (USize | None) = None
 
@@ -1608,6 +1616,7 @@ class val GuildWidget is Jsonable
             | "name" => name' = value as String
             | "instant_invite" =>
                 match value | let string: String => instant_invite' = string end
+            | "channels" => channels' = _PartialChannels(value)?
             | "members" => members' = _Users(value)?
             | "presence_count" => presence_count' = (value as I64).usize()
             end
@@ -1616,6 +1625,7 @@ class val GuildWidget is Jsonable
         id = id' as Snowflake
         name = name' as String
         instant_invite = instant_invite'
+        channels = channels' as Array[PartialChannel] val
         members = members' as Array[User] val
         presence_count = presence_count' as USize
 
@@ -1624,6 +1634,7 @@ class val GuildWidget is Jsonable
             .update("id", id.to_json())
             .update("name", name)
             .update("instant_invite", instant_invite)
+            .update("channels", _PartialChannels.to_json(channels))
             .update("members", _Users.to_json(members))
             .update("presence_count", presence_count.i64())
 

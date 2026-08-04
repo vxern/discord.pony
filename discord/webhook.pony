@@ -53,9 +53,19 @@ class val Webhook is Jsonable
         the bot/OAuth2 application that created this webhook
         """
 
-    // TODO(vxern): Add `source_guild` (partial guild object; the guild of the channel that this webhook is following) once a partial variant of `Guild` is implemented. Discord sends only `id`, `name` and `icon`, so `Guild` — which requires far more — cannot decode it.
+    let source_guild: (PartialGuild | None)
+        """
+        the guild of the channel that this webhook is following
 
-    // TODO(vxern): Add `source_channel` (partial channel object; the channel that this webhook is following) once a partial variant of `Channel` is implemented. Discord sends only `id` and `name`, so `Channel` — which requires `type` — cannot decode it.
+        This is a partial guild object: Discord sends only `id`, `name` and `icon`.
+        """
+
+    let source_channel: (PartialChannel | None)
+        """
+        the channel that this webhook is following
+
+        This is a partial channel object: Discord sends only `id` and `name`.
+        """
 
     let url: (String | None)
         """
@@ -72,6 +82,8 @@ class val Webhook is Jsonable
         avatar': (String | None) = None,
         token': (String | None) = None,
         application_id': (Snowflake | None) = None,
+        source_guild': (PartialGuild | None) = None,
+        source_channel': (PartialChannel | None) = None,
         url': (String | None) = None
     ) =>
         id = id'
@@ -83,6 +95,8 @@ class val Webhook is Jsonable
         avatar = avatar'
         token = token'
         application_id = application_id'
+        source_guild = source_guild'
+        source_channel = source_channel'
         url = url'
 
     new val from_json(obj: json.JsonObject) ? =>
@@ -95,6 +109,8 @@ class val Webhook is Jsonable
         var avatar': (String | None) = None
         var token': (String | None) = None
         var application_id': (Snowflake | None) = None
+        var source_guild': (PartialGuild | None) = None
+        var source_channel': (PartialChannel | None) = None
         var url': (String | None) = None
 
         for (key, value) in obj.pairs() do
@@ -113,6 +129,8 @@ class val Webhook is Jsonable
             | "token" => token' = value as String
             | "application_id" =>
                 match value | let string: String => application_id' = Snowflake.from_json(string)? end
+            | "source_guild" => source_guild' = PartialGuild.from_json(value as json.JsonObject)?
+            | "source_channel" => source_channel' = PartialChannel.from_json(value as json.JsonObject)?
             | "url" => url' = value as String
             end
         end
@@ -126,6 +144,8 @@ class val Webhook is Jsonable
         avatar = avatar'
         token = token'
         application_id = application_id'
+        source_guild = source_guild'
+        source_channel = source_channel'
         url = url'
 
     fun to_json(): json.JsonObject =>
@@ -147,6 +167,14 @@ class val Webhook is Jsonable
 
         match token
         | let token': String => obj = obj.update("token", token')
+        end
+
+        match source_guild
+        | let source_guild': PartialGuild => obj = obj.update("source_guild", source_guild'.to_json())
+        end
+
+        match source_channel
+        | let source_channel': PartialChannel => obj = obj.update("source_channel", source_channel'.to_json())
         end
 
         match url

@@ -75,7 +75,12 @@ class val Application is Jsonable
         Guild associated with the app. For example, a developer support server.
         """
 
-    // TODO(vxern): Add `guild` (partial guild object; Partial object of the associated guild) once a partial variant of `Guild` is implemented. Discord omits most of the fields `Guild` requires, so `Guild` cannot decode it.
+    let guild: (PartialGuild | None)
+        """
+        Partial object of the associated guild
+
+        This is a partial guild object, so most of its fields may be absent.
+        """
 
     let primary_sku_id: (Snowflake | None)
         """
@@ -178,6 +183,7 @@ class val Application is Jsonable
         owner': (User | None) = None,
         verify_key': String,
         guild_id': (Snowflake | None) = None,
+        guild': (PartialGuild | None) = None,
         primary_sku_id': (Snowflake | None) = None,
         slug': (String | None) = None,
         cover_image': (String | None) = None,
@@ -209,6 +215,7 @@ class val Application is Jsonable
         owner = owner'
         verify_key = verify_key'
         guild_id = guild_id'
+        guild = guild'
         primary_sku_id = primary_sku_id'
         slug = slug'
         cover_image = cover_image'
@@ -241,6 +248,7 @@ class val Application is Jsonable
         var privacy_policy_url': (String | None) = None
         var verify_key': (String | None) = None
         var guild_id': (Snowflake | None) = None
+        var guild': (PartialGuild | None) = None
         var primary_sku_id': (Snowflake | None) = None
         var slug': (String | None) = None
         var cover_image': (String | None) = None
@@ -276,6 +284,7 @@ class val Application is Jsonable
             | "privacy_policy_url" => privacy_policy_url' = value as String
             | "verify_key" => verify_key' = value as String
             | "guild_id" => guild_id' = Snowflake.from_json(value)?
+            | "guild" => guild' = PartialGuild.from_json(value as json.JsonObject)?
             | "primary_sku_id" => primary_sku_id' = Snowflake.from_json(value)?
             | "slug" => slug' = value as String
             | "cover_image" => cover_image' = value as String
@@ -313,6 +322,7 @@ class val Application is Jsonable
         privacy_policy_url = privacy_policy_url'
         verify_key = verify_key' as String
         guild_id = guild_id'
+        guild = guild'
         primary_sku_id = primary_sku_id'
         slug = slug'
         cover_image = cover_image'
@@ -367,6 +377,10 @@ class val Application is Jsonable
 
         match guild_id
         | let guild_id': Snowflake => obj = obj.update("guild_id", guild_id'.to_json())
+        end
+
+        match guild
+        | let guild': PartialGuild => obj = obj.update("guild", guild'.to_json())
         end
 
         match primary_sku_id

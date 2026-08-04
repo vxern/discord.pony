@@ -617,14 +617,19 @@ class val ResolvedData is Jsonable
         the ids and User objects
         """
 
-    // TODO(vxern): Add `members` (map of snowflakes to partial member objects; the ids and partial Member objects) once a partial variant of `GuildMember` is implemented. Discord omits `user`, `deaf` and `mute` here, and `GuildMember` requires the latter two.
+    let members: (collections.Map[Snowflake, PartialGuildMember] val | None)
+        """
+        the ids and partial Member objects
+
+        Discord omits `user`, `deaf` and `mute` from these.
+        """
 
     let roles: (collections.Map[Snowflake, Role] val | None)
         """
         the ids and Role objects
         """
 
-    let channels: (collections.Map[Snowflake, Channel] val | None)
+    let channels: (collections.Map[Snowflake, PartialChannel] val | None)
         """
         the ids and partial Channel objects
 
@@ -643,12 +648,14 @@ class val ResolvedData is Jsonable
 
     new val create(
         users': (collections.Map[Snowflake, User] val | None) = None,
+        members': (collections.Map[Snowflake, PartialGuildMember] val | None) = None,
         roles': (collections.Map[Snowflake, Role] val | None) = None,
-        channels': (collections.Map[Snowflake, Channel] val | None) = None,
+        channels': (collections.Map[Snowflake, PartialChannel] val | None) = None,
         messages': (collections.Map[Snowflake, Message] val | None) = None,
         attachments': (collections.Map[Snowflake, MessageAttachment] val | None) = None
     ) =>
         users = users'
+        members = members'
         roles = roles'
         channels = channels'
         messages = messages'
@@ -656,14 +663,16 @@ class val ResolvedData is Jsonable
 
     new val from_json(obj: json.JsonObject) ? =>
         var users': (collections.Map[Snowflake, User] val | None) = None
+        var members': (collections.Map[Snowflake, PartialGuildMember] val | None) = None
         var roles': (collections.Map[Snowflake, Role] val | None) = None
-        var channels': (collections.Map[Snowflake, Channel] val | None) = None
+        var channels': (collections.Map[Snowflake, PartialChannel] val | None) = None
         var messages': (collections.Map[Snowflake, Message] val | None) = None
         var attachments': (collections.Map[Snowflake, MessageAttachment] val | None) = None
 
         for (key, value) in obj.pairs() do
             match key
             | "users" => users' = _ResolvedUsers(value)?
+            | "members" => members' = _ResolvedMembers(value)?
             | "roles" => roles' = _ResolvedRoles(value)?
             | "channels" => channels' = _ResolvedChannels(value)?
             | "messages" => messages' = _ResolvedMessages(value)?
@@ -672,6 +681,7 @@ class val ResolvedData is Jsonable
         end
 
         users = users'
+        members = members'
         roles = roles'
         channels = channels'
         messages = messages'
@@ -684,12 +694,16 @@ class val ResolvedData is Jsonable
         | let users': collections.Map[Snowflake, User] val => obj = obj.update("users", _ResolvedUsers.to_json(users'))
         end
 
+        match members
+        | let members': collections.Map[Snowflake, PartialGuildMember] val => obj = obj.update("members", _ResolvedMembers.to_json(members'))
+        end
+
         match roles
         | let roles': collections.Map[Snowflake, Role] val => obj = obj.update("roles", _ResolvedRoles.to_json(roles'))
         end
 
         match channels
-        | let channels': collections.Map[Snowflake, Channel] val => obj = obj.update("channels", _ResolvedChannels.to_json(channels'))
+        | let channels': collections.Map[Snowflake, PartialChannel] val => obj = obj.update("channels", _ResolvedChannels.to_json(channels'))
         end
 
         match messages
@@ -742,22 +756,42 @@ primitive _ResolvedRoles
         for (id, role) in map.pairs() do obj = obj.update(id.string(), role.to_json()) end
         obj
 
-primitive _ResolvedChannels
-    fun apply(value: json.JsonValue): collections.Map[Snowflake, Channel] val ? =>
+primitive _ResolvedMembers
+    fun apply(value: json.JsonValue): collections.Map[Snowflake, PartialGuildMember] val ? =>
         """
-        Decodes a mapping of snowflakes to channels.
+        Decodes a mapping of snowflakes to partial guild members.
         """
 
         let obj = value as json.JsonObject
         recover val
-            let map = collections.Map[Snowflake, Channel](obj.size())
+            let map = collections.Map[Snowflake, PartialGuildMember](obj.size())
             for (key, value') in obj.pairs() do
-                map(Snowflake.from_json(key)?) = Channel.from_json(value' as json.JsonObject)?
+                map(Snowflake.from_json(key)?) = PartialGuildMember.from_json(value' as json.JsonObject)?
             end
             map
         end
 
-    fun to_json(map: collections.Map[Snowflake, Channel] box): json.JsonObject =>
+    fun to_json(map: collections.Map[Snowflake, PartialGuildMember] box): json.JsonObject =>
+        var obj = json.JsonObject
+        for (id, member) in map.pairs() do obj = obj.update(id.string(), member.to_json()) end
+        obj
+
+primitive _ResolvedChannels
+    fun apply(value: json.JsonValue): collections.Map[Snowflake, PartialChannel] val ? =>
+        """
+        Decodes a mapping of snowflakes to partial channels.
+        """
+
+        let obj = value as json.JsonObject
+        recover val
+            let map = collections.Map[Snowflake, PartialChannel](obj.size())
+            for (key, value') in obj.pairs() do
+                map(Snowflake.from_json(key)?) = PartialChannel.from_json(value' as json.JsonObject)?
+            end
+            map
+        end
+
+    fun to_json(map: collections.Map[Snowflake, PartialChannel] box): json.JsonObject =>
         var obj = json.JsonObject
         for (id, channel) in map.pairs() do obj = obj.update(id.string(), channel.to_json()) end
         obj
