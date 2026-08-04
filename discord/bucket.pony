@@ -2,20 +2,61 @@ use time = "time"
 use courier = "courier"
 use collections = "collections"
 
-class Queue[A: Any #send]
-    embed _queue: collections.List[A] = collections.List[A]
+actor GlobalBucket
+    let _api: RestApi
+    let _timers: time.Timers
+    embed _queue: Queue[(courier.HTTPRequest, RawResponseHandler)] = Queue[(courier.HTTPRequest, RawResponseHandler)]
 
-    fun size(): USize => _queue.size()
+    var _requests_remaining: USize = _RateLimitConstants.global_rate_limit_max_count()
+    var _window_open: Bool = false
+    var _disposed: Bool = false
 
-    fun ref enqueue(item: A): None => _queue.push(consume item)
+    new create(api: RestApi, timers: time.Timers) =>
+        _api = api
+        _timers = timers
 
-    fun ref enqueue_at_beginning(item: A): None => _queue.unshift(consume item)
+    be enqueue(request: courier.HTTPRequest, handler: RawResponseHandler) =>
+        if _disposed then return end
 
-    fun ref dequeue(): A^ ? => _queue.shift()?
+        _queue.enqueue((request, handler))
+        _drain()
+
+    be dispose() =>
+        _disposed = true
+        _queue.clear()
+
+    be _open_window() =>
+        _window_open = false
+        _requests_remaining = _RateLimitConstants.global_rate_limit_max_count()
+        _drain()
+
+    fun ref _drain() =>
+        while (_requests_remaining > 0) and (_queue.size() > 0) do
+            try
+                (let request, let handler) = _queue.dequeue()?
+
+                if not _window_open then
+                    _window_open = true
+                    _timers(
+                        time.Timer(
+                            _GlobalBucketOpen(this),
+                            time.Nanos.from_millis(
+                                _RateLimitConstants.global_rate_limit_window_ms().u64()
+                            )
+                        )
+                    )
+                end
+
+                _requests_remaining = _requests_remaining - 1
+                _api._raw_send_request(request, handler)
+            else
+                break
+            end
+        end
 
 actor Bucket
     let _env: Env
-    let _api: RestApi
+    let _global: GlobalBucket
     let _id: String
     let _timers: time.Timers
     embed _queue: Queue[(courier.HTTPRequest, RawResponseHandler)] = Queue[(courier.HTTPRequest, RawResponseHandler)]
@@ -26,9 +67,9 @@ actor Bucket
 
     var _restarting: Bool = false
 
-    new create(env: Env, api: RestApi, id: String, timers: time.Timers = time.Timers) =>
+    new create(env: Env, global: GlobalBucket, id: String, timers: time.Timers) =>
         _env = env
-        _api = api
+        _global = global
         _id = id
         _timers = timers
 
@@ -47,7 +88,7 @@ actor Bucket
                 _requests_remaining = _requests_remaining - 1
 
                 let self: Bucket tag = this
-                _api._raw_send_request(request, {(request': courier.HTTPRequest val, response': courier.HTTPResponse val) =>
+                _global.enqueue(request, {(request': courier.HTTPRequest val, response': courier.HTTPResponse val) =>
                     self.on_response_received(request', response', handler)
                 })
             else
@@ -126,6 +167,16 @@ class iso _BucketRestart is time.TimerNotify
 
     fun ref apply(timer: time.Timer, count: U64): Bool =>
         _bucket._restart()
+        false
+
+class iso _GlobalBucketOpen is time.TimerNotify
+    let _bucket: GlobalBucket
+
+    new iso create(bucket: GlobalBucket) =>
+        _bucket = bucket
+
+    fun ref apply(timer: time.Timer, count: U64): Bool =>
+        _bucket._open_window()
         false
 
 class val _RateLimit

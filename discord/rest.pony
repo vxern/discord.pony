@@ -52,13 +52,17 @@ class Rest
         api = RestApi(env, options')
         routes = Routes(api, options')
 
+    fun dispose() => api.dispose()
+
 actor RestApi
     let options: RestOptions
     let _env: Env
     let _auth: lori.TCPConnectAuth
     let _ssl_context: (ssl.SSLContext val | None)
     let _timers: time.Timers = time.Timers
+
     embed _buckets: collections.Map[String, Bucket] = collections.Map[String, Bucket]
+    let _global_bucket: GlobalBucket
 
     new create(env: Env, options': RestOptions) =>
         options = options'
@@ -77,6 +81,7 @@ actor RestApi
                     )?
                 end
             end
+        _global_bucket = GlobalBucket(this, _timers)
 
     be send_request(request: courier.HTTPRequest val, handler: RawResponseHandler) =>
         let id = _BucketId(request)
@@ -84,12 +89,17 @@ actor RestApi
             try
                 _buckets(id)?
             else
-                let bucket' = Bucket(_env, this, id, _timers)
+                let bucket' = Bucket(_env, _global_bucket, id, _timers)
                 _buckets(id) = bucket'
                 bucket'
             end
 
         bucket.enqueue(request, handler)
+
+    be dispose() =>
+        _global_bucket.dispose()
+        _timers.dispose()
+        _buckets.clear()
 
     be _raw_send_request(request: courier.HTTPRequest val, handler: RawResponseHandler) =>
         match _ssl_context
