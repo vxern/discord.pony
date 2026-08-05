@@ -1,4 +1,3 @@
-use collections = "collections"
 use json = "json"
 
 class val Channel is Jsonable

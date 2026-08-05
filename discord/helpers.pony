@@ -1,5 +1,4 @@
 use collections = "collections"
-use json = "json"
 use time = "time"
 
 type _Enum[A: Equatable[A] #read] is (collections.Hashable & Equatable[A])

@@ -1,4 +1,3 @@
-use collections = "collections"
 use json = "json"
 
 class val Sticker is Jsonable

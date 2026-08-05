@@ -1,4 +1,3 @@
-use collections = "collections"
 use json = "json"
 
 trait val Component is Jsonable

@@ -1,4 +1,3 @@
-use collections = "collections"
 use json = "json"
 
 trait val Permission is _Enum[Permission]

@@ -1,6 +1,5 @@
 use time = "time"
 use courier = "courier"
-use collections = "collections"
 
 actor GlobalBucket
     let _api: RestApi

@@ -1,5 +1,4 @@
 use data = "data"
-use collections = "collections"
 
 trait val ImageFormat is _Enum[ImageFormat]
     fun value(): String
