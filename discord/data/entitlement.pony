@@ -311,7 +311,7 @@ class val GetEntitlementsParams
         exclude_ended = exclude_ended'
         exclude_deleted = exclude_deleted'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match user_id

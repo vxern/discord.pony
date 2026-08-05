@@ -3624,7 +3624,7 @@ class val GetGuildParams
     new val create(with_counts': (Bool | None) = None) =>
         with_counts = with_counts'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match with_counts
@@ -4192,7 +4192,7 @@ class val GetGuildMembersParams
         limit = limit'
         after = after'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match limit
@@ -4224,7 +4224,7 @@ class val SearchGuildMembersParams
         query = query'
         limit = limit'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let params = recover iso Array[(String, String)] end
 
         params.push(("query", query))
@@ -4497,7 +4497,7 @@ class val GetGuildBansParams
         before = before'
         after = after'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match limit
@@ -4858,7 +4858,7 @@ class val GetGuildPruneCountParams
         days = days'
         include_roles = include_roles'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match days
@@ -5020,7 +5020,7 @@ class val GetGuildWidgetImageParams
     new val create(style': (GuildWidgetStyle | None) = None) =>
         style = style'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match style

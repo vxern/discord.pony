@@ -240,7 +240,7 @@ class val GetSKUSubscriptionsParams
         limit = limit'
         user_id = user_id'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match before

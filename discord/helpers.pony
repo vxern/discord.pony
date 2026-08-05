@@ -2,9 +2,17 @@ use collections = "collections"
 use json = "json"
 use time = "time"
 
-type ISO8601 is String
-
 type _Enum[A: Equatable[A] #read] is (collections.Hashable & Equatable[A])
+
+type _RequestQuery is Array[(String, String)] val
+    """
+    Query parameters to append to a route, or `None` for a route called without any.
+    """
+
+type _RequestBody is String
+    """
+    A serialised request body, or `None` for a route called without one.
+    """
 
 class Queue[A: Any #send]
     embed _queue: collections.List[A] = collections.List[A]
@@ -18,21 +26,6 @@ class Queue[A: Any #send]
     fun ref dequeue(): A^ ? => _queue.shift()?
 
     fun ref clear(): None => _queue.clear()
-
-trait val ToJsonable is Stringable
-    fun to_json(): json.JsonObject
-
-    fun string(): String iso^ => to_json().pretty_print()
-
-trait val FromJsonable
-    new val from_json(obj: json.JsonObject) ?
-
-trait val ToJsonableArray is Stringable
-    fun to_json(): json.JsonArray
-
-    fun string(): String iso^ => to_json().pretty_print()
-
-trait val Jsonable is (ToJsonable & FromJsonable)
 
 class iso _OnceElapsed is time.TimerNotify
     """

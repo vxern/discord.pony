@@ -885,7 +885,7 @@ class val GetGlobalApplicationCommandsParams
     new val create(with_localizations': (Bool | None) = None) =>
         with_localizations = with_localizations'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match with_localizations
@@ -1123,7 +1123,7 @@ class val GetGuildApplicationCommandsParams
     new val create(with_localizations': (Bool | None) = None) =>
         with_localizations = with_localizations'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match with_localizations

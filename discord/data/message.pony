@@ -3851,7 +3851,7 @@ class val GetChannelMessagesParams
         after = after'
         limit = limit'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match around
@@ -3943,7 +3943,7 @@ class val SearchGuildMessagesParams
         offset = offset'
         limit = limit'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match content
@@ -4257,7 +4257,7 @@ class val GetReactionsParams
         after = after'
         limit = limit'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match type'
@@ -4422,7 +4422,7 @@ class val GetChannelPinsParams
         before = before'
         limit = limit'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match before

@@ -1543,7 +1543,7 @@ class val CreateInteractionResponseParams is ToJsonable
         data = data'
         with_response = with_response'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match with_response
@@ -1578,7 +1578,7 @@ class val GetOriginalInteractionResponseParams
     new val create(thread_id': (Snowflake | None) = None) =>
         thread_id = thread_id'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match thread_id
@@ -1653,7 +1653,7 @@ class val UpdateOriginalInteractionResponseParams is ToJsonable
         thread_id = thread_id'
         with_components = with_components'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match thread_id
@@ -1773,7 +1773,7 @@ class val CreateFollowupMessageParams is ToJsonable
         poll = poll'
         with_components = with_components'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match with_components
@@ -1834,7 +1834,7 @@ class val GetFollowupMessageParams
     new val create(thread_id': (Snowflake | None) = None) =>
         thread_id = thread_id'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match thread_id
@@ -1909,7 +1909,7 @@ class val UpdateFollowupMessageParams is ToJsonable
         thread_id = thread_id'
         with_components = with_components'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match thread_id

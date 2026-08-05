@@ -1017,7 +1017,7 @@ class val GetCurrentUserGuildsParams
         limit = limit'
         with_counts = with_counts'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match before

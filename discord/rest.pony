@@ -1,4 +1,5 @@
 use "files"
+use "data"
 use collections = "collections"
 use time = "time"
 use courier = "courier"
@@ -16,10 +17,6 @@ type RawResponseHandler is {(courier.HTTPRequest val, courier.HTTPResponse val)}
 
 type RawFailureHandler is {()} val
 
-primitive Null
-
-type Nullable[A: Any val] is (A | Null | None)
-
 class val RestError
     let request: courier.HTTPRequest val
     let reason: String
@@ -32,17 +29,6 @@ class val RestError
         request.method.string() + " " + request.path + ": " + reason
 
 type RestErrorHandler is {(RestError)} val
-
-primitive _CommaSeparated
-    fun apply(ids: Array[Snowflake] val): String =>
-        var buffer = recover iso String end
-        var first = true
-        for id in ids.values() do
-            if not first then buffer.push(',') end
-            first = false
-            buffer.append(id.string())
-        end
-        consume buffer
 
 class Rest
     let options: RestOptions
@@ -190,16 +176,6 @@ primitive RestConstants
 
     fun port(): String => "443"
 
-type RequestQuery is Array[(String, String)] val
-    """
-    Query parameters to append to a route, or `None` for a route called without any.
-    """
-
-type RequestBody is String
-    """
-    A serialised request body, or `None` for a route called without one.
-    """
-
 class val RestOptions
     let token: String
         """
@@ -230,17 +206,17 @@ class val RestOptions
 
         "/api/" + version.id() + route
 
-    fun build_request(method: courier.Method, route: String, query: (RequestQuery | None) = None, body: (RequestBody | None) = None, reason: Reason = None): courier.HTTPRequest val =>
+    fun build_request(method: courier.Method, route: String, query: (_RequestQuery | None) = None, body: (_RequestBody | None) = None, reason: Reason = None): courier.HTTPRequest val =>
         courier.HTTPRequest(method, build_path(route, query), build_headers(body, reason), build_body(body))
     
-    fun build_path(route: String, query: (RequestQuery | None) = None): String => 
+    fun build_path(route: String, query: (_RequestQuery | None) = None): String => 
         match query
-        | let query': RequestQuery if query'.size() > 0 => path(route) + "?" + courier.QueryParams(query')
+        | let query': _RequestQuery if query'.size() > 0 => path(route) + "?" + courier.QueryParams(query')
         else
             path(route)
         end
 
-    fun build_headers(body: (RequestBody | None) = None, reason: (Reason | None) = None): courier.Headers val =>
+    fun build_headers(body: (_RequestBody | None) = None, reason: (Reason | None) = None): courier.Headers val =>
         recover val
             let headers' = courier.Headers
             headers'.set("User-Agent", user_agent)
@@ -257,15 +233,18 @@ class val RestOptions
             headers'
         end
 
-    fun build_body(body: (RequestBody | None) = None): (Array[U8] val | None) =>
+    fun build_body(body: (_RequestBody | None) = None): (Array[U8] val | None) =>
         match body
         | let body': String => body'.array()
         end
 
 trait val RestVersion is _Enum[RestVersion]
     fun value(): U64
+
     fun id(): String => "v" + value().string()
+
     fun hash(): USize => value().hash()
+
     fun eq(that: RestVersion): Bool => value() == that.value()
 primitive RestVersion6 is RestVersion
     fun value(): U64 => 6

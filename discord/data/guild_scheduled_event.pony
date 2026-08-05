@@ -834,7 +834,7 @@ class val GetGuildScheduledEventsParams
     new val create(with_user_count': (Bool | None) = None) =>
         with_user_count = with_user_count'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match with_user_count
@@ -975,7 +975,7 @@ class val GetGuildScheduledEventParams
     new val create(with_user_count': (Bool | None) = None) =>
         with_user_count = with_user_count'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match with_user_count
@@ -1169,7 +1169,7 @@ class val GetGuildScheduledEventUsersParams
         before = before'
         after = after'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match limit

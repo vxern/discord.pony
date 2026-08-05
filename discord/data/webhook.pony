@@ -473,7 +473,7 @@ class val ExecuteWebhookParams is ToJsonable
         thread_id = thread_id'
         with_components = with_components'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match wait
@@ -576,7 +576,7 @@ class val ExecuteSlackCompatibleWebhookParams is ToJsonable
         thread_id = thread_id'
         wait = wait'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match thread_id
@@ -624,7 +624,7 @@ class val ExecuteGithubCompatibleWebhookParams is ToJsonable
         thread_id = thread_id'
         wait = wait'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match thread_id
@@ -652,7 +652,7 @@ class val GetWebhookMessageParams
     new val create(thread_id': (Snowflake | None) = None) =>
         thread_id = thread_id'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match thread_id
@@ -729,7 +729,7 @@ class val UpdateWebhookMessageParams is ToJsonable
         thread_id = thread_id'
         with_components = with_components'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match thread_id
@@ -789,7 +789,7 @@ class val DeleteWebhookMessageParams
     new val create(thread_id': (Snowflake | None) = None) =>
         thread_id = thread_id'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match thread_id

@@ -626,7 +626,7 @@ class val GetInviteParams
         with_expiration = with_expiration'
         guild_scheduled_event_id = guild_scheduled_event_id'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match with_counts

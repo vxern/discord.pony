@@ -2530,7 +2530,7 @@ class val GetThreadMemberParams
     new val create(with_member': (Bool | None) = None) =>
         with_member = with_member'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match with_member
@@ -2570,7 +2570,7 @@ class val GetThreadMembersParams
         after = after'
         limit = limit'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match with_member
@@ -2606,7 +2606,7 @@ class val GetPublicArchivedThreadsParams
         before = before'
         limit = limit'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match before
@@ -2638,7 +2638,7 @@ class val GetPrivateArchivedThreadsParams
         before = before'
         limit = limit'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match before
@@ -2670,7 +2670,7 @@ class val GetJoinedPrivateArchivedThreadsParams
         before = before'
         limit = limit'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match before

@@ -1,3 +1,4 @@
+use "data"
 use courier = "courier"
 use json = "json"
 
@@ -16,7 +17,7 @@ actor Routes
         Returns a list of application role connection metadata objects for the given application.
         """
 
-        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/role-connections/metadata"), _Decode.list[ApplicationRoleConnectionMetadata](handler, _ApplicationRoleConnectionMetadatas, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/role-connections/metadata"), _Decode.list[ApplicationRoleConnectionMetadata](handler, options.on_error))
 
     be update_application_role_connection_metadata(application_id: Snowflake, application_role_connection_metadata: Array[ApplicationRoleConnectionMetadata] val, handler: ResponseHandler[Array[ApplicationRoleConnectionMetadata] val]) =>
         """
@@ -28,7 +29,7 @@ actor Routes
         var records = json.JsonArray
         for record in application_role_connection_metadata.values() do records = records.push(record.to_json()) end
 
-        api.send_request(options.build_request(courier.PUT, "/applications/" + application_id.string() + "/role-connections/metadata" where body = json.JsonPrinter.print(records)), _Decode.list[ApplicationRoleConnectionMetadata](handler, _ApplicationRoleConnectionMetadatas, options.on_error))
+        api.send_request(options.build_request(courier.PUT, "/applications/" + application_id.string() + "/role-connections/metadata" where body = json.JsonPrinter.print(records)), _Decode.list[ApplicationRoleConnectionMetadata](handler, options.on_error))
 
     be get_application(handler: ResponseHandler[Application]) =>
         """
@@ -75,7 +76,7 @@ actor Routes
         Get a list of all rules currently configured for the guild. Returns a list of auto moderation rule objects for the given guild.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/auto-moderation/rules"), _Decode.list[AutoModerationRule](handler, _AutoModerationRules, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/auto-moderation/rules"), _Decode.list[AutoModerationRule](handler, options.on_error))
 
     be get_auto_moderation_rule(guild_id: Snowflake, auto_moderation_rule_id: Snowflake, handler: ResponseHandler[AutoModerationRule]) =>
         """
@@ -165,7 +166,7 @@ actor Routes
         Returns a list of invite objects (with invite metadata) for the channel. Only usable for guild channels. Requires the MANAGE_CHANNELS permission.
         """
 
-        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/invites"), _Decode.list[Invite](handler, _Invites, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/invites"), _Decode.list[Invite](handler, options.on_error))
 
     be create_channel_invite(channel_id: Snowflake, params: CreateChannelInviteParams, handler: ResponseHandler[Invite], reason: Reason = None) =>
         """
@@ -318,7 +319,7 @@ actor Routes
         This endpoint is restricted according to whether the GUILD_MEMBERS Privileged Intent is enabled for your application. Without it Discord answers 403 Missing Access, even for a thread the bot is itself a member of.
         """
 
-        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/thread-members" where query = params.to_query()), _Decode.list[ThreadMember](handler, _ThreadMembers, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/thread-members" where query = params.to_query()), _Decode.list[ThreadMember](handler, options.on_error))
 
     be get_public_archived_threads(channel_id: Snowflake, params: GetPublicArchivedThreadsParams, handler: ResponseHandler[ArchivedThreads]) =>
         """
@@ -354,7 +355,7 @@ actor Routes
         Returns a list of emoji objects for the given guild. Includes user fields if the bot has the CREATE_GUILD_EXPRESSIONS or MANAGE_GUILD_EXPRESSIONS permission.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/emojis"), _Decode.list[Emoji](handler, _Emojis, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/emojis"), _Decode.list[Emoji](handler, options.on_error))
 
     be get_guild_emoji(guild_id: Snowflake, emoji_id: Snowflake, handler: ResponseHandler[Emoji]) =>
         """
@@ -399,7 +400,7 @@ actor Routes
         Returns an object containing a list of emoji objects for the given application under the items key. Includes a user object for the team member that uploaded the emoji from the app’s settings, or for the bot user if uploaded using the API.
         """
 
-        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/emojis"), _Decode.wrapped[Emoji](handler, "items", _Emojis, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/emojis"), _Decode.wrapped[Emoji](handler, "items", options.on_error))
 
     be get_application_emoji(application_id: Snowflake, emoji_id: Snowflake, handler: ResponseHandler[Emoji]) =>
         """
@@ -444,7 +445,7 @@ actor Routes
         Returns all entitlements for a given app, active and expired.
         """
 
-        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/entitlements" where query = params.to_query()), _Decode.list[Entitlement](handler, _Entitlements, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/entitlements" where query = params.to_query()), _Decode.list[Entitlement](handler, options.on_error))
 
     be get_entitlement(application_id: Snowflake, entitlement_id: Snowflake, handler: ResponseHandler[Entitlement]) =>
         """
@@ -531,7 +532,7 @@ actor Routes
         Returns a list of guild channel objects. Does not include threads.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/channels"), _Decode.list[Channel](handler, _Channels, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/channels"), _Decode.list[Channel](handler, options.on_error))
 
     be create_guild_channel(guild_id: Snowflake, params: CreateGuildChannelParams, handler: ResponseHandler[Channel], reason: Reason = None) =>
         """
@@ -588,7 +589,7 @@ actor Routes
         All parameters to this endpoint are optional.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/members" where query = params.to_query()), _Decode.list[GuildMember](handler, _GuildMembers, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/members" where query = params.to_query()), _Decode.list[GuildMember](handler, options.on_error))
 
     be search_guild_members(guild_id: Snowflake, params: SearchGuildMembersParams, handler: ResponseHandler[Array[GuildMember] val]) =>
         """
@@ -599,7 +600,7 @@ actor Routes
         All parameters to this endpoint except for query are optional
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/members/search" where query = params.to_query()), _Decode.list[GuildMember](handler, _GuildMembers, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/members/search" where query = params.to_query()), _Decode.list[GuildMember](handler, options.on_error))
 
     be add_guild_member(guild_id: Snowflake, user_id: Snowflake, params: AddGuildMemberParams, handler: ResponseHandler[GuildMember]) =>
         """
@@ -693,7 +694,7 @@ actor Routes
         Returns a list of ban objects for the users banned from this guild. Requires the BAN_MEMBERS permission.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/bans" where query = params.to_query()), _Decode.list[Ban](handler, _Bans, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/bans" where query = params.to_query()), _Decode.list[Ban](handler, options.on_error))
 
     be get_guild_ban(guild_id: Snowflake, user_id: Snowflake, handler: ResponseHandler[Ban]) =>
         """
@@ -744,7 +745,7 @@ actor Routes
         Returns a list of role objects for the guild.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/roles"), _Decode.list[Role](handler, _Roles, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/roles"), _Decode.list[Role](handler, options.on_error))
 
     be get_guild_role(guild_id: Snowflake, role_id: Snowflake, handler: ResponseHandler[Role]) =>
         """
@@ -786,7 +787,7 @@ actor Routes
         This endpoint takes a JSON array of parameters in the following format:
         """
 
-        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/roles" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.list[Role](handler, _Roles, options.on_error))
+        api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/roles" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.list[Role](handler, options.on_error))
 
     be update_guild_role(guild_id: Snowflake, role_id: Snowflake, params: UpdateGuildRoleParams, handler: ResponseHandler[Role], reason: Reason = None) =>
         """
@@ -843,7 +844,7 @@ actor Routes
         Returns a list of voice region objects for the guild. Unlike the similar /voice route, this returns VIP servers when the guild is VIP-enabled.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/regions"), _Decode.list[VoiceRegion](handler, _VoiceRegions, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/regions"), _Decode.list[VoiceRegion](handler, options.on_error))
 
     be get_guild_invites(guild_id: Snowflake, handler: ResponseHandler[Array[Invite] val]) =>
         """
@@ -852,7 +853,7 @@ actor Routes
         Returns a list of invite objects. Requires the MANAGE_GUILD or VIEW_AUDIT_LOG permission. Invite Metadata is included with the MANAGE_GUILD permission.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/invites"), _Decode.list[Invite](handler, _Invites, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/invites"), _Decode.list[Invite](handler, options.on_error))
 
     be get_guild_integrations(guild_id: Snowflake, handler: ResponseHandler[Array[Integration] val]) =>
         """
@@ -863,7 +864,7 @@ actor Routes
         This endpoint returns a maximum of 50 integrations. If a guild has more integrations, they cannot be accessed.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/integrations"), _Decode.list[Integration](handler, _Integrations, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/integrations"), _Decode.list[Integration](handler, options.on_error))
 
     be delete_guild_integration(guild_id: Snowflake, integration_id: Snowflake, handler: EmptyResponseHandler, reason: Reason = None) =>
         """
@@ -989,7 +990,7 @@ actor Routes
         Returns a list of guild scheduled event objects for the given guild.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/scheduled-events" where query = params.to_query()), _Decode.list[GuildScheduledEvent](handler, _GuildScheduledEvents, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/scheduled-events" where query = params.to_query()), _Decode.list[GuildScheduledEvent](handler, options.on_error))
 
     be create_guild_scheduled_event(guild_id: Snowflake, params: CreateGuildScheduledEventParams, handler: ResponseHandler[GuildScheduledEvent], reason: Reason = None) =>
         """
@@ -1046,7 +1047,7 @@ actor Routes
         Get a list of guild scheduled event users subscribed to a guild scheduled event. Returns a list of guild scheduled event user objects on success. Guild member data, if it exists, is included if the with_member query parameter is set.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/scheduled-events/" + guild_scheduled_event_id.string() + "/users" where query = params.to_query()), _Decode.list[GuildScheduledEventUser](handler, _GuildScheduledEventUsers, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/scheduled-events/" + guild_scheduled_event_id.string() + "/users" where query = params.to_query()), _Decode.list[GuildScheduledEventUser](handler, options.on_error))
 
     be get_guild_template(template_code: String, handler: ResponseHandler[GuildTemplate]) =>
         """
@@ -1064,7 +1065,7 @@ actor Routes
         Returns an array of guild template objects. Requires the MANAGE_GUILD permission.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/templates"), _Decode.list[GuildTemplate](handler, _GuildTemplates, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/templates"), _Decode.list[GuildTemplate](handler, options.on_error))
 
     be create_guild_template(guild_id: Snowflake, params: CreateGuildTemplateParams, handler: ResponseHandler[GuildTemplate]) =>
         """
@@ -1235,7 +1236,7 @@ actor Routes
         Users unknown to Discord will return a 404 UNKNOWN_USER error. Users that fail permission checks or who have already reached the maximum number of lobbies per application (and are not already a member of this lobby) are silently dropped from the upsert set.
         """
 
-        api.send_request(options.build_request(courier.POST, "/lobbies/" + lobby_id.string() + "/members/bulk" where body = json.JsonPrinter.print(params.to_json())), _Decode.list[LobbyMember](handler, _LobbyMembers, options.on_error))
+        api.send_request(options.build_request(courier.POST, "/lobbies/" + lobby_id.string() + "/members/bulk" where body = json.JsonPrinter.print(params.to_json())), _Decode.list[LobbyMember](handler, options.on_error))
 
     be remove_lobby_member(lobby_id: Snowflake, user_id: Snowflake, handler: EmptyResponseHandler) =>
         """
@@ -1315,7 +1316,7 @@ actor Routes
         Returns an array of lobby message objects (see Send Lobby Message for the object shape).
         """
 
-        api.send_request(options.build_request(courier.GET, "/lobbies/" + lobby_id.string() + "/messages" where query = params.to_query()), _Decode.list[LobbyMessage](handler, _LobbyMessages, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/lobbies/" + lobby_id.string() + "/messages" where query = params.to_query()), _Decode.list[LobbyMessage](handler, options.on_error))
 
     be update_lobby_message_moderation_metadata(lobby_id: Snowflake, message_id: Snowflake, params: UpdateLobbyMessageModerationMetadataParams, handler: EmptyResponseHandler) =>
         """
@@ -1371,7 +1372,7 @@ actor Routes
         The before, after, and around parameters are mutually exclusive, only one may be passed at a time.
         """
 
-        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/messages" where query = params.to_query()), _Decode.list[Message](handler, _Messages, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/messages" where query = params.to_query()), _Decode.list[Message](handler, options.on_error))
 
     be search_guild_messages(guild_id: Snowflake, params: SearchGuildMessagesParams, handler: ResponseHandler[MessageSearchResults]) =>
         """
@@ -1469,7 +1470,7 @@ actor Routes
         The emoji must be URL Encoded or the request will fail with 10014: Unknown Emoji. To use custom emoji, you must encode it in the format name:id with the emoji name and emoji id.
         """
 
-        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/messages/" + message_id.string() + "/reactions/" + emoji where query = params.to_query()), _Decode.list[User](handler, _Users, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/messages/" + message_id.string() + "/reactions/" + emoji where query = params.to_query()), _Decode.list[User](handler, options.on_error))
 
     be delete_all_reactions(channel_id: Snowflake, message_id: Snowflake, handler: EmptyResponseHandler) =>
         """
@@ -1575,7 +1576,7 @@ actor Routes
         This endpoint is deprecated. Use Get Channel Pins instead.
         """
 
-        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/pins"), _Decode.list[Message](handler, _Messages, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/pins"), _Decode.list[Message](handler, options.on_error))
 
     be pin_message_deprecated(channel_id: Snowflake, message_id: Snowflake, handler: EmptyResponseHandler) =>
         """
@@ -1602,7 +1603,7 @@ actor Routes
         Get a list of users that voted for this specific answer.
         """
 
-        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/polls/" + message_id.string() + "/answers/" + answer_id.string() where query = params.to_query()), _Decode.wrapped[User](handler, "users", _Users, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/polls/" + message_id.string() + "/answers/" + answer_id.string() where query = params.to_query()), _Decode.wrapped[User](handler, "users", options.on_error))
 
     be end_poll(channel_id: Snowflake, message_id: Snowflake, handler: ResponseHandler[Message]) =>
         """
@@ -1624,7 +1625,7 @@ actor Routes
         Because of how our SKU and subscription systems work, you will see two SKUs for your subscription offering. For integration and testing entitlements for Subscriptions, you should use the SKU with type: 5.
         """
 
-        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/skus"), _Decode.list[SKU](handler, _SKUs, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/skus"), _Decode.list[SKU](handler, options.on_error))
 
     be send_soundboard_sound(channel_id: Snowflake, params: SendSoundboardSoundParams, handler: EmptyResponseHandler) =>
         """
@@ -1644,7 +1645,7 @@ actor Routes
         Returns an array of soundboard sound objects that can be used by all users.
         """
 
-        api.send_request(options.build_request(courier.GET, "/soundboard-default-sounds"), _Decode.list[SoundboardSound](handler, _SoundboardSounds, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/soundboard-default-sounds"), _Decode.list[SoundboardSound](handler, options.on_error))
 
     be get_guild_soundboard_sounds(guild_id: Snowflake, handler: ResponseHandler[Array[SoundboardSound] val]) =>
         """
@@ -1653,7 +1654,7 @@ actor Routes
         Returns a list of the guild's soundboard sounds. Includes user fields if the bot has the CREATE_GUILD_EXPRESSIONS or MANAGE_GUILD_EXPRESSIONS permission.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/soundboard-sounds"), _Decode.wrapped[SoundboardSound](handler, "items", _SoundboardSounds, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/soundboard-sounds"), _Decode.wrapped[SoundboardSound](handler, "items", options.on_error))
 
     be get_guild_soundboard_sound(guild_id: Snowflake, sound_id: Snowflake, handler: ResponseHandler[SoundboardSound]) =>
         """
@@ -1765,7 +1766,7 @@ actor Routes
         Returns a list of available sticker packs.
         """
 
-        api.send_request(options.build_request(courier.GET, "/sticker-packs"), _Decode.wrapped[StickerPack](handler, "sticker_packs", _StickerPacks, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/sticker-packs"), _Decode.wrapped[StickerPack](handler, "sticker_packs", options.on_error))
 
     be get_sticker_pack(sticker_pack_id: Snowflake, handler: ResponseHandler[StickerPack]) =>
         """
@@ -1783,7 +1784,7 @@ actor Routes
         Returns an array of sticker objects for the given guild. Includes user fields if the bot has the CREATE_GUILD_EXPRESSIONS or MANAGE_GUILD_EXPRESSIONS permission.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/stickers"), _Decode.list[Sticker](handler, _Stickers, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/stickers"), _Decode.list[Sticker](handler, options.on_error))
 
     be get_guild_sticker(guild_id: Snowflake, sticker_id: Snowflake, handler: ResponseHandler[Sticker]) =>
         """
@@ -1842,7 +1843,7 @@ actor Routes
         Returns all subscriptions containing the SKU, filtered by user. Returns a list of subscription objects.
         """
 
-        api.send_request(options.build_request(courier.GET, "/skus/" + sku_id.string() + "/subscriptions" where query = params.to_query()), _Decode.list[Subscription](handler, _Subscriptions, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/skus/" + sku_id.string() + "/subscriptions" where query = params.to_query()), _Decode.list[Subscription](handler, options.on_error))
 
     be get_sku_subscription(sku_id: Snowflake, subscription_id: Snowflake, handler: ResponseHandler[Subscription]) =>
         """
@@ -1889,7 +1890,7 @@ actor Routes
         Returns a list of partial guild objects the current user is a member of. For OAuth2, requires the guilds scope.
         """
 
-        api.send_request(options.build_request(courier.GET, "/users/@me/guilds" where query = params.to_query()), _Decode.list[PartialGuild](handler, _PartialGuilds, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/users/@me/guilds" where query = params.to_query()), _Decode.list[PartialGuild](handler, options.on_error))
 
     be get_current_user_guild_member(guild_id: Snowflake, handler: ResponseHandler[GuildMember]) =>
         """
@@ -1938,7 +1939,7 @@ actor Routes
         Returns a list of connection objects. Requires the connections OAuth2 scope.
         """
 
-        api.send_request(options.build_request(courier.GET, "/users/@me/connections"), _Decode.list[Connection](handler, _Connections, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/users/@me/connections"), _Decode.list[Connection](handler, options.on_error))
 
     be get_current_user_application_role_connection(application_id: Snowflake, handler: ResponseHandler[ApplicationRoleConnection]) =>
         """
@@ -1974,7 +1975,7 @@ actor Routes
         Returns an array of voice region objects that can be used when setting a voice or stage channel's rtc_region.
         """
 
-        api.send_request(options.build_request(courier.GET, "/voice/regions"), _Decode.list[VoiceRegion](handler, _VoiceRegions, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/voice/regions"), _Decode.list[VoiceRegion](handler, options.on_error))
 
     be get_current_user_voice_state(guild_id: Snowflake, handler: ResponseHandler[VoiceState]) =>
         """
@@ -2037,7 +2038,7 @@ actor Routes
         Returns a list of channel webhook objects. Requires the MANAGE_WEBHOOKS permission.
         """
 
-        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/webhooks"), _Decode.list[Webhook](handler, _Webhooks, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/webhooks"), _Decode.list[Webhook](handler, options.on_error))
 
     be get_guild_webhooks(guild_id: Snowflake, handler: ResponseHandler[Array[Webhook] val]) =>
         """
@@ -2046,7 +2047,7 @@ actor Routes
         Returns a list of guild webhook objects. Requires the MANAGE_WEBHOOKS permission.
         """
 
-        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/webhooks"), _Decode.list[Webhook](handler, _Webhooks, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/webhooks"), _Decode.list[Webhook](handler, options.on_error))
 
     be get_webhook(webhook_id: Snowflake, handler: ResponseHandler[Webhook]) =>
         """
@@ -2267,7 +2268,7 @@ actor Routes
         Fetch all of the global commands for your application. Returns an array of application command objects.
         """
 
-        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/commands" where query = params.to_query()), _Decode.list[ApplicationCommand](handler, _ApplicationCommands, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/commands" where query = params.to_query()), _Decode.list[ApplicationCommand](handler, options.on_error))
 
     be create_global_application_command(application_id: Snowflake, params: CreateGlobalApplicationCommandParams, handler: ResponseHandler[ApplicationCommand]) =>
         """
@@ -2318,7 +2319,7 @@ actor Routes
         This will overwrite all types of application commands: slash commands, user commands, and message commands.
         """
 
-        api.send_request(options.build_request(courier.PUT, "/applications/" + application_id.string() + "/commands" where body = json.JsonPrinter.print(params.to_json())), _Decode.list[ApplicationCommand](handler, _ApplicationCommands, options.on_error))
+        api.send_request(options.build_request(courier.PUT, "/applications/" + application_id.string() + "/commands" where body = json.JsonPrinter.print(params.to_json())), _Decode.list[ApplicationCommand](handler, options.on_error))
 
     be get_guild_application_commands(application_id: Snowflake, guild_id: Snowflake, params: GetGuildApplicationCommandsParams, handler: ResponseHandler[Array[ApplicationCommand] val]) =>
         """
@@ -2329,7 +2330,7 @@ actor Routes
         Fetch all of the guild commands for your application for a specific guild. Returns an array of application command objects.
         """
 
-        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands" where query = params.to_query()), _Decode.list[ApplicationCommand](handler, _ApplicationCommands, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands" where query = params.to_query()), _Decode.list[ApplicationCommand](handler, options.on_error))
 
     be create_guild_application_command(application_id: Snowflake, guild_id: Snowflake, params: CreateGuildApplicationCommandParams, handler: ResponseHandler[ApplicationCommand]) =>
         """
@@ -2380,7 +2381,7 @@ actor Routes
         This will overwrite all types of application commands: slash commands, user commands, and message commands.
         """
 
-        api.send_request(options.build_request(courier.PUT, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands" where body = json.JsonPrinter.print(params.to_json())), _Decode.list[ApplicationCommand](handler, _ApplicationCommands, options.on_error))
+        api.send_request(options.build_request(courier.PUT, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands" where body = json.JsonPrinter.print(params.to_json())), _Decode.list[ApplicationCommand](handler, options.on_error))
 
     be get_guild_application_command_permissions(application_id: Snowflake, guild_id: Snowflake, handler: ResponseHandler[Array[GuildApplicationCommandPermissions] val]) =>
         """
@@ -2389,7 +2390,7 @@ actor Routes
         Fetches permissions for all commands for your application in a guild. Returns an array of guild application command permissions objects.
         """
 
-        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/permissions"), _Decode.list[GuildApplicationCommandPermissions](handler, _GuildApplicationCommandPermissions, options.on_error))
+        api.send_request(options.build_request(courier.GET, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/permissions"), _Decode.list[GuildApplicationCommandPermissions](handler, options.on_error))
 
     be get_application_command_permissions(application_id: Snowflake, guild_id: Snowflake, command_id: Snowflake, handler: ResponseHandler[GuildApplicationCommandPermissions]) =>
         """
@@ -2424,7 +2425,7 @@ actor Routes
         This endpoint has been disabled with updates to command permissions (Permissions v2). Instead, you can edit each application command permissions (though you should be careful to handle any potential rate limits).
         """
 
-        api.send_request(options.build_request(courier.PUT, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/permissions" where body = json.JsonPrinter.print(params.to_json())), _Decode.list[GuildApplicationCommandPermissions](handler, _GuildApplicationCommandPermissions, options.on_error))
+        api.send_request(options.build_request(courier.PUT, "/applications/" + application_id.string() + "/guilds/" + guild_id.string() + "/commands/permissions" where body = json.JsonPrinter.print(params.to_json())), _Decode.list[GuildApplicationCommandPermissions](handler, options.on_error))
 
     be get_current_bot_application_information(handler: ResponseHandler[Application]) =>
         """
@@ -2494,11 +2495,10 @@ primitive _Decode
             end
         }
 
-    fun list[A: Any val](handler: ResponseHandler[Array[A] val], decode: {(json.JsonValue): Array[A] val ?} val, on_error: RestErrorHandler): RawResponseHandler =>
+    fun list[A: FromJsonable val](handler: ResponseHandler[Array[A] val], on_error: RestErrorHandler): RawResponseHandler =>
         """
         Decodes an array, as returned by routes documented as returning "a list
-        of ... objects". `decode` is the package's `_As`-style array decoder for
-        the element type.
+        of ... objects".
         """
 
         {(request: courier.HTTPRequest val, response: courier.HTTPResponse val) =>
@@ -2506,14 +2506,14 @@ primitive _Decode
             | let rejection: RestError => on_error(rejection)
             else
                 try
-                    handler(decode(_Decode.parse(response)?)?)
+                    handler(_Decode.entities[A](_Decode.parse(response)?)?)
                 else
                     on_error(_Decode.undecodable(request, response))
                 end
             end
         }
 
-    fun wrapped[A: Any val](handler: ResponseHandler[Array[A] val], key: String, decode: {(json.JsonValue): Array[A] val ?} val, on_error: RestErrorHandler): RawResponseHandler =>
+    fun wrapped[A: FromJsonable val](handler: ResponseHandler[Array[A] val], key: String, on_error: RestErrorHandler): RawResponseHandler =>
         """
         Decodes an array held under `key` of an enclosing object, as returned by
         routes documented as returning "an object containing a list of ...
@@ -2526,12 +2526,25 @@ primitive _Decode
             | let rejection: RestError => on_error(rejection)
             else
                 try
-                    handler(decode((_Decode.parse(response)? as json.JsonObject)(key)?)?)
+                    handler(_Decode.entities[A]((_Decode.parse(response)? as json.JsonObject)(key)?)?)
                 else
                     on_error(_Decode.undecodable(request, response))
                 end
             end
         }
+
+    fun entities[A: FromJsonable val](value: json.JsonValue): Array[A] val ? =>
+        """
+        Decodes a JSON array into an array of the element type, erroring if it
+        is not an array of objects each of which decodes.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let entities' = Array[A](array.size())
+            for value' in array.values() do entities'.push(A.from_json(value' as json.JsonObject)?) end
+            entities'
+        end
 
     // Spelled out rather than written as `ResponseHandler[json.JsonValue]`.
     // ponyc 0.68.0 loses the `json` package alias when a value typed by a

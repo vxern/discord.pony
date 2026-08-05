@@ -804,7 +804,7 @@ class val GetLobbyMessagesParams
     new val create(limit': (USize | None) = None) =>
         limit = limit'
 
-    fun to_query(): RequestQuery =>
+    fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match limit
