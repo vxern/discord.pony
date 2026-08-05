@@ -14,6 +14,8 @@ type EmptyResponseHandler is {()} val
 
 type RawResponseHandler is {(courier.HTTPRequest val, courier.HTTPResponse val)} val
 
+type RawFailureHandler is {()} val
+
 primitive Null
 
 type Nullable[A: Any val] is (A | Null | None)
@@ -101,10 +103,10 @@ actor RestApi
         _timers.dispose()
         _buckets.clear()
 
-    be _raw_send_request(request: courier.HTTPRequest val, handler: RawResponseHandler) =>
+    be _raw_send_request(request: courier.HTTPRequest val, handler: RawResponseHandler, on_failure: RawFailureHandler) =>
         match _ssl_context
         | let ssl_context: ssl.SSLContext val =>
-            _RequestSender(_auth, ssl_context, options, request, handler)
+            _RequestSender(_auth, ssl_context, options, request, handler, on_failure)
         else
             options.on_error(
                 RestError(
@@ -112,6 +114,7 @@ actor RestApi
                     "no certificate authority at " + options.ca_certificates_path
                 )
             )
+            on_failure()
         end
 
 actor _RequestSender is courier.HTTPClientConnectionActor
@@ -120,6 +123,7 @@ actor _RequestSender is courier.HTTPClientConnectionActor
     let _options: RestOptions
     let _request: courier.HTTPRequest val
     let _handler: RawResponseHandler
+    let _on_failure: RawFailureHandler
     var _settled: Bool = false
 
     new create(
@@ -127,11 +131,13 @@ actor _RequestSender is courier.HTTPClientConnectionActor
         ssl_context: ssl.SSLContext val,
         options: RestOptions,
         request: courier.HTTPRequest val,
-        handler: RawResponseHandler
+        handler: RawResponseHandler,
+        on_failure: RawFailureHandler
     ) =>
         _options = options
         _request = request
         _handler = handler
+        _on_failure = on_failure
         _http = courier.HTTPClientConnection.ssl(
             auth,
             ssl_context,
@@ -176,6 +182,7 @@ actor _RequestSender is courier.HTTPClientConnectionActor
         if not _settled then
             _settled = true
             _options.on_error(RestError(_request, reason))
+            _on_failure()
         end
 
 primitive RestConstants

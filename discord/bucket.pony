@@ -5,7 +5,7 @@ use collections = "collections"
 actor GlobalBucket
     let _api: RestApi
     let _timers: time.Timers
-    embed _queue: Queue[(courier.HTTPRequest, RawResponseHandler)] = Queue[(courier.HTTPRequest, RawResponseHandler)]
+    embed _queue: Queue[(courier.HTTPRequest, RawResponseHandler, RawFailureHandler)] = Queue[(courier.HTTPRequest, RawResponseHandler, RawFailureHandler)]
 
     // A request only goes out if every window has room for it.
     let _windows: Array[_RateLimitWindow] = _RateLimitConstants.windows()
@@ -20,10 +20,10 @@ actor GlobalBucket
         _api = api
         _timers = timers
 
-    be enqueue(request: courier.HTTPRequest, handler: RawResponseHandler) =>
+    be enqueue(request: courier.HTTPRequest, handler: RawResponseHandler, on_failure: RawFailureHandler) =>
         if _disposed then return end
 
-        _queue.enqueue((request, handler))
+        _queue.enqueue((request, handler, on_failure))
         _drain()
 
     be _pause(seconds: F64) =>
@@ -82,13 +82,13 @@ actor GlobalBucket
             end
 
             try
-                (let request, let handler) = _queue.dequeue()?
+                (let request, let handler, let on_failure) = _queue.dequeue()?
 
                 for window in _windows.values() do
                     window.spend(now)
                 end
 
-                _api._raw_send_request(request, handler)
+                _api._raw_send_request(request, handler, on_failure)
             else
                 return
             end
@@ -140,9 +140,13 @@ actor Bucket
                 _requests_in_flight = _requests_in_flight + 1
                 _requests_remaining = _requests_remaining - 1
 
-                _global_bucket.enqueue(request, {(request': courier.HTTPRequest val, response': courier.HTTPResponse val) =>
-                    self.on_response_received(request', response', handler)
-                })
+                _global_bucket.enqueue(
+                    request,
+                    {(request': courier.HTTPRequest val, response': courier.HTTPResponse val) =>
+                        self.on_response_received(request', response', handler)
+                    },
+                    {() => self.on_request_failed()}
+                )
             else
                 break
             end
@@ -158,6 +162,10 @@ actor Bucket
         _restarting = false
         _rate_limit = None
         _requests_remaining = 1
+        _drain()
+
+    be on_request_failed() =>
+        _requests_in_flight = _requests_in_flight - 1
         _drain()
 
     be on_response_received(request: courier.HTTPRequest, response: courier.HTTPResponse, handler: RawResponseHandler) =>
