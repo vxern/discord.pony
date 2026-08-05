@@ -156,7 +156,7 @@ actor Bucket
             _queue.enqueue_at_beginning((request, handler))
             _requests_remaining = 0
 
-            if _IsGlobalLimit(response.headers) then
+            if _IsGlobalRateLimit(response.headers) then
                 _global_bucket._pause(try (_rate_limit as _RateLimit).reset_after_s else 5 end)
             end
         else
@@ -164,18 +164,6 @@ actor Bucket
         end
 
         _drain()
-
-primitive _IsGlobalLimit
-    fun apply(headers: courier.Headers val): Bool =>
-        match (
-            headers.get(_RateLimitConstants.scope_header_name()),
-            headers.get(_RateLimitConstants.global_header_name())
-        )
-        | (let scope: String, _) => scope == "global"
-        | (_, let global: String) => global == "true"
-        else
-            false
-        end
 
 primitive _BucketId
     fun apply(request: courier.HTTPRequest val): String =>
@@ -202,27 +190,13 @@ primitive _BucketId
 
         true
 
-class _RateLimitWindow
-    let max_count: USize
-    let duration_ms: USize
-
-    var remaining: USize
-    var started: Bool = false
+primitive _BucketConstants
+    fun major_parameters(): Array[String] val =>
         """
-        Whether the span is under way, and so a timer is set to end it.
+        The route segments whose id decides which bucket a request falls in.
         """
 
-    new create(max_count': USize, duration_ms': USize) =>
-        max_count = max_count'
-        duration_ms = duration_ms'
-        remaining = max_count'
-
-    fun ref spend() =>
-        remaining = remaining - remaining.min(1)
-
-    fun ref reset() =>
-        remaining = max_count
-        started = false
+        ["channels"; "guilds"; "webhooks"]
 
 class val _RateLimit
     let limit: (USize | None)
@@ -279,13 +253,39 @@ class val _RateLimit
             true
         end
 
-primitive _BucketConstants
-    fun major_parameters(): Array[String] val =>
+class _RateLimitWindow
+    let max_count: USize
+    let duration_ms: USize
+
+    var remaining: USize
+    var started: Bool = false
         """
-        The route segments whose id decides which bucket a request falls in.
+        Whether the span is under way, and so a timer is set to end it.
         """
 
-        ["channels"; "guilds"; "webhooks"]
+    new create(max_count': USize, duration_ms': USize) =>
+        max_count = max_count'
+        duration_ms = duration_ms'
+        remaining = max_count'
+
+    fun ref spend() =>
+        remaining = remaining - remaining.min(1)
+
+    fun ref reset() =>
+        remaining = max_count
+        started = false
+
+primitive _IsGlobalRateLimit
+    fun apply(headers: courier.Headers val): Bool =>
+        match (
+            headers.get(_RateLimitConstants.scope_header_name()),
+            headers.get(_RateLimitConstants.global_header_name())
+        )
+        | (let scope: String, _) => scope == "global"
+        | (_, let global: String) => global == "true"
+        else
+            false
+        end
 
 primitive _RateLimitConstants
     fun windows(): Array[_RateLimitWindow] =>
