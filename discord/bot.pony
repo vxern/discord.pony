@@ -5,3 +5,7 @@ class Bot
     new create(env: Env, rest_options: RestOptions) =>
         rest = Rest(env, rest_options)
         gateway = Gateway
+
+    fun dispose() =>
+        rest.dispose()
+        gateway.dispose()

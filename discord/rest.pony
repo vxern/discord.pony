@@ -46,6 +46,7 @@ actor RestApi
     let _timers: time.Timers = time.Timers
 
     embed _buckets: collections.Map[String, Bucket] = collections.Map[String, Bucket]
+    embed _senders: collections.SetIs[_RequestSender tag] = collections.SetIs[_RequestSender tag]
     let _global_bucket: GlobalBucket
 
     new create(env: Env, options': RestOptions) =>
@@ -81,14 +82,22 @@ actor RestApi
         bucket.enqueue(request, handler)
 
     be dispose() =>
+        for bucket in _buckets.values() do bucket.dispose() end
+        _buckets.clear()
+
+        for sender in _senders.values() do sender.dispose() end
+        _senders.clear()
+
         _global_bucket.dispose()
         _timers.dispose()
-        _buckets.clear()
+
+    be _sender_settled(sender: _RequestSender tag) =>
+        _senders.unset(sender)
 
     be _raw_send_request(request: courier.HTTPRequest val, handler: RawResponseHandler, on_failure: RawFailureHandler) =>
         match _ssl_context
         | let ssl_context: ssl.SSLContext val =>
-            _RequestSender(_auth, ssl_context, options, request, handler, on_failure)
+            _senders.set(_RequestSender(this, _auth, ssl_context, options, request, handler, on_failure))
         else
             options.on_error(
                 RestError(
@@ -102,6 +111,7 @@ actor RestApi
 actor _RequestSender is courier.HTTPClientConnectionActor
     var _http: courier.HTTPClientConnection = courier.HTTPClientConnection.none()
     var _collector: courier.ResponseCollector = courier.ResponseCollector
+    let _api: RestApi
     let _options: RestOptions
     let _request: courier.HTTPRequest val
     let _handler: RawResponseHandler
@@ -109,6 +119,7 @@ actor _RequestSender is courier.HTTPClientConnectionActor
     var _settled: Bool = false
 
     new create(
+        api: RestApi,
         auth: lori.TCPConnectAuth,
         ssl_context: ssl.SSLContext val,
         options: RestOptions,
@@ -116,6 +127,7 @@ actor _RequestSender is courier.HTTPClientConnectionActor
         handler: RawResponseHandler,
         on_failure: RawFailureHandler
     ) =>
+        _api = api
         _options = options
         _request = request
         _handler = handler
@@ -150,6 +162,11 @@ actor _RequestSender is courier.HTTPClientConnectionActor
             _fail("response could not be assembled")
         end
         _http.close()
+        _api._sender_settled(this)
+
+    be dispose() =>
+        _settled = true
+        _http.close()
 
     fun ref on_connection_failure(reason: courier.ConnectionFailureReason) =>
         _fail(reason.string())
@@ -165,6 +182,7 @@ actor _RequestSender is courier.HTTPClientConnectionActor
             _settled = true
             _options.on_error(RestError(_request, reason))
             _on_failure()
+            _api._sender_settled(this)
         end
 
 primitive RestConstants

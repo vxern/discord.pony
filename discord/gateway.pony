@@ -8,3 +8,5 @@ actor Gateway
 
     // TODO(vxern): Implement, waiting on a WS client library to proceed...
     be connect() => None
+
+    be dispose() => None

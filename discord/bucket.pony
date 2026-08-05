@@ -115,6 +115,7 @@ actor Bucket
     var _requests_in_flight: USize = 0
     var _requests_remaining: USize = 1
 
+    var _disposed: Bool = false
     var _restarting: Bool = false
 
     new create(env: Env, global_bucket: GlobalBucket, id: String, timers: time.Timers) =>
@@ -124,11 +125,17 @@ actor Bucket
         _timers = timers
 
     be enqueue(request: courier.HTTPRequest, handler: RawResponseHandler) =>
+        if _disposed then return end
+
         _queue.enqueue((request, handler))
         _drain()
 
+    be dispose() =>
+        _disposed = true
+        _queue.clear()
+
     be _drain() =>
-        if _restarting then return end
+        if _disposed or _restarting then return end
 
         let self: Bucket tag = this
 
@@ -168,6 +175,8 @@ actor Bucket
         _drain()
 
     be on_response_received(request: courier.HTTPRequest, response: courier.HTTPResponse, handler: RawResponseHandler) =>
+        if _disposed then return end
+
         _requests_in_flight = _requests_in_flight - 1
 
         let rate_limit = try _RateLimit.from_headers(response.headers)? end
