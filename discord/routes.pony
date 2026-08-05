@@ -2,6 +2,8 @@ use "data"
 use courier = "courier"
 use json = "json"
 
+type Reason is String
+
 actor Routes
     let api: RestApi
     let options: RestOptions
@@ -87,7 +89,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/auto-moderation/rules/" + auto_moderation_rule_id.string()), _Decode.entity[AutoModerationRule](handler, options.on_error))
 
-    be create_auto_moderation_rule(guild_id: Snowflake, params: CreateAutoModerationRuleParams, handler: ResponseHandler[AutoModerationRule], reason: Reason = None) =>
+    be create_auto_moderation_rule(guild_id: Snowflake, params: CreateAutoModerationRuleParams, handler: ResponseHandler[AutoModerationRule], reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/auto-moderation#create-auto-moderation-rule
 
@@ -96,7 +98,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/auto-moderation/rules" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[AutoModerationRule](handler, options.on_error))
 
-    be update_auto_moderation_rule(guild_id: Snowflake, auto_moderation_rule_id: Snowflake, params: UpdateAutoModerationRuleParams, handler: ResponseHandler[AutoModerationRule], reason: Reason = None) =>
+    be update_auto_moderation_rule(guild_id: Snowflake, auto_moderation_rule_id: Snowflake, params: UpdateAutoModerationRuleParams, handler: ResponseHandler[AutoModerationRule], reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/auto-moderation#modify-auto-moderation-rule
 
@@ -105,7 +107,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/auto-moderation/rules/" + auto_moderation_rule_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[AutoModerationRule](handler, options.on_error))
 
-    be delete_auto_moderation_rule(guild_id: Snowflake, auto_moderation_rule_id: Snowflake, handler: EmptyResponseHandler, reason: Reason = None) =>
+    be delete_auto_moderation_rule(guild_id: Snowflake, auto_moderation_rule_id: Snowflake, handler: EmptyResponseHandler, reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/auto-moderation#delete-auto-moderation-rule
 
@@ -123,7 +125,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string()), _Decode.entity[Channel](handler, options.on_error))
 
-    be update_channel(channel_id: Snowflake, params: UpdateChannelParams, handler: ResponseHandler[Channel], reason: Reason = None) =>
+    be update_channel(channel_id: Snowflake, params: UpdateChannelParams, handler: ResponseHandler[Channel], reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/channel#modify-channel
 
@@ -132,7 +134,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.PATCH, "/channels/" + channel_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Channel](handler, options.on_error))
 
-    be set_voice_channel_status(channel_id: Snowflake, params: SetVoiceChannelStatusParams, handler: EmptyResponseHandler, reason: Reason = None) =>
+    be set_voice_channel_status(channel_id: Snowflake, params: SetVoiceChannelStatusParams, handler: EmptyResponseHandler, reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/channel#set-voice-channel-status
 
@@ -141,7 +143,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.PUT, "/channels/" + channel_id.string() + "/voice-status" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.empty(handler, options.on_error))
 
-    be delete_channel(channel_id: Snowflake, handler: ResponseHandler[Channel], reason: Reason = None) =>
+    be delete_channel(channel_id: Snowflake, handler: ResponseHandler[Channel], reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/channel#delete/close-channel
 
@@ -150,7 +152,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() where reason = reason), _Decode.entity[Channel](handler, options.on_error))
 
-    be update_channel_permissions(channel_id: Snowflake, permission_overwrite_id: Snowflake, params: UpdateChannelPermissionsParams, handler: EmptyResponseHandler, reason: Reason = None) =>
+    be update_channel_permissions(channel_id: Snowflake, permission_overwrite_id: Snowflake, params: UpdateChannelPermissionsParams, handler: EmptyResponseHandler, reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/channel#edit-channel-permissions
 
@@ -168,7 +170,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/invites"), _Decode.list[Invite](handler, options.on_error))
 
-    be create_channel_invite(channel_id: Snowflake, params: CreateChannelInviteParams, handler: ResponseHandler[Invite], reason: Reason = None) =>
+    be create_channel_invite(channel_id: Snowflake, params: CreateChannelInviteParams, handler: ResponseHandler[Invite], reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/channel#create-channel-invite
 
@@ -177,7 +179,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/invites" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Invite](handler, options.on_error))
 
-    be delete_channel_permission_overwrite(channel_id: Snowflake, permission_overwrite_id: Snowflake, handler: EmptyResponseHandler, reason: Reason = None) =>
+    be delete_channel_permission_overwrite(channel_id: Snowflake, permission_overwrite_id: Snowflake, handler: EmptyResponseHandler, reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/channel#delete-channel-permission
 
@@ -186,7 +188,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() + "/permissions/" + permission_overwrite_id.string() where reason = reason), _Decode.empty(handler, options.on_error))
 
-    be follow_announcement_channel(channel_id: Snowflake, params: FollowAnnouncementChannelParams, handler: ResponseHandler[FollowedChannel], reason: Reason = None) =>
+    be follow_announcement_channel(channel_id: Snowflake, params: FollowAnnouncementChannelParams, handler: ResponseHandler[FollowedChannel], reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/channel#follow-announcement-channel
 
@@ -224,7 +226,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() + "/recipients/" + user_id.string()), _Decode.empty(handler, options.on_error))
 
-    be start_thread_from_message(channel_id: Snowflake, message_id: Snowflake, params: StartThreadFromMessageParams, handler: ResponseHandler[Channel], reason: Reason = None) =>
+    be start_thread_from_message(channel_id: Snowflake, message_id: Snowflake, params: StartThreadFromMessageParams, handler: ResponseHandler[Channel], reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/channel#start-thread-from-message
 
@@ -235,7 +237,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/messages/" + message_id.string() + "/threads" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Channel](handler, options.on_error))
 
-    be start_thread_without_message(channel_id: Snowflake, params: StartThreadWithoutMessageParams, handler: ResponseHandler[Channel], reason: Reason = None) =>
+    be start_thread_without_message(channel_id: Snowflake, params: StartThreadWithoutMessageParams, handler: ResponseHandler[Channel], reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/channel#start-thread-without-message
 
@@ -244,7 +246,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.POST, "/channels/" + channel_id.string() + "/threads" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Channel](handler, options.on_error))
 
-    be start_thread_in_forum_or_media_channel(channel_id: Snowflake, params: StartThreadInForumOrMediaChannelParams, handler: ResponseHandler[Channel], reason: Reason = None) =>
+    be start_thread_in_forum_or_media_channel(channel_id: Snowflake, params: StartThreadInForumOrMediaChannelParams, handler: ResponseHandler[Channel], reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/channel#start-thread-in-forum-or-media-channel
 
@@ -366,7 +368,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/emojis/" + emoji_id.string()), _Decode.entity[Emoji](handler, options.on_error))
 
-    be create_guild_emoji(guild_id: Snowflake, params: CreateGuildEmojiParams, handler: ResponseHandler[Emoji], reason: Reason = None) =>
+    be create_guild_emoji(guild_id: Snowflake, params: CreateGuildEmojiParams, handler: ResponseHandler[Emoji], reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/emoji#create-guild-emoji
 
@@ -375,7 +377,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/emojis" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Emoji](handler, options.on_error))
 
-    be update_guild_emoji(guild_id: Snowflake, emoji_id: Snowflake, params: UpdateGuildEmojiParams, handler: ResponseHandler[Emoji], reason: Reason = None) =>
+    be update_guild_emoji(guild_id: Snowflake, emoji_id: Snowflake, params: UpdateGuildEmojiParams, handler: ResponseHandler[Emoji], reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/emoji#modify-guild-emoji
 
@@ -384,7 +386,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/emojis/" + emoji_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Emoji](handler, options.on_error))
 
-    be delete_guild_emoji(guild_id: Snowflake, emoji_id: Snowflake, handler: EmptyResponseHandler, reason: Reason = None) =>
+    be delete_guild_emoji(guild_id: Snowflake, emoji_id: Snowflake, handler: EmptyResponseHandler, reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/emoji#delete-guild-emoji
 
@@ -510,7 +512,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/preview"), _Decode.entity[GuildPreview](handler, options.on_error))
 
-    be update_guild(guild_id: Snowflake, params: UpdateGuildParams, handler: ResponseHandler[Guild], reason: Reason = None) =>
+    be update_guild(guild_id: Snowflake, params: UpdateGuildParams, handler: ResponseHandler[Guild], reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/guild#modify-guild
 
@@ -534,7 +536,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/channels"), _Decode.list[Channel](handler, options.on_error))
 
-    be create_guild_channel(guild_id: Snowflake, params: CreateGuildChannelParams, handler: ResponseHandler[Channel], reason: Reason = None) =>
+    be create_guild_channel(guild_id: Snowflake, params: CreateGuildChannelParams, handler: ResponseHandler[Channel], reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/guild#create-guild-channel
 
@@ -617,7 +619,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.PUT, "/guilds/" + guild_id.string() + "/members/" + user_id.string() where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[GuildMember](handler, options.on_error))
 
-    be update_guild_member(guild_id: Snowflake, user_id: Snowflake, params: UpdateGuildMemberParams, handler: ResponseHandler[GuildMember], reason: Reason = None) =>
+    be update_guild_member(guild_id: Snowflake, user_id: Snowflake, params: UpdateGuildMemberParams, handler: ResponseHandler[GuildMember], reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/guild#modify-guild-member
 
@@ -630,7 +632,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/members/" + user_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[GuildMember](handler, options.on_error))
 
-    be update_current_member(guild_id: Snowflake, params: UpdateCurrentMemberParams, handler: ResponseHandler[GuildMember], reason: Reason = None) =>
+    be update_current_member(guild_id: Snowflake, params: UpdateCurrentMemberParams, handler: ResponseHandler[GuildMember], reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/guild#modify-current-member
 
@@ -641,7 +643,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/members/@me" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[GuildMember](handler, options.on_error))
 
-    be update_current_user_nick(guild_id: Snowflake, params: UpdateCurrentUserNickParams, handler: ResponseHandler[CurrentUserNick], reason: Reason = None) =>
+    be update_current_user_nick(guild_id: Snowflake, params: UpdateCurrentUserNickParams, handler: ResponseHandler[CurrentUserNick], reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/guild#modify-current-user-nick
 
@@ -654,7 +656,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/members/@me/nick" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[CurrentUserNick](handler, options.on_error))
 
-    be add_guild_member_role(guild_id: Snowflake, user_id: Snowflake, role_id: Snowflake, handler: EmptyResponseHandler, reason: Reason = None) =>
+    be add_guild_member_role(guild_id: Snowflake, user_id: Snowflake, role_id: Snowflake, handler: EmptyResponseHandler, reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/guild#add-guild-member-role
 
@@ -665,7 +667,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.PUT, "/guilds/" + guild_id.string() + "/members/" + user_id.string() + "/roles/" + role_id.string() where reason = reason), _Decode.empty(handler, options.on_error))
 
-    be remove_guild_member_role(guild_id: Snowflake, user_id: Snowflake, role_id: Snowflake, handler: EmptyResponseHandler, reason: Reason = None) =>
+    be remove_guild_member_role(guild_id: Snowflake, user_id: Snowflake, role_id: Snowflake, handler: EmptyResponseHandler, reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/guild#remove-guild-member-role
 
@@ -676,7 +678,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/guilds/" + guild_id.string() + "/members/" + user_id.string() + "/roles/" + role_id.string() where reason = reason), _Decode.empty(handler, options.on_error))
 
-    be remove_guild_member(guild_id: Snowflake, user_id: Snowflake, handler: EmptyResponseHandler, reason: Reason = None) =>
+    be remove_guild_member(guild_id: Snowflake, user_id: Snowflake, handler: EmptyResponseHandler, reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/guild#remove-guild-member
 
@@ -705,7 +707,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/bans/" + user_id.string()), _Decode.entity[Ban](handler, options.on_error))
 
-    be create_guild_ban(guild_id: Snowflake, user_id: Snowflake, params: CreateGuildBanParams, handler: EmptyResponseHandler, reason: Reason = None) =>
+    be create_guild_ban(guild_id: Snowflake, user_id: Snowflake, params: CreateGuildBanParams, handler: EmptyResponseHandler, reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/guild#create-guild-ban
 
@@ -716,7 +718,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.PUT, "/guilds/" + guild_id.string() + "/bans/" + user_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.empty(handler, options.on_error))
 
-    be remove_guild_ban(guild_id: Snowflake, user_id: Snowflake, handler: EmptyResponseHandler, reason: Reason = None) =>
+    be remove_guild_ban(guild_id: Snowflake, user_id: Snowflake, handler: EmptyResponseHandler, reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/guild#remove-guild-ban
 
@@ -727,7 +729,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/guilds/" + guild_id.string() + "/bans/" + user_id.string() where reason = reason), _Decode.empty(handler, options.on_error))
 
-    be bulk_guild_ban(guild_id: Snowflake, params: BulkGuildBanParams, handler: ResponseHandler[BulkBanResponse], reason: Reason = None) =>
+    be bulk_guild_ban(guild_id: Snowflake, params: BulkGuildBanParams, handler: ResponseHandler[BulkBanResponse], reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/guild#bulk-guild-ban
 
@@ -765,7 +767,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/roles/member-counts"), _Decode.entity[GuildRoleMemberCounts](handler, options.on_error))
 
-    be create_guild_role(guild_id: Snowflake, params: CreateGuildRoleParams, handler: ResponseHandler[Role], reason: Reason = None) =>
+    be create_guild_role(guild_id: Snowflake, params: CreateGuildRoleParams, handler: ResponseHandler[Role], reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/guild#create-guild-role
 
@@ -776,7 +778,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/roles" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Role](handler, options.on_error))
 
-    be update_guild_role_positions(guild_id: Snowflake, params: UpdateGuildRolePositionsParams, handler: ResponseHandler[Array[Role] val], reason: Reason = None) =>
+    be update_guild_role_positions(guild_id: Snowflake, params: UpdateGuildRolePositionsParams, handler: ResponseHandler[Array[Role] val], reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/guild#modify-guild-role-positions
 
@@ -789,7 +791,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/roles" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.list[Role](handler, options.on_error))
 
-    be update_guild_role(guild_id: Snowflake, role_id: Snowflake, params: UpdateGuildRoleParams, handler: ResponseHandler[Role], reason: Reason = None) =>
+    be update_guild_role(guild_id: Snowflake, role_id: Snowflake, params: UpdateGuildRoleParams, handler: ResponseHandler[Role], reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/guild#modify-guild-role
 
@@ -802,7 +804,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/roles/" + role_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Role](handler, options.on_error))
 
-    be delete_guild_role(guild_id: Snowflake, role_id: Snowflake, handler: EmptyResponseHandler, reason: Reason = None) =>
+    be delete_guild_role(guild_id: Snowflake, role_id: Snowflake, handler: EmptyResponseHandler, reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/guild#delete-guild-role
 
@@ -824,7 +826,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/prune" where query = params.to_query()), _Decode.entity[GuildPruneCount](handler, options.on_error))
 
-    be begin_guild_prune(guild_id: Snowflake, params: BeginGuildPruneParams, handler: ResponseHandler[GuildPruneCount], reason: Reason = None) =>
+    be begin_guild_prune(guild_id: Snowflake, params: BeginGuildPruneParams, handler: ResponseHandler[GuildPruneCount], reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/guild#begin-guild-prune
 
@@ -866,7 +868,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/integrations"), _Decode.list[Integration](handler, options.on_error))
 
-    be delete_guild_integration(guild_id: Snowflake, integration_id: Snowflake, handler: EmptyResponseHandler, reason: Reason = None) =>
+    be delete_guild_integration(guild_id: Snowflake, integration_id: Snowflake, handler: EmptyResponseHandler, reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/guild#delete-guild-integration
 
@@ -886,7 +888,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/widget"), _Decode.entity[GuildWidgetSettings](handler, options.on_error))
 
-    be update_guild_widget(guild_id: Snowflake, params: UpdateGuildWidgetParams, handler: ResponseHandler[GuildWidgetSettings], reason: Reason = None) =>
+    be update_guild_widget(guild_id: Snowflake, params: UpdateGuildWidgetParams, handler: ResponseHandler[GuildWidgetSettings], reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/guild#modify-guild-widget
 
@@ -937,7 +939,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/welcome-screen"), _Decode.entity[WelcomeScreen](handler, options.on_error))
 
-    be update_guild_welcome_screen(guild_id: Snowflake, params: UpdateGuildWelcomeScreenParams, handler: ResponseHandler[WelcomeScreen], reason: Reason = None) =>
+    be update_guild_welcome_screen(guild_id: Snowflake, params: UpdateGuildWelcomeScreenParams, handler: ResponseHandler[WelcomeScreen], reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/guild#modify-guild-welcome-screen
 
@@ -959,7 +961,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/onboarding"), _Decode.entity[GuildOnboarding](handler, options.on_error))
 
-    be update_guild_onboarding(guild_id: Snowflake, params: UpdateGuildOnboardingParams, handler: ResponseHandler[GuildOnboarding], reason: Reason = None) =>
+    be update_guild_onboarding(guild_id: Snowflake, params: UpdateGuildOnboardingParams, handler: ResponseHandler[GuildOnboarding], reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/guild#modify-guild-onboarding
 
@@ -992,7 +994,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/scheduled-events" where query = params.to_query()), _Decode.list[GuildScheduledEvent](handler, options.on_error))
 
-    be create_guild_scheduled_event(guild_id: Snowflake, params: CreateGuildScheduledEventParams, handler: ResponseHandler[GuildScheduledEvent], reason: Reason = None) =>
+    be create_guild_scheduled_event(guild_id: Snowflake, params: CreateGuildScheduledEventParams, handler: ResponseHandler[GuildScheduledEvent], reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/guild-scheduled-event#create-guild-scheduled-event
 
@@ -1014,7 +1016,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/scheduled-events/" + guild_scheduled_event_id.string() where query = params.to_query()), _Decode.entity[GuildScheduledEvent](handler, options.on_error))
 
-    be update_guild_scheduled_event(guild_id: Snowflake, guild_scheduled_event_id: Snowflake, params: UpdateGuildScheduledEventParams, handler: ResponseHandler[GuildScheduledEvent], reason: Reason = None) =>
+    be update_guild_scheduled_event(guild_id: Snowflake, guild_scheduled_event_id: Snowflake, params: UpdateGuildScheduledEventParams, handler: ResponseHandler[GuildScheduledEvent], reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/guild-scheduled-event#modify-guild-scheduled-event
 
@@ -1112,7 +1114,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/invites/" + invite_code where query = params.to_query()), _Decode.entity[Invite](handler, options.on_error))
 
-    be delete_invite(invite_code: String, handler: ResponseHandler[Invite], reason: Reason = None) =>
+    be delete_invite(invite_code: String, handler: ResponseHandler[Invite], reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/invite#delete-invite
 
@@ -1511,7 +1513,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.PATCH, "/channels/" + channel_id.string() + "/messages/" + message_id.string() where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Message](handler, options.on_error))
 
-    be delete_message(channel_id: Snowflake, message_id: Snowflake, handler: EmptyResponseHandler, reason: Reason = None) =>
+    be delete_message(channel_id: Snowflake, message_id: Snowflake, handler: EmptyResponseHandler, reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/message#delete-message
 
@@ -1522,7 +1524,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() + "/messages/" + message_id.string() where reason = reason), _Decode.empty(handler, options.on_error))
 
-    be bulk_delete_messages(channel_id: Snowflake, params: BulkDeleteMessagesParams, handler: EmptyResponseHandler, reason: Reason = None) =>
+    be bulk_delete_messages(channel_id: Snowflake, params: BulkDeleteMessagesParams, handler: EmptyResponseHandler, reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/message#bulk-delete-messages
 
@@ -1546,7 +1548,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/channels/" + channel_id.string() + "/messages/pins" where query = params.to_query()), _Decode.entity[ChannelPins](handler, options.on_error))
 
-    be pin_message(channel_id: Snowflake, message_id: Snowflake, handler: EmptyResponseHandler, reason: Reason = None) =>
+    be pin_message(channel_id: Snowflake, message_id: Snowflake, handler: EmptyResponseHandler, reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/message#pin-message
 
@@ -1557,7 +1559,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.PUT, "/channels/" + channel_id.string() + "/messages/pins/" + message_id.string() where reason = reason), _Decode.empty(handler, options.on_error))
 
-    be unpin_message(channel_id: Snowflake, message_id: Snowflake, handler: EmptyResponseHandler, reason: Reason = None) =>
+    be unpin_message(channel_id: Snowflake, message_id: Snowflake, handler: EmptyResponseHandler, reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/message#unpin-message
 
@@ -1665,7 +1667,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/soundboard-sounds/" + sound_id.string()), _Decode.entity[SoundboardSound](handler, options.on_error))
 
-    be create_guild_soundboard_sound(guild_id: Snowflake, params: CreateGuildSoundboardSoundParams, handler: ResponseHandler[SoundboardSound], reason: Reason = None) =>
+    be create_guild_soundboard_sound(guild_id: Snowflake, params: CreateGuildSoundboardSoundParams, handler: ResponseHandler[SoundboardSound], reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/soundboard#create-guild-soundboard-sound
 
@@ -1678,7 +1680,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/soundboard-sounds" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[SoundboardSound](handler, options.on_error))
 
-    be update_guild_soundboard_sound(guild_id: Snowflake, sound_id: Snowflake, params: UpdateGuildSoundboardSoundParams, handler: ResponseHandler[SoundboardSound], reason: Reason = None) =>
+    be update_guild_soundboard_sound(guild_id: Snowflake, sound_id: Snowflake, params: UpdateGuildSoundboardSoundParams, handler: ResponseHandler[SoundboardSound], reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/soundboard#modify-guild-soundboard-sound
 
@@ -1691,7 +1693,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/soundboard-sounds/" + sound_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[SoundboardSound](handler, options.on_error))
 
-    be delete_guild_soundboard_sound(guild_id: Snowflake, sound_id: Snowflake, handler: EmptyResponseHandler, reason: Reason = None) =>
+    be delete_guild_soundboard_sound(guild_id: Snowflake, sound_id: Snowflake, handler: EmptyResponseHandler, reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/soundboard#delete-guild-soundboard-sound
 
@@ -1702,7 +1704,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/guilds/" + guild_id.string() + "/soundboard-sounds/" + sound_id.string() where reason = reason), _Decode.empty(handler, options.on_error))
 
-    be create_stage_instance(params: CreateStageInstanceParams, handler: ResponseHandler[StageInstance], reason: Reason = None) =>
+    be create_stage_instance(params: CreateStageInstanceParams, handler: ResponseHandler[StageInstance], reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/stage-instance#create-stage-instance
 
@@ -1724,7 +1726,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/stage-instances/" + channel_id.string()), _Decode.entity[StageInstance](handler, options.on_error))
 
-    be update_stage_instance(channel_id: Snowflake, params: UpdateStageInstanceParams, handler: ResponseHandler[StageInstance], reason: Reason = None) =>
+    be update_stage_instance(channel_id: Snowflake, params: UpdateStageInstanceParams, handler: ResponseHandler[StageInstance], reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/stage-instance#modify-stage-instance
 
@@ -1737,7 +1739,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.PATCH, "/stage-instances/" + channel_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[StageInstance](handler, options.on_error))
 
-    be delete_stage_instance(channel_id: Snowflake, handler: EmptyResponseHandler, reason: Reason = None) =>
+    be delete_stage_instance(channel_id: Snowflake, handler: EmptyResponseHandler, reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/stage-instance#delete-stage-instance
 
@@ -1795,7 +1797,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/guilds/" + guild_id.string() + "/stickers/" + sticker_id.string()), _Decode.entity[Sticker](handler, options.on_error))
 
-    be create_guild_sticker(guild_id: Snowflake, params: CreateGuildStickerParams, handler: ResponseHandler[Sticker], reason: Reason = None) =>
+    be create_guild_sticker(guild_id: Snowflake, params: CreateGuildStickerParams, handler: ResponseHandler[Sticker], reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/sticker#create-guild-sticker
 
@@ -1812,7 +1814,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.POST, "/guilds/" + guild_id.string() + "/stickers" where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Sticker](handler, options.on_error))
 
-    be update_guild_sticker(guild_id: Snowflake, sticker_id: Snowflake, params: UpdateGuildStickerParams, handler: ResponseHandler[Sticker], reason: Reason = None) =>
+    be update_guild_sticker(guild_id: Snowflake, sticker_id: Snowflake, params: UpdateGuildStickerParams, handler: ResponseHandler[Sticker], reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/sticker#modify-guild-sticker
 
@@ -1825,7 +1827,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/stickers/" + sticker_id.string() where body = json.JsonPrinter.print(params.to_json()), reason = reason), _Decode.entity[Sticker](handler, options.on_error))
 
-    be delete_guild_sticker(guild_id: Snowflake, sticker_id: Snowflake, handler: EmptyResponseHandler, reason: Reason = None) =>
+    be delete_guild_sticker(guild_id: Snowflake, sticker_id: Snowflake, handler: EmptyResponseHandler, reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/sticker#delete-guild-sticker
 
@@ -2015,7 +2017,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.PATCH, "/guilds/" + guild_id.string() + "/voice-states/" + user_id.string() where body = json.JsonPrinter.print(params.to_json())), _Decode.empty(handler, options.on_error))
 
-    be create_webhook(channel_id: Snowflake, params: CreateWebhookParams, handler: ResponseHandler[Webhook], reason: Reason = None) =>
+    be create_webhook(channel_id: Snowflake, params: CreateWebhookParams, handler: ResponseHandler[Webhook], reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/webhook#create-webhook
 
@@ -2070,7 +2072,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.GET, "/webhooks/" + webhook_id.string() + "/" + webhook_token), _Decode.entity[Webhook](handler, options.on_error))
 
-    be update_webhook(webhook_id: Snowflake, params: UpdateWebhookParams, handler: ResponseHandler[Webhook], reason: Reason = None) =>
+    be update_webhook(webhook_id: Snowflake, params: UpdateWebhookParams, handler: ResponseHandler[Webhook], reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/webhook#modify-webhook
 
@@ -2092,7 +2094,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.PATCH, "/webhooks/" + webhook_id.string() + "/" + webhook_token where body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Webhook](handler, options.on_error))
 
-    be delete_webhook(webhook_id: Snowflake, handler: EmptyResponseHandler, reason: Reason = None) =>
+    be delete_webhook(webhook_id: Snowflake, handler: EmptyResponseHandler, reason: (Reason | None) = None) =>
         """
         https://docs.discord.com/developers/resources/webhook#delete-webhook
 

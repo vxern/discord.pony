@@ -5,8 +5,6 @@ use courier = "courier"
 use lori = "lori"
 use ssl = "ssl/net"
 
-type Reason is (String | None)
-
 type ResponseHandler[A: Any val] is {(A)} val
 
 type EmptyResponseHandler is {()} val
@@ -204,7 +202,7 @@ class val RestOptions
 
         "/api/" + version.id() + route
 
-    fun build_request(method: courier.Method, route: String, query: (_RequestQuery | None) = None, body: (_RequestBody | None) = None, reason: Reason = None): courier.HTTPRequest val =>
+    fun build_request(method: courier.Method, route: String, query: (_RequestQuery | None) = None, body: (_RequestBody | None) = None, reason: (Reason | None) = None): courier.HTTPRequest val =>
         courier.HTTPRequest(method, build_path(route, query), build_headers(body, reason), build_body(body))
     
     fun build_path(route: String, query: (_RequestQuery | None) = None): String => 
