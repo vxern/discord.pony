@@ -11,6 +11,7 @@ actor GlobalBucket
     let _windows: Array[_RateLimitWindow] = _RateLimitConstants.windows()
 
     var _disposed: Bool = false
+    var _paused: Bool = false
 
     new create(api: RestApi, timers: time.Timers) =>
         _api = api
@@ -20,6 +21,23 @@ actor GlobalBucket
         if _disposed then return end
 
         _queue.enqueue((request, handler))
+        _drain()
+
+    be _pause(seconds: F64) =>
+        if _disposed or _paused then return end
+
+        _paused = true
+
+        let self: GlobalBucket tag = this
+        _timers(
+            time.Timer(
+                _OnceElapsed({() => self._resume()}),
+                time.Nanos.from_seconds_f(seconds).max(time.Nanos.from_seconds(1))
+            )
+        )
+
+    be _resume() =>
+        _paused = false
         _drain()
 
     be dispose() =>
@@ -60,6 +78,8 @@ actor GlobalBucket
         end
 
     fun _can_send(): Bool =>
+        if _paused then return false end
+
         for window in _windows.values() do
             if window.remaining == 0 then return false end
         end
@@ -68,7 +88,7 @@ actor GlobalBucket
 
 actor Bucket
     let _env: Env
-    let _global: GlobalBucket
+    let _global_bucket: GlobalBucket
     let _id: String
     let _timers: time.Timers
     embed _queue: Queue[(courier.HTTPRequest, RawResponseHandler)] = Queue[(courier.HTTPRequest, RawResponseHandler)]
@@ -79,9 +99,9 @@ actor Bucket
 
     var _restarting: Bool = false
 
-    new create(env: Env, global: GlobalBucket, id: String, timers: time.Timers) =>
+    new create(env: Env, global_bucket: GlobalBucket, id: String, timers: time.Timers) =>
         _env = env
-        _global = global
+        _global_bucket = global_bucket
         _id = id
         _timers = timers
 
@@ -101,7 +121,7 @@ actor Bucket
                 _requests_in_flight = _requests_in_flight + 1
                 _requests_remaining = _requests_remaining - 1
 
-                _global.enqueue(request, {(request': courier.HTTPRequest val, response': courier.HTTPResponse val) =>
+                _global_bucket.enqueue(request, {(request': courier.HTTPRequest val, response': courier.HTTPResponse val) =>
                     self.on_response_received(request', response', handler)
                 })
             else
@@ -135,11 +155,27 @@ actor Bucket
         if response.status == 429 then
             _queue.enqueue_at_beginning((request, handler))
             _requests_remaining = 0
+
+            if _IsGlobalLimit(response.headers) then
+                _global_bucket._pause(try (_rate_limit as _RateLimit).reset_after_s else 5 end)
+            end
         else
             handler(request, response)
         end
 
         _drain()
+
+primitive _IsGlobalLimit
+    fun apply(headers: courier.Headers val): Bool =>
+        match (
+            headers.get(_RateLimitConstants.scope_header_name()),
+            headers.get(_RateLimitConstants.global_header_name())
+        )
+        | (let scope: String, _) => scope == "global"
+        | (_, let global: String) => global == "true"
+        else
+            false
+        end
 
 primitive _BucketId
     fun apply(request: courier.HTTPRequest val): String =>
@@ -165,20 +201,6 @@ primitive _BucketId
         end
 
         true
-
-class iso _OnceElapsed is time.TimerNotify
-    """
-    Runs `action` when the timer elapses, and does not run again.
-    """
-
-    let _action: {()} val
-
-    new iso create(action: {()} val) =>
-        _action = action
-
-    fun ref apply(timer: time.Timer, count: U64): Bool =>
-        _action()
-        false
 
 class _RateLimitWindow
     let max_count: USize

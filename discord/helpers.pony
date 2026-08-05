@@ -1,5 +1,6 @@
 use collections = "collections"
 use json = "json"
+use time = "time"
 
 type ISO8601 is String
 
@@ -30,3 +31,17 @@ trait val ToJsonableArray is Stringable
     fun string(): String iso^ => to_json().pretty_print()
 
 trait val Jsonable is (ToJsonable & FromJsonable)
+
+class iso _OnceElapsed is time.TimerNotify
+    """
+    Runs `action` when the timer elapses, and does not run again.
+    """
+
+    let _action: {()} val
+
+    new iso create(action: {()} val) =>
+        _action = action
+
+    fun ref apply(timer: time.Timer, count: U64): Bool =>
+        _action()
+        false
