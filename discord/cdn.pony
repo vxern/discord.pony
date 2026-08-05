@@ -19,7 +19,7 @@ primitive ImageFormatGIF is ImageFormat
 primitive ImageFormatLottie is ImageFormat
     fun value(): String => "json"
 
-type ImageSize is (data.Snowflake | None)
+type ImageSize is (USize | None)
     """
     The width and height to serve an image at, which must be a power of two
     between 16 and 4096. `None` serves the image at its original size.
@@ -100,7 +100,7 @@ primitive _CDNQuery
         """
 
         var query = ""
-        match size | let size': data.Snowflake => query = "?size=" + size'.string() end
+        match size | let size': USize => query = "?size=" + size'.string() end
         if animated then query = query + (if query.size() == 0 then "?" else "&" end) + "animated=true" end
         query
 
