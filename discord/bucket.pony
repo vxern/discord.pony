@@ -12,6 +12,8 @@ actor GlobalBucket
 
     var _disposed: Bool = false
     var _paused: Bool = false
+    var _paused_until: U64 = 0
+    var _pause_generation: USize = 0
 
     new create(api: RestApi, timers: time.Timers) =>
         _api = api
@@ -24,19 +26,32 @@ actor GlobalBucket
         _drain()
 
     be _pause(seconds: F64) =>
-        if _disposed or _paused then return end
+        if _disposed then return end
+
+        let duration = time.Nanos.from_seconds_f(
+            seconds.max(_RateLimitConstants.minimum_pause_s())
+        )
+        let resume_at = time.Time.nanos() + duration
+
+        if _paused and (resume_at <= _paused_until) then return end
 
         _paused = true
+        _paused_until = resume_at
+
+        _pause_generation = _pause_generation + 1
+        let generation = _pause_generation
 
         let self: GlobalBucket tag = this
         _timers(
             time.Timer(
-                _OnceElapsed({() => self._resume()}),
-                time.Nanos.from_seconds_f(seconds).max(time.Nanos.from_seconds(1))
+                _OnceElapsed({() => self._resume(generation)}),
+                duration
             )
         )
 
-    be _resume() =>
+    be _resume(generation: USize) =>
+        if generation != _pause_generation then return end
+
         _paused = false
         _drain()
 
@@ -144,12 +159,12 @@ actor Bucket
     be on_response_received(request: courier.HTTPRequest, response: courier.HTTPResponse, handler: RawResponseHandler) =>
         _requests_in_flight = _requests_in_flight - 1
 
-        try
-            let rate_limit = _RateLimit.from_headers(response.headers)?
-            if rate_limit.is_newer_than(_rate_limit) then
-                _rate_limit = rate_limit
-                _requests_remaining = rate_limit.remaining - _requests_in_flight.min(rate_limit.remaining)
-            end
+        let rate_limit = try _RateLimit.from_headers(response.headers)? end
+
+        match rate_limit
+        | let rate_limit': _RateLimit if rate_limit'.is_newer_than(_rate_limit) =>
+            _rate_limit = rate_limit'
+            _requests_remaining = rate_limit'.remaining - _requests_in_flight.min(rate_limit'.remaining)
         end
 
         if response.status == 429 then
@@ -157,7 +172,13 @@ actor Bucket
             _requests_remaining = 0
 
             if _IsGlobalRateLimit(response.headers) then
-                _global_bucket._pause(try (_rate_limit as _RateLimit).reset_after_s else 5 end)
+                _global_bucket._pause(
+                    match rate_limit
+                    | let rate_limit': _RateLimit => rate_limit'.reset_after_s
+                    else
+                        _RateLimitConstants.blind_pause_s()
+                    end
+                )
             end
         else
             handler(request, response)
@@ -277,15 +298,15 @@ class _RateLimitWindow
 
 primitive _IsGlobalRateLimit
     fun apply(headers: courier.Headers val): Bool =>
-        match (
-            headers.get(_RateLimitConstants.scope_header_name()),
-            headers.get(_RateLimitConstants.global_header_name())
-        )
-        | (let scope: String, _) => scope == "global"
-        | (_, let global: String) => global == "true"
-        else
-            false
+        match headers.get(_RateLimitConstants.scope_header_name())
+        | let scope: String => return scope == "global"
         end
+
+        match headers.get(_RateLimitConstants.global_header_name())
+        | let global: String => return global == "true"
+        end
+
+        headers.get(_RateLimitConstants.bucket_header_name()) is None
 
 primitive _RateLimitConstants
     fun windows(): Array[_RateLimitWindow] =>
@@ -305,3 +326,23 @@ primitive _RateLimitConstants
     fun global_header_name(): String => "X-RateLimit-Global".lower()
 
     fun scope_header_name(): String => "X-RateLimit-Scope".lower()
+
+    fun bucket_header_name(): String => "X-RateLimit-Bucket".lower()
+
+    fun minimum_pause_s(): F64 =>
+        """
+        The least time the global bucket sits out a 429, however short a wait the
+        response asks for.
+        """
+
+        1
+
+    fun blind_pause_s(): F64 =>
+        """
+        How long the global bucket sits out a 429 that names no wait at all.
+
+        Long enough not to walk straight back into a Cloudflare ban, short enough
+        that taking a route's limit for a global one is not costly.
+        """
+
+        60
