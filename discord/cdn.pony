@@ -1,6 +1,6 @@
 use collections = "collections"
 
-trait val ImageFormat is (collections.Hashable & Equatable[ImageFormat])
+trait val ImageFormat is _Enum[ImageFormat]
     fun value(): String
 
     fun extension(): String => "." + value()

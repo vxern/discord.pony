@@ -252,7 +252,7 @@ primitive _GuildScheduledEvents
         for guild_scheduled_event in guild_scheduled_events.values() do array = array.push(guild_scheduled_event.to_json()) end
         array
 
-trait val GuildScheduledEventPrivacyLevel is (collections.Hashable & Equatable[GuildScheduledEventPrivacyLevel])
+trait val GuildScheduledEventPrivacyLevel is _Enum[GuildScheduledEventPrivacyLevel]
     """
     https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-privacy-level
     """
@@ -275,7 +275,7 @@ primitive GuildScheduledEventPrivacyLevels
         else error
         end
 
-trait val GuildScheduledEventEntityType is (collections.Hashable & Equatable[GuildScheduledEventEntityType])
+trait val GuildScheduledEventEntityType is _Enum[GuildScheduledEventEntityType]
     """
     https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-entity-types
     """
@@ -318,7 +318,7 @@ primitive GuildScheduledEventEntityTypes
         else error
         end
 
-trait val GuildScheduledEventStatus is (collections.Hashable & Equatable[GuildScheduledEventStatus])
+trait val GuildScheduledEventStatus is _Enum[GuildScheduledEventStatus]
     """
     https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-status
 
@@ -527,7 +527,7 @@ class val GuildScheduledEventRecurrenceRule is Jsonable
 
         obj
 
-trait val GuildScheduledEventRecurrenceRuleFrequency is (collections.Hashable & Equatable[GuildScheduledEventRecurrenceRuleFrequency])
+trait val GuildScheduledEventRecurrenceRuleFrequency is _Enum[GuildScheduledEventRecurrenceRuleFrequency]
     """
     https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-recurrence-rule-object-guild-scheduled-event-recurrence-rule-frequency
     """
@@ -555,7 +555,7 @@ primitive GuildScheduledEventRecurrenceRuleFrequencies
         else error
         end
 
-trait val GuildScheduledEventRecurrenceRuleWeekday is (collections.Hashable & Equatable[GuildScheduledEventRecurrenceRuleWeekday])
+trait val GuildScheduledEventRecurrenceRuleWeekday is _Enum[GuildScheduledEventRecurrenceRuleWeekday]
     """
     https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-recurrence-rule-object-guild-scheduled-event-recurrence-rule-weekday
     """
@@ -664,7 +664,7 @@ primitive _GuildScheduledEventRecurrenceRuleNWeekdays
         for nweekday in nweekdays.values() do array = array.push(nweekday.to_json()) end
         array
 
-trait val GuildScheduledEventRecurrenceRuleMonth is (collections.Hashable & Equatable[GuildScheduledEventRecurrenceRuleMonth])
+trait val GuildScheduledEventRecurrenceRuleMonth is _Enum[GuildScheduledEventRecurrenceRuleMonth]
     """
     https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-recurrence-rule-object-guild-scheduled-event-recurrence-rule-month
     """

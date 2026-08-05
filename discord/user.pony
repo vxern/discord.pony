@@ -301,7 +301,7 @@ primitive _Users
         for user in users.values() do array = array.push(user.to_json()) end
         array
 
-trait val UserFlag is (collections.Hashable & Equatable[UserFlag])
+trait val UserFlag is _Enum[UserFlag]
     """
     https://docs.discord.com/developers/resources/user#user-object-user-flags
     """
@@ -441,7 +441,7 @@ primitive _UserFlags
         for flag in flags.values() do bits = bits or (U64(1) << flag.value().u64()) end
         bits.i64()
 
-trait val PremiumType is (collections.Hashable & Equatable[PremiumType])
+trait val PremiumType is _Enum[PremiumType]
     """
     https://docs.discord.com/developers/resources/user#user-object-premium-types
 
@@ -836,7 +836,7 @@ primitive _Connections
         for connection in connections.values() do array = array.push(connection.to_json()) end
         array
 
-trait val ConnectionVisibility is (collections.Hashable & Equatable[ConnectionVisibility])
+trait val ConnectionVisibility is _Enum[ConnectionVisibility]
     """
     https://docs.discord.com/developers/resources/user#connection-object-visibility-types
     """

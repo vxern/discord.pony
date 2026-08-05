@@ -181,7 +181,7 @@ primitive _Stickers
         for sticker in stickers.values() do array = array.push(sticker.to_json()) end
         array
 
-trait val StickerType is (collections.Hashable & Equatable[StickerType])
+trait val StickerType is _Enum[StickerType]
     """
     https://docs.discord.com/developers/resources/sticker#sticker-object-sticker-types
     """
@@ -211,7 +211,7 @@ primitive StickerTypes
         else error
         end
 
-trait val StickerFormatType is (collections.Hashable & Equatable[StickerFormatType])
+trait val StickerFormatType is _Enum[StickerFormatType]
     """
     https://docs.discord.com/developers/resources/sticker#sticker-object-sticker-format-types
     """

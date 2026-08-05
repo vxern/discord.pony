@@ -225,7 +225,7 @@ primitive _Invites
         for invite in invites.values() do array = array.push(invite.to_json()) end
         array
 
-trait val InviteType is (collections.Hashable & Equatable[InviteType])
+trait val InviteType is _Enum[InviteType]
     """
     https://docs.discord.com/developers/resources/invite#invite-object-invite-types
     """
@@ -250,7 +250,7 @@ primitive InviteTypes
         else error
         end
 
-trait val InviteTargetType is (collections.Hashable & Equatable[InviteTargetType])
+trait val InviteTargetType is _Enum[InviteTargetType]
     """
     https://docs.discord.com/developers/resources/invite#invite-object-invite-target-types
     """
@@ -272,7 +272,7 @@ primitive InviteTargetTypes
         else error
         end
 
-trait val InviteFlag is (collections.Hashable & Equatable[InviteFlag])
+trait val InviteFlag is _Enum[InviteFlag]
     """
     https://docs.discord.com/developers/resources/invite#invite-object-invite-flags
     """
@@ -553,7 +553,7 @@ class val TargetUsersJobStatus is Jsonable
             .update("completed_at", completed_at)
             .update("error_message", error_message)
 
-trait val TargetUsersJobStatusCode is (collections.Hashable & Equatable[TargetUsersJobStatusCode])
+trait val TargetUsersJobStatusCode is _Enum[TargetUsersJobStatusCode]
     """
     https://docs.discord.com/developers/resources/invite#get-target-users-job-status-status-codes
     """

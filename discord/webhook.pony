@@ -201,7 +201,7 @@ primitive _Webhooks
         for webhook in webhooks.values() do array = array.push(webhook.to_json()) end
         array
 
-trait val WebhookType is (collections.Hashable & Equatable[WebhookType])
+trait val WebhookType is _Enum[WebhookType]
     """
     https://docs.discord.com/developers/resources/webhook#webhook-object-webhook-types
     """

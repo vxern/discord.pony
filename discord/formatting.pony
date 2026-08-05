@@ -67,7 +67,7 @@ primitive Formatting
 primitive FormattingDefaults
     fun timestamp_style(): TimestampStyle val => TimestampStyleLongDateShortTime
 
-trait val TimestampStyle is (collections.Hashable & Equatable[TimestampStyle])
+trait val TimestampStyle is _Enum[TimestampStyle]
     fun value(): String
 
     fun hash(): USize => value().hash()
@@ -129,9 +129,11 @@ primitive TimestampStyleRelativeTime is TimestampStyle
 
     fun value(): String => "R"
 
-trait val GuildNavigationType is (collections.Hashable & Equatable[GuildNavigationType])
+trait val GuildNavigationType is _Enum[GuildNavigationType]
     fun value(): String
+
     fun hash(): USize => value().hash()
+
     fun eq(that: GuildNavigationType): Bool => value() == that.value()
 primitive GuildNavigationTypeChannelAndRoles is GuildNavigationType
     """

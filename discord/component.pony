@@ -17,7 +17,7 @@ trait val Component is Jsonable
         The type of the component
         """
 
-trait val ComponentType is (collections.Hashable & Equatable[ComponentType])
+trait val ComponentType is _Enum[ComponentType]
     """
     https://docs.discord.com/developers/components/reference#component-object-component-types
     """
@@ -486,7 +486,7 @@ class val ButtonComponent is Component
 
         obj
 
-trait val ButtonStyle is (collections.Hashable & Equatable[ButtonStyle])
+trait val ButtonStyle is _Enum[ButtonStyle]
     """
     https://docs.discord.com/developers/components/reference#button-button-styles
     """
@@ -927,7 +927,7 @@ class val TextInputComponent is Component
 
         obj
 
-trait val TextInputStyle is (collections.Hashable & Equatable[TextInputStyle])
+trait val TextInputStyle is _Enum[TextInputStyle]
     """
     https://docs.discord.com/developers/components/reference#text-input-text-input-styles
     """
@@ -1491,7 +1491,7 @@ class val SelectDefaultValue is Jsonable
             .update("id", id.to_json())
             .update("type", type'.value())
 
-trait val SelectDefaultValueType is (collections.Hashable & Equatable[SelectDefaultValueType])
+trait val SelectDefaultValueType is _Enum[SelectDefaultValueType]
     """
     https://docs.discord.com/developers/components/reference#user-select-select-default-value-structure
     """
@@ -2028,7 +2028,7 @@ class val SeparatorComponent is Component
 
         obj
 
-trait val SeparatorSpacingSize is (collections.Hashable & Equatable[SeparatorSpacingSize])
+trait val SeparatorSpacingSize is _Enum[SeparatorSpacingSize]
     """
     https://docs.discord.com/developers/components/reference#separator-separator-structure
     """
@@ -2899,7 +2899,7 @@ class val UnfurledMediaItem is Jsonable
 
         obj
 
-trait val UnfurledMediaItemFlag is (collections.Hashable & Equatable[UnfurledMediaItemFlag])
+trait val UnfurledMediaItemFlag is _Enum[UnfurledMediaItemFlag]
     """
     https://docs.discord.com/developers/components/reference#unfurled-media-item-unfurled-media-item-flags
     """

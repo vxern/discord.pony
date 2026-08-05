@@ -249,7 +249,7 @@ primitive _AuditLogEntries
         for entry in entries.values() do array = array.push(entry.to_json()) end
         array
 
-trait val AuditLogEvent is (collections.Hashable & Equatable[AuditLogEvent])
+trait val AuditLogEvent is _Enum[AuditLogEvent]
     """
     https://docs.discord.com/developers/resources/audit-log#audit-log-entry-object-audit-log-events
 

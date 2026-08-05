@@ -1068,7 +1068,7 @@ primitive _PartialGuilds
         for guild in guilds.values() do array = array.push(guild.to_json()) end
         array
 
-trait val DefaultMessageNotificationLevel is (collections.Hashable & Equatable[DefaultMessageNotificationLevel])
+trait val DefaultMessageNotificationLevel is _Enum[DefaultMessageNotificationLevel]
     """
     https://docs.discord.com/developers/resources/guild#guild-object-default-message-notification-level
     """
@@ -1098,7 +1098,7 @@ primitive DefaultMessageNotificationLevels
         else error
         end
 
-trait val ExplicitContentFilterLevel is (collections.Hashable & Equatable[ExplicitContentFilterLevel])
+trait val ExplicitContentFilterLevel is _Enum[ExplicitContentFilterLevel]
     """
     https://docs.discord.com/developers/resources/guild#guild-object-explicit-content-filter-level
     """
@@ -1135,7 +1135,7 @@ primitive ExplicitContentFilterLevels
         else error
         end
 
-trait val MFALevel is (collections.Hashable & Equatable[MFALevel])
+trait val MFALevel is _Enum[MFALevel]
     """
     https://docs.discord.com/developers/resources/guild#guild-object-mfa-level
     """
@@ -1165,7 +1165,7 @@ primitive MFALevels
         else error
         end
 
-trait val VerificationLevel is (collections.Hashable & Equatable[VerificationLevel])
+trait val VerificationLevel is _Enum[VerificationLevel]
     """
     https://docs.discord.com/developers/resources/guild#guild-object-verification-level
     """
@@ -1216,7 +1216,7 @@ primitive VerificationLevels
         else error
         end
 
-trait val GuildNSFWLevel is (collections.Hashable & Equatable[GuildNSFWLevel])
+trait val GuildNSFWLevel is _Enum[GuildNSFWLevel]
     """
     https://docs.discord.com/developers/resources/guild#guild-object-guild-nsfw-level
     """
@@ -1244,7 +1244,7 @@ primitive GuildNSFWLevels
         else error
         end
 
-trait val PremiumTier is (collections.Hashable & Equatable[PremiumTier])
+trait val PremiumTier is _Enum[PremiumTier]
     """
     https://docs.discord.com/developers/resources/guild#guild-object-premium-tier
     """
@@ -1288,7 +1288,7 @@ primitive PremiumTiers
         else error
         end
 
-trait val SystemChannelFlag is (collections.Hashable & Equatable[SystemChannelFlag])
+trait val SystemChannelFlag is _Enum[SystemChannelFlag]
     """
     https://docs.discord.com/developers/resources/guild#guild-object-system-channel-flags
     """
@@ -2065,7 +2065,7 @@ primitive _PartialGuildMembers
         for member in members.values() do array = array.push(member.to_json()) end
         array
 
-trait val GuildMemberFlag is (collections.Hashable & Equatable[GuildMemberFlag])
+trait val GuildMemberFlag is _Enum[GuildMemberFlag]
     """
     https://docs.discord.com/developers/resources/guild#guild-member-object-guild-member-flags
     """
@@ -2617,7 +2617,7 @@ primitive _PartialIntegrations
         for integration in integrations.values() do array = array.push(integration.to_json()) end
         array
 
-trait val IntegrationExpireBehavior is (collections.Hashable & Equatable[IntegrationExpireBehavior])
+trait val IntegrationExpireBehavior is _Enum[IntegrationExpireBehavior]
     """
     https://docs.discord.com/developers/resources/guild#integration-object-integration-expire-behaviors
     """
@@ -3012,7 +3012,7 @@ class val GuildOnboarding is Jsonable
             .update("enabled", enabled)
             .update("mode", mode.value().i64())
 
-trait val OnboardingMode is (collections.Hashable & Equatable[OnboardingMode])
+trait val OnboardingMode is _Enum[OnboardingMode]
     """
     https://docs.discord.com/developers/resources/guild#guild-onboarding-object-onboarding-mode
 
@@ -3158,7 +3158,7 @@ primitive _OnboardingPrompts
         for prompt in prompts.values() do array = array.push(prompt.to_json()) end
         array
 
-trait val OnboardingPromptType is (collections.Hashable & Equatable[OnboardingPromptType])
+trait val OnboardingPromptType is _Enum[OnboardingPromptType]
     """
     https://docs.discord.com/developers/resources/guild#guild-onboarding-object-prompt-types
     """
@@ -4954,7 +4954,7 @@ class val UpdateGuildWidgetParams is ToJsonable
 
         obj
 
-trait val GuildWidgetStyle is (collections.Hashable & Equatable[GuildWidgetStyle])
+trait val GuildWidgetStyle is _Enum[GuildWidgetStyle]
     """
     https://docs.discord.com/developers/resources/guild#get-guild-widget-image-widget-style-options
     """

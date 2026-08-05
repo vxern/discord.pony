@@ -329,7 +329,7 @@ primitive _AuthorizingIntegrationOwners
         for (integration_type, id) in map.pairs() do obj = obj.update(integration_type.value().string(), id.to_json()) end
         obj
 
-trait val InteractionType is (collections.Hashable & Equatable[InteractionType])
+trait val InteractionType is _Enum[InteractionType]
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-object-interaction-type
     """
@@ -360,7 +360,7 @@ primitive InteractionTypes
         else error
         end
 
-trait val InteractionContextType is (collections.Hashable & Equatable[InteractionContextType])
+trait val InteractionContextType is _Enum[InteractionContextType]
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-object-interaction-context-types
 
@@ -1030,7 +1030,7 @@ class val InteractionResponse is ToJsonable
 
         obj
 
-trait val InteractionCallbackType is (collections.Hashable & Equatable[InteractionCallbackType])
+trait val InteractionCallbackType is _Enum[InteractionCallbackType]
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-response-object-interaction-callback-type
     """

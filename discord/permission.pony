@@ -1,7 +1,7 @@
 use collections = "collections"
 use json = "json"
 
-trait val Permission is (collections.Hashable & Equatable[Permission])
+trait val Permission is _Enum[Permission]
     """
     https://docs.discord.com/developers/topics/permissions#permissions-bitwise-permission-flags
 
@@ -835,7 +835,7 @@ class val RoleColors is Jsonable
             .update("secondary_color", secondary_color)
             .update("tertiary_color", tertiary_color)
 
-trait val RoleFlag is (collections.Hashable & Equatable[RoleFlag])
+trait val RoleFlag is _Enum[RoleFlag]
     """
     https://docs.discord.com/developers/topics/permissions#role-object-role-flags
     """

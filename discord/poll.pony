@@ -98,7 +98,7 @@ class val Poll is Jsonable
 
         obj
 
-trait val PollLayoutType is (collections.Hashable & Equatable[PollLayoutType])
+trait val PollLayoutType is _Enum[PollLayoutType]
     """
     https://docs.discord.com/developers/resources/poll#layout-type
     """

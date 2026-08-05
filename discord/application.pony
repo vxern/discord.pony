@@ -807,7 +807,7 @@ class val PartialApplication is Jsonable
 
         obj
 
-trait val ApplicationIntegrationType is (collections.Hashable & Equatable[ApplicationIntegrationType])
+trait val ApplicationIntegrationType is _Enum[ApplicationIntegrationType]
     """
     https://docs.discord.com/developers/resources/application#application-object-application-integration-types
 
@@ -912,7 +912,7 @@ primitive _ApplicationIntegrationTypes
         for type' in types.values() do array = array.push(type'.value().i64()) end
         array
 
-trait val ApplicationEventWebhookStatus is (collections.Hashable & Equatable[ApplicationEventWebhookStatus])
+trait val ApplicationEventWebhookStatus is _Enum[ApplicationEventWebhookStatus]
     """
     https://docs.discord.com/developers/resources/application#application-object-application-event-webhook-status
 
@@ -951,7 +951,7 @@ primitive ApplicationEventWebhookStatuses
         else error
         end
 
-trait val ApplicationFlag is (collections.Hashable & Equatable[ApplicationFlag])
+trait val ApplicationFlag is _Enum[ApplicationFlag]
     """
     https://docs.discord.com/developers/resources/application#application-object-application-flags
 
@@ -1257,7 +1257,7 @@ primitive _TeamMembers
         for member in members.values() do array = array.push(member.to_json()) end
         array
 
-trait val TeamMembershipState is (collections.Hashable & Equatable[TeamMembershipState])
+trait val TeamMembershipState is _Enum[TeamMembershipState]
     """
     https://docs.discord.com/developers/topics/teams#data-models-membership-state-enum
     """
@@ -1279,7 +1279,7 @@ primitive TeamMembershipStates
         else error
         end
 
-trait val TeamMemberRole is (collections.Hashable & Equatable[TeamMemberRole])
+trait val TeamMemberRole is _Enum[TeamMemberRole]
     """
     https://docs.discord.com/developers/topics/teams#team-member-roles-team-member-role-types
 
@@ -1466,7 +1466,7 @@ class val ActivityLocation is Jsonable
 
         obj
 
-trait val ActivityLocationKind is (collections.Hashable & Equatable[ActivityLocationKind])
+trait val ActivityLocationKind is _Enum[ActivityLocationKind]
     """
     https://docs.discord.com/developers/resources/application#get-application-activity-instance-activity-location-kind-enum
     """

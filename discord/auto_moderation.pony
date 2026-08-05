@@ -163,7 +163,7 @@ primitive _AutoModerationRules
         for rule in rules.values() do array = array.push(rule.to_json()) end
         array
 
-trait val AutoModerationTriggerType is (collections.Hashable & Equatable[AutoModerationTriggerType])
+trait val AutoModerationTriggerType is _Enum[AutoModerationTriggerType]
     """
     https://docs.discord.com/developers/resources/auto-moderation#auto-moderation-rule-object-trigger-types
 
@@ -345,7 +345,7 @@ class val AutoModerationTriggerMetadata is Jsonable
 
         obj
 
-trait val KeywordPresetType is (collections.Hashable & Equatable[KeywordPresetType])
+trait val KeywordPresetType is _Enum[KeywordPresetType]
     """
     https://docs.discord.com/developers/resources/auto-moderation#auto-moderation-rule-object-keyword-preset-types
     """
@@ -400,7 +400,7 @@ primitive _KeywordPresets
         for preset in presets.values() do array = array.push(preset.value().i64()) end
         array
 
-trait val AutoModerationEventType is (collections.Hashable & Equatable[AutoModerationEventType])
+trait val AutoModerationEventType is _Enum[AutoModerationEventType]
     """
     https://docs.discord.com/developers/resources/auto-moderation#auto-moderation-rule-object-event-types
 
@@ -495,7 +495,7 @@ primitive _AutoModerationActions
         for action in actions.values() do array = array.push(action.to_json()) end
         array
 
-trait val AutoModerationActionType is (collections.Hashable & Equatable[AutoModerationActionType])
+trait val AutoModerationActionType is _Enum[AutoModerationActionType]
     """
     https://docs.discord.com/developers/resources/auto-moderation#auto-moderation-action-object-action-types
     """

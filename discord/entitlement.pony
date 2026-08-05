@@ -157,7 +157,7 @@ class val Entitlement is Jsonable
 
         obj
 
-trait val EntitlementType is (collections.Hashable & Equatable[EntitlementType])
+trait val EntitlementType is _Enum[EntitlementType]
     """
     https://docs.discord.com/developers/resources/entitlement#entitlement-object-entitlement-types
     """
@@ -379,7 +379,7 @@ class val CreateTestEntitlementParams is ToJsonable
             .update("owner_id", owner_id.to_json())
             .update("owner_type", owner_type.value().i64())
 
-trait val TestEntitlementOwnerType is (collections.Hashable & Equatable[TestEntitlementOwnerType])
+trait val TestEntitlementOwnerType is _Enum[TestEntitlementOwnerType]
     """
     https://docs.discord.com/developers/resources/entitlement#create-test-entitlement
 

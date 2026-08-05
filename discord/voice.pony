@@ -270,7 +270,7 @@ primitive _VoiceRegions
         for region in regions.values() do array = array.push(region.to_json()) end
         array
 
-trait val VoiceOpcode is (collections.Hashable & Equatable[VoiceOpcode])
+trait val VoiceOpcode is _Enum[VoiceOpcode]
     """
     Our voice gateways have their own set of opcodes and close codes.
     """
@@ -463,10 +463,13 @@ primitive VoiceOpcodeDAVEMLSInvalidCommitWelcome is VoiceOpcode
 
     fun value(): U16 => 31
 
-trait val VoiceCloseEventCode is (collections.Hashable & Equatable[VoiceCloseEventCode])
+trait val VoiceCloseEventCode is _Enum[VoiceCloseEventCode]
     fun value(): U16
+
     fun reconnect(): Bool
+
     fun hash(): USize => value().hash()
+
     fun eq(that: VoiceCloseEventCode): Bool => value() == that.value()
 primitive VoiceCloseEventCodeUnknownOpcode is VoiceCloseEventCode
     """

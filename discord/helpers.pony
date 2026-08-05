@@ -4,6 +4,8 @@ use time = "time"
 
 type ISO8601 is String
 
+type _Enum[A: Equatable[A] #read] is (collections.Hashable & Equatable[A])
+
 class Queue[A: Any #send]
     embed _queue: collections.List[A] = collections.List[A]
 

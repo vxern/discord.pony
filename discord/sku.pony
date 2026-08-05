@@ -108,7 +108,7 @@ primitive _SKUs
         for sku in skus.values() do array = array.push(sku.to_json()) end
         array
 
-trait val SKUType is (collections.Hashable & Equatable[SKUType])
+trait val SKUType is _Enum[SKUType]
     """
     https://docs.discord.com/developers/resources/sku#sku-object-sku-types
 
@@ -158,7 +158,7 @@ primitive SKUTypes
         else error
         end
 
-trait val SKUFlag is (collections.Hashable & Equatable[SKUFlag])
+trait val SKUFlag is _Enum[SKUFlag]
     """
     https://docs.discord.com/developers/resources/sku#sku-object-sku-flags
     """

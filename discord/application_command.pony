@@ -1,7 +1,7 @@
 use collections = "collections"
 use json = "json"
 
-trait val ApplicationCommandType is (collections.Hashable & Equatable[ApplicationCommandType])
+trait val ApplicationCommandType is _Enum[ApplicationCommandType]
     """
     https://docs.discord.com/developers/interactions/application-commands#application-command-object-application-command-types
     """
@@ -45,7 +45,7 @@ primitive ApplicationCommandTypes
         else error
         end
 
-trait val ApplicationCommandHandlerType is (collections.Hashable & Equatable[ApplicationCommandHandlerType])
+trait val ApplicationCommandHandlerType is _Enum[ApplicationCommandHandlerType]
     """
     https://docs.discord.com/developers/interactions/application-commands#application-command-object-entry-point-command-handler-types
 
@@ -77,7 +77,7 @@ primitive ApplicationCommandHandlerTypes
         else error
         end
 
-trait val ApplicationCommandOptionType is (collections.Hashable & Equatable[ApplicationCommandOptionType])
+trait val ApplicationCommandOptionType is _Enum[ApplicationCommandOptionType]
     """
     https://docs.discord.com/developers/interactions/application-commands#application-command-object-application-command-option-type
     """
@@ -693,7 +693,7 @@ primitive _ApplicationCommands
         array
 
 
-trait val ApplicationCommandPermissionType is (collections.Hashable & Equatable[ApplicationCommandPermissionType])
+trait val ApplicationCommandPermissionType is _Enum[ApplicationCommandPermissionType]
     """
     https://docs.discord.com/developers/interactions/application-commands#application-command-permissions-object-application-command-permission-type
     """

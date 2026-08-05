@@ -165,7 +165,7 @@ primitive _LobbyMembers
         for member in members.values() do array = array.push(member.to_json()) end
         array
 
-trait val LobbyMemberFlag is (collections.Hashable & Equatable[LobbyMemberFlag])
+trait val LobbyMemberFlag is _Enum[LobbyMemberFlag]
     """
     https://docs.discord.com/developers/resources/lobby#lobby-member-object-lobby-member-flags
     """

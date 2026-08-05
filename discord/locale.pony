@@ -1,7 +1,7 @@
 use collections = "collections"
 use json = "json"
 
-trait val Locale is (collections.Hashable & Equatable[Locale])
+trait val Locale is _Enum[Locale]
     fun value(): String
 
     fun hash(): USize => value().hash()

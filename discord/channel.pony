@@ -940,7 +940,7 @@ primitive _PartialChannels
         for channel in channels.values() do array = array.push(channel.to_json()) end
         array
 
-trait val ChannelType is (collections.Hashable & Equatable[ChannelType])
+trait val ChannelType is _Enum[ChannelType]
     """
     https://docs.discord.com/developers/resources/channel#channel-object-channel-types
     """
@@ -1065,7 +1065,7 @@ primitive _ChannelTypes
         for type' in types.values() do array = array.push(type'.value().i64()) end
         array
 
-trait val VideoQualityMode is (collections.Hashable & Equatable[VideoQualityMode])
+trait val VideoQualityMode is _Enum[VideoQualityMode]
     """
     https://docs.discord.com/developers/resources/channel#channel-object-video-quality-modes
     """
@@ -1095,7 +1095,7 @@ primitive VideoQualityModes
         else error
         end
 
-trait val ChannelFlag is (collections.Hashable & Equatable[ChannelFlag])
+trait val ChannelFlag is _Enum[ChannelFlag]
     """
     https://docs.discord.com/developers/resources/channel#channel-object-channel-flags
     """
@@ -1151,7 +1151,7 @@ primitive _ChannelFlags
         for flag in flags.values() do bits = bits or (U64(1) << flag.value().u64()) end
         bits.i64()
 
-trait val SortOrderType is (collections.Hashable & Equatable[SortOrderType])
+trait val SortOrderType is _Enum[SortOrderType]
     """
     https://docs.discord.com/developers/resources/channel#channel-object-sort-order-types
     """
@@ -1181,7 +1181,7 @@ primitive SortOrderTypes
         else error
         end
 
-trait val ForumLayoutType is (collections.Hashable & Equatable[ForumLayoutType])
+trait val ForumLayoutType is _Enum[ForumLayoutType]
     """
     https://docs.discord.com/developers/resources/channel#channel-object-forum-layout-types
     """
@@ -1339,7 +1339,7 @@ primitive _PermissionOverwrites
         for overwrite in overwrites.values() do array = array.push(overwrite.to_json()) end
         array
 
-trait val PermissionOverwriteType is (collections.Hashable & Equatable[PermissionOverwriteType])
+trait val PermissionOverwriteType is _Enum[PermissionOverwriteType]
     """
     https://docs.discord.com/developers/resources/channel#overwrite-object-overwrite-structure
     """

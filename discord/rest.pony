@@ -262,7 +262,7 @@ class val RestOptions
         | let body': String => body'.array()
         end
 
-trait val RestVersion is (collections.Hashable & Equatable[RestVersion])
+trait val RestVersion is _Enum[RestVersion]
     fun value(): U64
     fun id(): String => "v" + value().string()
     fun hash(): USize => value().hash()

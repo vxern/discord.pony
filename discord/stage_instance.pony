@@ -108,7 +108,7 @@ class val StageInstance is Jsonable
             .update("discoverable_disabled", discoverable_disabled)
             .update("guild_scheduled_event_id", match guild_scheduled_event_id | let guild_scheduled_event_id': Snowflake => guild_scheduled_event_id'.to_json() end)
 
-trait val StageInstancePrivacyLevel is (collections.Hashable & Equatable[StageInstancePrivacyLevel])
+trait val StageInstancePrivacyLevel is _Enum[StageInstancePrivacyLevel]
     """
     https://docs.discord.com/developers/resources/stage-instance#stage-instance-object-privacy-level
     """

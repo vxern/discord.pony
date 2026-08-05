@@ -535,7 +535,7 @@ primitive _Messages
         for message in messages.values() do array = array.push(message.to_json()) end
         array
 
-trait val MessageType is (collections.Hashable & Equatable[MessageType])
+trait val MessageType is _Enum[MessageType]
     """
     https://docs.discord.com/developers/resources/message#message-object-message-types
 
@@ -787,7 +787,7 @@ class val MessageActivity is Jsonable
 
         obj
 
-trait val MessageActivityType is (collections.Hashable & Equatable[MessageActivityType])
+trait val MessageActivityType is _Enum[MessageActivityType]
     """
     https://docs.discord.com/developers/resources/message#message-object-message-activity-types
     """
@@ -815,7 +815,7 @@ primitive MessageActivityTypes
         else error
         end
 
-trait val MessageFlag is (collections.Hashable & Equatable[MessageFlag])
+trait val MessageFlag is _Enum[MessageFlag]
     """
     https://docs.discord.com/developers/resources/message#message-object-message-flags
     """
@@ -1475,7 +1475,7 @@ class val MessageReference is Jsonable
 
         obj
 
-trait val MessageReferenceType is (collections.Hashable & Equatable[MessageReferenceType])
+trait val MessageReferenceType is _Enum[MessageReferenceType]
     """
     https://docs.discord.com/developers/resources/message#message-reference-types
 
@@ -2092,7 +2092,7 @@ primitive _MessageEmbeds
         for entry in embeds.values() do array = array.push(entry.to_json()) end
         array
 
-trait val MessageEmbedType is (collections.Hashable & Equatable[MessageEmbedType])
+trait val MessageEmbedType is _Enum[MessageEmbedType]
     """
     https://docs.discord.com/developers/resources/message#embed-object-embed-types
 
@@ -2161,7 +2161,7 @@ primitive MessageEmbedTypes
         else error
         end
 
-trait val MessageEmbedFlag is (collections.Hashable & Equatable[MessageEmbedFlag])
+trait val MessageEmbedFlag is _Enum[MessageEmbedFlag]
     """
     https://docs.discord.com/developers/resources/message#embed-object-embed-flags
     """
@@ -2496,7 +2496,7 @@ class val MessageEmbedImage is Jsonable
 
         obj
 
-trait val MessageEmbedMediaFlag is (collections.Hashable & Equatable[MessageEmbedMediaFlag])
+trait val MessageEmbedMediaFlag is _Enum[MessageEmbedMediaFlag]
     """
     https://docs.discord.com/developers/resources/message#embed-object-embed-media-flags
     """
@@ -3080,7 +3080,7 @@ primitive _MessageAttachments
         for attachment in attachments.values() do array = array.push(attachment.to_json()) end
         array
 
-trait val MessageAttachmentFlag is (collections.Hashable & Equatable[MessageAttachmentFlag])
+trait val MessageAttachmentFlag is _Enum[MessageAttachmentFlag]
     """
     https://docs.discord.com/developers/resources/message#attachment-object-attachment-flags
     """
@@ -3314,7 +3314,7 @@ class val AllowedMentions is Jsonable
 
         obj
 
-trait val AllowedMention is (collections.Hashable & Equatable[AllowedMention])
+trait val AllowedMention is _Enum[AllowedMention]
     """
     https://docs.discord.com/developers/resources/message#allowed-mentions-object-allowed-mention-types
     """
@@ -3717,7 +3717,7 @@ class val SharedClientTheme is Jsonable
 
         obj
 
-trait val BaseThemeType is (collections.Hashable & Equatable[BaseThemeType])
+trait val BaseThemeType is _Enum[BaseThemeType]
     """
     https://docs.discord.com/developers/resources/message#base-theme-types
     """
@@ -4274,7 +4274,7 @@ class val GetReactionsParams
 
         consume query
 
-trait val MessageReactionType is (collections.Hashable & Equatable[MessageReactionType])
+trait val MessageReactionType is _Enum[MessageReactionType]
     """
     https://docs.discord.com/developers/resources/message#get-reactions-reaction-types
     """

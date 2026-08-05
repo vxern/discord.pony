@@ -165,7 +165,7 @@ primitive _Subscriptions
         for subscription in subscriptions.values() do array = array.push(subscription.to_json()) end
         array
 
-trait val SubscriptionStatus is (collections.Hashable & Equatable[SubscriptionStatus])
+trait val SubscriptionStatus is _Enum[SubscriptionStatus]
     """
     https://docs.discord.com/developers/resources/subscription#subscription-statuses
 

@@ -122,7 +122,7 @@ primitive _ApplicationRoleConnectionMetadatas
         for record in records.values() do array = array.push(record.to_json()) end
         array
 
-trait val ApplicationRoleConnectionMetadataType is (collections.Hashable & Equatable[ApplicationRoleConnectionMetadataType])
+trait val ApplicationRoleConnectionMetadataType is _Enum[ApplicationRoleConnectionMetadataType]
     """
     https://docs.discord.com/developers/resources/application-role-connection-metadata#application-role-connection-metadata-object-application-role-connection-metadata-type
     """
