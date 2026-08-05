@@ -129,7 +129,7 @@ actor Bucket
             end
         end
 
-        if (_requests_remaining == 0) and (_queue.size() > 0) then
+        if (_requests_in_flight == 0) and (_requests_remaining == 0) and (_queue.size() > 0) then
             _restarting = true
             let delay = try time.Nanos.from_seconds_f((_rate_limit as _RateLimit).reset_after_s) else 0 end
             _timers(time.Timer(_OnceElapsed({() => self._restart()}), delay))
