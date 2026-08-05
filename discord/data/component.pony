@@ -16,16 +16,10 @@ trait val Component is Jsonable
         The type of the component
         """
 
-trait val ComponentType is _Enum[ComponentType]
+trait val ComponentType is _Enum[ComponentType, U8]
     """
     https://docs.discord.com/developers/components/reference#component-object-component-types
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: ComponentType): Bool => value() == that.value()
 primitive ActionRowComponentType is ComponentType
     """
     Container to display a row of interactive components
@@ -485,16 +479,10 @@ class val ButtonComponent is Component
 
         obj
 
-trait val ButtonStyle is _Enum[ButtonStyle]
+trait val ButtonStyle is _Enum[ButtonStyle, U8]
     """
     https://docs.discord.com/developers/components/reference#button-button-styles
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: ButtonStyle): Bool => value() == that.value()
 primitive PrimaryButtonStyle is ButtonStyle
     """
     The most important or recommended action in a group of options
@@ -926,16 +914,10 @@ class val TextInputComponent is Component
 
         obj
 
-trait val TextInputStyle is _Enum[TextInputStyle]
+trait val TextInputStyle is _Enum[TextInputStyle, U8]
     """
     https://docs.discord.com/developers/components/reference#text-input-text-input-styles
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: TextInputStyle): Bool => value() == that.value()
 primitive ShortTextInputStyle is TextInputStyle
     """
     Single-line input
@@ -1490,16 +1472,10 @@ class val SelectDefaultValue is Jsonable
             .update("id", id.to_json())
             .update("type", type'.value())
 
-trait val SelectDefaultValueType is _Enum[SelectDefaultValueType]
+trait val SelectDefaultValueType is _Enum[SelectDefaultValueType, String]
     """
     https://docs.discord.com/developers/components/reference#user-select-select-default-value-structure
     """
-
-    fun value(): String
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: SelectDefaultValueType): Bool => value() == that.value()
 primitive UserSelectDefaultValueType is SelectDefaultValueType
     fun value(): String => "user"
 primitive RoleSelectDefaultValueType is SelectDefaultValueType
@@ -2027,16 +2003,10 @@ class val SeparatorComponent is Component
 
         obj
 
-trait val SeparatorSpacingSize is _Enum[SeparatorSpacingSize]
+trait val SeparatorSpacingSize is _Enum[SeparatorSpacingSize, U8]
     """
     https://docs.discord.com/developers/components/reference#separator-separator-structure
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: SeparatorSpacingSize): Bool => value() == that.value()
 primitive SmallSeparatorSpacingSize is SeparatorSpacingSize
     """
     Small padding
@@ -2898,16 +2868,10 @@ class val UnfurledMediaItem is Jsonable
 
         obj
 
-trait val UnfurledMediaItemFlag is _Enum[UnfurledMediaItemFlag]
+trait val UnfurledMediaItemFlag is _Enum[UnfurledMediaItemFlag, U8]
     """
     https://docs.discord.com/developers/components/reference#unfurled-media-item-unfurled-media-item-flags
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: UnfurledMediaItemFlag): Bool => value() == that.value()
 primitive IsAnimatedUnfurledMediaItemFlag is UnfurledMediaItemFlag
     """
     This image is animated

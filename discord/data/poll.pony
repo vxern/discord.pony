@@ -97,16 +97,10 @@ class val Poll is Jsonable
 
         obj
 
-trait val PollLayoutType is _Enum[PollLayoutType]
+trait val PollLayoutType is _Enum[PollLayoutType, U8]
     """
     https://docs.discord.com/developers/resources/poll#layout-type
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: PollLayoutType): Bool => value() == that.value()
 primitive DefaultPollLayoutType is PollLayoutType
     """
     The, uhm, default layout type.

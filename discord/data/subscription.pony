@@ -164,18 +164,12 @@ primitive _Subscriptions
         for subscription in subscriptions.values() do array = array.push(subscription.to_json()) end
         array
 
-trait val SubscriptionStatus is _Enum[SubscriptionStatus]
+trait val SubscriptionStatus is _Enum[SubscriptionStatus, U8]
     """
     https://docs.discord.com/developers/resources/subscription#subscription-statuses
 
     Subscription status should not be used to grant perks. Use entitlements as an indication of whether a user should have access to a specific SKU. See our guide on Implementing App Subscriptions for more information.
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: SubscriptionStatus): Bool => value() == that.value()
 primitive ActiveSubscriptionStatus is SubscriptionStatus
     """
     Subscription is active and scheduled to renew.

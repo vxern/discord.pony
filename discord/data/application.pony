@@ -807,18 +807,12 @@ class val PartialApplication is Jsonable
 
         obj
 
-trait val ApplicationIntegrationType is _Enum[ApplicationIntegrationType]
+trait val ApplicationIntegrationType is _Enum[ApplicationIntegrationType, U8]
     """
     https://docs.discord.com/developers/resources/application#application-object-application-integration-types
 
     Where an app can be installed, also called its supported installation contexts.
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: ApplicationIntegrationType): Bool => value() == that.value()
 primitive GuildInstallApplicationIntegrationType is ApplicationIntegrationType
     """
     App is installable to servers
@@ -912,18 +906,12 @@ primitive _ApplicationIntegrationTypes
         for type' in types.values() do array = array.push(type'.value().i64()) end
         array
 
-trait val ApplicationEventWebhookStatus is _Enum[ApplicationEventWebhookStatus]
+trait val ApplicationEventWebhookStatus is _Enum[ApplicationEventWebhookStatus, U8]
     """
     https://docs.discord.com/developers/resources/application#application-object-application-event-webhook-status
 
     Status indicating whether event webhooks are enabled or disabled for an application
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: ApplicationEventWebhookStatus): Bool => value() == that.value()
 primitive DisabledApplicationEventWebhookStatus is ApplicationEventWebhookStatus
     """
     Webhook events are disabled by developer
@@ -951,21 +939,12 @@ primitive ApplicationEventWebhookStatuses
         else error
         end
 
-trait val ApplicationFlag is _Enum[ApplicationFlag]
+trait val ApplicationFlag is _Enum[ApplicationFlag, U8]
     """
     https://docs.discord.com/developers/resources/application#application-object-application-flags
 
     The flags field is serialized as a number; however, this number will not grow beyond 31 bits. New flag bits beyond bit 30 will only appear in flags_new, a string-serialized integer containing the full set of flag bits. Existing integrations consuming flags are not impacted. flags_new is for response serialization only — requests that accept flag values should continue to use the original flags field.
     """
-
-    fun value(): U8
-        """
-        Represents the bit-shift value. Unshift by this value to get the flag.
-        """
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: ApplicationFlag): Bool => value() == that.value()
 primitive ApplicationAutoModerationRuleCreateBadgeApplicationFlag is ApplicationFlag
     """
     Indicates if an app uses the Auto Moderation API
@@ -1257,16 +1236,10 @@ primitive _TeamMembers
         for member in members.values() do array = array.push(member.to_json()) end
         array
 
-trait val TeamMembershipState is _Enum[TeamMembershipState]
+trait val TeamMembershipState is _Enum[TeamMembershipState, U8]
     """
     https://docs.discord.com/developers/topics/teams#data-models-membership-state-enum
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: TeamMembershipState): Bool => value() == that.value()
 primitive InvitedTeamMembershipState is TeamMembershipState
     fun value(): U8 => 1
 primitive AcceptedTeamMembershipState is TeamMembershipState
@@ -1279,18 +1252,12 @@ primitive TeamMembershipStates
         else error
         end
 
-trait val TeamMemberRole is _Enum[TeamMemberRole]
+trait val TeamMemberRole is _Enum[TeamMemberRole, String]
     """
     https://docs.discord.com/developers/topics/teams#team-member-roles-team-member-role-types
 
     Team member roles are hierarchical, with the owner — who is identified by the team's `owner_user_id` rather than by a role — sitting above all of them.
     """
-
-    fun value(): String
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: TeamMemberRole): Bool => value() == that.value()
 primitive AdminTeamMemberRole is TeamMemberRole
     """
     Admins have similar access to owners, except they cannot take destructive actions on the team or team-owned apps.
@@ -1466,16 +1433,10 @@ class val ActivityLocation is Jsonable
 
         obj
 
-trait val ActivityLocationKind is _Enum[ActivityLocationKind]
+trait val ActivityLocationKind is _Enum[ActivityLocationKind, String]
     """
     https://docs.discord.com/developers/resources/application#get-application-activity-instance-activity-location-kind-enum
     """
-
-    fun value(): String
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: ActivityLocationKind): Bool => value() == that.value()
 primitive GuildChannelActivityLocationKind is ActivityLocationKind
     """
     Location is a Guild Channel

@@ -15,7 +15,12 @@ type ImageData is String
     `data:image/{jpeg,png,gif};base64,{data}`.
     """
 
-type _Enum[A: Equatable[A] #read] is (collections.Hashable & Equatable[A])
+trait val _Enum[A: _Enum[A, V] val, V: (collections.Hashable val & Equatable[V] val)] is (collections.Hashable & Equatable[A])
+    fun value(): V
+
+    fun hash(): USize => value().hash()
+
+    fun eq(that: A): Bool => value() == that.value()
 
 trait val ToJsonable is Stringable
     fun to_json(): json.JsonObject

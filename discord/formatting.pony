@@ -67,12 +67,7 @@ primitive Formatting
 primitive FormattingDefaults
     fun timestamp_style(): TimestampStyle val => TimestampStyleLongDateShortTime
 
-trait val TimestampStyle is _Enum[TimestampStyle]
-    fun value(): String
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: TimestampStyle): Bool => value() == that.value()
+trait val TimestampStyle is _Enum[TimestampStyle, String]
 primitive TimestampStyleShortTime is TimestampStyle
     """
     Example: 16:20
@@ -129,12 +124,7 @@ primitive TimestampStyleRelativeTime is TimestampStyle
 
     fun value(): String => "R"
 
-trait val GuildNavigationType is _Enum[GuildNavigationType]
-    fun value(): String
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: GuildNavigationType): Bool => value() == that.value()
+trait val GuildNavigationType is _Enum[GuildNavigationType, String]
 primitive GuildNavigationTypeChannelAndRoles is GuildNavigationType
     """
     Channel & Roles tab with Onboarding prompts

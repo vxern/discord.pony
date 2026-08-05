@@ -1,12 +1,7 @@
 use collections = "collections"
 use json = "json"
 
-trait val Locale is _Enum[Locale]
-    fun value(): String
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: Locale): Bool => value() == that.value()
+trait val Locale is _Enum[Locale, String]
 primitive LocaleIndonesian is Locale
     fun value(): String => "id"
 primitive LocaleDanish is Locale

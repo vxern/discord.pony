@@ -1068,16 +1068,10 @@ primitive _PartialGuilds
         for guild in guilds.values() do array = array.push(guild.to_json()) end
         array
 
-trait val DefaultMessageNotificationLevel is _Enum[DefaultMessageNotificationLevel]
+trait val DefaultMessageNotificationLevel is _Enum[DefaultMessageNotificationLevel, U8]
     """
     https://docs.discord.com/developers/resources/guild#guild-object-default-message-notification-level
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: DefaultMessageNotificationLevel): Bool => value() == that.value()
 primitive AllMessagesDefaultMessageNotificationLevel is DefaultMessageNotificationLevel
     """
     members will receive notifications for all messages by default
@@ -1098,16 +1092,10 @@ primitive DefaultMessageNotificationLevels
         else error
         end
 
-trait val ExplicitContentFilterLevel is _Enum[ExplicitContentFilterLevel]
+trait val ExplicitContentFilterLevel is _Enum[ExplicitContentFilterLevel, U8]
     """
     https://docs.discord.com/developers/resources/guild#guild-object-explicit-content-filter-level
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: ExplicitContentFilterLevel): Bool => value() == that.value()
 primitive DisabledExplicitContentFilterLevel is ExplicitContentFilterLevel
     """
     media content will not be scanned
@@ -1135,16 +1123,10 @@ primitive ExplicitContentFilterLevels
         else error
         end
 
-trait val MFALevel is _Enum[MFALevel]
+trait val MFALevel is _Enum[MFALevel, U8]
     """
     https://docs.discord.com/developers/resources/guild#guild-object-mfa-level
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: MFALevel): Bool => value() == that.value()
 primitive NoneMFALevel is MFALevel
     """
     guild has no MFA/2FA requirement for moderation actions
@@ -1165,16 +1147,10 @@ primitive MFALevels
         else error
         end
 
-trait val VerificationLevel is _Enum[VerificationLevel]
+trait val VerificationLevel is _Enum[VerificationLevel, U8]
     """
     https://docs.discord.com/developers/resources/guild#guild-object-verification-level
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: VerificationLevel): Bool => value() == that.value()
 primitive NoneVerificationLevel is VerificationLevel
     """
     unrestricted
@@ -1216,16 +1192,10 @@ primitive VerificationLevels
         else error
         end
 
-trait val GuildNSFWLevel is _Enum[GuildNSFWLevel]
+trait val GuildNSFWLevel is _Enum[GuildNSFWLevel, U8]
     """
     https://docs.discord.com/developers/resources/guild#guild-object-guild-nsfw-level
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: GuildNSFWLevel): Bool => value() == that.value()
 primitive DefaultGuildNSFWLevel is GuildNSFWLevel
     fun value(): U8 => 0
 primitive ExplicitGuildNSFWLevel is GuildNSFWLevel
@@ -1244,16 +1214,10 @@ primitive GuildNSFWLevels
         else error
         end
 
-trait val PremiumTier is _Enum[PremiumTier]
+trait val PremiumTier is _Enum[PremiumTier, U8]
     """
     https://docs.discord.com/developers/resources/guild#guild-object-premium-tier
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: PremiumTier): Bool => value() == that.value()
 primitive NonePremiumTier is PremiumTier
     """
     guild has not unlocked any Server Boost perks
@@ -1288,16 +1252,10 @@ primitive PremiumTiers
         else error
         end
 
-trait val SystemChannelFlag is _Enum[SystemChannelFlag]
+trait val SystemChannelFlag is _Enum[SystemChannelFlag, U8]
     """
     https://docs.discord.com/developers/resources/guild#guild-object-system-channel-flags
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: SystemChannelFlag): Bool => value() == that.value()
 primitive SuppressJoinNotificationsSystemChannelFlag is SystemChannelFlag
     """
     Suppress member join notifications
@@ -2065,16 +2023,10 @@ primitive _PartialGuildMembers
         for member in members.values() do array = array.push(member.to_json()) end
         array
 
-trait val GuildMemberFlag is _Enum[GuildMemberFlag]
+trait val GuildMemberFlag is _Enum[GuildMemberFlag, U8]
     """
     https://docs.discord.com/developers/resources/guild#guild-member-object-guild-member-flags
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: GuildMemberFlag): Bool => value() == that.value()
 primitive DidRejoinGuildMemberFlag is GuildMemberFlag
     """
     Member has left and rejoined the guild
@@ -2617,16 +2569,10 @@ primitive _PartialIntegrations
         for integration in integrations.values() do array = array.push(integration.to_json()) end
         array
 
-trait val IntegrationExpireBehavior is _Enum[IntegrationExpireBehavior]
+trait val IntegrationExpireBehavior is _Enum[IntegrationExpireBehavior, U8]
     """
     https://docs.discord.com/developers/resources/guild#integration-object-integration-expire-behaviors
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: IntegrationExpireBehavior): Bool => value() == that.value()
 primitive RemoveRoleIntegrationExpireBehavior is IntegrationExpireBehavior
     fun value(): U8 => 0
 primitive KickIntegrationExpireBehavior is IntegrationExpireBehavior
@@ -3012,18 +2958,12 @@ class val GuildOnboarding is Jsonable
             .update("enabled", enabled)
             .update("mode", mode.value().i64())
 
-trait val OnboardingMode is _Enum[OnboardingMode]
+trait val OnboardingMode is _Enum[OnboardingMode, U8]
     """
     https://docs.discord.com/developers/resources/guild#guild-onboarding-object-onboarding-mode
 
     Defines the criteria used to satisfy Onboarding constraints that are required for enabling.
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: OnboardingMode): Bool => value() == that.value()
 primitive DefaultOnboardingMode is OnboardingMode
     """
     Counts only Default Channels towards constraints
@@ -3158,16 +3098,10 @@ primitive _OnboardingPrompts
         for prompt in prompts.values() do array = array.push(prompt.to_json()) end
         array
 
-trait val OnboardingPromptType is _Enum[OnboardingPromptType]
+trait val OnboardingPromptType is _Enum[OnboardingPromptType, U8]
     """
     https://docs.discord.com/developers/resources/guild#guild-onboarding-object-prompt-types
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: OnboardingPromptType): Bool => value() == that.value()
 primitive MultipleChoiceOnboardingPromptType is OnboardingPromptType
     fun value(): U8 => 0
 primitive DropdownOnboardingPromptType is OnboardingPromptType
@@ -4954,16 +4888,10 @@ class val UpdateGuildWidgetParams is ToJsonable
 
         obj
 
-trait val GuildWidgetStyle is _Enum[GuildWidgetStyle]
+trait val GuildWidgetStyle is _Enum[GuildWidgetStyle, String]
     """
     https://docs.discord.com/developers/resources/guild#get-guild-widget-image-widget-style-options
     """
-
-    fun value(): String
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: GuildWidgetStyle): Bool => value() == that.value()
 primitive ShieldGuildWidgetStyle is GuildWidgetStyle
     """
     shield style widget with Discord icon and guild members online count

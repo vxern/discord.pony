@@ -200,16 +200,10 @@ primitive _Webhooks
         for webhook in webhooks.values() do array = array.push(webhook.to_json()) end
         array
 
-trait val WebhookType is _Enum[WebhookType]
+trait val WebhookType is _Enum[WebhookType, U8]
     """
     https://docs.discord.com/developers/resources/webhook#webhook-object-webhook-types
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: WebhookType): Bool => value() == that.value()
 primitive IncomingWebhookType is WebhookType
     """
     Incoming Webhooks can post messages to channels with a generated token

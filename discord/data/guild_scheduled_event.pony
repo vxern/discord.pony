@@ -251,16 +251,10 @@ primitive _GuildScheduledEvents
         for guild_scheduled_event in guild_scheduled_events.values() do array = array.push(guild_scheduled_event.to_json()) end
         array
 
-trait val GuildScheduledEventPrivacyLevel is _Enum[GuildScheduledEventPrivacyLevel]
+trait val GuildScheduledEventPrivacyLevel is _Enum[GuildScheduledEventPrivacyLevel, U8]
     """
     https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-privacy-level
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: GuildScheduledEventPrivacyLevel): Bool => value() == that.value()
 primitive GuildOnlyGuildScheduledEventPrivacyLevel is GuildScheduledEventPrivacyLevel
     """
     the scheduled event is only accessible to guild members
@@ -274,16 +268,10 @@ primitive GuildScheduledEventPrivacyLevels
         else error
         end
 
-trait val GuildScheduledEventEntityType is _Enum[GuildScheduledEventEntityType]
+trait val GuildScheduledEventEntityType is _Enum[GuildScheduledEventEntityType, U8]
     """
     https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-entity-types
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: GuildScheduledEventEntityType): Bool => value() == that.value()
 primitive StageInstanceGuildScheduledEventEntityType is GuildScheduledEventEntityType
     """
     the scheduled event is hosted in a stage channel
@@ -317,18 +305,12 @@ primitive GuildScheduledEventEntityTypes
         else error
         end
 
-trait val GuildScheduledEventStatus is _Enum[GuildScheduledEventStatus]
+trait val GuildScheduledEventStatus is _Enum[GuildScheduledEventStatus, U8]
     """
     https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-status
 
     Once `status` is set to COMPLETED or CANCELED, the `status` can no longer be updated.
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: GuildScheduledEventStatus): Bool => value() == that.value()
 primitive ScheduledGuildScheduledEventStatus is GuildScheduledEventStatus
     fun value(): U8 => 1
 primitive ActiveGuildScheduledEventStatus is GuildScheduledEventStatus
@@ -526,16 +508,10 @@ class val GuildScheduledEventRecurrenceRule is Jsonable
 
         obj
 
-trait val GuildScheduledEventRecurrenceRuleFrequency is _Enum[GuildScheduledEventRecurrenceRuleFrequency]
+trait val GuildScheduledEventRecurrenceRuleFrequency is _Enum[GuildScheduledEventRecurrenceRuleFrequency, U8]
     """
     https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-recurrence-rule-object-guild-scheduled-event-recurrence-rule-frequency
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: GuildScheduledEventRecurrenceRuleFrequency): Bool => value() == that.value()
 primitive YearlyGuildScheduledEventRecurrenceRuleFrequency is GuildScheduledEventRecurrenceRuleFrequency
     fun value(): U8 => 0
 primitive MonthlyGuildScheduledEventRecurrenceRuleFrequency is GuildScheduledEventRecurrenceRuleFrequency
@@ -554,16 +530,10 @@ primitive GuildScheduledEventRecurrenceRuleFrequencies
         else error
         end
 
-trait val GuildScheduledEventRecurrenceRuleWeekday is _Enum[GuildScheduledEventRecurrenceRuleWeekday]
+trait val GuildScheduledEventRecurrenceRuleWeekday is _Enum[GuildScheduledEventRecurrenceRuleWeekday, U8]
     """
     https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-recurrence-rule-object-guild-scheduled-event-recurrence-rule-weekday
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: GuildScheduledEventRecurrenceRuleWeekday): Bool => value() == that.value()
 primitive MondayGuildScheduledEventRecurrenceRuleWeekday is GuildScheduledEventRecurrenceRuleWeekday
     fun value(): U8 => 0
 primitive TuesdayGuildScheduledEventRecurrenceRuleWeekday is GuildScheduledEventRecurrenceRuleWeekday
@@ -663,16 +633,10 @@ primitive _GuildScheduledEventRecurrenceRuleNWeekdays
         for nweekday in nweekdays.values() do array = array.push(nweekday.to_json()) end
         array
 
-trait val GuildScheduledEventRecurrenceRuleMonth is _Enum[GuildScheduledEventRecurrenceRuleMonth]
+trait val GuildScheduledEventRecurrenceRuleMonth is _Enum[GuildScheduledEventRecurrenceRuleMonth, U8]
     """
     https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-recurrence-rule-object-guild-scheduled-event-recurrence-rule-month
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: GuildScheduledEventRecurrenceRuleMonth): Bool => value() == that.value()
 primitive JanuaryGuildScheduledEventRecurrenceRuleMonth is GuildScheduledEventRecurrenceRuleMonth
     fun value(): U8 => 1
 primitive FebruaryGuildScheduledEventRecurrenceRuleMonth is GuildScheduledEventRecurrenceRuleMonth

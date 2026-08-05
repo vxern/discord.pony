@@ -162,18 +162,12 @@ primitive _AutoModerationRules
         for rule in rules.values() do array = array.push(rule.to_json()) end
         array
 
-trait val AutoModerationTriggerType is _Enum[AutoModerationTriggerType]
+trait val AutoModerationTriggerType is _Enum[AutoModerationTriggerType, U8]
     """
     https://docs.discord.com/developers/resources/auto-moderation#auto-moderation-rule-object-trigger-types
 
     Characterizes the type of content which can trigger the rule.
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: AutoModerationTriggerType): Bool => value() == that.value()
 primitive KeywordAutoModerationTriggerType is AutoModerationTriggerType
     """
     check if content contains words from a user defined list of keywords
@@ -344,16 +338,10 @@ class val AutoModerationTriggerMetadata is Jsonable
 
         obj
 
-trait val KeywordPresetType is _Enum[KeywordPresetType]
+trait val KeywordPresetType is _Enum[KeywordPresetType, U8]
     """
     https://docs.discord.com/developers/resources/auto-moderation#auto-moderation-rule-object-keyword-preset-types
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: KeywordPresetType): Bool => value() == that.value()
 primitive ProfanityKeywordPresetType is KeywordPresetType
     """
     words that may be considered forms of swearing or cursing
@@ -399,18 +387,12 @@ primitive _KeywordPresets
         for preset in presets.values() do array = array.push(preset.value().i64()) end
         array
 
-trait val AutoModerationEventType is _Enum[AutoModerationEventType]
+trait val AutoModerationEventType is _Enum[AutoModerationEventType, U8]
     """
     https://docs.discord.com/developers/resources/auto-moderation#auto-moderation-rule-object-event-types
 
     Indicates in what event context a rule should be checked.
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: AutoModerationEventType): Bool => value() == that.value()
 primitive MessageSendAutoModerationEventType is AutoModerationEventType
     """
     when a member sends or edits a message in the guild
@@ -494,16 +476,10 @@ primitive _AutoModerationActions
         for action in actions.values() do array = array.push(action.to_json()) end
         array
 
-trait val AutoModerationActionType is _Enum[AutoModerationActionType]
+trait val AutoModerationActionType is _Enum[AutoModerationActionType, U8]
     """
     https://docs.discord.com/developers/resources/auto-moderation#auto-moderation-action-object-action-types
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: AutoModerationActionType): Bool => value() == that.value()
 primitive BlockMessageAutoModerationActionType is AutoModerationActionType
     """
     blocks a member's message and prevents it from being posted. A custom explanation can be specified and shown to members whenever their message is blocked.

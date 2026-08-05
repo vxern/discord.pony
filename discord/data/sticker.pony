@@ -180,16 +180,10 @@ primitive _Stickers
         for sticker in stickers.values() do array = array.push(sticker.to_json()) end
         array
 
-trait val StickerType is _Enum[StickerType]
+trait val StickerType is _Enum[StickerType, U8]
     """
     https://docs.discord.com/developers/resources/sticker#sticker-object-sticker-types
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: StickerType): Bool => value() == that.value()
 primitive StandardStickerType is StickerType
     """
     an official sticker in a pack
@@ -210,16 +204,10 @@ primitive StickerTypes
         else error
         end
 
-trait val StickerFormatType is _Enum[StickerFormatType]
+trait val StickerFormatType is _Enum[StickerFormatType, U8]
     """
     https://docs.discord.com/developers/resources/sticker#sticker-object-sticker-format-types
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: StickerFormatType): Bool => value() == that.value()
 primitive PNGStickerFormatType is StickerFormatType
     fun value(): U8 => 1
 primitive APNGStickerFormatType is StickerFormatType

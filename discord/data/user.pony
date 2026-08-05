@@ -301,16 +301,10 @@ primitive _Users
         for user in users.values() do array = array.push(user.to_json()) end
         array
 
-trait val UserFlag is _Enum[UserFlag]
+trait val UserFlag is _Enum[UserFlag, U8]
     """
     https://docs.discord.com/developers/resources/user#user-object-user-flags
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: UserFlag): Bool => value() == that.value()
 primitive StaffUserFlag is UserFlag
     """
     Discord Employee
@@ -441,18 +435,12 @@ primitive _UserFlags
         for flag in flags.values() do bits = bits or (U64(1) << flag.value().u64()) end
         bits.i64()
 
-trait val PremiumType is _Enum[PremiumType]
+trait val PremiumType is _Enum[PremiumType, U8]
     """
     https://docs.discord.com/developers/resources/user#user-object-premium-types
 
     Premium types denote the level of premium a user has. Visit the Nitro page to learn more about the premium plans we currently offer.
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: PremiumType): Bool => value() == that.value()
 primitive NonePremiumType is PremiumType
     fun value(): U8 => 0
 primitive NitroClassicPremiumType is PremiumType
@@ -836,16 +824,10 @@ primitive _Connections
         for connection in connections.values() do array = array.push(connection.to_json()) end
         array
 
-trait val ConnectionVisibility is _Enum[ConnectionVisibility]
+trait val ConnectionVisibility is _Enum[ConnectionVisibility, U8]
     """
     https://docs.discord.com/developers/resources/user#connection-object-visibility-types
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: ConnectionVisibility): Bool => value() == that.value()
 primitive NoneConnectionVisibility is ConnectionVisibility
     """
     invisible to everyone except the user themselves

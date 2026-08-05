@@ -149,16 +149,10 @@ class val SessionStartLimit is Jsonable
             .update("reset_after", reset_after.i64())
             .update("max_concurrency", max_concurrency.i64())
 
-trait val GatewayOpcode is _Enum[GatewayOpcode]
+trait val GatewayOpcode is _Enum[GatewayOpcode, U8]
     """
     All gateway events in Discord are tagged with an opcode that denotes the payload type. Your connection to our gateway may also sometimes close. When it does, you will receive a close code that tells you what happened.
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: GatewayOpcode): Bool => value() == that.value()
 primitive GatewayOpcodeDispatch is GatewayOpcode
     """
     Action: Receive
@@ -264,18 +258,12 @@ primitive GatewayOpcodeRequestChannelInfo is GatewayOpcode
 
     fun value(): U8 => 43
 
-trait val GatewayCloseEventCode is _Enum[GatewayCloseEventCode]
+trait val GatewayCloseEventCode is _Enum[GatewayCloseEventCode, U16]
     """
     In order to prevent broken reconnect loops, you should consider some close codes as a signal to stop reconnecting. This can be because your token expired, or your identification is invalid. This table explains what the application defined close codes for the gateway are, and which close codes you should not attempt to reconnect.
     """
 
-    fun value(): U16
-
     fun reconnect(): Bool
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: GatewayCloseEventCode): Bool => value() == that.value()
 primitive GatewayCloseEventCodeUnknownError is GatewayCloseEventCode
     """
     We’re not sure what went wrong. Try reconnecting?

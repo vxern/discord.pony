@@ -939,16 +939,10 @@ primitive _PartialChannels
         for channel in channels.values() do array = array.push(channel.to_json()) end
         array
 
-trait val ChannelType is _Enum[ChannelType]
+trait val ChannelType is _Enum[ChannelType, U8]
     """
     https://docs.discord.com/developers/resources/channel#channel-object-channel-types
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: ChannelType): Bool => value() == that.value()
 primitive GuildTextChannelType is ChannelType
     """
     a text channel within a server
@@ -1064,16 +1058,10 @@ primitive _ChannelTypes
         for type' in types.values() do array = array.push(type'.value().i64()) end
         array
 
-trait val VideoQualityMode is _Enum[VideoQualityMode]
+trait val VideoQualityMode is _Enum[VideoQualityMode, U8]
     """
     https://docs.discord.com/developers/resources/channel#channel-object-video-quality-modes
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: VideoQualityMode): Bool => value() == that.value()
 primitive AutoVideoQualityMode is VideoQualityMode
     """
     Discord chooses the quality for optimal performance
@@ -1094,16 +1082,10 @@ primitive VideoQualityModes
         else error
         end
 
-trait val ChannelFlag is _Enum[ChannelFlag]
+trait val ChannelFlag is _Enum[ChannelFlag, U8]
     """
     https://docs.discord.com/developers/resources/channel#channel-object-channel-flags
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: ChannelFlag): Bool => value() == that.value()
 primitive PinnedChannelFlag is ChannelFlag
     """
     this thread is pinned to the top of its parent GUILD_FORUM or GUILD_MEDIA channel
@@ -1150,16 +1132,10 @@ primitive _ChannelFlags
         for flag in flags.values() do bits = bits or (U64(1) << flag.value().u64()) end
         bits.i64()
 
-trait val SortOrderType is _Enum[SortOrderType]
+trait val SortOrderType is _Enum[SortOrderType, U8]
     """
     https://docs.discord.com/developers/resources/channel#channel-object-sort-order-types
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: SortOrderType): Bool => value() == that.value()
 primitive LatestActivitySortOrderType is SortOrderType
     """
     Sort forum posts by activity
@@ -1180,16 +1156,10 @@ primitive SortOrderTypes
         else error
         end
 
-trait val ForumLayoutType is _Enum[ForumLayoutType]
+trait val ForumLayoutType is _Enum[ForumLayoutType, U8]
     """
     https://docs.discord.com/developers/resources/channel#channel-object-forum-layout-types
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: ForumLayoutType): Bool => value() == that.value()
 primitive NotSetForumLayoutType is ForumLayoutType
     """
     No default has been set for forum channel
@@ -1338,16 +1308,10 @@ primitive _PermissionOverwrites
         for overwrite in overwrites.values() do array = array.push(overwrite.to_json()) end
         array
 
-trait val PermissionOverwriteType is _Enum[PermissionOverwriteType]
+trait val PermissionOverwriteType is _Enum[PermissionOverwriteType, U8]
     """
     https://docs.discord.com/developers/resources/channel#overwrite-object-overwrite-structure
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: PermissionOverwriteType): Bool => value() == that.value()
 primitive RolePermissionOverwriteType is PermissionOverwriteType
     fun value(): U8 => 0
 primitive MemberPermissionOverwriteType is PermissionOverwriteType

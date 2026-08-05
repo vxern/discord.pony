@@ -1,16 +1,10 @@
 use collections = "collections"
 use json = "json"
 
-trait val ApplicationCommandType is _Enum[ApplicationCommandType]
+trait val ApplicationCommandType is _Enum[ApplicationCommandType, U8]
     """
     https://docs.discord.com/developers/interactions/application-commands#application-command-object-application-command-types
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: ApplicationCommandType): Bool => value() == that.value()
 primitive ChatInputApplicationCommandType is ApplicationCommandType
     """
     Slash commands; a text-based command that shows up when a user types /
@@ -45,18 +39,12 @@ primitive ApplicationCommandTypes
         else error
         end
 
-trait val ApplicationCommandHandlerType is _Enum[ApplicationCommandHandlerType]
+trait val ApplicationCommandHandlerType is _Enum[ApplicationCommandHandlerType, U8]
     """
     https://docs.discord.com/developers/interactions/application-commands#application-command-object-entry-point-command-handler-types
 
     Determines whether the interaction is handled by the app's interactions handler or by Discord.
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: ApplicationCommandHandlerType): Bool => value() == that.value()
 primitive AppHandlerApplicationCommandHandlerType is ApplicationCommandHandlerType
     """
     The app handles the interaction using an interaction token
@@ -77,16 +65,10 @@ primitive ApplicationCommandHandlerTypes
         else error
         end
 
-trait val ApplicationCommandOptionType is _Enum[ApplicationCommandOptionType]
+trait val ApplicationCommandOptionType is _Enum[ApplicationCommandOptionType, U8]
     """
     https://docs.discord.com/developers/interactions/application-commands#application-command-object-application-command-option-type
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: ApplicationCommandOptionType): Bool => value() == that.value()
 primitive SubCommandApplicationCommandOptionType is ApplicationCommandOptionType
     fun value(): U8 => 1
 primitive SubCommandGroupApplicationCommandOptionType is ApplicationCommandOptionType
@@ -693,16 +675,10 @@ primitive _ApplicationCommands
         array
 
 
-trait val ApplicationCommandPermissionType is _Enum[ApplicationCommandPermissionType]
+trait val ApplicationCommandPermissionType is _Enum[ApplicationCommandPermissionType, U8]
     """
     https://docs.discord.com/developers/interactions/application-commands#application-command-permissions-object-application-command-permission-type
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: ApplicationCommandPermissionType): Bool => value() == that.value()
 primitive RoleApplicationCommandPermissionType is ApplicationCommandPermissionType
     fun value(): U8 => 1
 primitive UserApplicationCommandPermissionType is ApplicationCommandPermissionType

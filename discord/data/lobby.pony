@@ -165,16 +165,10 @@ primitive _LobbyMembers
         for member in members.values() do array = array.push(member.to_json()) end
         array
 
-trait val LobbyMemberFlag is _Enum[LobbyMemberFlag]
+trait val LobbyMemberFlag is _Enum[LobbyMemberFlag, U8]
     """
     https://docs.discord.com/developers/resources/lobby#lobby-member-object-lobby-member-flags
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: LobbyMemberFlag): Bool => value() == that.value()
 primitive CanLinkLobbyLobbyMemberFlag is LobbyMemberFlag
     """
     user can link a text channel to a lobby

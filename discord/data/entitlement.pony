@@ -156,16 +156,10 @@ class val Entitlement is Jsonable
 
         obj
 
-trait val EntitlementType is _Enum[EntitlementType]
+trait val EntitlementType is _Enum[EntitlementType, U8]
     """
     https://docs.discord.com/developers/resources/entitlement#entitlement-object-entitlement-types
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: EntitlementType): Bool => value() == that.value()
 primitive PurchaseEntitlementType is EntitlementType
     """
     Entitlement was purchased by user
@@ -378,18 +372,12 @@ class val CreateTestEntitlementParams is ToJsonable
             .update("owner_id", owner_id.to_json())
             .update("owner_type", owner_type.value().i64())
 
-trait val TestEntitlementOwnerType is _Enum[TestEntitlementOwnerType]
+trait val TestEntitlementOwnerType is _Enum[TestEntitlementOwnerType, U8]
     """
     https://docs.discord.com/developers/resources/entitlement#create-test-entitlement
 
     Whether a test entitlement is granted to a guild or to a user.
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: TestEntitlementOwnerType): Bool => value() == that.value()
 primitive GuildSubscriptionTestEntitlementOwnerType is TestEntitlementOwnerType
     """
     A guild subscription

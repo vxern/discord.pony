@@ -224,16 +224,10 @@ primitive _Invites
         for invite in invites.values() do array = array.push(invite.to_json()) end
         array
 
-trait val InviteType is _Enum[InviteType]
+trait val InviteType is _Enum[InviteType, U8]
     """
     https://docs.discord.com/developers/resources/invite#invite-object-invite-types
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: InviteType): Bool => value() == that.value()
 primitive GuildInviteType is InviteType
     fun value(): U8 => 0
 primitive GroupDMInviteType is InviteType
@@ -249,16 +243,10 @@ primitive InviteTypes
         else error
         end
 
-trait val InviteTargetType is _Enum[InviteTargetType]
+trait val InviteTargetType is _Enum[InviteTargetType, U8]
     """
     https://docs.discord.com/developers/resources/invite#invite-object-invite-target-types
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: InviteTargetType): Bool => value() == that.value()
 primitive StreamInviteTargetType is InviteTargetType
     fun value(): U8 => 1
 primitive EmbeddedApplicationInviteTargetType is InviteTargetType
@@ -271,16 +259,10 @@ primitive InviteTargetTypes
         else error
         end
 
-trait val InviteFlag is _Enum[InviteFlag]
+trait val InviteFlag is _Enum[InviteFlag, U8]
     """
     https://docs.discord.com/developers/resources/invite#invite-object-invite-flags
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: InviteFlag): Bool => value() == that.value()
 primitive IsGuestInviteInviteFlag is InviteFlag
     """
     this invite is a guest invite for a voice channel
@@ -552,16 +534,10 @@ class val TargetUsersJobStatus is Jsonable
             .update("completed_at", completed_at)
             .update("error_message", error_message)
 
-trait val TargetUsersJobStatusCode is _Enum[TargetUsersJobStatusCode]
+trait val TargetUsersJobStatusCode is _Enum[TargetUsersJobStatusCode, U8]
     """
     https://docs.discord.com/developers/resources/invite#get-target-users-job-status-status-codes
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: TargetUsersJobStatusCode): Bool => value() == that.value()
 primitive UnspecifiedTargetUsersJobStatusCode is TargetUsersJobStatusCode
     """
     The default value.

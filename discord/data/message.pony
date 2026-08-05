@@ -535,20 +535,14 @@ primitive _Messages
         for message in messages.values() do array = array.push(message.to_json()) end
         array
 
-trait val MessageType is _Enum[MessageType]
+trait val MessageType is _Enum[MessageType, U8]
     """
     https://docs.discord.com/developers/resources/message#message-object-message-types
 
     Type `19` and `20` are only available in API v8 and above. In v6, they are represented as type `0`. Additionally, type `21` is only available in API v9 and above.
     """
 
-    fun value(): U8
-
     fun deletable(): Bool
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: MessageType): Bool => value() == that.value()
 primitive DefaultMessageType is MessageType
     fun value(): U8 => 0
 
@@ -787,16 +781,10 @@ class val MessageActivity is Jsonable
 
         obj
 
-trait val MessageActivityType is _Enum[MessageActivityType]
+trait val MessageActivityType is _Enum[MessageActivityType, U8]
     """
     https://docs.discord.com/developers/resources/message#message-object-message-activity-types
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: MessageActivityType): Bool => value() == that.value()
 primitive JoinMessageActivityType is MessageActivityType
     fun value(): U8 => 1
 primitive SpectateMessageActivityType is MessageActivityType
@@ -815,19 +803,10 @@ primitive MessageActivityTypes
         else error
         end
 
-trait val MessageFlag is _Enum[MessageFlag]
+trait val MessageFlag is _Enum[MessageFlag, U8]
     """
     https://docs.discord.com/developers/resources/message#message-object-message-flags
     """
-
-    fun value(): U8
-        """
-        Represents the bit-shift value. Unshift by this value to get the flag.
-        """
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: MessageFlag): Bool => value() == that.value()
 primitive CrosspostedMessageFlag is MessageFlag
     """
     this message has been published to subscribed channels (via Channel Following)
@@ -1475,23 +1454,17 @@ class val MessageReference is Jsonable
 
         obj
 
-trait val MessageReferenceType is _Enum[MessageReferenceType]
+trait val MessageReferenceType is _Enum[MessageReferenceType, U8]
     """
     https://docs.discord.com/developers/resources/message#message-reference-types
 
     Determines how associated data is populated.
     """
 
-    fun value(): U8
-
     fun coupled_message_field(): String
         """
         The field on the message that the reference populates.
         """
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: MessageReferenceType): Bool => value() == that.value()
 primitive DefaultMessageReferenceType is MessageReferenceType
     """
     A standard reference used by replies.
@@ -2092,18 +2065,12 @@ primitive _MessageEmbeds
         for entry in embeds.values() do array = array.push(entry.to_json()) end
         array
 
-trait val MessageEmbedType is _Enum[MessageEmbedType]
+trait val MessageEmbedType is _Enum[MessageEmbedType, String]
     """
     https://docs.discord.com/developers/resources/message#embed-object-embed-types
 
     Embed types are "loose" types that should be considered deprecated and might be removed in a future API version.
     """
-
-    fun value(): String
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: MessageEmbedType): Bool => value() == that.value()
 primitive RichMessageEmbedType is MessageEmbedType
     """
     generic embed rendered from embed attributes
@@ -2161,16 +2128,10 @@ primitive MessageEmbedTypes
         else error
         end
 
-trait val MessageEmbedFlag is _Enum[MessageEmbedFlag]
+trait val MessageEmbedFlag is _Enum[MessageEmbedFlag, U8]
     """
     https://docs.discord.com/developers/resources/message#embed-object-embed-flags
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: MessageEmbedFlag): Bool => value() == that.value()
 primitive IsContentInventoryEntryMessageEmbedFlag is MessageEmbedFlag
     """
     this embed is a fallback for a reply to an activity card
@@ -2496,16 +2457,10 @@ class val MessageEmbedImage is Jsonable
 
         obj
 
-trait val MessageEmbedMediaFlag is _Enum[MessageEmbedMediaFlag]
+trait val MessageEmbedMediaFlag is _Enum[MessageEmbedMediaFlag, U8]
     """
     https://docs.discord.com/developers/resources/message#embed-object-embed-media-flags
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: MessageEmbedMediaFlag): Bool => value() == that.value()
 primitive IsAnimatedMessageEmbedMediaFlag is MessageEmbedMediaFlag
     """
     this image is animated
@@ -3080,16 +3035,10 @@ primitive _MessageAttachments
         for attachment in attachments.values() do array = array.push(attachment.to_json()) end
         array
 
-trait val MessageAttachmentFlag is _Enum[MessageAttachmentFlag]
+trait val MessageAttachmentFlag is _Enum[MessageAttachmentFlag, U8]
     """
     https://docs.discord.com/developers/resources/message#attachment-object-attachment-flags
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: MessageAttachmentFlag): Bool => value() == that.value()
 primitive IsClipMessageAttachmentFlag is MessageAttachmentFlag
     """
     this attachment is a Clip from a stream
@@ -3314,16 +3263,10 @@ class val AllowedMentions is Jsonable
 
         obj
 
-trait val AllowedMention is _Enum[AllowedMention]
+trait val AllowedMention is _Enum[AllowedMention, String]
     """
     https://docs.discord.com/developers/resources/message#allowed-mentions-object-allowed-mention-types
     """
-
-    fun value(): String
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: AllowedMention): Bool => value() == that.value()
 primitive AllowedMentionRole is AllowedMention
     """
     Controls role mentions
@@ -3717,16 +3660,10 @@ class val SharedClientTheme is Jsonable
 
         obj
 
-trait val BaseThemeType is _Enum[BaseThemeType]
+trait val BaseThemeType is _Enum[BaseThemeType, U8]
     """
     https://docs.discord.com/developers/resources/message#base-theme-types
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: BaseThemeType): Bool => value() == that.value()
 primitive UnsetBaseThemeType is BaseThemeType
     """
     Equivalent to the `DARK` type.
@@ -4274,16 +4211,10 @@ class val GetReactionsParams
 
         consume query
 
-trait val MessageReactionType is _Enum[MessageReactionType]
+trait val MessageReactionType is _Enum[MessageReactionType, U8]
     """
     https://docs.discord.com/developers/resources/message#get-reactions-reaction-types
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: MessageReactionType): Bool => value() == that.value()
 primitive NormalMessageReactionType is MessageReactionType
     fun value(): U8 => 0
 primitive BurstMessageReactionType is MessageReactionType

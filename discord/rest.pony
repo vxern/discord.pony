@@ -252,14 +252,8 @@ class val RestOptions
         | let body': String => body'.array()
         end
 
-trait val RestVersion is _Enum[RestVersion]
-    fun value(): U64
-
+trait val RestVersion is _Enum[RestVersion, U64]
     fun id(): String => "v" + value().string()
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: RestVersion): Bool => value() == that.value()
 primitive RestVersion6 is RestVersion
     fun value(): U64 => 6
 primitive RestVersion7 is RestVersion

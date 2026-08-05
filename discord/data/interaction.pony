@@ -329,16 +329,10 @@ primitive _AuthorizingIntegrationOwners
         for (integration_type, id) in map.pairs() do obj = obj.update(integration_type.value().string(), id.to_json()) end
         obj
 
-trait val InteractionType is _Enum[InteractionType]
+trait val InteractionType is _Enum[InteractionType, U8]
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-object-interaction-type
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: InteractionType): Bool => value() == that.value()
 primitive PingInteractionType is InteractionType
     fun value(): U8 => 1
 primitive ApplicationCommandInteractionType is InteractionType
@@ -360,18 +354,12 @@ primitive InteractionTypes
         else error
         end
 
-trait val InteractionContextType is _Enum[InteractionContextType]
+trait val InteractionContextType is _Enum[InteractionContextType, U8]
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-object-interaction-context-types
 
     Context in Discord where an interaction can be used, or where it was triggered from. Details about using interaction contexts for application commands is in the commands context documentation.
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: InteractionContextType): Bool => value() == that.value()
 primitive GuildInteractionContextType is InteractionContextType
     """
     Interaction can be used within servers
@@ -1030,16 +1018,10 @@ class val InteractionResponse is ToJsonable
 
         obj
 
-trait val InteractionCallbackType is _Enum[InteractionCallbackType]
+trait val InteractionCallbackType is _Enum[InteractionCallbackType, U8]
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-response-object-interaction-callback-type
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: InteractionCallbackType): Bool => value() == that.value()
 primitive PongInteractionCallbackType is InteractionCallbackType
     """
     ACK a Ping

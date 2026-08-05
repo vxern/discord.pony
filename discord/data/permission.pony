@@ -1,6 +1,6 @@
 use json = "json"
 
-trait val Permission is _Enum[Permission]
+trait val Permission is _Enum[Permission, U8]
     """
     https://docs.discord.com/developers/topics/permissions#permissions-bitwise-permission-flags
 
@@ -8,12 +8,6 @@ trait val Permission is _Enum[Permission]
 
     Timed out members will temporarily lose all permissions except `ViewChannelPermission` and `ReadMessageHistoryPermission`. Owners and admin users with `AdministratorPermission` are exempt.
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: Permission): Bool => value() == that.value()
 primitive CreateInstantInvitePermission is Permission
     """
     Allows creation of instant invites
@@ -834,16 +828,10 @@ class val RoleColors is Jsonable
             .update("secondary_color", secondary_color)
             .update("tertiary_color", tertiary_color)
 
-trait val RoleFlag is _Enum[RoleFlag]
+trait val RoleFlag is _Enum[RoleFlag, U8]
     """
     https://docs.discord.com/developers/topics/permissions#role-object-role-flags
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: RoleFlag): Bool => value() == that.value()
 primitive InPromptRoleFlag is RoleFlag
     """
     role can be selected by members in an onboarding prompt

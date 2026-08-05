@@ -107,7 +107,7 @@ primitive _SKUs
         for sku in skus.values() do array = array.push(sku.to_json()) end
         array
 
-trait val SKUType is _Enum[SKUType]
+trait val SKUType is _Enum[SKUType, U8]
     """
     https://docs.discord.com/developers/resources/sku#sku-object-sku-types
 
@@ -117,12 +117,6 @@ trait val SKUType is _Enum[SKUType]
 
         User Subscriptions: A subscription purchased by a user for themselves. They get access to your premium benefits in every server.
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: SKUType): Bool => value() == that.value()
 primitive DurableSKUType is SKUType
     """
     Durable one-time purchase
@@ -157,16 +151,10 @@ primitive SKUTypes
         else error
         end
 
-trait val SKUFlag is _Enum[SKUFlag]
+trait val SKUFlag is _Enum[SKUFlag, U8]
     """
     https://docs.discord.com/developers/resources/sku#sku-object-sku-flags
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: SKUFlag): Bool => value() == that.value()
 primitive AvailableSKUFlag is SKUFlag
     """
     SKU is available for purchase

@@ -248,7 +248,7 @@ primitive _AuditLogEntries
         for entry in entries.values() do array = array.push(entry.to_json()) end
         array
 
-trait val AuditLogEvent is _Enum[AuditLogEvent]
+trait val AuditLogEvent is _Enum[AuditLogEvent, U8]
     """
     https://docs.discord.com/developers/resources/audit-log#audit-log-entry-object-audit-log-events
 
@@ -260,12 +260,6 @@ trait val AuditLogEvent is _Enum[AuditLogEvent]
 
     * Object has exception(s) to available keys. See the exceptions section below for details.
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: AuditLogEvent): Bool => value() == that.value()
 primitive GuildUpdateAuditLogEvent is AuditLogEvent
     """
     Server settings were updated

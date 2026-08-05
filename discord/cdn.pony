@@ -1,13 +1,7 @@
 use data = "data"
 
-trait val ImageFormat is _Enum[ImageFormat]
-    fun value(): String
-
+trait val ImageFormat is _Enum[ImageFormat, String]
     fun extension(): String => "." + value()
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: ImageFormat): Bool => value() == that.value()
 primitive ImageFormatJPEG is ImageFormat
     fun value(): String => "jpeg"
 primitive ImageFormatPNG is ImageFormat

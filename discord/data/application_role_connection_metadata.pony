@@ -122,16 +122,10 @@ primitive _ApplicationRoleConnectionMetadatas
         for record in records.values() do array = array.push(record.to_json()) end
         array
 
-trait val ApplicationRoleConnectionMetadataType is _Enum[ApplicationRoleConnectionMetadataType]
+trait val ApplicationRoleConnectionMetadataType is _Enum[ApplicationRoleConnectionMetadataType, U8]
     """
     https://docs.discord.com/developers/resources/application-role-connection-metadata#application-role-connection-metadata-object-application-role-connection-metadata-type
     """
-
-    fun value(): U8
-
-    fun hash(): USize => value().hash()
-
-    fun eq(that: ApplicationRoleConnectionMetadataType): Bool => value() == that.value()
 primitive IntegerLessThanOrEqualApplicationRoleConnectionMetadataType is ApplicationRoleConnectionMetadataType
     """
     the metadata value (integer) is less than or equal to the guild’s configured value (integer)
