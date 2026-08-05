@@ -7,13 +7,14 @@ actor GlobalBucket
     let _timers: time.Timers
     embed _queue: Queue[(courier.HTTPRequest, RawResponseHandler)] = Queue[(courier.HTTPRequest, RawResponseHandler)]
 
-    // A request only goes out if every window has requests remaining.
+    // A request only goes out if every window has room for it.
     let _windows: Array[_RateLimitWindow] = _RateLimitConstants.windows()
 
     var _disposed: Bool = false
     var _paused: Bool = false
     var _paused_until: U64 = 0
     var _pause_generation: USize = 0
+    var _drain_scheduled: Bool = false
 
     new create(api: RestApi, timers: time.Timers) =>
         _api = api
@@ -59,47 +60,50 @@ actor GlobalBucket
         _disposed = true
         _queue.clear()
 
-    be _reset_window(index: USize) =>
-        try _windows(index)?.reset() end
+    be _wake() =>
+        _drain_scheduled = false
         _drain()
 
     fun ref _drain() =>
-        let self: GlobalBucket tag = this
+        if _paused then return end
 
-        while _can_send() and (_queue.size() > 0) do
+        while _queue.size() > 0 do
+            let now = time.Time.nanos()
+
+            match _blocked_until(now)
+            | let at: U64 =>
+                if not _drain_scheduled then
+                    _drain_scheduled = true
+                    let self: GlobalBucket tag = this
+                    _timers(time.Timer(_OnceElapsed({() => self._wake()}), at - now))
+                end
+
+                return
+            end
+
             try
                 (let request, let handler) = _queue.dequeue()?
 
-                for (index, window) in _windows.pairs() do
-                    // A window starts with the first request spent in it, rather
-                    // than ticking along on its own.
-                    if not window.started then
-                        window.started = true
-                        _timers(
-                            time.Timer(
-                                _OnceElapsed({() => self._reset_window(index)}),
-                                time.Nanos.from_millis(window.duration_ms.u64())
-                            )
-                        )
-                    end
-
-                    window.spend()
+                for window in _windows.values() do
+                    window.spend(now)
                 end
 
                 _api._raw_send_request(request, handler)
             else
-                break
+                return
             end
         end
 
-    fun _can_send(): Bool =>
-        if _paused then return false end
+    fun _blocked_until(now: U64): (U64 | None) =>
+        var at: U64 = 0
 
         for window in _windows.values() do
-            if window.remaining == 0 then return false end
+            match window.blocked_until(now)
+            | let window_at: U64 => at = at.max(window_at)
+            end
         end
 
-        true
+        if at > now then at end
 
 actor Bucket
     let _env: Env
@@ -276,25 +280,25 @@ class val _RateLimit
 
 class _RateLimitWindow
     let max_count: USize
-    let duration_ms: USize
+    let duration_ns: U64
 
-    var remaining: USize
-    var started: Bool = false
-        """
-        Whether the span is under way, and so a timer is set to end it.
-        """
+    embed _sent_at: Array[U64]
+    var _sends: USize = 0
 
     new create(max_count': USize, duration_ms': USize) =>
         max_count = max_count'
-        duration_ms = duration_ms'
-        remaining = max_count'
+        duration_ns = time.Nanos.from_millis(duration_ms'.u64())
+        _sent_at = Array[U64].init(0, max_count')
 
-    fun ref spend() =>
-        remaining = remaining - remaining.min(1)
+    fun blocked_until(now: U64): (U64 | None) =>
+        if _sends < max_count then return None end
 
-    fun ref reset() =>
-        remaining = max_count
-        started = false
+        let frees_at = try _sent_at(_sends % max_count)? + duration_ns else return None end
+        if frees_at > now then frees_at end
+
+    fun ref spend(now: U64) =>
+        try _sent_at(_sends % max_count)? = now end
+        _sends = _sends + 1
 
 primitive _IsGlobalRateLimit
     fun apply(headers: courier.Headers val): Bool =>
