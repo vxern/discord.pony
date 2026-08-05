@@ -1598,7 +1598,7 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/channels/" + channel_id.string() + "/pins/" + message_id.string()), _Decode.empty(handler, options.on_error))
 
-    be get_answer_voters(channel_id: Snowflake, message_id: Snowflake, answer_id: U64, params: GetAnswerVotersParams, handler: ResponseHandler[Array[User] val]) =>
+    be get_answer_voters(channel_id: Snowflake, message_id: Snowflake, answer_id: Snowflake, params: GetAnswerVotersParams, handler: ResponseHandler[Array[User] val]) =>
         """
         https://docs.discord.com/developers/resources/poll#get-answer-voters
 

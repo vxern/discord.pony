@@ -1,16 +1,18 @@
+use data = "data"
+
 primitive Formatting
     """
     Discord utilizes a subset of markdown for rendering message content on its clients, while also adding some custom functionality to enable things like mentioning users and channels.
     """
 
-    fun user(id: U64): String => "<@" + id.string() + ">"
+    fun user(id: data.Snowflake): String => "<@" + id.string() + ">"
         """
         Using the markdown for users or roles will mention the target(s), and notify them depending on the sender’s permissions as well as the value of the allowed_mentions field when creating a message.
 
         Example: <@80351110224678912>
         """
 
-    fun member(id: U64): String => "<@!" + id.string() + ">"
+    fun member(id: data.Snowflake): String => "<@!" + id.string() + ">"
         """
         Deprecated: Discord no longer distinguishes `<@!id>` from `<@id>`.
         Use `user` instead.
@@ -20,19 +22,19 @@ primitive Formatting
         Example: <@!80351110224678912>
         """
 
-    fun channel(id: U64): String => "<#" + id.string() + ">"
+    fun channel(id: data.Snowflake): String => "<#" + id.string() + ">"
         """
         Example: <#103735883630395392>
         """
 
-    fun role(id: U64): String => "<@&" + id.string() + ">"
+    fun role(id: data.Snowflake): String => "<@&" + id.string() + ">"
         """
         Using the markdown for users or roles will mention the target(s), and notify them depending on the sender’s permissions as well as the value of the allowed_mentions field when creating a message.
         
         Example: <@&165511591545143296>
         """
 
-    fun slash_command(command: String, id: U64): String => "</" + command + ":" + id.string() + ">"
+    fun slash_command(command: String, id: data.Snowflake): String => "</" + command + ":" + id.string() + ">"
         """
         Example: </airhorn:816437322781949972>
 
@@ -41,14 +43,14 @@ primitive Formatting
         Example: </foo group bar:123456789012345678>
         """
 
-    fun emoji(name: String, id: U64): String => "<:" + name + ":" + id.string() + ">"
+    fun emoji(name: String, id: data.Snowflake): String => "<:" + name + ":" + id.string() + ">"
         """
         Standard emoji are currently rendered using Twemoji for Desktop and Android while iOS devices use Apple’s native emoji set.
 
         Example: <:mmLol:216154654256398347>
         """
 
-    fun animated_emoji(name: String, id: U64): String => "<a:" + name + ":" + id.string() + ">"
+    fun animated_emoji(name: String, id: data.Snowflake): String => "<a:" + name + ":" + id.string() + ">"
         """
         Example: <a:b1nzy:392938283556143104>
         """
@@ -60,7 +62,7 @@ primitive Formatting
         Example: <t:1618953630:d>
         """
 
-    fun guild_navigation(id: U64, type': GuildNavigationType val): String => "<" + id.string() + ":" + type'.value() + ">"
+    fun guild_navigation(id: data.Snowflake, type': GuildNavigationType val): String => "<" + id.string() + ":" + type'.value() + ">"
 
 primitive FormattingDefaults
     fun timestamp_style(): TimestampStyle val => TimestampStyleLongDateShortTime
@@ -161,8 +163,8 @@ class GuildNavigationTypeLinkedRolesWithId is GuildNavigationType
     """
     Specific linked role, opening the connection modal on click (the second id is the role id)
     """
-    let id: U64
+    let id: data.Snowflake
 
-    new apply(id': U64) => id = id'
+    new apply(id': data.Snowflake) => id = id'
 
     fun value(): String => "linked-roles:" + id.string()
