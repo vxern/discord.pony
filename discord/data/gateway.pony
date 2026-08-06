@@ -552,13 +552,10 @@ class val GatewayIdentifyEvent is GatewaySendableEvent
     fun opcode(): GatewayOpcode => GatewayOpcodeIdentify
 
     fun data(): json.JsonValue =>
-        var bits: U64 = 0
-        for intent in intents.values() do bits = bits or (U64(1) << intent.value().u64()) end
-
         var obj = json.JsonObject
             .update("token", token)
             .update("properties", properties.to_json())
-            .update("intents", bits.i64())
+            .update("intents", _GatewayIntents.to_json(intents))
 
         match compress
         | let compress': Bool => obj = obj.update("compress", compress')
@@ -713,10 +710,7 @@ class val GatewayRequestGuildMembersEvent is GatewaySendableEvent
 
         match user_ids
         | let user_id: Snowflake => obj = obj.update("user_ids", user_id.to_json())
-        | let user_ids': Array[Snowflake] val =>
-            var array = json.JsonArray
-            for user_id in user_ids'.values() do array = array.push(user_id.to_json()) end
-            obj = obj.update("user_ids", array)
+        | let user_ids': Array[Snowflake] val => obj = obj.update("user_ids", _Snowflakes.to_json(user_ids'))
         end
 
         match nonce
@@ -743,10 +737,7 @@ class val GatewayRequestSoundboardSoundsEvent is GatewaySendableEvent
     fun opcode(): GatewayOpcode => GatewayOpcodeRequestSoundboardSounds
 
     fun data(): json.JsonValue =>
-        var array = json.JsonArray
-        for guild_id in guild_ids.values() do array = array.push(guild_id.to_json()) end
-
-        json.JsonObject.update("guild_ids", array)
+        json.JsonObject.update("guild_ids", _Snowflakes.to_json(guild_ids))
 
 class val GatewayRequestChannelInfoEvent is GatewaySendableEvent
     """
@@ -772,12 +763,9 @@ class val GatewayRequestChannelInfoEvent is GatewaySendableEvent
     fun opcode(): GatewayOpcode => GatewayOpcodeRequestChannelInfo
 
     fun data(): json.JsonValue =>
-        var array = json.JsonArray
-        for field in fields.values() do array = array.push(field) end
-
         json.JsonObject
             .update("guild_id", guild_id.to_json())
-            .update("fields", array)
+            .update("fields", _Strings.to_json(fields))
 
 class val GatewayVoiceStateUpdateEvent is GatewaySendableEvent
     """
@@ -1052,6 +1040,25 @@ primitive GatewayIntents
         | 25 => GatewayIntentDirectMessagePolls
         else error
         end
+
+primitive _GatewayIntents
+    fun apply(bits: U64): Array[GatewayIntent] val =>
+        recover val
+            let intents = Array[GatewayIntent]
+            var shift: U8 = 0
+            while shift < 64 do
+                if (bits and (U64(1) << shift.u64())) != 0 then
+                    try intents.push(GatewayIntents.from(shift)?) end
+                end
+                shift = shift + 1
+            end
+            intents
+        end
+
+    fun to_json(intents: Array[GatewayIntent] val): I64 =>
+        var bits: U64 = 0
+        for intent in intents.values() do bits = bits or (U64(1) << intent.value().u64()) end
+        bits.i64()
 
 class val IdentifyConnectionProperties is ToJsonable
     """
