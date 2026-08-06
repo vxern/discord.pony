@@ -107,6 +107,24 @@ class val StageInstance is Jsonable
             .update("discoverable_disabled", discoverable_disabled)
             .update("guild_scheduled_event_id", match guild_scheduled_event_id | let guild_scheduled_event_id': Snowflake => guild_scheduled_event_id'.to_json() end)
 
+primitive _StageInstances
+    fun apply(value: json.JsonValue): Array[StageInstance] val ? =>
+        """
+        Decodes an array of stage instances.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let instances = Array[StageInstance](array.size())
+            for instance in array.values() do instances.push(StageInstance.from_json(instance as json.JsonObject)?) end
+            instances
+        end
+
+    fun to_json(instances: Array[StageInstance] val): json.JsonArray =>
+        var array = json.JsonArray
+        for instance in instances.values() do array = array.push(instance.to_json()) end
+        array
+
 trait val StageInstancePrivacyLevel is _Enum[StageInstancePrivacyLevel, U8]
     """
     https://docs.discord.com/developers/resources/stage-instance#stage-instance-object-privacy-level

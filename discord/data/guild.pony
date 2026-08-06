@@ -1068,6 +1068,70 @@ primitive _PartialGuilds
         for guild in guilds.values() do array = array.push(guild.to_json()) end
         array
 
+class val UnavailableGuild is Jsonable
+    """
+    https://docs.discord.com/developers/resources/guild#unavailable-guild-object
+
+    A partial guild object. Represents an Offline Guild, or a Guild whose information has not been provided through `GUILD_CREATE` events during the Gateway connect.
+    """
+
+    let id: Snowflake
+        """
+        guild id
+        """
+
+    let unavailable: (Bool | None)
+        """
+        `true` if this guild is unavailable due to an outage
+
+        A `GUILD_DELETE` without this field set means the user was removed from the guild.
+        """
+
+    new val create(id': Snowflake, unavailable': (Bool | None) = None) =>
+        id = id'
+        unavailable = unavailable'
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var id': (Snowflake | None) = None
+        var unavailable': (Bool | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "id" => id' = Snowflake.from_json(value)?
+            | "unavailable" => unavailable' = value as Bool
+            end
+        end
+
+        id = id' as Snowflake
+        unavailable = unavailable'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject.update("id", id.to_json())
+
+        match unavailable
+        | let unavailable': Bool => obj = obj.update("unavailable", unavailable')
+        end
+
+        obj
+
+primitive _UnavailableGuilds
+    fun apply(value: json.JsonValue): Array[UnavailableGuild] val ? =>
+        """
+        Decodes an array of unavailable guilds.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let guilds = Array[UnavailableGuild](array.size())
+            for guild in array.values() do guilds.push(UnavailableGuild.from_json(guild as json.JsonObject)?) end
+            guilds
+        end
+
+    fun to_json(guilds: Array[UnavailableGuild] val): json.JsonArray =>
+        var array = json.JsonArray
+        for guild in guilds.values() do array = array.push(guild.to_json()) end
+        array
+
 trait val DefaultMessageNotificationLevel is _Enum[DefaultMessageNotificationLevel, U8]
     """
     https://docs.discord.com/developers/resources/guild#guild-object-default-message-notification-level

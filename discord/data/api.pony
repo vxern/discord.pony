@@ -10,3 +10,13 @@ primitive ApiVersion9 is ApiVersion
     fun value(): U8 => 9
 primitive ApiVersion10 is ApiVersion
     fun value(): U8 => 10
+primitive ApiVersions
+    fun from(value: U8): ApiVersion ? =>
+        match value
+        | 6 => ApiVersion6
+        | 7 => ApiVersion7
+        | 8 => ApiVersion8
+        | 9 => ApiVersion9
+        | 10 => ApiVersion10
+        else error
+        end

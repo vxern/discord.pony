@@ -1458,18 +1458,27 @@ class val ThreadMember is Jsonable
         Only included when `with_member` is set to true when calling List Thread Members or Get Thread Member.
         """
 
+    let presence: (Presence | None)
+        """
+        The presence of the user
+
+        Only included on the members added in the THREAD_MEMBERS_UPDATE event, where Discord may also send it as `null`.
+        """
+
     new val create(
         id': (Snowflake | None) = None,
         user_id': (Snowflake | None) = None,
         join_timestamp': ISO8601,
         flags': USize,
-        member': (GuildMember | None) = None
+        member': (GuildMember | None) = None,
+        presence': (Presence | None) = None
     ) =>
         id = id'
         user_id = user_id'
         join_timestamp = join_timestamp'
         flags = flags'
         member = member'
+        presence = presence'
 
     new val from_json(obj: json.JsonObject) ? =>
         var id': (Snowflake | None) = None
@@ -1477,6 +1486,7 @@ class val ThreadMember is Jsonable
         var join_timestamp': (ISO8601 | None) = None
         var flags': (USize | None) = None
         var member': (GuildMember | None) = None
+        var presence': (Presence | None) = None
 
         for (key, value) in obj.pairs() do
             match key
@@ -1485,6 +1495,8 @@ class val ThreadMember is Jsonable
             | "join_timestamp" => join_timestamp' = value as String
             | "flags" => flags' = (value as I64).usize()
             | "member" => member' = GuildMember.from_json(value as json.JsonObject)?
+            | "presence" =>
+                match value | let obj': json.JsonObject => presence' = Presence.from_json(obj')? end
             end
         end
 
@@ -1493,6 +1505,7 @@ class val ThreadMember is Jsonable
         join_timestamp = join_timestamp' as ISO8601
         flags = flags' as USize
         member = member'
+        presence = presence'
 
     fun to_json(): json.JsonObject =>
         var obj = json.JsonObject
@@ -1509,6 +1522,10 @@ class val ThreadMember is Jsonable
 
         match member
         | let member': GuildMember => obj = obj.update("member", member'.to_json())
+        end
+
+        match presence
+        | let presence': Presence => obj = obj.update("presence", presence'.to_json())
         end
 
         obj

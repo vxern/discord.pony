@@ -283,6 +283,233 @@ class val User is Jsonable
 
         obj
 
+class val PartialUser is Jsonable
+    """
+    https://docs.discord.com/developers/resources/user#user-object-user-structure
+
+    A user Discord sent as a *partial* object: the same structure as `User`, but
+    carrying only some of its fields. Presences embed users this way, where the
+    only field guaranteed to be sent is `id`, so every field here but `id` is
+    optional.
+
+    The fields mean exactly what their `User` counterparts do, and are documented
+    there. A field Discord omits is indistinguishable from a field Discord sent as
+    `null`.
+    """
+
+    let id: Snowflake
+    let username: (String | None)
+    let discriminator: (String | None)
+    let global_name: (String | None)
+    let avatar: (String | None)
+    let bot: (Bool | None)
+    let system: (Bool | None)
+    let mfa_enabled: (Bool | None)
+    let banner: (String | None)
+    let accent_color: (I64 | None)
+    let locale: (Locale | None)
+    let verified: (Bool | None)
+    let email: (String | None)
+    let flags: (Array[UserFlag] val | None)
+    let premium_type: (PremiumType | None)
+    let public_flags: (Array[UserFlag] val | None)
+    let avatar_decoration_data: (AvatarDecorationData | None)
+    let collectibles: (Collectibles | None)
+    let primary_guild: (UserPrimaryGuild | None)
+
+    new val create(
+        id': Snowflake,
+        username': (String | None) = None,
+        discriminator': (String | None) = None,
+        global_name': (String | None) = None,
+        avatar': (String | None) = None,
+        bot': (Bool | None) = None,
+        system': (Bool | None) = None,
+        mfa_enabled': (Bool | None) = None,
+        banner': (String | None) = None,
+        accent_color': (I64 | None) = None,
+        locale': (Locale | None) = None,
+        verified': (Bool | None) = None,
+        email': (String | None) = None,
+        flags': (Array[UserFlag] val | None) = None,
+        premium_type': (PremiumType | None) = None,
+        public_flags': (Array[UserFlag] val | None) = None,
+        avatar_decoration_data': (AvatarDecorationData | None) = None,
+        collectibles': (Collectibles | None) = None,
+        primary_guild': (UserPrimaryGuild | None) = None
+    ) =>
+        id = id'
+        username = username'
+        discriminator = discriminator'
+        global_name = global_name'
+        avatar = avatar'
+        bot = bot'
+        system = system'
+        mfa_enabled = mfa_enabled'
+        banner = banner'
+        accent_color = accent_color'
+        locale = locale'
+        verified = verified'
+        email = email'
+        flags = flags'
+        premium_type = premium_type'
+        public_flags = public_flags'
+        avatar_decoration_data = avatar_decoration_data'
+        collectibles = collectibles'
+        primary_guild = primary_guild'
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var id': (Snowflake | None) = None
+        var username': (String | None) = None
+        var discriminator': (String | None) = None
+        var global_name': (String | None) = None
+        var avatar': (String | None) = None
+        var bot': (Bool | None) = None
+        var system': (Bool | None) = None
+        var mfa_enabled': (Bool | None) = None
+        var banner': (String | None) = None
+        var accent_color': (I64 | None) = None
+        var locale': (Locale | None) = None
+        var verified': (Bool | None) = None
+        var email': (String | None) = None
+        var flags': (Array[UserFlag] val | None) = None
+        var premium_type': (PremiumType | None) = None
+        var public_flags': (Array[UserFlag] val | None) = None
+        var avatar_decoration_data': (AvatarDecorationData | None) = None
+        var collectibles': (Collectibles | None) = None
+        var primary_guild': (UserPrimaryGuild | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "id" => id' = Snowflake.from_json(value)?
+            | "username" =>
+                match value | let string: String => username' = string end
+            | "discriminator" =>
+                match value | let string: String => discriminator' = string end
+            | "global_name" =>
+                match value | let string: String => global_name' = string end
+            | "avatar" =>
+                match value | let string: String => avatar' = string end
+            | "bot" => bot' = value as Bool
+            | "system" => system' = value as Bool
+            | "mfa_enabled" => mfa_enabled' = value as Bool
+            | "banner" =>
+                match value | let string: String => banner' = string end
+            | "accent_color" =>
+                match value | let integer: I64 => accent_color' = integer end
+            | "locale" => locale' = Locales.from(value as String)?
+            | "verified" => verified' = value as Bool
+            | "email" =>
+                match value | let string: String => email' = string end
+            | "flags" => flags' = _UserFlags((value as I64).u64())
+            | "premium_type" => premium_type' = PremiumTypes.from((value as I64).u8())?
+            | "public_flags" => public_flags' = _UserFlags((value as I64).u64())
+            | "avatar_decoration_data" =>
+                match value | let obj': json.JsonObject => avatar_decoration_data' = AvatarDecorationData.from_json(obj')? end
+            | "collectibles" =>
+                match value | let obj': json.JsonObject => collectibles' = Collectibles.from_json(obj')? end
+            | "primary_guild" =>
+                match value | let obj': json.JsonObject => primary_guild' = UserPrimaryGuild.from_json(obj')? end
+            end
+        end
+
+        id = id' as Snowflake
+        username = username'
+        discriminator = discriminator'
+        global_name = global_name'
+        avatar = avatar'
+        bot = bot'
+        system = system'
+        mfa_enabled = mfa_enabled'
+        banner = banner'
+        accent_color = accent_color'
+        locale = locale'
+        verified = verified'
+        email = email'
+        flags = flags'
+        premium_type = premium_type'
+        public_flags = public_flags'
+        avatar_decoration_data = avatar_decoration_data'
+        collectibles = collectibles'
+        primary_guild = primary_guild'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject.update("id", id.to_json())
+
+        match username
+        | let username': String => obj = obj.update("username", username')
+        end
+
+        match discriminator
+        | let discriminator': String => obj = obj.update("discriminator", discriminator')
+        end
+
+        match global_name
+        | let global_name': String => obj = obj.update("global_name", global_name')
+        end
+
+        match avatar
+        | let avatar': String => obj = obj.update("avatar", avatar')
+        end
+
+        match bot
+        | let bot': Bool => obj = obj.update("bot", bot')
+        end
+
+        match system
+        | let system': Bool => obj = obj.update("system", system')
+        end
+
+        match mfa_enabled
+        | let mfa_enabled': Bool => obj = obj.update("mfa_enabled", mfa_enabled')
+        end
+
+        match banner
+        | let banner': String => obj = obj.update("banner", banner')
+        end
+
+        match accent_color
+        | let accent_color': I64 => obj = obj.update("accent_color", accent_color')
+        end
+
+        match locale
+        | let locale': Locale => obj = obj.update("locale", locale'.value())
+        end
+
+        match verified
+        | let verified': Bool => obj = obj.update("verified", verified')
+        end
+
+        match email
+        | let email': String => obj = obj.update("email", email')
+        end
+
+        match flags
+        | let flags': Array[UserFlag] val => obj = obj.update("flags", _UserFlags.to_json(flags'))
+        end
+
+        match premium_type
+        | let premium_type': PremiumType => obj = obj.update("premium_type", premium_type'.value().i64())
+        end
+
+        match public_flags
+        | let public_flags': Array[UserFlag] val => obj = obj.update("public_flags", _UserFlags.to_json(public_flags'))
+        end
+
+        match avatar_decoration_data
+        | let avatar_decoration_data': AvatarDecorationData => obj = obj.update("avatar_decoration_data", avatar_decoration_data'.to_json())
+        end
+
+        match collectibles
+        | let collectibles': Collectibles => obj = obj.update("collectibles", collectibles'.to_json())
+        end
+
+        match primary_guild
+        | let primary_guild': UserPrimaryGuild => obj = obj.update("primary_guild", primary_guild'.to_json())
+        end
+
+        obj
+
 primitive _Users
     fun apply(value: json.JsonValue): Array[User] val ? =>
         """

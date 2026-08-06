@@ -177,6 +177,24 @@ class val VoiceState is Jsonable
 
         obj
 
+primitive _VoiceStates
+    fun apply(value: json.JsonValue): Array[VoiceState] val ? =>
+        """
+        Decodes an array of voice states.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let states = Array[VoiceState](array.size())
+            for state in array.values() do states.push(VoiceState.from_json(state as json.JsonObject)?) end
+            states
+        end
+
+    fun to_json(states: Array[VoiceState] val): json.JsonArray =>
+        var array = json.JsonArray
+        for state in states.values() do array = array.push(state.to_json()) end
+        array
+
 class val VoiceRegion is Jsonable
     """
     https://docs.discord.com/developers/resources/voice#voice-region-object-voice-region-structure
