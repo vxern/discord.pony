@@ -1,4 +1,4 @@
-use data = "data"
+use data = "./data"
 
 primitive Formatting
     """

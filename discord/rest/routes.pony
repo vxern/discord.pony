@@ -1,4 +1,5 @@
-use "data"
+// TODO(vxern): use data = "data"
+use "../data"
 use courier = "courier"
 use json = "json"
 

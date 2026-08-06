@@ -1,4 +1,5 @@
-use "files"
+use "../data"
+use files = "files"
 use collections = "collections"
 use time = "time"
 use courier = "courier"
@@ -59,8 +60,8 @@ actor RestApi
                     ssl.SSLContext
                     .> set_client_verify(true)
                     .> set_authority(
-                        FilePath(
-                            FileAuth(env.root),
+                        files.FilePath(
+                            files.FileAuth(env.root),
                             options'.ca_certificates_path
                         )
                     )?
@@ -150,8 +151,8 @@ actor _RequestSender is courier.HTTPClientConnectionActor
         _collector = courier.ResponseCollector
         _collector.set_response(response)
 
-    fun ref on_body_chunk(data: Array[U8] val) =>
-        _collector.add_chunk(data)
+    fun ref on_body_chunk(chunk: Array[U8] val) =>
+        _collector.add_chunk(chunk)
 
     fun ref on_response_complete() =>
         try
@@ -190,19 +191,34 @@ primitive RestConstants
 
     fun port(): String => "443"
 
+primitive RestDefaults
+    fun version(): ApiVersion val => ApiVersion10
+
+    fun user_agent(): String =>
+        "discord.pony (https://github.com/vxern/discord.pony, 1.0.0)"
+
+    fun ca_certificates_path(): String =>
+        ifdef osx then
+            "/etc/ssl/cert.pem"
+        else
+            "/etc/ssl/certs/ca-certificates.crt"
+        end
+
+    fun on_error(): RestErrorHandler => { (error': RestError) => None }
+
 class val RestOptions
     let token: String
         """
         The bot token every request is authorised with.
         """
-    let version: RestVersion val
+    let version: ApiVersion val
     let user_agent: String
     let ca_certificates_path: String
     let on_error: RestErrorHandler
 
     new val create(
         token': String,
-        version': RestVersion val = RestDefaults.version(),
+        version': ApiVersion val = RestDefaults.version(),
         user_agent': String = RestDefaults.user_agent(),
         ca_certificates_path': String = RestDefaults.ca_certificates_path(),
         on_error': RestErrorHandler = RestDefaults.on_error()
@@ -252,30 +268,3 @@ class val RestOptions
         | let body': String => body'.array()
         end
 
-trait val RestVersion is _Enum[RestVersion, U64]
-    fun id(): String => "v" + value().string()
-primitive RestVersion6 is RestVersion
-    fun value(): U64 => 6
-primitive RestVersion7 is RestVersion
-    fun value(): U64 => 7
-primitive RestVersion8 is RestVersion
-    fun value(): U64 => 8
-primitive RestVersion9 is RestVersion
-    fun value(): U64 => 9
-primitive RestVersion10 is RestVersion
-    fun value(): U64 => 10
-
-primitive RestDefaults
-    fun version(): RestVersion val => RestVersion10
-
-    fun user_agent(): String =>
-        "discord.pony (https://github.com/vxern/discord.pony, 1.0.0)"
-
-    fun ca_certificates_path(): String =>
-        ifdef osx then
-            "/etc/ssl/cert.pem"
-        else
-            "/etc/ssl/certs/ca-certificates.crt"
-        end
-
-    fun on_error(): RestErrorHandler => {(error': RestError) => None }
