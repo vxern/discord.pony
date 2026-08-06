@@ -472,6 +472,379 @@ class val GatewayEventPayload is Jsonable
 
         obj
 
+trait val GatewaySendableEvent
+    """
+    https://docs.discord.com/developers/events/gateway-events#send-events
+
+    Send events are Gateway events encapsulated in an event payload, and are sent by an app to Discord through a Gateway connection.
+    """
+
+    fun opcode(): GatewayOpcode
+
+    fun data(): json.JsonValue => None
+
+    fun payload(): GatewayEventPayload =>
+        GatewayEventPayload(opcode(), data())
+
+class val GatewayIdentifyEvent is GatewaySendableEvent
+    """
+    https://docs.discord.com/developers/events/gateway-events#identify
+
+    Used to trigger the initial handshake with the gateway.
+    """
+
+    let token: String
+        """
+        Authentication token
+        """
+
+    let properties: IdentifyConnectionProperties
+        """
+        Connection properties
+        """
+
+    let compress: (Bool | None)
+        """
+        Whether this connection supports compression of packets
+
+        Defaults to `false`.
+        """
+
+    let large_threshold: (USize | None)
+        """
+        Value between 50 and 250, total number of members where the gateway will stop sending offline members in the guild member list
+
+        Defaults to `50`.
+        """
+
+    let shard: ((USize, USize) | None)
+        """
+        Used for Guild Sharding
+        """
+
+    let presence: (GatewayPresenceUpdate | None)
+        """
+        Presence structure for initial presence information
+        """
+
+    let intents: Array[GatewayIntent] val
+        """
+        Gateway Intents you wish to receive
+        """
+
+    new val create(
+        token': String,
+        properties': IdentifyConnectionProperties,
+        compress': (Bool | None) = None,
+        large_threshold': (USize | None) = None,
+        shard': ((USize, USize) | None) = None,
+        presence': (GatewayPresenceUpdate | None) = None,
+        intents': Array[GatewayIntent] val
+    ) =>
+        token = token'
+        properties = properties'
+        compress = compress'
+        large_threshold = large_threshold'
+        shard = shard'
+        presence = presence'
+        intents = intents'
+
+    fun opcode(): GatewayOpcode => GatewayOpcodeIdentify
+
+    fun data(): json.JsonValue =>
+        var bits: U64 = 0
+        for intent in intents.values() do bits = bits or (U64(1) << intent.value().u64()) end
+
+        var obj = json.JsonObject
+            .update("token", token)
+            .update("properties", properties.to_json())
+            .update("intents", bits.i64())
+
+        match compress
+        | let compress': Bool => obj = obj.update("compress", compress')
+        end
+
+        match large_threshold
+        | let large_threshold': USize => obj = obj.update("large_threshold", large_threshold'.i64())
+        end
+
+        match shard
+        | (let shard_id: USize, let num_shards: USize) =>
+            obj = obj.update("shard", json.JsonArray.push(shard_id.i64()).push(num_shards.i64()))
+        end
+
+        match presence
+        | let presence': GatewayPresenceUpdate => obj = obj.update("presence", presence'.to_json())
+        end
+
+        obj
+
+class val GatewayResumeEvent is GatewaySendableEvent
+    """
+    https://docs.discord.com/developers/events/gateway-events#resume
+
+    Used to replay missed events when a disconnected client resumes.
+    """
+
+    let token: String
+        """
+        Session token
+        """
+
+    let session_id: String
+        """
+        Session ID
+        """
+
+    let seq: USize
+        """
+        Last sequence number received
+        """
+
+    new val create(token': String, session_id': String, seq': USize) =>
+        token = token'
+        session_id = session_id'
+        seq = seq'
+
+    fun opcode(): GatewayOpcode => GatewayOpcodeResume
+
+    fun data(): json.JsonValue =>
+        json.JsonObject
+            .update("token", token)
+            .update("session_id", session_id)
+            .update("seq", seq.i64())
+
+class val GatewayHeartbeatEvent is GatewaySendableEvent
+    """
+    https://docs.discord.com/developers/events/gateway-events#heartbeat
+
+    Used to maintain an active gateway connection. Must be sent every `heartbeat_interval` milliseconds after the Hello payload is received.
+    """
+
+    let seq: (USize | None)
+        """
+        The last sequence number received by the client, or `None` if it has not yet received one
+        """
+
+    new val create(seq': (USize | None) = None) =>
+        seq = seq'
+
+    fun opcode(): GatewayOpcode => GatewayOpcodeHeartbeat
+
+    fun data(): json.JsonValue =>
+        match seq
+        | let seq': USize => seq'.i64()
+        end
+
+class val GatewayRequestGuildMembersEvent is GatewaySendableEvent
+    """
+    https://docs.discord.com/developers/events/gateway-events#request-guild-members
+
+    Used to request all members for a guild. The server will send Guild Members Chunk events in response with up to 1000 members per chunk until all members that match the request have been sent.
+
+    The `GUILD_PRESENCES` intent is required to set `presences` to `true`, and the `GUILD_MEMBERS` intent is required to request the entire member list. Requesting a prefix or user ids returns a maximum of 100 members.
+    """
+
+    let guild_id: Snowflake
+        """
+        ID of the guild to get members for
+        """
+
+    let query: (String | None)
+        """
+        string that username starts with, or an empty string to return all members
+
+        One of `query` or `user_ids` is required.
+        """
+
+    let limit: USize
+        """
+        maximum number of members to send matching the `query`; a limit of `0` can be used with an empty string `query` to return all members
+        """
+
+    let presences: (Bool | None)
+        """
+        used to specify if we want the presences of the matched members
+        """
+
+    let user_ids: (Snowflake | Array[Snowflake] val | None)
+        """
+        used to specify which users you wish to fetch
+
+        One of `query` or `user_ids` is required.
+        """
+
+    let nonce: (String | None)
+        """
+        nonce to identify the Guild Members Chunk response
+
+        Can only be up to 32 bytes. If you send an invalid nonce it will be ignored and the reply member chunk(s) will not have a nonce set.
+        """
+
+    new val create(
+        guild_id': Snowflake,
+        query': (String | None) = None,
+        limit': USize = 0,
+        presences': (Bool | None) = None,
+        user_ids': (Snowflake | Array[Snowflake] val | None) = None,
+        nonce': (String | None) = None
+    ) =>
+        guild_id = guild_id'
+        query = query'
+        limit = limit'
+        presences = presences'
+        user_ids = user_ids'
+        nonce = nonce'
+
+    fun opcode(): GatewayOpcode => GatewayOpcodeRequestGuildMembers
+
+    fun data(): json.JsonValue =>
+        var obj = json.JsonObject
+            .update("guild_id", guild_id.to_json())
+            .update("limit", limit.i64())
+
+        match query
+        | let query': String => obj = obj.update("query", query')
+        end
+
+        match presences
+        | let presences': Bool => obj = obj.update("presences", presences')
+        end
+
+        match user_ids
+        | let user_id: Snowflake => obj = obj.update("user_ids", user_id.to_json())
+        | let user_ids': Array[Snowflake] val =>
+            var array = json.JsonArray
+            for user_id in user_ids'.values() do array = array.push(user_id.to_json()) end
+            obj = obj.update("user_ids", array)
+        end
+
+        match nonce
+        | let nonce': String => obj = obj.update("nonce", nonce')
+        end
+
+        obj
+
+class val GatewayRequestSoundboardSoundsEvent is GatewaySendableEvent
+    """
+    https://docs.discord.com/developers/events/gateway-events#request-soundboard-sounds
+
+    Used to request soundboard sounds for a list of guilds. The server will send Soundboard Sounds events for each guild in response.
+    """
+
+    let guild_ids: Array[Snowflake] val
+        """
+        IDs of the guilds to get soundboard sounds for
+        """
+
+    new val create(guild_ids': Array[Snowflake] val) =>
+        guild_ids = guild_ids'
+
+    fun opcode(): GatewayOpcode => GatewayOpcodeRequestSoundboardSounds
+
+    fun data(): json.JsonValue =>
+        var array = json.JsonArray
+        for guild_id in guild_ids.values() do array = array.push(guild_id.to_json()) end
+
+        json.JsonObject.update("guild_ids", array)
+
+class val GatewayRequestChannelInfoEvent is GatewaySendableEvent
+    """
+    https://docs.discord.com/developers/events/gateway-events#request-channel-info
+
+    Requests ephemeral channel data for channels in a guild. The server will send a Channel Info event in response.
+    """
+
+    let guild_id: Snowflake
+        """
+        The guild id to request channel info for
+        """
+
+    let fields: Array[String] val
+        """
+        The fields to request. The current available fields are `status` and `voice_start_time`.
+        """
+
+    new val create(guild_id': Snowflake, fields': Array[String] val) =>
+        guild_id = guild_id'
+        fields = fields'
+
+    fun opcode(): GatewayOpcode => GatewayOpcodeRequestChannelInfo
+
+    fun data(): json.JsonValue =>
+        var array = json.JsonArray
+        for field in fields.values() do array = array.push(field) end
+
+        json.JsonObject
+            .update("guild_id", guild_id.to_json())
+            .update("fields", array)
+
+class val GatewayVoiceStateUpdateEvent is GatewaySendableEvent
+    """
+    https://docs.discord.com/developers/events/gateway-events#update-voice-state
+
+    Sent when a client wants to join, move, or disconnect from a voice channel.
+    """
+
+    let guild_id: Snowflake
+        """
+        ID of the guild
+        """
+
+    let channel_id: (Snowflake | None)
+        """
+        ID of the voice channel client wants to join (null if disconnecting)
+        """
+
+    let self_mute: Bool
+        """
+        Whether the client is muted
+        """
+
+    let self_deaf: Bool
+        """
+        Whether the client deafened
+        """
+
+    new val create(
+        guild_id': Snowflake,
+        channel_id': (Snowflake | None),
+        self_mute': Bool,
+        self_deaf': Bool
+    ) =>
+        guild_id = guild_id'
+        channel_id = channel_id'
+        self_mute = self_mute'
+        self_deaf = self_deaf'
+
+    fun opcode(): GatewayOpcode => GatewayOpcodeVoiceStateUpdate
+
+    fun data(): json.JsonValue =>
+        json.JsonObject
+            .update("guild_id", guild_id.to_json())
+            .update("channel_id", match channel_id | let channel_id': Snowflake => channel_id'.to_json() end)
+            .update("self_mute", self_mute)
+            .update("self_deaf", self_deaf)
+
+class val GatewayPresenceUpdateEvent is GatewaySendableEvent
+    """
+    https://docs.discord.com/developers/events/gateway-events#update-presence
+
+    Sent by the client to indicate a presence or status update.
+    """
+
+    let presence: GatewayPresenceUpdate
+        """
+        The presence to update to
+        """
+
+    new val create(presence': GatewayPresenceUpdate) =>
+        presence = presence'
+
+    fun opcode(): GatewayOpcode => GatewayOpcodePresenceUpdate
+
+    fun data(): json.JsonValue => presence.to_json()
+
 trait val GatewayIntent is _Enum[GatewayIntent, U8]
     """
     https://docs.discord.com/developers/events/gateway#list-of-intents
@@ -5511,3 +5884,166 @@ class val SoundboardSounds is Jsonable
         json.JsonObject
             .update("soundboard_sounds", _SoundboardSounds.to_json(soundboard_sounds))
             .update("guild_id", guild_id.to_json())
+
+type GatewayDispatchEventData is
+    ( GuildApplicationCommandPermissions
+    | AutoModerationRule
+    | AutoModerationActionExecution
+    | Channel
+    | ChannelInfo
+    | ChannelPinsUpdate
+    | ThreadCreate
+    | ThreadDelete
+    | ThreadListSync
+    | ThreadMemberUpdate
+    | ThreadMembersUpdate
+    | Entitlement
+    | GuildCreate
+    | Guild
+    | UnavailableGuild
+    | GuildAuditLogEntryCreate
+    | GuildBanAdd
+    | GuildBanRemove
+    | GuildEmojisUpdate
+    | GuildStickersUpdate
+    | GuildIntegrationsUpdate
+    | GuildMemberAdd
+    | GuildMemberRemove
+    | GuildMemberUpdate
+    | GuildMembersChunk
+    | GuildRoleCreate
+    | GuildRoleUpdate
+    | GuildRoleDelete
+    | GuildScheduledEvent
+    | GuildScheduledEventUserAdd
+    | GuildScheduledEventUserRemove
+    | SoundboardSound
+    | GuildSoundboardSoundDelete
+    | GuildSoundboardSoundsUpdate
+    | SoundboardSounds
+    | IntegrationCreate
+    | IntegrationUpdate
+    | IntegrationDelete
+    | Interaction
+    | InviteCreate
+    | InviteDelete
+    | MessageCreate
+    | MessageUpdate
+    | MessageDelete
+    | MessageDeleteBulk
+    | MessageReactionAdd
+    | MessageReactionRemove
+    | MessageReactionRemoveAll
+    | MessageReactionRemoveEmoji
+    | MessagePollVoteAdd
+    | MessagePollVoteRemove
+    | Presence
+    | StageInstance
+    | Subscription
+    | TypingStart
+    | User
+    | VoiceChannelEffectSend
+    | VoiceChannelStatusUpdate
+    | VoiceChannelStartTimeUpdate
+    | VoiceState
+    | VoiceServerUpdate
+    | WebhooksUpdate
+    | GatewayReady
+    | GatewayRateLimited
+    | None )
+    """
+    https://docs.discord.com/developers/events/gateway-events#receive-events
+
+    The decoded `d` of a dispatch payload. `None` is what an event that carries no data, such as `RESUMED`, decodes to.
+    """
+
+primitive GatewayDispatchEvents
+    fun from(name: String, data: json.JsonValue): GatewayDispatchEventData ? =>
+        """
+        Decodes the `d` of a dispatch payload according to its event name `t`.
+        """
+
+        match name
+        | "READY" => GatewayReady.from_json(data as json.JsonObject)?
+        | "RESUMED" => None
+        | "RATE_LIMITED" => GatewayRateLimited.from_json(data as json.JsonObject)?
+        | "APPLICATION_COMMAND_PERMISSIONS_UPDATE" => GuildApplicationCommandPermissions.from_json(data as json.JsonObject)?
+        | "AUTO_MODERATION_RULE_CREATE" => AutoModerationRule.from_json(data as json.JsonObject)?
+        | "AUTO_MODERATION_RULE_UPDATE" => AutoModerationRule.from_json(data as json.JsonObject)?
+        | "AUTO_MODERATION_RULE_DELETE" => AutoModerationRule.from_json(data as json.JsonObject)?
+        | "AUTO_MODERATION_ACTION_EXECUTION" => AutoModerationActionExecution.from_json(data as json.JsonObject)?
+        | "CHANNEL_CREATE" => Channel.from_json(data as json.JsonObject)?
+        | "CHANNEL_UPDATE" => Channel.from_json(data as json.JsonObject)?
+        | "CHANNEL_DELETE" => Channel.from_json(data as json.JsonObject)?
+        | "CHANNEL_INFO" => ChannelInfo.from_json(data as json.JsonObject)?
+        | "CHANNEL_PINS_UPDATE" => ChannelPinsUpdate.from_json(data as json.JsonObject)?
+        | "THREAD_CREATE" => ThreadCreate.from_json(data as json.JsonObject)?
+        | "THREAD_UPDATE" => Channel.from_json(data as json.JsonObject)?
+        | "THREAD_DELETE" => ThreadDelete.from_json(data as json.JsonObject)?
+        | "THREAD_LIST_SYNC" => ThreadListSync.from_json(data as json.JsonObject)?
+        | "THREAD_MEMBER_UPDATE" => ThreadMemberUpdate.from_json(data as json.JsonObject)?
+        | "THREAD_MEMBERS_UPDATE" => ThreadMembersUpdate.from_json(data as json.JsonObject)?
+        | "ENTITLEMENT_CREATE" => Entitlement.from_json(data as json.JsonObject)?
+        | "ENTITLEMENT_UPDATE" => Entitlement.from_json(data as json.JsonObject)?
+        | "ENTITLEMENT_DELETE" => Entitlement.from_json(data as json.JsonObject)?
+        | "GUILD_CREATE" =>
+            let obj = data as json.JsonObject
+            try GuildCreate.from_json(obj)? else UnavailableGuild.from_json(obj)? end
+        | "GUILD_UPDATE" => Guild.from_json(data as json.JsonObject)?
+        | "GUILD_DELETE" => UnavailableGuild.from_json(data as json.JsonObject)?
+        | "GUILD_AUDIT_LOG_ENTRY_CREATE" => GuildAuditLogEntryCreate.from_json(data as json.JsonObject)?
+        | "GUILD_BAN_ADD" => GuildBanAdd.from_json(data as json.JsonObject)?
+        | "GUILD_BAN_REMOVE" => GuildBanRemove.from_json(data as json.JsonObject)?
+        | "GUILD_EMOJIS_UPDATE" => GuildEmojisUpdate.from_json(data as json.JsonObject)?
+        | "GUILD_STICKERS_UPDATE" => GuildStickersUpdate.from_json(data as json.JsonObject)?
+        | "GUILD_INTEGRATIONS_UPDATE" => GuildIntegrationsUpdate.from_json(data as json.JsonObject)?
+        | "GUILD_MEMBER_ADD" => GuildMemberAdd.from_json(data as json.JsonObject)?
+        | "GUILD_MEMBER_REMOVE" => GuildMemberRemove.from_json(data as json.JsonObject)?
+        | "GUILD_MEMBER_UPDATE" => GuildMemberUpdate.from_json(data as json.JsonObject)?
+        | "GUILD_MEMBERS_CHUNK" => GuildMembersChunk.from_json(data as json.JsonObject)?
+        | "GUILD_ROLE_CREATE" => GuildRoleCreate.from_json(data as json.JsonObject)?
+        | "GUILD_ROLE_UPDATE" => GuildRoleUpdate.from_json(data as json.JsonObject)?
+        | "GUILD_ROLE_DELETE" => GuildRoleDelete.from_json(data as json.JsonObject)?
+        | "GUILD_SCHEDULED_EVENT_CREATE" => GuildScheduledEvent.from_json(data as json.JsonObject)?
+        | "GUILD_SCHEDULED_EVENT_UPDATE" => GuildScheduledEvent.from_json(data as json.JsonObject)?
+        | "GUILD_SCHEDULED_EVENT_DELETE" => GuildScheduledEvent.from_json(data as json.JsonObject)?
+        | "GUILD_SCHEDULED_EVENT_USER_ADD" => GuildScheduledEventUserAdd.from_json(data as json.JsonObject)?
+        | "GUILD_SCHEDULED_EVENT_USER_REMOVE" => GuildScheduledEventUserRemove.from_json(data as json.JsonObject)?
+        | "GUILD_SOUNDBOARD_SOUND_CREATE" => SoundboardSound.from_json(data as json.JsonObject)?
+        | "GUILD_SOUNDBOARD_SOUND_UPDATE" => SoundboardSound.from_json(data as json.JsonObject)?
+        | "GUILD_SOUNDBOARD_SOUND_DELETE" => GuildSoundboardSoundDelete.from_json(data as json.JsonObject)?
+        | "GUILD_SOUNDBOARD_SOUNDS_UPDATE" => GuildSoundboardSoundsUpdate.from_json(data as json.JsonObject)?
+        | "SOUNDBOARD_SOUNDS" => SoundboardSounds.from_json(data as json.JsonObject)?
+        | "INTEGRATION_CREATE" => IntegrationCreate.from_json(data as json.JsonObject)?
+        | "INTEGRATION_UPDATE" => IntegrationUpdate.from_json(data as json.JsonObject)?
+        | "INTEGRATION_DELETE" => IntegrationDelete.from_json(data as json.JsonObject)?
+        | "INTERACTION_CREATE" => Interaction.from_json(data as json.JsonObject)?
+        | "INVITE_CREATE" => InviteCreate.from_json(data as json.JsonObject)?
+        | "INVITE_DELETE" => InviteDelete.from_json(data as json.JsonObject)?
+        | "MESSAGE_CREATE" => MessageCreate.from_json(data as json.JsonObject)?
+        | "MESSAGE_UPDATE" => MessageUpdate.from_json(data as json.JsonObject)?
+        | "MESSAGE_DELETE" => MessageDelete.from_json(data as json.JsonObject)?
+        | "MESSAGE_DELETE_BULK" => MessageDeleteBulk.from_json(data as json.JsonObject)?
+        | "MESSAGE_REACTION_ADD" => MessageReactionAdd.from_json(data as json.JsonObject)?
+        | "MESSAGE_REACTION_REMOVE" => MessageReactionRemove.from_json(data as json.JsonObject)?
+        | "MESSAGE_REACTION_REMOVE_ALL" => MessageReactionRemoveAll.from_json(data as json.JsonObject)?
+        | "MESSAGE_REACTION_REMOVE_EMOJI" => MessageReactionRemoveEmoji.from_json(data as json.JsonObject)?
+        | "MESSAGE_POLL_VOTE_ADD" => MessagePollVoteAdd.from_json(data as json.JsonObject)?
+        | "MESSAGE_POLL_VOTE_REMOVE" => MessagePollVoteRemove.from_json(data as json.JsonObject)?
+        | "PRESENCE_UPDATE" => Presence.from_json(data as json.JsonObject)?
+        | "STAGE_INSTANCE_CREATE" => StageInstance.from_json(data as json.JsonObject)?
+        | "STAGE_INSTANCE_UPDATE" => StageInstance.from_json(data as json.JsonObject)?
+        | "STAGE_INSTANCE_DELETE" => StageInstance.from_json(data as json.JsonObject)?
+        | "SUBSCRIPTION_CREATE" => Subscription.from_json(data as json.JsonObject)?
+        | "SUBSCRIPTION_UPDATE" => Subscription.from_json(data as json.JsonObject)?
+        | "SUBSCRIPTION_DELETE" => Subscription.from_json(data as json.JsonObject)?
+        | "TYPING_START" => TypingStart.from_json(data as json.JsonObject)?
+        | "USER_UPDATE" => User.from_json(data as json.JsonObject)?
+        | "VOICE_CHANNEL_EFFECT_SEND" => VoiceChannelEffectSend.from_json(data as json.JsonObject)?
+        | "VOICE_CHANNEL_STATUS_UPDATE" => VoiceChannelStatusUpdate.from_json(data as json.JsonObject)?
+        | "VOICE_CHANNEL_START_TIME_UPDATE" => VoiceChannelStartTimeUpdate.from_json(data as json.JsonObject)?
+        | "VOICE_STATE_UPDATE" => VoiceState.from_json(data as json.JsonObject)?
+        | "VOICE_SERVER_UPDATE" => VoiceServerUpdate.from_json(data as json.JsonObject)?
+        | "WEBHOOKS_UPDATE" => WebhooksUpdate.from_json(data as json.JsonObject)?
+        else error
+        end
