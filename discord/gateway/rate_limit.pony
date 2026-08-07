@@ -52,6 +52,7 @@ primitive _RateLimitConstants
 
     fun presence_window(): _RateLimitWindow => _RateLimitWindow(5, 20 * 1000)
 
-    fun identify_window(): _RateLimitWindow => _RateLimitWindow(1, 5 * 1000)
+    fun identify_window(max_concurrency: USize = 1): _RateLimitWindow =>
+        _RateLimitWindow(max_concurrency.max(1), 5 * 1000)
 
     fun heartbeat_reserve(): USize => 5

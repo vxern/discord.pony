@@ -9,7 +9,7 @@ actor _GatewayBucket
 
     let _commands: _RateLimitWindow = _RateLimitConstants.command_window()
     let _presences: _RateLimitWindow = _RateLimitConstants.presence_window()
-    let _identifies: _RateLimitWindow = _RateLimitConstants.identify_window()
+    var _identifies: _RateLimitWindow = _RateLimitConstants.identify_window()
 
     var _open: Bool = false
     var _throttled: Bool = false
@@ -78,6 +78,17 @@ actor _GatewayBucket
 
         _commands.spend(time.Time.nanos())
         _connection._raw_send(event)
+
+    be set_identify_concurrency(max_concurrency: USize) =>
+        if max_concurrency == _identifies.max_count then return end
+
+        Debug.out(
+            "[gateway/bucket] the identify limit is now "
+            + max_concurrency.string() + " per 5s, was "
+            + _identifies.max_count.string()
+        )
+
+        _identifies = _RateLimitConstants.identify_window(max_concurrency)
 
     be throttle() =>
         Debug.out(

@@ -1,5 +1,6 @@
 use "../data"
 use "debug"
+use rest = "../rest"
 use files = "files"
 use random = "random"
 use time = "time"
@@ -15,8 +16,8 @@ class Gateway
     let api: GatewayApi
     let events: Events
 
-    new create(env: Env, options: GatewayOptions) =>
-        api = GatewayApi(env, options)
+    new create(env: Env, options: GatewayOptions, routes: rest.Routes) =>
+        api = GatewayApi(env, options, routes)
         events = Events(api)
         api._listen(events)
 
@@ -25,8 +26,8 @@ class Gateway
 actor GatewayApi
     let _connection: _GatewayConnection
 
-    new create(env: Env, options: GatewayOptions) =>
-        _connection = _GatewayConnection(env, options)
+    new create(env: Env, options: GatewayOptions, routes: rest.Routes) =>
+        _connection = _GatewayConnection(env, options, routes)
 
     be send_message(event: GatewaySendableEvent) =>
         _connection._send_message(event)
@@ -107,6 +108,8 @@ primitive GatewayConstants
 
     fun close_timeout_ms(): U64 => 10_000
 
+    fun session_limit_timeout_ms(): U64 => 10_000
+
 primitive GatewayDefaults
     fun version(): ApiVersion val => ApiVersion10
 
@@ -158,6 +161,7 @@ actor _GatewayConnection is mare.WebSocketClientActor
     let _timers: time.Timers = time.Timers
     let _rand: random.Rand
     let _bucket: _GatewayBucket
+    let _routes: rest.Routes
 
     var _ws: mare.WebSocketClient = mare.WebSocketClient.none()
     var _events: (Events | None) = None
@@ -171,10 +175,12 @@ actor _GatewayConnection is mare.WebSocketClientActor
     var _watchdog_generation: USize = 0
     var _watchdog_armed: Bool = false
     var _fatal: Bool = false
+    var _limit_check_generation: USize = 0
     var _disposed: Bool = false
 
-    new create(env: Env, options': GatewayOptions) =>
+    new create(env: Env, options': GatewayOptions, routes: rest.Routes) =>
         options = options'
+        _routes = routes
         _auth = lori.TCPConnectAuth(env.root)
         _ssl_context =
             try
@@ -227,6 +233,38 @@ actor _GatewayConnection is mare.WebSocketClientActor
             return
         end
 
+        match _resume_url
+        | let url': String =>
+            Debug.out("[gateway] a session is in hand, resuming through " + url')
+            _dial(url')
+        else
+            Debug.out(
+                "[gateway] no session in hand, so checking the session start limit"
+            )
+
+            _check_session_limits()
+        end
+
+    fun ref _check_session_limits() =>
+        _limit_check_generation = _limit_check_generation + 1
+
+        let generation = _limit_check_generation
+        let self: _GatewayConnection tag = this
+
+        _routes.get_gateway_bot(
+            { (info: GatewayBotInfo) => self._session_limits(generation, info) }
+        )
+
+        _timers(
+            time.Timer(
+                _OnceElapsed({() => self._session_limits_timed_out(generation)}),
+                time.Nanos.from_millis(
+                    GatewayConstants.session_limit_timeout_ms()
+                )
+            )
+        )
+
+    fun ref _dial(url: String) =>
         let context =
             match _ssl_context
             | let context': ssl.SSLContext val => context'
@@ -234,16 +272,6 @@ actor _GatewayConnection is mare.WebSocketClientActor
                 Debug.out("[gateway] giving up: there is no SSL context")
                 options.on_error(GatewayError("could not create an SSL context"))
                 return
-            end
-
-        let url =
-            match _resume_url
-            | let url': String =>
-                Debug.out("[gateway] a session is in hand, resuming through " + url')
-                url'
-            else
-                Debug.out("[gateway] no session in hand, connecting fresh")
-                GatewayConstants.base_url()
             end
 
         let headers: Array[(String val, String val)] val =
@@ -473,6 +501,73 @@ actor _GatewayConnection is mare.WebSocketClientActor
     be _raw_send(event: GatewaySendableEvent) =>
         _send(event)
 
+    be _session_limits(generation: USize, info: GatewayBotInfo) =>
+        if _disposed or _fatal then return end
+
+        if generation != _limit_check_generation then
+            Debug.out("[gateway] ignoring a stale session start limit")
+            return
+        end
+
+        _limit_check_generation = _limit_check_generation + 1
+
+        let limit = info.session_start_limit
+
+        Debug.out(
+            "[gateway] " + limit.remaining.string() + " of "
+            + limit.total.string() + " session start(s) left, "
+            + limit.max_concurrency.string() + " identify(s) per 5s, "
+            + info.shards.string() + " shard(s) recommended"
+        )
+
+        _bucket.set_identify_concurrency(limit.max_concurrency)
+
+        if info.shards > 1 then
+            options.on_error(
+                GatewayError(
+                    "discord recommends " + info.shards.string()
+                    + " shards, but only one connection is running"
+                )
+            )
+        end
+
+        if limit.remaining == 0 then
+            Debug.out(
+                "[gateway] the session start limit is spent, waiting "
+                + limit.reset_after.string() + "ms for it to reset"
+            )
+            options.on_error(
+                GatewayError(
+                    "the session start limit of " + limit.total.string()
+                    + " is spent, so waiting " + limit.reset_after.string()
+                    + "ms for it to reset"
+                )
+            )
+            _schedule_connect(limit.reset_after)
+            return
+        end
+
+        _dial(GatewayConstants.base_url())
+
+    be _session_limits_timed_out(generation: USize) =>
+        if _disposed or _fatal then return end
+
+        if generation != _limit_check_generation then return end
+
+        _limit_check_generation = _limit_check_generation + 1
+
+        Debug.out(
+            "[gateway] the session start limit did not come back in time, "
+            + "so connecting anyway"
+        )
+        options.on_error(
+            GatewayError(
+                "the session start limit could not be read, so connecting anyway"
+            )
+        )
+
+        _dial(GatewayConstants.base_url())
+
     be _queue_overflowed(cap: USize) =>
         Debug.out(
             "[gateway] the send queue hit " + cap.string()
@@ -685,7 +780,7 @@ actor _GatewayConnection is mare.WebSocketClientActor
         _sequence_number = None
         _resume_url = None
 
-    fun ref _schedule_connect() =>
+    fun ref _schedule_connect(delay_ms: (U64 | None) = None) =>
         if _disposed then
             Debug.out("[gateway] not scheduling a connect: the connection was disposed of")
             return
@@ -702,14 +797,23 @@ actor _GatewayConnection is mare.WebSocketClientActor
         end
 
         _connect_scheduled = true
-        _reconnect_attempts = _reconnect_attempts + 1
 
-        let delay = _backoff()
-
-        Debug.out(
-            "[gateway] attempt " + _reconnect_attempts.string() + " goes out in "
-            + (delay / 1_000_000).string() + "ms"
-        )
+        let delay =
+            match delay_ms
+            | let ms: U64 =>
+                Debug.out(
+                    "[gateway] the next connect is held back by " + ms.string() + "ms"
+                )
+                time.Nanos.from_millis(ms)
+            else
+                _reconnect_attempts = _reconnect_attempts + 1
+                let backoff = _backoff()
+                Debug.out(
+                    "[gateway] attempt " + _reconnect_attempts.string()
+                    + " goes out in " + (backoff / 1_000_000).string() + "ms"
+                )
+                backoff
+            end
 
         let self: _GatewayConnection tag = this
         _timers(
