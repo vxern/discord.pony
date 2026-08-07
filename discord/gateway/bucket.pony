@@ -1,4 +1,5 @@
 use "../data"
+use "debug"
 use time = "time"
 
 actor _GatewayBucket
@@ -20,38 +21,85 @@ actor _GatewayBucket
         _timers = timers
 
     be enqueue(event: GatewaySendableEvent) =>
-        if _disposed then return end
+        if _disposed then
+            Debug.out("[gateway/bucket] dropping an event: the bucket was disposed of")
+            return
+        end
 
         _queue.enqueue(event)
+
+        Debug.out(
+            "[gateway/bucket] queued opcode " + event.opcode().value().string()
+            + ", " + _queue.size().string() + " waiting"
+        )
+
         _drain()
 
     be handshake(event: GatewaySendableEvent) =>
-        if _disposed then return end
+        if _disposed then
+            Debug.out("[gateway/bucket] dropping a handshake: the bucket was disposed of")
+            return
+        end
+
+        Debug.out(
+            "[gateway/bucket] handshaking with opcode "
+            + event.opcode().value().string()
+        )
 
         _handshake(event, _generation)
 
     be heartbeat(event: GatewaySendableEvent) =>
-        if _disposed then return end
+        if _disposed then
+            Debug.out("[gateway/bucket] dropping a heartbeat: the bucket was disposed of")
+            return
+        end
+
+        Debug.out("[gateway/bucket] letting a heartbeat past the queue")
 
         _commands.spend(time.Time.nanos())
         _connection._raw_send(event)
 
     be close() =>
+        Debug.out(
+            "[gateway/bucket] closing, " + _queue.size().string()
+            + " event(s) stay queued for the next connection"
+        )
+
         _open = false
         _generation = _generation + 1
 
     be dispose() =>
+        Debug.out(
+            "[gateway/bucket] disposing, dropping " + _queue.size().string()
+            + " queued event(s)"
+        )
+
         _disposed = true
         _open = false
         _generation = _generation + 1
         _queue.clear()
 
     be _retry_handshake(event: GatewaySendableEvent, generation: USize) =>
-        if _disposed or (generation != _generation) then return end
+        if _disposed then
+            Debug.out("[gateway/bucket] abandoning a handshake retry: the bucket was disposed of")
+            return
+        end
+
+        if generation != _generation then
+            Debug.out(
+                "[gateway/bucket] abandoning a handshake retry from generation "
+                + generation.string() + ", we are on " + _generation.string()
+            )
+            return
+        end
+
+        Debug.out("[gateway/bucket] retrying the handshake")
 
         _handshake(event, generation)
 
     be _wake() =>
+        Debug.out("[gateway/bucket] woken up to drain the queue")
+
         _drain_scheduled = false
         _drain()
 
@@ -61,6 +109,11 @@ actor _GatewayBucket
         if _IsIdentify(event) then
             match _identifies.blocked_until(now)
             | let at: U64 =>
+                Debug.out(
+                    "[gateway/bucket] the identify window is spent, holding the identify for "
+                    + ((at - now) / 1_000_000).string() + "ms"
+                )
+
                 let self: _GatewayBucket tag = this
                 _timers(
                     time.Timer(
@@ -80,11 +133,27 @@ actor _GatewayBucket
         _commands.spend(now)
         _connection._raw_send(event)
 
+        Debug.out(
+            "[gateway/bucket] the handshake is away, the queue is open with "
+            + _queue.size().string() + " event(s) waiting"
+        )
+
         _open = true
         _drain()
 
     fun ref _drain() =>
-        if _disposed or not _open then return end
+        if _disposed then
+            Debug.out("[gateway/bucket] not draining: the bucket was disposed of")
+            return
+        end
+
+        if not _open then
+            Debug.out(
+                "[gateway/bucket] not draining: the handshake has not gone through yet, "
+                + _queue.size().string() + " event(s) held back"
+            )
+            return
+        end
 
         while _queue.size() > 0 do
             let now = time.Time.nanos()
@@ -92,6 +161,12 @@ actor _GatewayBucket
 
             match _blocked_until(event, now)
             | let at: U64 =>
+                Debug.out(
+                    "[gateway/bucket] rate limited, putting opcode "
+                    + event.opcode().value().string() + " back and waiting "
+                    + ((at - now) / 1_000_000).string() + "ms"
+                )
+
                 _queue.enqueue_at_beginning(event)
 
                 if not _drain_scheduled then
@@ -107,6 +182,12 @@ actor _GatewayBucket
 
             _commands.spend(now)
             if _IsPresenceUpdate(event) then _presences.spend(now) end
+
+            Debug.out(
+                "[gateway/bucket] releasing opcode "
+                + event.opcode().value().string() + ", "
+                + _queue.size().string() + " left in the queue"
+            )
 
             _connection._raw_send(event)
         end

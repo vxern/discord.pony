@@ -1,4 +1,5 @@
 use "../data"
+use "debug"
 
 type GatewayEventHandler[A: Any val] is {(A)} val
 
@@ -9,8 +10,15 @@ class _Listeners[A: Any val]
 
     fun ref add(handler: GatewayEventHandler[A]) =>
         _handlers.push(handler)
+        Debug.out(
+            "[gateway/events] a listener was added, " + _handlers.size().string()
+            + " now on this event"
+        )
 
     fun apply(event: A) =>
+        Debug.out(
+            "[gateway/events] running " + _handlers.size().string() + " listener(s)"
+        )
         for handler in _handlers.values() do handler(event) end
 
 class _EmptyListeners
@@ -18,8 +26,15 @@ class _EmptyListeners
 
     fun ref add(handler: GatewayEmptyEventHandler) =>
         _handlers.push(handler)
+        Debug.out(
+            "[gateway/events] a listener was added, " + _handlers.size().string()
+            + " now on this event"
+        )
 
     fun apply() =>
+        Debug.out(
+            "[gateway/events] running " + _handlers.size().string() + " listener(s)"
+        )
         for handler in _handlers.values() do handler() end
 
 actor Events
@@ -109,18 +124,23 @@ actor Events
         _api = api
 
     be request_guild_members(event: GatewayRequestGuildMembersEvent) =>
+        Debug.out("[gateway/events] requesting guild members")
         _api.send_message(event)
 
     be request_soundboard_sounds(event: GatewayRequestSoundboardSoundsEvent) =>
+        Debug.out("[gateway/events] requesting soundboard sounds")
         _api.send_message(event)
 
     be request_channel_info(event: GatewayRequestChannelInfoEvent) =>
+        Debug.out("[gateway/events] requesting channel info")
         _api.send_message(event)
 
     be update_voice_state(event: GatewayVoiceStateUpdateEvent) =>
+        Debug.out("[gateway/events] updating our voice state")
         _api.send_message(event)
 
     be update_presence(event: GatewayPresenceUpdateEvent) =>
+        Debug.out("[gateway/events] updating our presence")
         _api.send_message(event)
 
     be on_ready(handler: GatewayEventHandler[GatewayReady]) =>
@@ -361,6 +381,8 @@ actor Events
         _webhooks_update.add(handler)
 
     be _dispatch(name: String, data: GatewayDispatchEventData) =>
+        Debug.out("[gateway/events] dispatching " + name)
+
         try
             match name
             | "READY" => _ready(data as GatewayReady)
@@ -442,5 +464,11 @@ actor Events
             | "VOICE_STATE_UPDATE" => _voice_state_update(data as VoiceState)
             | "VOICE_SERVER_UPDATE" => _voice_server_update(data as VoiceServerUpdate)
             | "WEBHOOKS_UPDATE" => _webhooks_update(data as WebhooksUpdate)
+            else
+                Debug.out("[gateway/events] " + name + " has no listener slot")
             end
+        else
+            Debug.out(
+                "[gateway/events] " + name + " arrived carrying data of the wrong type"
+            )
         end

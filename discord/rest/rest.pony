@@ -1,4 +1,5 @@
 use "../data"
+use "debug"
 use files = "files"
 use collections = "collections"
 use time = "time"
@@ -69,20 +70,43 @@ actor RestApi
             end
         _global_bucket = GlobalBucket(this, _timers)
 
+        Debug.out(
+            "[rest] starting up on api v" + options.version.value().string()
+            + " against " + RestConstants.host()
+        )
+
+        if _ssl_context is None then
+            Debug.out(
+                "[rest] could not build an SSL context from "
+                + options.ca_certificates_path
+            )
+        end
+
     be send_request(request: courier.HTTPRequest val, handler: RawResponseHandler) =>
         let id = _BucketId(request)
         let bucket =
             try
                 _buckets(id)?
             else
+                Debug.out("[rest] opening a new bucket for " + id)
                 let bucket' = Bucket(_env, _global_bucket, id, _timers)
                 _buckets(id) = bucket'
                 bucket'
             end
 
+        Debug.out(
+            "[rest] " + request.method.string() + " " + request.path
+            + " goes to bucket " + id
+        )
+
         bucket.enqueue(request, handler)
 
     be dispose() =>
+        Debug.out(
+            "[rest] disposing of " + _buckets.size().string() + " bucket(s) and "
+            + _senders.size().string() + " in-flight request(s)"
+        )
+
         for bucket in _buckets.values() do bucket.dispose() end
         _buckets.clear()
 
@@ -94,12 +118,22 @@ actor RestApi
 
     be _sender_settled(sender: _RequestSender tag) =>
         _senders.unset(sender)
+        Debug.out(
+            "[rest] a request settled, " + _senders.size().string() + " still in flight"
+        )
 
     be _raw_send_request(request: courier.HTTPRequest val, handler: RawResponseHandler, on_failure: RawFailureHandler) =>
         match _ssl_context
         | let ssl_context: ssl.SSLContext val =>
+            Debug.out(
+                "[rest] sending " + request.method.string() + " " + request.path
+            )
             _senders.set(_RequestSender(this, _auth, ssl_context, options, request, handler, on_failure))
         else
+            Debug.out(
+                "[rest] cannot send " + request.method.string() + " " + request.path
+                + ": there is no SSL context"
+            )
             options.on_error(
                 RestError(
                     request,
@@ -145,18 +179,31 @@ actor _RequestSender is courier.HTTPClientConnectionActor
     fun ref _http_client_connection(): courier.HTTPClientConnection => _http
 
     fun ref on_connected() =>
+        Debug.out(
+            "[rest] connected, writing " + _request.method.string() + " "
+            + _request.path
+        )
         _http.send_request(_request)
 
     fun ref on_response(response: courier.Response val) =>
+        Debug.out(
+            "[rest] " + response.status.string() + " for "
+            + _request.method.string() + " " + _request.path
+        )
         _collector = courier.ResponseCollector
         _collector.set_response(response)
 
     fun ref on_body_chunk(chunk: Array[U8] val) =>
+        Debug.out("[rest] read a body chunk of " + chunk.size().string() + " bytes")
         _collector.add_chunk(chunk)
 
     fun ref on_response_complete() =>
         try
             let response = _collector.build()?
+            Debug.out(
+                "[rest] the response to " + _request.method.string() + " "
+                + _request.path + " is complete"
+            )
             _settled = true
             _handler(_request, response)
         else
@@ -166,6 +213,10 @@ actor _RequestSender is courier.HTTPClientConnectionActor
         _api._sender_settled(this)
 
     be dispose() =>
+        Debug.out(
+            "[rest] disposing of the request " + _request.method.string() + " "
+            + _request.path
+        )
         _settled = true
         _http.close()
 
@@ -179,6 +230,11 @@ actor _RequestSender is courier.HTTPClientConnectionActor
         _fail("connection closed before a response arrived")
 
     fun ref _fail(reason: String) =>
+        Debug.out(
+            "[rest] " + _request.method.string() + " " + _request.path + " failed: "
+            + reason + (if _settled then " (already settled)" else "" end)
+        )
+
         if not _settled then
             _settled = true
             _options.on_error(RestError(_request, reason))

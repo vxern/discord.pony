@@ -1,5 +1,6 @@
 // TODO(vxern): use data = "data"
 use "../data"
+use "debug"
 use courier = "courier"
 use json = "json"
 
@@ -2624,13 +2625,31 @@ primitive _Decode
         """
 
         if (response.status < 200) or (response.status > 299) then
+            Debug.out(
+                "[rest/decode] " + request.method.string() + " " + request.path
+                + " was refused with " + response.status.string() + " "
+                + response.reason + ": " + String.from_array(response.body)
+            )
+
             RestError(request, "Discord answered " + response.status.string() + " " + response.reason + ": " + String.from_array(response.body))
+        else
+            Debug.out(
+                "[rest/decode] " + request.method.string() + " " + request.path
+                + " came back " + response.status.string() + " with "
+                + response.body.size().string() + " bytes to decode"
+            )
         end
 
     fun undecodable(request: courier.HTTPRequest val, response: courier.HTTPResponse val): RestError =>
         """
         Reports a success response whose body was not what the route expected.
         """
+
+        Debug.out(
+            "[rest/decode] " + request.method.string() + " " + request.path
+            + " came back in a shape this route cannot read: "
+            + String.from_array(response.body)
+        )
 
         RestError(request, "the response body did not match the type this route returns: " + String.from_array(response.body))
 
@@ -2640,6 +2659,8 @@ primitive _Decode
         """
 
         match json.JsonParser.parse(String.from_array(response.body))
-        | let _: json.JsonParseError => error
+        | let error': json.JsonParseError =>
+            Debug.out("[rest/decode] the body is not well-formed JSON: " + error'.string())
+            error
         | let parsed: json.JsonValue => parsed
         end

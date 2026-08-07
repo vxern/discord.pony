@@ -1,4 +1,5 @@
 use "../data"
+use "debug"
 use files = "files"
 use random = "random"
 use time = "time"
@@ -181,30 +182,61 @@ actor _GatewayConnection is mare.WebSocketClientActor
 
         _bucket = _GatewayBucket(this, _timers)
 
+        Debug.out(
+            "[gateway] starting up on api v" + options.version.value().string()
+            + " with " + options.intents.size().string() + " intent(s)"
+        )
+
+        match options.shard
+        | (let id: USize, let count: USize) =>
+            Debug.out(
+                "[gateway] this is shard " + id.string() + " of " + count.string()
+            )
+        end
+
+        if _ssl_context is None then
+            Debug.out(
+                "[gateway] could not build an SSL context from "
+                + options.ca_certificates_path
+            )
+        end
+
         _connect()
 
     fun ref _websocket(): mare.WebSocketClient => _ws
 
     fun ref _connect() =>
-        if _disposed then return end
+        if _disposed then
+            Debug.out("[gateway] not connecting: the connection was disposed of")
+            return
+        end
 
         let context =
             match _ssl_context
             | let context': ssl.SSLContext val => context'
             else
+                Debug.out("[gateway] giving up: there is no SSL context")
                 options.on_error(GatewayError("could not create an SSL context"))
                 return
             end
 
         let url =
             match _resume_url
-            | let url': String => url'
+            | let url': String =>
+                Debug.out("[gateway] a session is in hand, resuming through " + url')
+                url'
             else
+                Debug.out("[gateway] no session in hand, connecting fresh")
                 GatewayConstants.base_url()
             end
 
         let headers: Array[(String val, String val)] val =
             [("User-Agent", options.user_agent)]
+
+        Debug.out(
+            "[gateway] dialling " + _GatewayUrl.host(url) + ":"
+            + GatewayConstants.port() + options.path()
+        )
 
         _open = false
         _bucket.close()
@@ -223,20 +255,29 @@ actor _GatewayConnection is mare.WebSocketClientActor
             )
         )
 
-    fun ref on_open(response: mare.UpgradeResponse val) => None
+    fun ref on_open(response: mare.UpgradeResponse val) =>
+        Debug.out("[gateway] the websocket upgrade went through")
 
     fun ref on_text_message(text: String val) =>
+        Debug.out("[gateway] <- " + text.size().string() + " bytes")
+
         let payload =
         try
             match json.JsonParser.parse(text)
             | let parsed: json.JsonObject => GatewayEventPayload.from_json(parsed)?
-            else return
+            else
+                Debug.out("[gateway] dropping a message that is not a JSON object")
+                return
             end
-        else return
+        else
+            Debug.out("[gateway] dropping a message that could not be read: " + text)
+            return
         end
 
         match payload.s
-        | let s: USize => _sequence_number = s
+        | let s: USize =>
+            _sequence_number = s
+            Debug.out("[gateway] the sequence number is now " + s.string())
         end
 
         match payload.op
@@ -244,38 +285,87 @@ actor _GatewayConnection is mare.WebSocketClientActor
             try
                 let hello = GatewayHello.from_json(payload.d as json.JsonObject)?
 
+                Debug.out(
+                    "[gateway] hello: heartbeat every "
+                    + hello.heartbeat_interval.string() + "ms"
+                )
+
                 _open = true
                 _start_heartbeat(hello.heartbeat_interval.u64())
                 _identify_or_resume()
+            else
+                Debug.out("[gateway] the hello could not be read, so no heartbeat was started")
             end
         | GatewayOpcodeHeartbeat =>
+            Debug.out("[gateway] the gateway asked for a heartbeat right away")
+
             match _heartbeat
             | let heartbeat: _GatewayHeartbeat => heartbeat._beat_now()
+            else
+                Debug.out("[gateway] ...but there is no heartbeat running to ask")
             end
         | GatewayOpcodeHeartbeatACK =>
+            Debug.out("[gateway] the heartbeat was acknowledged")
+
             match _heartbeat
             | let heartbeat: _GatewayHeartbeat => heartbeat._acknowledge()
+            else
+                Debug.out("[gateway] ...but there is no heartbeat running to acknowledge")
             end
-        | GatewayOpcodeReconnect => _reconnect(true)
+        | GatewayOpcodeReconnect =>
+            Debug.out("[gateway] the gateway asked us to reconnect")
+            _reconnect(true)
         | GatewayOpcodeInvalidSession =>
-            _reconnect(try payload.d as Bool else false end)
+            let resumable = try payload.d as Bool else false end
+
+            Debug.out(
+                "[gateway] the session was invalidated and is "
+                + (if resumable then "resumable" else "not resumable" end)
+            )
+
+            _reconnect(resumable)
         | GatewayOpcodeDispatch =>
-            let name = try payload.t as String else return end
-            let event = try GatewayDispatchEvents.from(name, payload.d)? else return end
+            let name =
+                try
+                    payload.t as String
+                else
+                    Debug.out("[gateway] dropping a dispatch that carries no event name")
+                    return
+                end
+
+            let event =
+                try
+                    GatewayDispatchEvents.from(name, payload.d)?
+                else
+                    Debug.out("[gateway] dropping " + name + ": its data could not be read")
+                    return
+                end
+
             _on_dispatch(name, event)
+        else
+            Debug.out(
+                "[gateway] nothing to do for opcode " + payload.op.value().string()
+            )
         end
 
     fun ref on_connection_failure(reason: lori.ConnectionFailureReason) =>
+        Debug.out("[gateway] the connection failed: " + _GatewayFailure.reason(reason))
         options.on_error(GatewayError(_GatewayFailure.reason(reason)))
         _schedule_connect()
 
     fun ref on_handshake_failure(err: mare.ClientHandshakeError) =>
+        Debug.out("[gateway] the handshake failed: " + err.string())
         options.on_error(
             GatewayError("the gateway handshake failed: " + err.string())
         )
         _schedule_connect()
 
     fun ref on_closed(status: mare.CloseStatus, reason: String val) =>
+        Debug.out(
+            "[gateway] the websocket closed with " + status.code().string()
+            + " (" + status.string() + "): " + reason
+        )
+
         _open = false
         _bucket.close()
         _stop_heartbeat()
@@ -284,11 +374,19 @@ actor _GatewayConnection is mare.WebSocketClientActor
             try
                 GatewayCloseEventCodes.from(status.code())?
             else
+                Debug.out(
+                    "[gateway] " + status.code().string()
+                    + " is not a Discord close code, so reconnecting on spec"
+                )
                 _schedule_connect()
                 return
             end
 
         if not code.reconnect() then
+            Debug.out(
+                "[gateway] close code " + code.value().string()
+                + " cannot be recovered from, so staying down"
+            )
             options.on_error(
                 GatewayError("the gateway closed the connection: " + status.string())
             )
@@ -298,32 +396,49 @@ actor _GatewayConnection is mare.WebSocketClientActor
         match code
         | GatewayCloseEventCodeInvalidSequence
         | GatewayCloseEventCodeSessionTimedOut =>
+            Debug.out("[gateway] the session is past saving, dropping it")
             _forget_session()
         end
 
         _schedule_connect()
 
     be _listen(events: Events) =>
+        Debug.out("[gateway] the event dispatcher is now attached")
         _events = events
 
     be _send_message(event: GatewaySendableEvent) =>
+        Debug.out(
+            "[gateway] handing opcode " + event.opcode().value().string()
+            + " to the bucket"
+        )
         _bucket.enqueue(event)
 
     be _send_heartbeat() =>
+        match _sequence_number
+        | let s: USize =>
+            Debug.out("[gateway] heartbeating at sequence " + s.string())
+        else
+            Debug.out("[gateway] heartbeating with no sequence number yet")
+        end
+
         _bucket.heartbeat(GatewayHeartbeatEvent(_sequence_number))
 
     be _raw_send(event: GatewaySendableEvent) =>
         _send(event)
 
     be _heartbeat_timed_out() =>
+        Debug.out("[gateway] a heartbeat went unacknowledged, so the connection is stale")
         _reconnect(true)
 
     be _reconnect_now() =>
+        Debug.out("[gateway] the backoff has elapsed, reconnecting now")
         _connect_scheduled = false
         _connect()
 
     be dispose() =>
         if _disposed then return end
+
+        Debug.out("[gateway] disposing of the connection")
 
         _disposed = true
         _bucket.dispose()
@@ -336,15 +451,27 @@ actor _GatewayConnection is mare.WebSocketClientActor
         end
 
     fun ref _send(event: GatewaySendableEvent) =>
-        _ws.send_text(event.payload().to_json().print())
+        let text: String val = event.payload().to_json().print()
+
+        Debug.out(
+            "[gateway] -> opcode " + event.opcode().value().string() + ", "
+            + text.size().string() + " bytes"
+        )
+
+        _ws.send_text(text)
 
     fun ref _identify_or_resume() =>
         match (_session_id, _sequence_number)
         | (let session_id: String, let sequence_number: USize) =>
+            Debug.out(
+                "[gateway] resuming session " + session_id + " from sequence "
+                + sequence_number.string()
+            )
             _bucket.handshake(
                 GatewayResumeEvent(options.token, session_id, sequence_number)
             )
         else
+            Debug.out("[gateway] identifying as a new session")
             _bucket.handshake(
                 GatewayIdentifyEvent(
                     options.token,
@@ -363,18 +490,35 @@ actor _GatewayConnection is mare.WebSocketClientActor
         | let ready: GatewayReady =>
             _session_id = ready.session_id
             _resume_url = ready.resume_gateway_url
+
+            Debug.out(
+                "[gateway] ready as " + ready.user.username + " on session "
+                + ready.session_id + ", resumable through "
+                + ready.resume_gateway_url
+            )
         end
 
         if (name == "READY") or (name == "RESUMED") then
+            Debug.out("[gateway] the connection is settled, resetting the backoff")
             _reconnect_attempts = 0
         end
 
         match _events
         | let events: Events => events._dispatch(name, event)
+        else
+            Debug.out("[gateway] dropping " + name + ": nothing is listening yet")
         end
 
     fun ref _reconnect(resume: Bool) =>
-        if _disposed then return end
+        if _disposed then
+            Debug.out("[gateway] not reconnecting: the connection was disposed of")
+            return
+        end
+
+        Debug.out(
+            "[gateway] reconnecting, "
+            + (if resume then "keeping the session" else "dropping the session" end)
+        )
 
         if not resume then
             _forget_session()
@@ -391,21 +535,38 @@ actor _GatewayConnection is mare.WebSocketClientActor
         end
 
     fun ref _forget_session() =>
+        Debug.out("[gateway] forgetting the session, the id and the resume url")
+
         _session_id = None
         _sequence_number = None
         _resume_url = None
 
     fun ref _schedule_connect() =>
-        if _disposed or _connect_scheduled then return end
+        if _disposed then
+            Debug.out("[gateway] not scheduling a connect: the connection was disposed of")
+            return
+        end
+
+        if _connect_scheduled then
+            Debug.out("[gateway] a connect is already scheduled, leaving it be")
+            return
+        end
 
         _connect_scheduled = true
         _reconnect_attempts = _reconnect_attempts + 1
+
+        let delay = _backoff()
+
+        Debug.out(
+            "[gateway] attempt " + _reconnect_attempts.string() + " goes out in "
+            + (delay / 1_000_000).string() + "ms"
+        )
 
         let self: _GatewayConnection tag = this
         _timers(
             time.Timer(
                 _OnceElapsed({() => self._reconnect_now()}),
-                _backoff()
+                delay
             )
         )
 
@@ -420,12 +581,16 @@ actor _GatewayConnection is mare.WebSocketClientActor
     fun ref _start_heartbeat(interval_ms: U64) =>
         _stop_heartbeat()
 
+        Debug.out("[gateway] starting a heartbeat every " + interval_ms.string() + "ms")
+
         let self: _GatewayConnection tag = this
         _heartbeat = _GatewayHeartbeat(self, interval_ms)
 
     fun ref _stop_heartbeat() =>
         match _heartbeat
-        | let heartbeat: _GatewayHeartbeat => heartbeat.dispose()
+        | let heartbeat: _GatewayHeartbeat =>
+            Debug.out("[gateway] stopping the heartbeat")
+            heartbeat.dispose()
         end
 
         _heartbeat = None
@@ -448,6 +613,11 @@ actor _GatewayHeartbeat
         let rand = random.Rand(seconds.u64(), nanoseconds.u64())
         let initial_delay = (interval.f64() * rand.real()).u64()
 
+        Debug.out(
+            "[gateway] the first heartbeat is jittered to "
+            + (initial_delay / 1_000_000).string() + "ms from now"
+        )
+
         let self: _GatewayHeartbeat tag = this
         _timers(
             time.Timer(
@@ -458,9 +628,16 @@ actor _GatewayHeartbeat
         )
 
     be _beat() =>
-        if _disposed then return end
+        if _disposed then
+            Debug.out("[gateway] skipping a beat: the heartbeat was disposed of")
+            return
+        end
 
         if not _acknowledged then
+            Debug.out(
+                "[gateway] the previous heartbeat was never acknowledged in "
+                + _interval_ms.string() + "ms"
+            )
             _connection._heartbeat_timed_out()
             _dispose()
             return
@@ -470,7 +647,12 @@ actor _GatewayHeartbeat
         _connection._send_heartbeat()
 
     be _beat_now() =>
-        if _disposed then return end
+        if _disposed then
+            Debug.out("[gateway] skipping an out-of-band beat: the heartbeat was disposed of")
+            return
+        end
+
+        Debug.out("[gateway] beating out of band")
 
         _acknowledged = false
         _connection._send_heartbeat()
@@ -481,6 +663,8 @@ actor _GatewayHeartbeat
 
     fun ref _dispose() =>
         if _disposed then return end
+
+        Debug.out("[gateway] disposing of the heartbeat")
 
         _disposed = true
         _timers.dispose()

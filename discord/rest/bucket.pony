@@ -1,3 +1,4 @@
+use "debug"
 use time = "time"
 use courier = "courier"
 
@@ -20,20 +21,42 @@ actor GlobalBucket
         _timers = timers
 
     be enqueue(request: courier.HTTPRequest, handler: RawResponseHandler, on_failure: RawFailureHandler) =>
-        if _disposed then return end
+        if _disposed then
+            Debug.out("[rest/global] dropping a request: the global bucket was disposed of")
+            return
+        end
 
         _queue.enqueue((request, handler, on_failure))
+
+        Debug.out(
+            "[rest/global] queued a request, " + _queue.size().string() + " waiting"
+        )
+
         _drain()
 
     be _pause(seconds: F64) =>
-        if _disposed then return end
+        if _disposed then
+            Debug.out("[rest/global] ignoring a pause: the global bucket was disposed of")
+            return
+        end
 
         let duration = time.Nanos.from_seconds_f(
             seconds.max(_RateLimitConstants.minimum_pause_s())
         )
         let resume_at = time.Time.nanos() + duration
 
-        if _paused and (resume_at <= _paused_until) then return end
+        if _paused and (resume_at <= _paused_until) then
+            Debug.out(
+                "[rest/global] already paused for longer than the "
+                + seconds.string() + "s asked for"
+            )
+            return
+        end
+
+        Debug.out(
+            "[rest/global] globally rate limited, pausing everything for "
+            + (duration / 1_000_000).string() + "ms"
+        )
 
         _paused = true
         _paused_until = resume_at
@@ -50,27 +73,56 @@ actor GlobalBucket
         )
 
     be _resume(generation: USize) =>
-        if generation != _pause_generation then return end
+        if generation != _pause_generation then
+            Debug.out(
+                "[rest/global] ignoring a stale resume from pause "
+                + generation.string()
+            )
+            return
+        end
+
+        Debug.out(
+            "[rest/global] the global pause is over, " + _queue.size().string()
+            + " request(s) to work through"
+        )
 
         _paused = false
         _drain()
 
     be dispose() =>
+        Debug.out(
+            "[rest/global] disposing, dropping " + _queue.size().string()
+            + " queued request(s)"
+        )
+
         _disposed = true
         _queue.clear()
 
     be _wake() =>
+        Debug.out("[rest/global] woken up to drain the queue")
+
         _drain_scheduled = false
         _drain()
 
     fun ref _drain() =>
-        if _paused then return end
+        if _paused then
+            Debug.out(
+                "[rest/global] not draining: paused with " + _queue.size().string()
+                + " request(s) held"
+            )
+            return
+        end
 
         while _queue.size() > 0 do
             let now = time.Time.nanos()
 
             match _blocked_until(now)
             | let at: U64 =>
+                Debug.out(
+                    "[rest/global] out of budget, holding " + _queue.size().string()
+                    + " request(s) for " + ((at - now) / 1_000_000).string() + "ms"
+                )
+
                 if not _drain_scheduled then
                     _drain_scheduled = true
                     let self: GlobalBucket tag = this
@@ -86,6 +138,11 @@ actor GlobalBucket
                 for window in _windows.values() do
                     window.spend(now)
                 end
+
+                Debug.out(
+                    "[rest/global] releasing a request, " + _queue.size().string()
+                    + " left in the queue"
+                )
 
                 _api._raw_send_request(request, handler, on_failure)
             else
@@ -125,17 +182,39 @@ actor Bucket
         _timers = timers
 
     be enqueue(request: courier.HTTPRequest, handler: RawResponseHandler) =>
-        if _disposed then return end
+        if _disposed then
+            Debug.out("[rest/" + _id + "] dropping a request: the bucket was disposed of")
+            return
+        end
 
         _queue.enqueue((request, handler))
+
+        Debug.out(
+            "[rest/" + _id + "] queued a request, " + _queue.size().string()
+            + " waiting, " + _requests_remaining.string() + " slot(s) left"
+        )
+
         _drain()
 
     be dispose() =>
+        Debug.out(
+            "[rest/" + _id + "] disposing, dropping " + _queue.size().string()
+            + " queued request(s)"
+        )
+
         _disposed = true
         _queue.clear()
 
     be _drain() =>
-        if _disposed or _restarting then return end
+        if _disposed then
+            Debug.out("[rest/" + _id + "] not draining: the bucket was disposed of")
+            return
+        end
+
+        if _restarting then
+            Debug.out("[rest/" + _id + "] not draining: waiting on the window to reset")
+            return
+        end
 
         let self: Bucket tag = this
 
@@ -145,6 +224,12 @@ actor Bucket
 
                 _requests_in_flight = _requests_in_flight + 1
                 _requests_remaining = _requests_remaining - 1
+
+                Debug.out(
+                    "[rest/" + _id + "] handing a request to the global bucket, "
+                    + _requests_in_flight.string() + " in flight, "
+                    + _requests_remaining.string() + " slot(s) left"
+                )
 
                 _global_bucket.enqueue(
                     request,
@@ -161,21 +246,35 @@ actor Bucket
         if (_requests_in_flight == 0) and (_requests_remaining == 0) and (_queue.size() > 0) then
             _restarting = true
             let delay = try time.Nanos.from_seconds_f((_rate_limit as _RateLimit).reset_after_s) else 0 end
+
+            Debug.out(
+                "[rest/" + _id + "] out of slots with " + _queue.size().string()
+                + " request(s) queued, resting for "
+                + (delay / 1_000_000).string() + "ms"
+            )
+
             _timers(time.Timer(_OnceElapsed({() => self._restart()}), delay))
         end
 
     be _restart() =>
+        Debug.out("[rest/" + _id + "] the window reset, probing with one request")
+
         _restarting = false
         _rate_limit = None
         _requests_remaining = 1
         _drain()
 
     be on_request_failed() =>
+        Debug.out("[rest/" + _id + "] a request never came back")
+
         _requests_in_flight = _requests_in_flight - 1
         _drain()
 
     be on_response_received(request: courier.HTTPRequest, response: courier.HTTPResponse, handler: RawResponseHandler) =>
-        if _disposed then return end
+        if _disposed then
+            Debug.out("[rest/" + _id + "] dropping a response: the bucket was disposed of")
+            return
+        end
 
         _requests_in_flight = _requests_in_flight - 1
 
@@ -185,13 +284,32 @@ actor Bucket
         | let rate_limit': _RateLimit if rate_limit'.is_newer_than(_rate_limit) =>
             _rate_limit = rate_limit'
             _requests_remaining = rate_limit'.remaining - _requests_in_flight.min(rate_limit'.remaining)
+
+            Debug.out(
+                "[rest/" + _id + "] the headers say " + rate_limit'.remaining.string()
+                + " left, resetting in " + rate_limit'.reset_after_s.string()
+                + "s, so " + _requests_remaining.string()
+                + " slot(s) after the " + _requests_in_flight.string() + " in flight"
+            )
+        | let _: _RateLimit =>
+            Debug.out(
+                "[rest/" + _id + "] ignoring rate limit headers that are older than what we hold"
+            )
+        else
+            Debug.out("[rest/" + _id + "] the response carried no rate limit headers")
         end
 
         if response.status == 429 then
+            Debug.out(
+                "[rest/" + _id + "] 429 on " + request.method.string() + " "
+                + request.path + ", putting it back at the front of the queue"
+            )
+
             _queue.enqueue_at_beginning((request, handler))
             _requests_remaining = 0
 
             if _IsGlobalRateLimit(response.headers) then
+                Debug.out("[rest/" + _id + "] the 429 is global, pausing every bucket")
                 _global_bucket._pause(
                     match rate_limit
                     | let rate_limit': _RateLimit => rate_limit'.reset_after_s
@@ -199,8 +317,14 @@ actor Bucket
                         _RateLimitConstants.blind_pause_s()
                     end
                 )
+            else
+                Debug.out("[rest/" + _id + "] the 429 is route-scoped, only this bucket rests")
             end
         else
+            Debug.out(
+                "[rest/" + _id + "] handing " + response.status.string() + " on "
+                + request.method.string() + " " + request.path + " to the caller"
+            )
             handler(request, response)
         end
 
