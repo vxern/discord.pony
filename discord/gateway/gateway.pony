@@ -168,6 +168,7 @@ actor _GatewayConnection is mare.WebSocketClientActor
     var _connect_scheduled: Bool = false
     var _watchdog_generation: USize = 0
     var _watchdog_armed: Bool = false
+    var _fatal: Bool = false
     var _disposed: Bool = false
 
     new create(env: Env, options': GatewayOptions) =>
@@ -218,6 +219,11 @@ actor _GatewayConnection is mare.WebSocketClientActor
     fun ref _connect() =>
         if _disposed then
             Debug.out("[gateway] not connecting: the connection was disposed of")
+            return
+        end
+
+        if _fatal then
+            Debug.out("[gateway] not connecting: the gateway gave up")
             return
         end
 
@@ -369,6 +375,14 @@ actor _GatewayConnection is mare.WebSocketClientActor
             )
         end
 
+    fun ref on_throttled() =>
+        Debug.out("[gateway] the connection is backed up, so holding off on sends")
+        _bucket.throttle()
+
+    fun ref on_unthrottled() =>
+        Debug.out("[gateway] the connection has caught up, so sends can go out again")
+        _bucket.unthrottle()
+
     fun ref on_connection_failure(reason: lori.ConnectionFailureReason) =>
         Debug.out("[gateway] the connection failed: " + _GatewayFailure.reason(reason))
         _disarm_watchdog()
@@ -502,6 +516,34 @@ actor _GatewayConnection is mare.WebSocketClientActor
 
     fun ref _send(event: GatewaySendableEvent) =>
         let text: String val = event.payload().to_json().print()
+        let limit = GatewayConstants.max_send_message_size_bytes()
+
+        if text.size() > limit then
+            Debug.out(
+                "[gateway] opcode " + event.opcode().value().string() + " is "
+                + text.size().string() + " bytes, over the " + limit.string()
+                + " byte limit, so dropping it"
+            )
+            options.on_error(
+                GatewayError(
+                    "an outgoing payload of " + text.size().string()
+                    + " bytes is over the gateway limit of " + limit.string()
+                    + " bytes"
+                )
+            )
+
+            match event.opcode()
+            | GatewayOpcodeIdentify =>
+                _give_up("the identify is too big to ever go out")
+            | GatewayOpcodeResume =>
+                Debug.out(
+                    "[gateway] the resume is too big, so starting a fresh session"
+                )
+                _reconnect(false)
+            end
+
+            return
+        end
 
         Debug.out(
             "[gateway] -> opcode " + event.opcode().value().string() + ", "
@@ -509,6 +551,16 @@ actor _GatewayConnection is mare.WebSocketClientActor
         )
 
         _ws.send_text(text)
+
+    fun ref _give_up(reason: String) =>
+        Debug.out("[gateway] giving up: " + reason)
+
+        _fatal = true
+        _open = false
+        _disarm_watchdog()
+        _bucket.close()
+        _stop_heartbeat()
+        _connection().hard_close()
 
     fun ref _identify_or_resume() =>
         match (_session_id, _sequence_number)
@@ -599,6 +651,11 @@ actor _GatewayConnection is mare.WebSocketClientActor
     fun ref _schedule_connect() =>
         if _disposed then
             Debug.out("[gateway] not scheduling a connect: the connection was disposed of")
+            return
+        end
+
+        if _fatal then
+            Debug.out("[gateway] not scheduling a connect: the gateway gave up")
             return
         end
 

@@ -12,6 +12,7 @@ actor _GatewayBucket
     let _identifies: _RateLimitWindow = _RateLimitConstants.identify_window()
 
     var _open: Bool = false
+    var _throttled: Bool = false
     var _generation: USize = 0
     var _drain_scheduled: Bool = false
     var _disposed: Bool = false
@@ -59,6 +60,20 @@ actor _GatewayBucket
         _commands.spend(time.Time.nanos())
         _connection._raw_send(event)
 
+    be throttle() =>
+        Debug.out(
+            "[gateway/bucket] the connection is backed up, holding "
+            + _queue.size().string() + " event(s) back"
+        )
+
+        _throttled = true
+
+    be unthrottle() =>
+        Debug.out("[gateway/bucket] the connection has caught up, draining again")
+
+        _throttled = false
+        _drain()
+
     be close() =>
         Debug.out(
             "[gateway/bucket] closing, " + _queue.size().string()
@@ -66,6 +81,7 @@ actor _GatewayBucket
         )
 
         _open = false
+        _throttled = false
         _generation = _generation + 1
 
     be dispose() =>
@@ -150,6 +166,14 @@ actor _GatewayBucket
         if not _open then
             Debug.out(
                 "[gateway/bucket] not draining: the handshake has not gone through yet, "
+                + _queue.size().string() + " event(s) held back"
+            )
+            return
+        end
+
+        if _throttled then
+            Debug.out(
+                "[gateway/bucket] not draining: the connection is backed up, "
                 + _queue.size().string() + " event(s) held back"
             )
             return
