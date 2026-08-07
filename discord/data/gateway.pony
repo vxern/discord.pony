@@ -394,6 +394,25 @@ primitive GatewayCloseEventCodeDisallowedIntents is GatewayCloseEventCode
     fun value(): U16 => 4014
 
     fun reconnect(): Bool => false
+primitive GatewayCloseEventCodes
+    fun from(value: U16): GatewayCloseEventCode ? =>
+        match value
+        | 4000 => GatewayCloseEventCodeUnknownError
+        | 4001 => GatewayCloseEventCodeUnknownOpcode
+        | 4002 => GatewayCloseEventCodeDecodeError
+        | 4003 => GatewayCloseEventCodeNotAuthenticated
+        | 4004 => GatewayCloseEventCodeAuthenticationFailed
+        | 4005 => GatewayCloseEventCodeAlreadyAuthenticated
+        | 4007 => GatewayCloseEventCodeInvalidSequence
+        | 4008 => GatewayCloseEventCodeRateLimited
+        | 4009 => GatewayCloseEventCodeSessionTimedOut
+        | 4010 => GatewayCloseEventCodeInvalidShard
+        | 4011 => GatewayCloseEventCodeShardingRequired
+        | 4012 => GatewayCloseEventCodeInvalidAPIVersion
+        | 4013 => GatewayCloseEventCodeInvalidIntents
+        | 4014 => GatewayCloseEventCodeDisallowedIntents
+        else error
+        end
 
 class val GatewayEventPayload is Jsonable
     """
@@ -2223,24 +2242,24 @@ class val GatewayHello is Jsonable
     Sent on connection to the websocket. Defines the heartbeat interval that an app should heartbeat to.
     """
 
-    let heartbeat_interval: U64
+    let heartbeat_interval: USize
         """
         Interval (in milliseconds) an app should heartbeat with
         """
 
-    new val create(heartbeat_interval': U64) =>
+    new val create(heartbeat_interval': USize) =>
         heartbeat_interval = heartbeat_interval'
 
     new val from_json(obj: json.JsonObject) ? =>
-        var heartbeat_interval': (U64 | None) = None
+        var heartbeat_interval': (USize | None) = None
 
         for (key, value) in obj.pairs() do
             match key
-            | "heartbeat_interval" => heartbeat_interval' = (value as I64).u64()
+            | "heartbeat_interval" => heartbeat_interval' = (value as I64).usize()
             end
         end
 
-        heartbeat_interval = heartbeat_interval' as U64
+        heartbeat_interval = heartbeat_interval' as USize
 
     fun to_json(): json.JsonObject =>
         json.JsonObject.update("heartbeat_interval", heartbeat_interval.i64())
