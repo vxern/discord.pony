@@ -93,6 +93,8 @@ primitive GatewayConstants
 
     fun max_receive_message_size_bytes(): USize => 16_777_216
 
+    fun max_queued_events(): USize => 1_000
+
     fun base_backoff_ms(): U64 => 2_000
 
     fun max_backoff_exponent(): USize => 5
@@ -463,6 +465,30 @@ actor _GatewayConnection is mare.WebSocketClientActor
 
     be _raw_send(event: GatewaySendableEvent) =>
         _send(event)
+
+    be _queue_overflowed(cap: USize) =>
+        Debug.out(
+            "[gateway] the send queue hit " + cap.string()
+            + " events, so the oldest are being dropped"
+        )
+        options.on_error(
+            GatewayError(
+                "the gateway send queue is full at " + cap.string()
+                + " events, so the oldest are being dropped"
+            )
+        )
+
+    be _queue_recovered(dropped: USize) =>
+        Debug.out(
+            "[gateway] the send queue has caught up after dropping "
+            + dropped.string() + " event(s)"
+        )
+        options.on_error(
+            GatewayError(
+                "the gateway send queue has caught up, having dropped "
+                + dropped.string() + " event(s)"
+            )
+        )
 
     be _heartbeat_timed_out() =>
         Debug.out("[gateway] a heartbeat went unacknowledged, so the connection is stale")

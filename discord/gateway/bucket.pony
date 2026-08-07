@@ -13,6 +13,8 @@ actor _GatewayBucket
 
     var _open: Bool = false
     var _throttled: Bool = false
+    var _overflowing: Bool = false
+    var _dropped: USize = 0
     var _generation: USize = 0
     var _drain_scheduled: Bool = false
     var _disposed: Bool = false
@@ -29,10 +31,27 @@ actor _GatewayBucket
 
         _queue.enqueue(event)
 
-        Debug.out(
-            "[gateway/bucket] queued opcode " + event.opcode().value().string()
-            + ", " + _queue.size().string() + " waiting"
-        )
+        let cap = GatewayConstants.max_queued_events()
+        if _queue.size() > cap then
+            try _queue.dequeue()? end
+            _dropped = _dropped + 1
+
+            Debug.out(
+                "[gateway/bucket] the queue is full at " + cap.string()
+                + ", so the oldest event was dropped, " + _dropped.string()
+                + " lost so far"
+            )
+
+            if not _overflowing then
+                _overflowing = true
+                _connection._queue_overflowed(cap)
+            end
+        else
+            Debug.out(
+                "[gateway/bucket] queued opcode " + event.opcode().value().string()
+                + ", " + _queue.size().string() + " waiting"
+            )
+        end
 
         _drain()
 
@@ -214,6 +233,16 @@ actor _GatewayBucket
             )
 
             _connection._raw_send(event)
+
+            if
+                _overflowing
+                    and (_queue.size()
+                        <= (GatewayConstants.max_queued_events() / 2))
+            then
+                _overflowing = false
+                _connection._queue_recovered(_dropped)
+                _dropped = 0
+            end
         end
 
     fun _blocked_until(event: GatewaySendableEvent, now: U64): (U64 | None) =>
