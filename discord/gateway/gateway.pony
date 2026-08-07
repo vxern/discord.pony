@@ -214,8 +214,6 @@ actor _GatewayConnection is mare.WebSocketClientActor
             )
         end
 
-        _connect()
-
     fun ref _websocket(): mare.WebSocketClient => _ws
 
     fun ref _connect() =>
@@ -444,7 +442,11 @@ actor _GatewayConnection is mare.WebSocketClientActor
 
     be _listen(events: Events) =>
         Debug.out("[gateway] the event dispatcher is now attached")
+
+        let first = _events is None
         _events = events
+
+        if first then _connect() end
 
     be _send_message(event: GatewaySendableEvent) =>
         Debug.out(
@@ -454,6 +456,11 @@ actor _GatewayConnection is mare.WebSocketClientActor
         _bucket.enqueue(event)
 
     be _send_heartbeat() =>
+        if not _open then
+            Debug.out("[gateway] skipping a heartbeat: the connection is not open")
+            return
+        end
+
         match _sequence_number
         | let s: USize =>
             Debug.out("[gateway] heartbeating at sequence " + s.string())
@@ -664,6 +671,10 @@ actor _GatewayConnection is mare.WebSocketClientActor
                 GatewayConstants.close_timeout_ms()
             )
         else
+            Debug.out(
+                "[gateway] there is no open websocket to close, so dropping the socket"
+            )
+            _connection().hard_close()
             _schedule_connect()
         end
 
@@ -751,7 +762,7 @@ actor _GatewayConnection is mare.WebSocketClientActor
         Debug.out("[gateway] starting a heartbeat every " + interval_ms.string() + "ms")
 
         let self: _GatewayConnection tag = this
-        _heartbeat = _GatewayHeartbeat(self, interval_ms)
+        _heartbeat = _GatewayHeartbeat(self, _timers, interval_ms)
 
     fun ref _stop_heartbeat() =>
         match _heartbeat
@@ -764,14 +775,20 @@ actor _GatewayConnection is mare.WebSocketClientActor
 
 actor _GatewayHeartbeat
     let _connection: _GatewayConnection
+    let _timers: time.Timers
     let _interval_ms: U64
-    let _timers: time.Timers = time.Timers
+    let _timer: time.Timer tag
 
     var _acknowledged: Bool = true
     var _disposed: Bool = false
 
-    new create(connection: _GatewayConnection, interval_ms: U64) =>
+    new create(
+        connection: _GatewayConnection,
+        timers: time.Timers,
+        interval_ms: U64
+    ) =>
         _connection = connection
+        _timers = timers
         _interval_ms = interval_ms
 
         let interval = time.Nanos.from_millis(_interval_ms)
@@ -786,13 +803,13 @@ actor _GatewayHeartbeat
         )
 
         let self: _GatewayHeartbeat tag = this
-        _timers(
-            time.Timer(
-                _RepeatedlyElapsed({() => self._beat()}),
-                initial_delay,
-                interval
-            )
+        let timer = time.Timer(
+            _RepeatedlyElapsed({() => self._beat()}),
+            initial_delay,
+            interval
         )
+        _timer = timer
+        _timers(consume timer)
 
     be _beat() =>
         if _disposed then
@@ -834,4 +851,4 @@ actor _GatewayHeartbeat
         Debug.out("[gateway] disposing of the heartbeat")
 
         _disposed = true
-        _timers.dispose()
+        _timers.cancel(_timer)
