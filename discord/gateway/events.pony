@@ -1,41 +1,93 @@
 use "../data"
+use "collections"
 use "debug"
 
-type GatewayEventHandler[A: Any val] is {(A)} val
+type GatewayEventHandler[A: Any val] is {(A): (Bool | None)} val
 
-type GatewayEmptyEventHandler is {()} val
+type GatewayEmptyEventHandler is {(): (Bool | None)} val
 
-class _Listeners[A: Any val]
-    embed _handlers: Array[GatewayEventHandler[A]] = Array[GatewayEventHandler[A]]
+trait _Removable
+    fun ref remove(handler: Any val)
+
+    fun ref clear()
+
+class _Listeners[A: Any val] is _Removable
+    embed _order: List[GatewayEventHandler[A]] = List[GatewayEventHandler[A]]
+    embed _index: MapIs[Any val, ListNode[GatewayEventHandler[A]]] =
+        MapIs[Any val, ListNode[GatewayEventHandler[A]]]
 
     fun ref add(handler: GatewayEventHandler[A]) =>
-        _handlers.push(handler)
+        if _index.contains(handler) then return end
+        let node = ListNode[GatewayEventHandler[A]](handler)
+        _order.append_node(node)
+        _index(handler) = node
         Debug.out(
-            "[gateway/events] a listener was added, " + _handlers.size().string()
+            "[gateway/events] a listener was added, " + _order.size().string()
             + " now on this event"
         )
 
-    fun apply(event: A) =>
-        Debug.out(
-            "[gateway/events] running " + _handlers.size().string() + " listener(s)"
-        )
-        for handler in _handlers.values() do handler(event) end
+    fun ref remove(handler: Any val) =>
+        try
+            (_index.remove(handler)?._2).remove()
+            Debug.out(
+                "[gateway/events] a listener was removed, " + _order.size().string()
+                + " now on this event"
+            )
+        end
 
-class _EmptyListeners
-    embed _handlers: Array[GatewayEmptyEventHandler] = Array[GatewayEmptyEventHandler]
+    fun ref clear() =>
+        _index.clear()
+        _order.clear()
+
+    fun ref apply(event: A) =>
+        Debug.out(
+            "[gateway/events] running " + _order.size().string() + " listener(s)"
+        )
+        let spent = Array[GatewayEventHandler[A]]
+        for handler in _order.values() do
+            let keep = match handler(event) | let keep': Bool => keep' else true end
+            if not keep then spent.push(handler) end
+        end
+        for handler in spent.values() do remove(handler) end
+
+class _EmptyListeners is _Removable
+    embed _order: List[GatewayEmptyEventHandler] = List[GatewayEmptyEventHandler]
+    embed _index: MapIs[Any val, ListNode[GatewayEmptyEventHandler]] =
+        MapIs[Any val, ListNode[GatewayEmptyEventHandler]]
 
     fun ref add(handler: GatewayEmptyEventHandler) =>
-        _handlers.push(handler)
+        if _index.contains(handler) then return end
+        let node = ListNode[GatewayEmptyEventHandler](handler)
+        _order.append_node(node)
+        _index(handler) = node
         Debug.out(
-            "[gateway/events] a listener was added, " + _handlers.size().string()
+            "[gateway/events] a listener was added, " + _order.size().string()
             + " now on this event"
         )
 
-    fun apply() =>
+    fun ref remove(handler: Any val) =>
+        try
+            (_index.remove(handler)?._2).remove()
+            Debug.out(
+                "[gateway/events] a listener was removed, " + _order.size().string()
+                + " now on this event"
+            )
+        end
+
+    fun ref clear() =>
+        _index.clear()
+        _order.clear()
+
+    fun ref apply() =>
         Debug.out(
-            "[gateway/events] running " + _handlers.size().string() + " listener(s)"
+            "[gateway/events] running " + _order.size().string() + " listener(s)"
         )
-        for handler in _handlers.values() do handler() end
+        let spent = Array[GatewayEmptyEventHandler]
+        for handler in _order.values() do
+            let keep = match handler() | let keep': Bool => keep' else true end
+            if not keep then spent.push(handler) end
+        end
+        for handler in spent.values() do remove(handler) end
 
 actor Events
     let _api: GatewayApi
@@ -120,8 +172,96 @@ actor Events
     embed _voice_server_update: _Listeners[VoiceServerUpdate] = _Listeners[VoiceServerUpdate]
     embed _webhooks_update: _Listeners[WebhooksUpdate] = _Listeners[WebhooksUpdate]
 
+    embed _all: Array[_Removable] = Array[_Removable]
+
     new create(api: GatewayApi) =>
         _api = api
+
+        _all.push(_ready)
+        _all.push(_resumed)
+        _all.push(_rate_limited)
+        _all.push(_application_command_permissions_update)
+        _all.push(_auto_moderation_rule_create)
+        _all.push(_auto_moderation_rule_update)
+        _all.push(_auto_moderation_rule_delete)
+        _all.push(_auto_moderation_action_execution)
+        _all.push(_channel_create)
+        _all.push(_channel_update)
+        _all.push(_channel_delete)
+        _all.push(_channel_info)
+        _all.push(_channel_pins_update)
+        _all.push(_thread_create)
+        _all.push(_thread_update)
+        _all.push(_thread_delete)
+        _all.push(_thread_list_sync)
+        _all.push(_thread_member_update)
+        _all.push(_thread_members_update)
+        _all.push(_entitlement_create)
+        _all.push(_entitlement_update)
+        _all.push(_entitlement_delete)
+        _all.push(_guild_create)
+        _all.push(_guild_update)
+        _all.push(_guild_delete)
+        _all.push(_guild_audit_log_entry_create)
+        _all.push(_guild_ban_add)
+        _all.push(_guild_ban_remove)
+        _all.push(_guild_emojis_update)
+        _all.push(_guild_stickers_update)
+        _all.push(_guild_integrations_update)
+        _all.push(_guild_member_add)
+        _all.push(_guild_member_remove)
+        _all.push(_guild_member_update)
+        _all.push(_guild_members_chunk)
+        _all.push(_guild_role_create)
+        _all.push(_guild_role_update)
+        _all.push(_guild_role_delete)
+        _all.push(_guild_scheduled_event_create)
+        _all.push(_guild_scheduled_event_update)
+        _all.push(_guild_scheduled_event_delete)
+        _all.push(_guild_scheduled_event_user_add)
+        _all.push(_guild_scheduled_event_user_remove)
+        _all.push(_guild_soundboard_sound_create)
+        _all.push(_guild_soundboard_sound_update)
+        _all.push(_guild_soundboard_sound_delete)
+        _all.push(_guild_soundboard_sounds_update)
+        _all.push(_soundboard_sounds)
+        _all.push(_integration_create)
+        _all.push(_integration_update)
+        _all.push(_integration_delete)
+        _all.push(_interaction_create)
+        _all.push(_invite_create)
+        _all.push(_invite_delete)
+        _all.push(_message_create)
+        _all.push(_message_update)
+        _all.push(_message_delete)
+        _all.push(_message_delete_bulk)
+        _all.push(_message_reaction_add)
+        _all.push(_message_reaction_remove)
+        _all.push(_message_reaction_remove_all)
+        _all.push(_message_reaction_remove_emoji)
+        _all.push(_message_poll_vote_add)
+        _all.push(_message_poll_vote_remove)
+        _all.push(_presence_update)
+        _all.push(_stage_instance_create)
+        _all.push(_stage_instance_update)
+        _all.push(_stage_instance_delete)
+        _all.push(_subscription_create)
+        _all.push(_subscription_update)
+        _all.push(_subscription_delete)
+        _all.push(_typing_start)
+        _all.push(_user_update)
+        _all.push(_voice_channel_effect_send)
+        _all.push(_voice_channel_status_update)
+        _all.push(_voice_channel_start_time_update)
+        _all.push(_voice_state_update)
+        _all.push(_voice_server_update)
+        _all.push(_webhooks_update)
+
+    be off(handler: Any val) =>
+        for listeners in _all.values() do listeners.remove(handler) end
+
+    be clear() =>
+        for listeners in _all.values() do listeners.clear() end
 
     be request_guild_members(event: GatewayRequestGuildMembersEvent) =>
         Debug.out("[gateway/events] requesting guild members")
