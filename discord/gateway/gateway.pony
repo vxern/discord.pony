@@ -17,6 +17,7 @@ class Gateway
     new create(env: Env, options: GatewayOptions) =>
         api = GatewayApi(env, options)
         events = Events(api)
+        api._listen(events)
 
     fun dispose() => api.dispose()
 
@@ -29,28 +30,10 @@ actor GatewayApi
     be send_message(event: GatewaySendableEvent) =>
         _connection._send_message(event)
 
+    be _listen(events: Events) =>
+        _connection._listen(events)
+
     be dispose() => _connection.dispose()
-
-actor Events
-    let _api: GatewayApi
-
-    new create(api: GatewayApi) =>
-        _api = api
-
-    be request_guild_members(event: GatewayRequestGuildMembersEvent) =>
-        _api.send_message(event)
-
-    be request_soundboard_sounds(event: GatewayRequestSoundboardSoundsEvent) =>
-        _api.send_message(event)
-
-    be request_channel_info(event: GatewayRequestChannelInfoEvent) =>
-        _api.send_message(event)
-
-    be update_voice_state(event: GatewayVoiceStateUpdateEvent) =>
-        _api.send_message(event)
-
-    be update_presence(event: GatewayPresenceUpdateEvent) =>
-        _api.send_message(event)
 
 class val GatewayError
     let reason: String
@@ -165,6 +148,7 @@ actor _GatewayConnection is mare.WebSocketClientActor
     let _rand: random.Rand
 
     var _ws: mare.WebSocketClient = mare.WebSocketClient.none()
+    var _events: (Events | None) = None
     var _open: Bool = false
     var _sequence_number: (USize | None) = None
     var _session_id: (String | None) = None
@@ -315,6 +299,9 @@ actor _GatewayConnection is mare.WebSocketClientActor
 
         _schedule_connect()
 
+    be _listen(events: Events) =>
+        _events = events
+
     be _send_message(event: GatewaySendableEvent) =>
         _send(event)
 
@@ -370,6 +357,10 @@ actor _GatewayConnection is mare.WebSocketClientActor
 
         if (name == "READY") or (name == "RESUMED") then
             _reconnect_attempts = 0
+        end
+
+        match _events
+        | let events: Events => events._dispatch(name, event)
         end
 
     fun ref _reconnect(resume: Bool) =>
