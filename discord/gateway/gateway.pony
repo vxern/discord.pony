@@ -146,6 +146,7 @@ actor _GatewayConnection is mare.WebSocketClientActor
     let _ssl_context: (ssl.SSLContext val | None)
     let _timers: time.Timers = time.Timers
     let _rand: random.Rand
+    let _bucket: _GatewayBucket
 
     var _ws: mare.WebSocketClient = mare.WebSocketClient.none()
     var _events: (Events | None) = None
@@ -178,6 +179,8 @@ actor _GatewayConnection is mare.WebSocketClientActor
         (let seconds, let nanoseconds) = time.Time.now()
         _rand = random.Rand(seconds.u64(), nanoseconds.u64())
 
+        _bucket = _GatewayBucket(this, _timers)
+
         _connect()
 
     fun ref _websocket(): mare.WebSocketClient => _ws
@@ -204,6 +207,7 @@ actor _GatewayConnection is mare.WebSocketClientActor
             [("User-Agent", options.user_agent)]
 
         _open = false
+        _bucket.close()
         _ws = mare.WebSocketClient.ssl(
             _auth,
             context,
@@ -220,7 +224,6 @@ actor _GatewayConnection is mare.WebSocketClientActor
         )
 
     fun ref on_open(response: mare.UpgradeResponse val) => None
-        // TODO(vxern): Start draining bucket.
 
     fun ref on_text_message(text: String val) =>
         let payload =
@@ -274,6 +277,7 @@ actor _GatewayConnection is mare.WebSocketClientActor
 
     fun ref on_closed(status: mare.CloseStatus, reason: String val) =>
         _open = false
+        _bucket.close()
         _stop_heartbeat()
 
         let code =
@@ -303,10 +307,13 @@ actor _GatewayConnection is mare.WebSocketClientActor
         _events = events
 
     be _send_message(event: GatewaySendableEvent) =>
-        _send(event)
+        _bucket.enqueue(event)
 
     be _send_heartbeat() =>
-        _send(GatewayHeartbeatEvent(_sequence_number))
+        _bucket.heartbeat(GatewayHeartbeatEvent(_sequence_number))
+
+    be _raw_send(event: GatewaySendableEvent) =>
+        _send(event)
 
     be _heartbeat_timed_out() =>
         _reconnect(true)
@@ -319,6 +326,7 @@ actor _GatewayConnection is mare.WebSocketClientActor
         if _disposed then return end
 
         _disposed = true
+        _bucket.dispose()
         _stop_heartbeat()
         _timers.dispose()
 
@@ -333,9 +341,11 @@ actor _GatewayConnection is mare.WebSocketClientActor
     fun ref _identify_or_resume() =>
         match (_session_id, _sequence_number)
         | (let session_id: String, let sequence_number: USize) =>
-            _send(GatewayResumeEvent(options.token, session_id, sequence_number))
+            _bucket.handshake(
+                GatewayResumeEvent(options.token, session_id, sequence_number)
+            )
         else
-            _send(
+            _bucket.handshake(
                 GatewayIdentifyEvent(
                     options.token,
                     options.properties
@@ -370,6 +380,7 @@ actor _GatewayConnection is mare.WebSocketClientActor
             _forget_session()
         end
 
+        _bucket.close()
         _stop_heartbeat()
 
         if _open then
