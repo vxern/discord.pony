@@ -97,6 +97,14 @@ primitive GatewayConstants
 
     fun max_backoff_exponent(): USize => 5
 
+    fun connect_timeout_ms(): U64 => 30_000
+
+    fun hello_timeout_ms(): U64 => 20_000
+
+    fun ready_timeout_ms(): U64 => 60_000
+
+    fun close_timeout_ms(): U64 => 10_000
+
 primitive GatewayDefaults
     fun version(): ApiVersion val => ApiVersion10
 
@@ -158,6 +166,8 @@ actor _GatewayConnection is mare.WebSocketClientActor
     var _heartbeat: (_GatewayHeartbeat | None) = None
     var _reconnect_attempts: USize = 0
     var _connect_scheduled: Bool = false
+    var _watchdog_generation: USize = 0
+    var _watchdog_armed: Bool = false
     var _disposed: Bool = false
 
     new create(env: Env, options': GatewayOptions) =>
@@ -255,8 +265,15 @@ actor _GatewayConnection is mare.WebSocketClientActor
             )
         )
 
+        _arm_watchdog(
+            "the connection to open",
+            GatewayConstants.connect_timeout_ms()
+        )
+
     fun ref on_open(response: mare.UpgradeResponse val) =>
         Debug.out("[gateway] the websocket upgrade went through")
+
+        _arm_watchdog("a hello", GatewayConstants.hello_timeout_ms())
 
     fun ref on_text_message(text: String val) =>
         Debug.out("[gateway] <- " + text.size().string() + " bytes")
@@ -293,6 +310,10 @@ actor _GatewayConnection is mare.WebSocketClientActor
                 _open = true
                 _start_heartbeat(hello.heartbeat_interval.u64())
                 _identify_or_resume()
+                _arm_watchdog(
+                    "a ready or a resumed",
+                    GatewayConstants.ready_timeout_ms()
+                )
             else
                 Debug.out("[gateway] the hello could not be read, so no heartbeat was started")
             end
@@ -350,11 +371,13 @@ actor _GatewayConnection is mare.WebSocketClientActor
 
     fun ref on_connection_failure(reason: lori.ConnectionFailureReason) =>
         Debug.out("[gateway] the connection failed: " + _GatewayFailure.reason(reason))
+        _disarm_watchdog()
         options.on_error(GatewayError(_GatewayFailure.reason(reason)))
         _schedule_connect()
 
     fun ref on_handshake_failure(err: mare.ClientHandshakeError) =>
         Debug.out("[gateway] the handshake failed: " + err.string())
+        _disarm_watchdog()
         options.on_error(
             GatewayError("the gateway handshake failed: " + err.string())
         )
@@ -367,6 +390,7 @@ actor _GatewayConnection is mare.WebSocketClientActor
         )
 
         _open = false
+        _disarm_watchdog()
         _bucket.close()
         _stop_heartbeat()
 
@@ -435,12 +459,38 @@ actor _GatewayConnection is mare.WebSocketClientActor
         _connect_scheduled = false
         _connect()
 
+    be _watchdog_expired(generation: USize, stage: String) =>
+        if _disposed then return end
+
+        if generation != _watchdog_generation then
+            Debug.out(
+                "[gateway] ignoring a stale watchdog for " + stage
+            )
+            return
+        end
+
+        Debug.out(
+            "[gateway] gave up waiting for " + stage + ", dropping the socket"
+        )
+
+        _watchdog_armed = false
+        _open = false
+        options.on_error(
+            GatewayError("the gateway timed out waiting for " + stage)
+        )
+
+        _bucket.close()
+        _stop_heartbeat()
+        _connection().hard_close()
+        _schedule_connect()
+
     be dispose() =>
         if _disposed then return end
 
         Debug.out("[gateway] disposing of the connection")
 
         _disposed = true
+        _disarm_watchdog()
         _bucket.dispose()
         _stop_heartbeat()
         _timers.dispose()
@@ -501,6 +551,7 @@ actor _GatewayConnection is mare.WebSocketClientActor
         if (name == "READY") or (name == "RESUMED") then
             Debug.out("[gateway] the connection is settled, resetting the backoff")
             _reconnect_attempts = 0
+            _disarm_watchdog()
         end
 
         match _events
@@ -530,6 +581,10 @@ actor _GatewayConnection is mare.WebSocketClientActor
         if _open then
             _open = false
             _ws.close(mare.CloseGoingAway, "reconnecting")
+            _arm_watchdog(
+                "the close handshake",
+                GatewayConstants.close_timeout_ms()
+            )
         else
             _schedule_connect()
         end
@@ -569,6 +624,35 @@ actor _GatewayConnection is mare.WebSocketClientActor
                 delay
             )
         )
+
+    fun ref _arm_watchdog(stage: String, timeout_ms: U64) =>
+        if _disposed then return end
+
+        _watchdog_generation = _watchdog_generation + 1
+        _watchdog_armed = true
+
+        let generation = _watchdog_generation
+
+        Debug.out(
+            "[gateway] watching for " + stage + ", giving it "
+            + timeout_ms.string() + "ms"
+        )
+
+        let self: _GatewayConnection tag = this
+        _timers(
+            time.Timer(
+                _OnceElapsed({() => self._watchdog_expired(generation, stage)}),
+                time.Nanos.from_millis(timeout_ms)
+            )
+        )
+
+    fun ref _disarm_watchdog() =>
+        if not _watchdog_armed then return end
+
+        Debug.out("[gateway] the watchdog is standing down")
+
+        _watchdog_generation = _watchdog_generation + 1
+        _watchdog_armed = false
 
     fun ref _backoff(): U64 =>
         let exponent =
