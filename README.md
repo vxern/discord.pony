@@ -2,13 +2,9 @@
 
 (WIP) A complete, documented and battle-tested Pony library for working with Discord's API.
 
-## API Versions
-
-- ✅ 10
-- ❌ 9
-- ❌ 8
-- ❌ 7
-- ❌ 6
+API - v10
+Gateway - v10
+Voice - Unsupported!
 
 ## REST Endpoints
 
