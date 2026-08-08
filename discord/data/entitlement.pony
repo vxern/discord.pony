@@ -4,9 +4,12 @@ class val Entitlement is Jsonable
     """
     https://docs.discord.com/developers/resources/entitlement#entitlement-object-entitlement-structure
 
-    Entitlements in Discord represent that a user or guild has access to a premium offering in your application.
+    Entitlements in Discord represent that a user or guild has access to a
+    premium offering in your application.
 
-    Entitlements are created when a user purchases a SKU, when a developer gifts a SKU, or when a subscription is renewed. They are deleted when a subscription is cancelled or when a gift is revoked.
+    Entitlements are created when a user purchases a SKU, when a developer gifts
+    a SKU, or when a subscription is renewed. They are deleted when a
+    subscription is cancelled or when a gift is revoked.
     """
 
     let id: Snowflake
@@ -50,7 +53,8 @@ class val Entitlement is Jsonable
         """
         Date at which the entitlement is no longer valid.
 
-        Not present when using test entitlements, or when receiving an entitlement for a permanent one-time purchase.
+        Not present when using test entitlements, or when receiving an
+        entitlement for a permanent one-time purchase.
         """
 
     let guild_id: (Snowflake | None)
@@ -135,7 +139,8 @@ class val Entitlement is Jsonable
             .update("deleted", deleted)
 
         match user_id
-        | let user_id': Snowflake => obj = obj.update("user_id", user_id'.to_json())
+        | let user_id': Snowflake =>
+            obj = obj.update("user_id", user_id'.to_json())
         end
 
         match starts_at
@@ -147,7 +152,8 @@ class val Entitlement is Jsonable
         end
 
         match guild_id
-        | let guild_id': Snowflake => obj = obj.update("guild_id", guild_id'.to_json())
+        | let guild_id': Snowflake =>
+            obj = obj.update("guild_id", guild_id'.to_json())
         end
 
         match consumed
@@ -231,13 +237,19 @@ primitive _Entitlements
         let array = value as json.JsonArray
         recover val
             let entitlements = Array[Entitlement](array.size())
-            for entitlement in array.values() do entitlements.push(Entitlement.from_json(entitlement as json.JsonObject)?) end
+            for entitlement in array.values() do
+                entitlements.push(
+                    Entitlement.from_json(entitlement as json.JsonObject)?
+                )
+            end
             entitlements
         end
 
     fun to_json(entitlements: Array[Entitlement] val): json.JsonArray =>
         var array = json.JsonArray
-        for entitlement in entitlements.values() do array = array.push(entitlement.to_json()) end
+        for entitlement in entitlements.values() do
+            array = array.push(entitlement.to_json())
+        end
         array
 
 class val GetEntitlementsParams
@@ -277,12 +289,14 @@ class val GetEntitlementsParams
 
     let exclude_ended: (Bool | None)
         """
-        Whether or not ended entitlements should be omitted. Defaults to false, ended entitlements are included by default.
+        Whether or not ended entitlements should be omitted. Defaults to false,
+        ended entitlements are included by default.
         """
 
     let exclude_deleted: (Bool | None)
         """
-        Whether or not deleted entitlements should be omitted. Defaults to true, deleted entitlements are not included by default.
+        Whether or not deleted entitlements should be omitted. Defaults to true,
+        deleted entitlements are not included by default.
         """
 
     new val create(
@@ -312,7 +326,8 @@ class val GetEntitlementsParams
         end
 
         match sku_ids
-        | let sku_ids': Array[Snowflake] val => query.push(("sku_ids", _CommaSeparated(sku_ids')))
+        | let sku_ids': Array[Snowflake] val =>
+            query.push(("sku_ids", _CommaSeparated(sku_ids')))
         end
 
         match before
@@ -328,15 +343,18 @@ class val GetEntitlementsParams
         end
 
         match guild_id
-        | let guild_id': Snowflake => query.push(("guild_id", guild_id'.string()))
+        | let guild_id': Snowflake =>
+            query.push(("guild_id", guild_id'.string()))
         end
 
         match exclude_ended
-        | let exclude_ended': Bool => query.push(("exclude_ended", exclude_ended'.string()))
+        | let exclude_ended': Bool =>
+            query.push(("exclude_ended", exclude_ended'.string()))
         end
 
         match exclude_deleted
-        | let exclude_deleted': Bool => query.push(("exclude_deleted", exclude_deleted'.string()))
+        | let exclude_deleted': Bool =>
+            query.push(("exclude_deleted", exclude_deleted'.string()))
         end
 
         consume query
@@ -361,7 +379,11 @@ class val CreateTestEntitlementParams is ToJsonable
         `1` for a guild subscription, `2` for a user subscription
         """
 
-    new val create(sku_id': Snowflake, owner_id': Snowflake, owner_type': TestEntitlementOwnerType) =>
+    new val create(
+        sku_id': Snowflake,
+        owner_id': Snowflake,
+        owner_type': TestEntitlementOwnerType
+    ) =>
         sku_id = sku_id'
         owner_id = owner_id'
         owner_type = owner_type'

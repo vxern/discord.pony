@@ -4,15 +4,21 @@ class val Subscription is Jsonable
     """
     https://docs.discord.com/developers/resources/subscription#subscription-object-subscription-structure
 
-    Subscriptions in Discord represent a user making recurring payments for at least one SKU over an ongoing period. Successful payments grant the user access to entitlements associated with the SKU.
+    Subscriptions in Discord represent a user making recurring payments for at
+    least one SKU over an ongoing period. Successful payments grant the user
+    access to entitlements associated with the SKU.
 
     Subscription Statuses
 
-        Active Subscription: A subscription that is scheduled to renew at the end of the current period.
+        Active Subscription: A subscription that is scheduled to renew at the
+        end of the current period.
 
-        Ending Subscription: A subscription that will not renew at the end of the current period. The subscription will remain active until the end of the current period.
+        Ending Subscription: A subscription that will not renew at the end of
+        the current period. The subscription will remain active until the end of
+        the current period.
 
-        Inactive Subscription: A subscription that has ended. The user no longer has access to the entitlements associated with the SKU.
+        Inactive Subscription: A subscription that has ended. The user no longer
+        has access to the entitlements associated with the SKU.
     """
 
     let id: Snowflake
@@ -62,7 +68,8 @@ class val Subscription is Jsonable
 
     let country: (String | None)
         """
-        ISO3166-1 alpha-2 country code of the payment source used to purchase the subscription. Missing unless queried with a private OAuth scope.
+        ISO3166-1 alpha-2 country code of the payment source used to purchase
+        the subscription. Missing unless queried with a private OAuth scope.
         """
 
     new val create(
@@ -107,10 +114,14 @@ class val Subscription is Jsonable
             | "sku_ids" => sku_ids' = _Snowflakes(value)?
             | "entitlement_ids" => entitlement_ids' = _Snowflakes(value)?
             | "renewal_sku_ids" =>
-                match value | let array: json.JsonArray => renewal_sku_ids' = _Snowflakes(array)? end
+                match value
+                | let array: json.JsonArray =>
+                    renewal_sku_ids' = _Snowflakes(array)?
+                end
             | "current_period_start" => current_period_start' = value as String
             | "current_period_end" => current_period_end' = value as String
-            | "status" => status' = SubscriptionStatuses.from((value as I64).u8())?
+            | "status" =>
+                status' = SubscriptionStatuses.from((value as I64).u8())?
             | "canceled_at" =>
                 match value | let string: String => canceled_at' = string end
             | "country" => country' = value as String
@@ -134,7 +145,13 @@ class val Subscription is Jsonable
             .update("user_id", user_id.to_json())
             .update("sku_ids", _Snowflakes.to_json(sku_ids))
             .update("entitlement_ids", _Snowflakes.to_json(entitlement_ids))
-            .update("renewal_sku_ids", match renewal_sku_ids | let renewal_sku_ids': Array[Snowflake] val => _Snowflakes.to_json(renewal_sku_ids') end)
+            .update(
+                "renewal_sku_ids",
+                match renewal_sku_ids
+                | let renewal_sku_ids': Array[Snowflake] val =>
+                    _Snowflakes.to_json(renewal_sku_ids')
+                end
+            )
             .update("current_period_start", current_period_start)
             .update("current_period_end", current_period_end)
             .update("status", status.value().i64())
@@ -155,20 +172,28 @@ primitive _Subscriptions
         let array = value as json.JsonArray
         recover val
             let subscriptions = Array[Subscription](array.size())
-            for subscription in array.values() do subscriptions.push(Subscription.from_json(subscription as json.JsonObject)?) end
+            for subscription in array.values() do
+                subscriptions.push(
+                    Subscription.from_json(subscription as json.JsonObject)?
+                )
+            end
             subscriptions
         end
 
     fun to_json(subscriptions: Array[Subscription] val): json.JsonArray =>
         var array = json.JsonArray
-        for subscription in subscriptions.values() do array = array.push(subscription.to_json()) end
+        for subscription in subscriptions.values() do
+            array = array.push(subscription.to_json())
+        end
         array
 
 trait val SubscriptionStatus is _Enum[SubscriptionStatus, U8]
     """
     https://docs.discord.com/developers/resources/subscription#subscription-statuses
 
-    Subscription status should not be used to grant perks. Use entitlements as an indication of whether a user should have access to a specific SKU. See our guide on Implementing App Subscriptions for more information.
+    Subscription status should not be used to grant perks. Use entitlements as
+    an indication of whether a user should have access to a specific SKU. See
+    our guide on Implementing App Subscriptions for more information.
     """
 primitive ActiveSubscriptionStatus is SubscriptionStatus
     """
@@ -219,7 +244,8 @@ class val GetSKUSubscriptionsParams
 
     let user_id: (Snowflake | None)
         """
-        User ID for which to return subscriptions. Required except for OAuth queries.
+        User ID for which to return subscriptions. Required except for OAuth
+        queries.
         """
 
     new val create(

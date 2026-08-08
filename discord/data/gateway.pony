@@ -72,7 +72,9 @@ class val GatewayBotInfo is Jsonable
             match key
             | "url" => url' = value as String
             | "shards" => shards' = (value as I64).usize()
-            | "session_start_limit" => session_start_limit' = SessionStartLimit.from_json(value as json.JsonObject)?
+            | "session_start_limit" =>
+                session_start_limit' =
+                    SessionStartLimit.from_json(value as json.JsonObject)?
             end
         end
 
@@ -151,7 +153,9 @@ class val SessionStartLimit is Jsonable
 
 trait val GatewayOpcode is _Enum[GatewayOpcode, U8]
     """
-    All gateway events in Discord are tagged with an opcode that denotes the payload type. Your connection to our gateway may also sometimes close. When it does, you will receive a close code that tells you what happened.
+    All gateway events in Discord are tagged with an opcode that denotes the
+    payload type. Your connection to our gateway may also sometimes close. When
+    it does, you will receive a close code that tells you what happened.
     """
 primitive GatewayOpcodeDispatch is GatewayOpcode
     """
@@ -221,7 +225,8 @@ primitive GatewayOpcodeInvalidSession is GatewayOpcode
     """
     Action: Receive
 
-    The session has been invalidated. You should reconnect and identify/resume accordingly.
+    The session has been invalidated. You should reconnect and identify/resume
+    accordingly.
     """
 
     fun value(): U8 => 9
@@ -237,7 +242,8 @@ primitive GatewayOpcodeHeartbeatACK is GatewayOpcode
     """
     Action: Receive
 
-    Sent in response to receiving a heartbeat to acknowledge that it has been received.
+    Sent in response to receiving a heartbeat to acknowledge that it has been
+    received.
     """
 
     fun value(): U8 => 11
@@ -278,7 +284,11 @@ primitive GatewayOpcodes
 
 trait val GatewayCloseEventCode is _Enum[GatewayCloseEventCode, U16]
     """
-    In order to prevent broken reconnect loops, you should consider some close codes as a signal to stop reconnecting. This can be because your token expired, or your identification is invalid. This table explains what the application defined close codes for the gateway are, and which close codes you should not attempt to reconnect.
+    In order to prevent broken reconnect loops, you should consider some close
+    codes as a signal to stop reconnecting. This can be because your token
+    expired, or your identification is invalid. This table explains what the
+    application defined close codes for the gateway are, and which close codes
+    you should not attempt to reconnect.
     """
 
     fun reconnect(): Bool
@@ -292,7 +302,8 @@ primitive GatewayCloseEventCodeUnknownError is GatewayCloseEventCode
     fun reconnect(): Bool => true
 primitive GatewayCloseEventCodeUnknownOpcode is GatewayCloseEventCode
     """
-    You sent an invalid Gateway opcode or an invalid payload for an opcode. Don’t do that!
+    You sent an invalid Gateway opcode or an invalid payload for an opcode.
+    Don’t do that!
     """
 
     fun value(): U16 => 4001
@@ -308,7 +319,8 @@ primitive GatewayCloseEventCodeDecodeError is GatewayCloseEventCode
     fun reconnect(): Bool => true
 primitive GatewayCloseEventCodeNotAuthenticated is GatewayCloseEventCode
     """
-    You sent us a payload prior to identifying, or this session has been invalidated.
+    You sent us a payload prior to identifying, or this session has been
+    invalidated.
     """
 
     fun value(): U16 => 4003
@@ -332,7 +344,8 @@ primitive GatewayCloseEventCodeAlreadyAuthenticated is GatewayCloseEventCode
     fun reconnect(): Bool => true
 primitive GatewayCloseEventCodeInvalidSequence is GatewayCloseEventCode
     """
-    The sequence sent when resuming the session was invalid. Reconnect and start a new session.
+    The sequence sent when resuming the session was invalid. Reconnect and start
+    a new session.
     """
 
     fun value(): U16 => 4007
@@ -340,7 +353,8 @@ primitive GatewayCloseEventCodeInvalidSequence is GatewayCloseEventCode
     fun reconnect(): Bool => true
 primitive GatewayCloseEventCodeRateLimited is GatewayCloseEventCode
     """
-    Woah nelly! You’re sending payloads to us too quickly. Slow it down! You will be disconnected on receiving this.
+    Woah nelly! You’re sending payloads to us too quickly. Slow it down! You
+    will be disconnected on receiving this.
     """
 
     fun value(): U16 => 4008
@@ -364,7 +378,8 @@ primitive GatewayCloseEventCodeInvalidShard is GatewayCloseEventCode
     fun reconnect(): Bool => false
 primitive GatewayCloseEventCodeShardingRequired is GatewayCloseEventCode
     """
-    The session would have handled too many guilds - you are required to shard your connection in order to connect.
+    The session would have handled too many guilds - you are required to shard
+    your connection in order to connect.
     """
 
     fun value(): U16 => 4011
@@ -380,7 +395,8 @@ primitive GatewayCloseEventCodeInvalidAPIVersion is GatewayCloseEventCode
     fun reconnect(): Bool => false
 primitive GatewayCloseEventCodeInvalidIntents is GatewayCloseEventCode
     """
-    You sent an invalid intent for a Gateway Intent. You may have incorrectly calculated the bitwise value.
+    You sent an invalid intent for a Gateway Intent. You may have incorrectly
+    calculated the bitwise value.
     """
 
     fun value(): U16 => 4013
@@ -388,7 +404,8 @@ primitive GatewayCloseEventCodeInvalidIntents is GatewayCloseEventCode
     fun reconnect(): Bool => false
 primitive GatewayCloseEventCodeDisallowedIntents is GatewayCloseEventCode
     """
-    You sent a disallowed intent for a Gateway Intent. You may have tried to specify an intent that you have not enabled or are not approved for.
+    You sent a disallowed intent for a Gateway Intent. You may have tried to
+    specify an intent that you have not enabled or are not approved for.
     """
 
     fun value(): U16 => 4014
@@ -418,7 +435,8 @@ class val GatewayEventPayload is Jsonable
     """
     https://docs.discord.com/developers/events/gateway-events#payload-structure
 
-    Gateway event payloads have a common structure, but the contents of the associated data (d) varies between the different events.
+    Gateway event payloads have a common structure, but the contents of the
+    associated data (d) varies between the different events.
     """
 
     let op: GatewayOpcode
@@ -466,7 +484,8 @@ class val GatewayEventPayload is Jsonable
             match key
             | "op" => op' = GatewayOpcodes.from((value as I64).u8())?
             | "d" => d' = value
-            | "s" => s' = match value | let sequence: I64 => sequence.usize() end
+            | "s" =>
+                s' = match value | let sequence: I64 => sequence.usize() end
             | "t" => t' = match value | let name: String => name end
             end
         end
@@ -495,7 +514,8 @@ trait val GatewaySendableEvent
     """
     https://docs.discord.com/developers/events/gateway-events#send-events
 
-    Send events are Gateway events encapsulated in an event payload, and are sent by an app to Discord through a Gateway connection.
+    Send events are Gateway events encapsulated in an event payload, and are
+    sent by an app to Discord through a Gateway connection.
     """
 
     fun opcode(): GatewayOpcode
@@ -531,7 +551,8 @@ class val GatewayIdentifyEvent is GatewaySendableEvent
 
     let large_threshold: (USize | None)
         """
-        Value between 50 and 250, total number of members where the gateway will stop sending offline members in the guild member list
+        Value between 50 and 250, total number of members where the gateway will
+        stop sending offline members in the guild member list
 
         Defaults to `50`.
         """
@@ -581,16 +602,22 @@ class val GatewayIdentifyEvent is GatewaySendableEvent
         end
 
         match large_threshold
-        | let large_threshold': USize => obj = obj.update("large_threshold", large_threshold'.i64())
+        | let large_threshold': USize =>
+            obj = obj.update("large_threshold", large_threshold'.i64())
         end
 
         match shard
         | (let shard_id: USize, let num_shards: USize) =>
-            obj = obj.update("shard", json.JsonArray.push(shard_id.i64()).push(num_shards.i64()))
+            obj =
+                obj.update(
+                    "shard",
+                    json.JsonArray.push(shard_id.i64()).push(num_shards.i64())
+                )
         end
 
         match presence
-        | let presence': GatewayPresenceUpdate => obj = obj.update("presence", presence'.to_json())
+        | let presence': GatewayPresenceUpdate =>
+            obj = obj.update("presence", presence'.to_json())
         end
 
         obj
@@ -634,12 +661,14 @@ class val GatewayHeartbeatEvent is GatewaySendableEvent
     """
     https://docs.discord.com/developers/events/gateway-events#heartbeat
 
-    Used to maintain an active gateway connection. Must be sent every `heartbeat_interval` milliseconds after the Hello payload is received.
+    Used to maintain an active gateway connection. Must be sent every
+    `heartbeat_interval` milliseconds after the Hello payload is received.
     """
 
     let seq: (USize | None)
         """
-        The last sequence number received by the client, or `None` if it has not yet received one
+        The last sequence number received by the client, or `None` if it has not
+        yet received one
         """
 
     new val create(seq': (USize | None) = None) =>
@@ -656,9 +685,13 @@ class val GatewayRequestGuildMembersEvent is GatewaySendableEvent
     """
     https://docs.discord.com/developers/events/gateway-events#request-guild-members
 
-    Used to request all members for a guild. The server will send Guild Members Chunk events in response with up to 1000 members per chunk until all members that match the request have been sent.
+    Used to request all members for a guild. The server will send Guild Members
+    Chunk events in response with up to 1000 members per chunk until all members
+    that match the request have been sent.
 
-    The `GUILD_PRESENCES` intent is required to set `presences` to `true`, and the `GUILD_MEMBERS` intent is required to request the entire member list. Requesting a prefix or user ids returns a maximum of 100 members.
+    The `GUILD_PRESENCES` intent is required to set `presences` to `true`, and
+    the `GUILD_MEMBERS` intent is required to request the entire member list.
+    Requesting a prefix or user ids returns a maximum of 100 members.
     """
 
     let guild_id: Snowflake
@@ -668,14 +701,16 @@ class val GatewayRequestGuildMembersEvent is GatewaySendableEvent
 
     let query: (String | None)
         """
-        string that username starts with, or an empty string to return all members
+        string that username starts with, or an empty string to return all
+        members
 
         One of `query` or `user_ids` is required.
         """
 
     let limit: USize
         """
-        maximum number of members to send matching the `query`; a limit of `0` can be used with an empty string `query` to return all members
+        maximum number of members to send matching the `query`; a limit of `0`
+        can be used with an empty string `query` to return all members
         """
 
     let presences: (Bool | None)
@@ -694,7 +729,8 @@ class val GatewayRequestGuildMembersEvent is GatewaySendableEvent
         """
         nonce to identify the Guild Members Chunk response
 
-        Can only be up to 32 bytes. If you send an invalid nonce it will be ignored and the reply member chunk(s) will not have a nonce set.
+        Can only be up to 32 bytes. If you send an invalid nonce it will be
+        ignored and the reply member chunk(s) will not have a nonce set.
         """
 
     new val create(
@@ -728,8 +764,10 @@ class val GatewayRequestGuildMembersEvent is GatewaySendableEvent
         end
 
         match user_ids
-        | let user_id: Snowflake => obj = obj.update("user_ids", user_id.to_json())
-        | let user_ids': Array[Snowflake] val => obj = obj.update("user_ids", _Snowflakes.to_json(user_ids'))
+        | let user_id: Snowflake =>
+            obj = obj.update("user_ids", user_id.to_json())
+        | let user_ids': Array[Snowflake] val =>
+            obj = obj.update("user_ids", _Snowflakes.to_json(user_ids'))
         end
 
         match nonce
@@ -742,7 +780,8 @@ class val GatewayRequestSoundboardSoundsEvent is GatewaySendableEvent
     """
     https://docs.discord.com/developers/events/gateway-events#request-soundboard-sounds
 
-    Used to request soundboard sounds for a list of guilds. The server will send Soundboard Sounds events for each guild in response.
+    Used to request soundboard sounds for a list of guilds. The server will send
+    Soundboard Sounds events for each guild in response.
     """
 
     let guild_ids: Array[Snowflake] val
@@ -762,7 +801,8 @@ class val GatewayRequestChannelInfoEvent is GatewaySendableEvent
     """
     https://docs.discord.com/developers/events/gateway-events#request-channel-info
 
-    Requests ephemeral channel data for channels in a guild. The server will send a Channel Info event in response.
+    Requests ephemeral channel data for channels in a guild. The server will
+    send a Channel Info event in response.
     """
 
     let guild_id: Snowflake
@@ -772,7 +812,8 @@ class val GatewayRequestChannelInfoEvent is GatewaySendableEvent
 
     let fields: Array[String] val
         """
-        The fields to request. The current available fields are `status` and `voice_start_time`.
+        The fields to request. The current available fields are `status` and
+        `voice_start_time`.
         """
 
     new val create(guild_id': Snowflake, fields': Array[String] val) =>
@@ -829,7 +870,12 @@ class val GatewayVoiceStateUpdateEvent is GatewaySendableEvent
     fun data(): json.JsonValue =>
         json.JsonObject
             .update("guild_id", guild_id.to_json())
-            .update("channel_id", match channel_id | let channel_id': Snowflake => channel_id'.to_json() end)
+            .update(
+                "channel_id",
+                match channel_id
+                | let channel_id': Snowflake => channel_id'.to_json()
+                end
+            )
             .update("self_mute", self_mute)
             .update("self_deaf", self_deaf)
 
@@ -856,18 +902,28 @@ trait val GatewayIntent is _Enum[GatewayIntent, U8]
     """
     https://docs.discord.com/developers/events/gateway#list-of-intents
 
-    Intents are bitwise values passed in the `intents` parameter when identifying which correlate to a set of related events. If you do not specify an intent when identifying, you will not receive any of the Gateway events associated with that intent.
+    Intents are bitwise values passed in the `intents` parameter when
+    identifying which correlate to a set of related events. If you do not
+    specify an intent when identifying, you will not receive any of the Gateway
+    events associated with that intent.
 
     Any events not associated with an intent will always be sent to your app.
     """
 
     fun privileged(): Bool
         """
-        Whether the intent must be toggled for the app in the Developer Portal, and approved after verification, before it can be identified with.
+        Whether the intent must be toggled for the app in the Developer Portal,
+        and approved after verification, before it can be identified with.
         """
 primitive GatewayIntentGuilds is GatewayIntent
     """
-    GUILD_CREATE, GUILD_UPDATE, GUILD_DELETE, GUILD_ROLE_CREATE, GUILD_ROLE_UPDATE, GUILD_ROLE_DELETE, CHANNEL_CREATE, CHANNEL_UPDATE, CHANNEL_DELETE, CHANNEL_PINS_UPDATE, THREAD_CREATE, THREAD_UPDATE, THREAD_DELETE, THREAD_LIST_SYNC, THREAD_MEMBER_UPDATE, THREAD_MEMBERS_UPDATE, STAGE_INSTANCE_CREATE, STAGE_INSTANCE_UPDATE, STAGE_INSTANCE_DELETE, VOICE_CHANNEL_STATUS_UPDATE, VOICE_CHANNEL_START_TIME_UPDATE
+    GUILD_CREATE, GUILD_UPDATE, GUILD_DELETE, GUILD_ROLE_CREATE,
+    GUILD_ROLE_UPDATE, GUILD_ROLE_DELETE, CHANNEL_CREATE, CHANNEL_UPDATE,
+    CHANNEL_DELETE, CHANNEL_PINS_UPDATE, THREAD_CREATE, THREAD_UPDATE,
+    THREAD_DELETE, THREAD_LIST_SYNC, THREAD_MEMBER_UPDATE,
+    THREAD_MEMBERS_UPDATE, STAGE_INSTANCE_CREATE, STAGE_INSTANCE_UPDATE,
+    STAGE_INSTANCE_DELETE, VOICE_CHANNEL_STATUS_UPDATE,
+    VOICE_CHANNEL_START_TIME_UPDATE
     """
 
     fun value(): U8 => 0
@@ -875,7 +931,8 @@ primitive GatewayIntentGuilds is GatewayIntent
     fun privileged(): Bool => false
 primitive GatewayIntentGuildMembers is GatewayIntent
     """
-    GUILD_MEMBER_ADD, GUILD_MEMBER_UPDATE, GUILD_MEMBER_REMOVE, THREAD_MEMBERS_UPDATE
+    GUILD_MEMBER_ADD, GUILD_MEMBER_UPDATE, GUILD_MEMBER_REMOVE,
+    THREAD_MEMBERS_UPDATE
     """
 
     fun value(): U8 => 1
@@ -891,7 +948,9 @@ primitive GatewayIntentGuildModeration is GatewayIntent
     fun privileged(): Bool => false
 primitive GatewayIntentGuildExpressions is GatewayIntent
     """
-    GUILD_EMOJIS_UPDATE, GUILD_STICKERS_UPDATE, GUILD_SOUNDBOARD_SOUND_CREATE, GUILD_SOUNDBOARD_SOUND_UPDATE, GUILD_SOUNDBOARD_SOUND_DELETE, GUILD_SOUNDBOARD_SOUNDS_UPDATE
+    GUILD_EMOJIS_UPDATE, GUILD_STICKERS_UPDATE, GUILD_SOUNDBOARD_SOUND_CREATE,
+    GUILD_SOUNDBOARD_SOUND_UPDATE, GUILD_SOUNDBOARD_SOUND_DELETE,
+    GUILD_SOUNDBOARD_SOUNDS_UPDATE
     """
 
     fun value(): U8 => 3
@@ -899,7 +958,8 @@ primitive GatewayIntentGuildExpressions is GatewayIntent
     fun privileged(): Bool => false
 primitive GatewayIntentGuildIntegrations is GatewayIntent
     """
-    GUILD_INTEGRATIONS_UPDATE, INTEGRATION_CREATE, INTEGRATION_UPDATE, INTEGRATION_DELETE
+    GUILD_INTEGRATIONS_UPDATE, INTEGRATION_CREATE, INTEGRATION_UPDATE,
+    INTEGRATION_DELETE
     """
 
     fun value(): U8 => 4
@@ -947,7 +1007,8 @@ primitive GatewayIntentGuildMessages is GatewayIntent
     fun privileged(): Bool => false
 primitive GatewayIntentGuildMessageReactions is GatewayIntent
     """
-    MESSAGE_REACTION_ADD, MESSAGE_REACTION_REMOVE, MESSAGE_REACTION_REMOVE_ALL, MESSAGE_REACTION_REMOVE_EMOJI
+    MESSAGE_REACTION_ADD, MESSAGE_REACTION_REMOVE, MESSAGE_REACTION_REMOVE_ALL,
+    MESSAGE_REACTION_REMOVE_EMOJI
     """
 
     fun value(): U8 => 10
@@ -971,7 +1032,8 @@ primitive GatewayIntentDirectMessages is GatewayIntent
     fun privileged(): Bool => false
 primitive GatewayIntentDirectMessageReactions is GatewayIntent
     """
-    MESSAGE_REACTION_ADD, MESSAGE_REACTION_REMOVE, MESSAGE_REACTION_REMOVE_ALL, MESSAGE_REACTION_REMOVE_EMOJI
+    MESSAGE_REACTION_ADD, MESSAGE_REACTION_REMOVE, MESSAGE_REACTION_REMOVE_ALL,
+    MESSAGE_REACTION_REMOVE_EMOJI
     """
 
     fun value(): U8 => 13
@@ -987,7 +1049,8 @@ primitive GatewayIntentDirectMessageTyping is GatewayIntent
     fun privileged(): Bool => false
 primitive GatewayIntentMessageContent is GatewayIntent
     """
-    Does not represent individual events, but rather affects what data is present for events that could contain message content fields.
+    Does not represent individual events, but rather affects what data is
+    present for events that could contain message content fields.
     """
 
     fun value(): U8 => 15
@@ -995,7 +1058,9 @@ primitive GatewayIntentMessageContent is GatewayIntent
     fun privileged(): Bool => true
 primitive GatewayIntentGuildScheduledEvents is GatewayIntent
     """
-    GUILD_SCHEDULED_EVENT_CREATE, GUILD_SCHEDULED_EVENT_UPDATE, GUILD_SCHEDULED_EVENT_DELETE, GUILD_SCHEDULED_EVENT_USER_ADD, GUILD_SCHEDULED_EVENT_USER_REMOVE
+    GUILD_SCHEDULED_EVENT_CREATE, GUILD_SCHEDULED_EVENT_UPDATE,
+    GUILD_SCHEDULED_EVENT_DELETE, GUILD_SCHEDULED_EVENT_USER_ADD,
+    GUILD_SCHEDULED_EVENT_USER_REMOVE
     """
 
     fun value(): U8 => 16
@@ -1003,7 +1068,8 @@ primitive GatewayIntentGuildScheduledEvents is GatewayIntent
     fun privileged(): Bool => false
 primitive GatewayIntentAutoModerationConfiguration is GatewayIntent
     """
-    AUTO_MODERATION_RULE_CREATE, AUTO_MODERATION_RULE_UPDATE, AUTO_MODERATION_RULE_DELETE
+    AUTO_MODERATION_RULE_CREATE, AUTO_MODERATION_RULE_UPDATE,
+    AUTO_MODERATION_RULE_DELETE
     """
 
     fun value(): U8 => 20
@@ -1076,7 +1142,9 @@ primitive _GatewayIntents
 
     fun to_json(intents: Array[GatewayIntent] val): I64 =>
         var bits: U64 = 0
-        for intent in intents.values() do bits = bits or (U64(1) << intent.value().u64()) end
+        for intent in intents.values() do
+            bits = bits or (U64(1) << intent.value().u64())
+        end
         bits.i64()
 
 class val IdentifyConnectionProperties is ToJsonable
@@ -1121,7 +1189,8 @@ class val GatewayPresenceUpdate is ToJsonable
 
     let since: (U64 | None)
         """
-        Unix time (in milliseconds) of when the client went idle, or null if the client is not idle
+        Unix time (in milliseconds) of when the client went idle, or null if the
+        client is not idle
         """
 
     let activities: Array[Activity] val
@@ -1226,7 +1295,8 @@ class val Activity is Jsonable
 
     let created_at: U64
         """
-        Unix timestamp (in milliseconds) of when the activity was added to the user's session
+        Unix timestamp (in milliseconds) of when the activity was added to the
+        user's session
         """
 
     let timestamps: (ActivityTimestamps | None)
@@ -1241,7 +1311,8 @@ class val Activity is Jsonable
 
     let status_display_type: (StatusDisplayType | None)
         """
-        Status display type; controls which field is displayed in the user's status text in the member list
+        Status display type; controls which field is displayed in the user's
+        status text in the member list
         """
 
     let details: (String | None)
@@ -1298,7 +1369,8 @@ class val Activity is Jsonable
         """
         Custom buttons shown in the Rich Presence (max 2)
 
-        When received over the gateway, the buttons are the button labels alone: bots cannot access a user's activity button URLs.
+        When received over the gateway, the buttons are the button labels alone:
+        bots cannot access a user's activity button URLs.
         """
 
     new val create(
@@ -1358,7 +1430,8 @@ class val Activity is Jsonable
         var secrets': (ActivitySecrets | None) = None
         var instance': (Bool | None) = None
         var flags': (Array[ActivityFlag] val | None) = None
-        var buttons': (Array[ActivityButton] val | Array[String] val | None) = None
+        var buttons': (Array[ActivityButton] val | Array[String] val | None) =
+            None
 
         for (key, value) in obj.pairs() do
             match key
@@ -1367,10 +1440,16 @@ class val Activity is Jsonable
             | "url" =>
                 match value | let string: String => url' = string end
             | "created_at" => created_at' = (value as I64).u64()
-            | "timestamps" => timestamps' = ActivityTimestamps.from_json(value as json.JsonObject)?
+            | "timestamps" =>
+                timestamps' =
+                    ActivityTimestamps.from_json(value as json.JsonObject)?
             | "application_id" => application_id' = Snowflake.from_json(value)?
             | "status_display_type" =>
-                match value | let integer: I64 => status_display_type' = StatusDisplayTypes.from(integer.u8())? end
+                match value
+                | let integer: I64 =>
+                    status_display_type' =
+                        StatusDisplayTypes.from(integer.u8())?
+                end
             | "details" =>
                 match value | let string: String => details' = string end
             | "details_url" =>
@@ -1380,10 +1459,16 @@ class val Activity is Jsonable
             | "state_url" =>
                 match value | let string: String => state_url' = string end
             | "emoji" =>
-                match value | let obj': json.JsonObject => emoji' = ActivityEmoji.from_json(obj')? end
-            | "party" => party' = ActivityParty.from_json(value as json.JsonObject)?
-            | "assets" => assets' = ActivityAssets.from_json(value as json.JsonObject)?
-            | "secrets" => secrets' = ActivitySecrets.from_json(value as json.JsonObject)?
+                match value
+                | let obj': json.JsonObject =>
+                    emoji' = ActivityEmoji.from_json(obj')?
+                end
+            | "party" =>
+                party' = ActivityParty.from_json(value as json.JsonObject)?
+            | "assets" =>
+                assets' = ActivityAssets.from_json(value as json.JsonObject)?
+            | "secrets" =>
+                secrets' = ActivitySecrets.from_json(value as json.JsonObject)?
             | "instance" => instance' = value as Bool
             | "flags" => flags' = _ActivityFlags((value as I64).u64())
             | "buttons" => buttons' = _ActivityButtons(value)?
@@ -1420,15 +1505,21 @@ class val Activity is Jsonable
         end
 
         match timestamps
-        | let timestamps': ActivityTimestamps => obj = obj.update("timestamps", timestamps'.to_json())
+        | let timestamps': ActivityTimestamps =>
+            obj = obj.update("timestamps", timestamps'.to_json())
         end
 
         match application_id
-        | let application_id': Snowflake => obj = obj.update("application_id", application_id'.to_json())
+        | let application_id': Snowflake =>
+            obj = obj.update("application_id", application_id'.to_json())
         end
 
         match status_display_type
-        | let status_display_type': StatusDisplayType => obj = obj.update("status_display_type", status_display_type'.value().i64())
+        | let status_display_type': StatusDisplayType =>
+            obj =
+                obj.update(
+                    "status_display_type", status_display_type'.value().i64()
+                )
         end
 
         match details
@@ -1436,7 +1527,8 @@ class val Activity is Jsonable
         end
 
         match details_url
-        | let details_url': String => obj = obj.update("details_url", details_url')
+        | let details_url': String =>
+            obj = obj.update("details_url", details_url')
         end
 
         match state
@@ -1448,19 +1540,23 @@ class val Activity is Jsonable
         end
 
         match emoji
-        | let emoji': ActivityEmoji => obj = obj.update("emoji", emoji'.to_json())
+        | let emoji': ActivityEmoji =>
+            obj = obj.update("emoji", emoji'.to_json())
         end
 
         match party
-        | let party': ActivityParty => obj = obj.update("party", party'.to_json())
+        | let party': ActivityParty =>
+            obj = obj.update("party", party'.to_json())
         end
 
         match assets
-        | let assets': ActivityAssets => obj = obj.update("assets", assets'.to_json())
+        | let assets': ActivityAssets =>
+            obj = obj.update("assets", assets'.to_json())
         end
 
         match secrets
-        | let secrets': ActivitySecrets => obj = obj.update("secrets", secrets'.to_json())
+        | let secrets': ActivitySecrets =>
+            obj = obj.update("secrets", secrets'.to_json())
         end
 
         match instance
@@ -1468,12 +1564,15 @@ class val Activity is Jsonable
         end
 
         match flags
-        | let flags': Array[ActivityFlag] val => obj = obj.update("flags", _ActivityFlags.to_json(flags'))
+        | let flags': Array[ActivityFlag] val =>
+            obj = obj.update("flags", _ActivityFlags.to_json(flags'))
         end
 
         match buttons
-        | let buttons': Array[ActivityButton] val => obj = obj.update("buttons", _ActivityButtons.to_json(buttons'))
-        | let labels: Array[String] val => obj = obj.update("buttons", _Strings.to_json(labels))
+        | let buttons': Array[ActivityButton] val =>
+            obj = obj.update("buttons", _ActivityButtons.to_json(buttons'))
+        | let labels: Array[String] val =>
+            obj = obj.update("buttons", _Strings.to_json(labels))
         end
 
         obj
@@ -1487,13 +1586,19 @@ primitive _Activities
         let array = value as json.JsonArray
         recover val
             let activities = Array[Activity](array.size())
-            for activity in array.values() do activities.push(Activity.from_json(activity as json.JsonObject)?) end
+            for activity in array.values() do
+                activities.push(
+                    Activity.from_json(activity as json.JsonObject)?
+                )
+            end
             activities
         end
 
     fun to_json(activities: Array[Activity] val): json.JsonArray =>
         var array = json.JsonArray
-        for activity in activities.values() do array = array.push(activity.to_json()) end
+        for activity in activities.values() do
+            array = array.push(activity.to_json())
+        end
         array
 
 trait val ActivityType is _Enum[ActivityType, U8]
@@ -1510,7 +1615,8 @@ primitive StreamingActivityType is ActivityType
     """
     Streaming `{details}`
 
-    The streaming type currently only supports Twitch and YouTube. Only `https://twitch.tv/` and `https://youtube.com/` urls will work.
+    The streaming type currently only supports Twitch and YouTube. Only
+    `https://twitch.tv/` and `https://youtube.com/` urls will work.
     """
 
     fun value(): U8 => 1
@@ -1554,7 +1660,8 @@ trait val StatusDisplayType is _Enum[StatusDisplayType, U8]
     """
     https://docs.discord.com/developers/events/gateway-events#activity-object-status-display-types
 
-    This applies to all activity types. "Listening" is used to serve as a consistent example of what the different fields might be used for.
+    This applies to all activity types. "Listening" is used to serve as a
+    consistent example of what the different fields might be used for.
     """
 primitive NameStatusDisplayType is StatusDisplayType
     """
@@ -1587,7 +1694,8 @@ class val ActivityTimestamps is Jsonable
     """
     https://docs.discord.com/developers/events/gateway-events#activity-object-activity-timestamps
 
-    For Listening and Watching activities, you can include both start and end timestamps to display a time bar.
+    For Listening and Watching activities, you can include both start and end
+    timestamps to display a time bar.
     """
 
     let start: (U64 | None)
@@ -1705,7 +1813,10 @@ class val ActivityParty is Jsonable
         Used to show the party's current and maximum size
         """
 
-    new val create(id': (String | None) = None, size': ((USize, USize) | None) = None) =>
+    new val create(
+        id': (String | None) = None,
+        size': ((USize, USize) | None) = None
+    ) =>
         id = id'
         size = size'
 
@@ -1734,7 +1845,11 @@ class val ActivityParty is Jsonable
 
         match size
         | (let current_size: USize, let max_size: USize) =>
-            obj = obj.update("size", json.JsonArray.push(current_size.i64()).push(max_size.i64()))
+            obj =
+                obj.update(
+                    "size",
+                    json.JsonArray.push(current_size.i64()).push(max_size.i64())
+                )
         end
 
         obj
@@ -1743,9 +1858,12 @@ class val ActivityAssets is Jsonable
     """
     https://docs.discord.com/developers/events/gateway-events#activity-object-activity-assets
 
-    Activity asset images are arbitrary strings which usually contain snowflake IDs or prefixed image IDs. Treat data within these fields carefully, as it is user-specifiable and not sanitized.
+    Activity asset images are arbitrary strings which usually contain snowflake
+    IDs or prefixed image IDs. Treat data within these fields carefully, as it
+    is user-specifiable and not sanitized.
 
-    To use an external image via media proxy, specify the URL as the field's value when sending. You will only receive the `mp:` prefix via the gateway.
+    To use an external image via media proxy, specify the URL as the field's
+    value when sending. You will only receive the `mp:` prefix via the gateway.
     """
 
     let large_image: (String | None)
@@ -1833,7 +1951,8 @@ class val ActivityAssets is Jsonable
         var obj = json.JsonObject
 
         match large_image
-        | let large_image': String => obj = obj.update("large_image", large_image')
+        | let large_image': String =>
+            obj = obj.update("large_image", large_image')
         end
 
         match large_text
@@ -1845,7 +1964,8 @@ class val ActivityAssets is Jsonable
         end
 
         match small_image
-        | let small_image': String => obj = obj.update("small_image", small_image')
+        | let small_image': String =>
+            obj = obj.update("small_image", small_image')
         end
 
         match small_text
@@ -1857,7 +1977,8 @@ class val ActivityAssets is Jsonable
         end
 
         match invite_cover_image
-        | let invite_cover_image': String => obj = obj.update("invite_cover_image", invite_cover_image')
+        | let invite_cover_image': String =>
+            obj = obj.update("invite_cover_image", invite_cover_image')
         end
 
         obj
@@ -1978,7 +2099,9 @@ primitive _ActivityFlags
 
     fun to_json(flags: Array[ActivityFlag] val): I64 =>
         var bits: U64 = 0
-        for flag in flags.values() do bits = bits or (U64(1) << flag.value().u64()) end
+        for flag in flags.values() do
+            bits = bits or (U64(1) << flag.value().u64())
+        end
         bits.i64()
 
 class val ActivityButton is Jsonable
@@ -2020,9 +2143,12 @@ class val ActivityButton is Jsonable
             .update("url", url)
 
 primitive _ActivityButtons
-    fun apply(value: json.JsonValue): (Array[ActivityButton] val | Array[String] val) ? =>
+    fun apply(
+        value: json.JsonValue
+    ): (Array[ActivityButton] val | Array[String] val) ? =>
         """
-        Decodes an array of activity buttons, which Discord sends as an array of labels and accepts as an array of objects.
+        Decodes an array of activity buttons, which Discord sends as an array of
+        labels and accepts as an array of objects.
         """
 
         let array = value as json.JsonArray
@@ -2031,36 +2157,47 @@ primitive _ActivityButtons
         else
             recover val
                 let buttons = Array[ActivityButton](array.size())
-                for button in array.values() do buttons.push(ActivityButton.from_json(button as json.JsonObject)?) end
+                for button in array.values() do
+                    buttons.push(
+                        ActivityButton.from_json(button as json.JsonObject)?
+                    )
+                end
                 buttons
             end
         end
 
     fun to_json(buttons: Array[ActivityButton] val): json.JsonArray =>
         var array = json.JsonArray
-        for button in buttons.values() do array = array.push(button.to_json()) end
+        for button in buttons.values() do
+            array = array.push(button.to_json())
+        end
         array
 
 class val ClientStatus is Jsonable
     """
     https://docs.discord.com/developers/events/gateway-events#client-status-object
 
-    Active sessions are indicated with an "online", "idle", or "dnd" string per platform. If a user is offline or invisible, the corresponding field is not present.
+    Active sessions are indicated with an "online", "idle", or "dnd" string per
+    platform. If a user is offline or invisible, the corresponding field is not
+    present.
     """
 
     let desktop: (StatusType | None)
         """
-        User's status set for an active desktop (Windows, Linux, Mac) application session
+        User's status set for an active desktop (Windows, Linux, Mac)
+        application session
         """
 
     let mobile: (StatusType | None)
         """
-        User's status set for an active mobile (iOS, Android) application session
+        User's status set for an active mobile (iOS, Android) application
+        session
         """
 
     let web: (StatusType | None)
         """
-        User's status set for an active web (browser, bot user) application session
+        User's status set for an active web (browser, bot user) application
+        session
         """
 
     let vr: (StatusType | None)
@@ -2103,7 +2240,8 @@ class val ClientStatus is Jsonable
         var obj = json.JsonObject
 
         match desktop
-        | let desktop': StatusType => obj = obj.update("desktop", desktop'.value())
+        | let desktop': StatusType =>
+            obj = obj.update("desktop", desktop'.value())
         end
 
         match mobile
@@ -2124,11 +2262,17 @@ class val Presence is Jsonable
     """
     https://docs.discord.com/developers/events/gateway-events#presence-update
 
-    A user's presence is their current state on a guild. This event is sent when a user's presence or info, such as name or avatar, is updated.
+    A user's presence is their current state on a guild. This event is sent when
+    a user's presence or info, such as name or avatar, is updated.
 
-    The user object within this event can be partial, the only field which must be sent is the `id` field, everything else is optional. Along with this limitation, no fields are required, and the types of the fields are not validated. Your client should expect any combination of fields and types within this event.
+    The user object within this event can be partial, the only field which must
+    be sent is the `id` field, everything else is optional. Along with this
+    limitation, no fields are required, and the types of the fields are not
+    validated. Your client should expect any combination of fields and types
+    within this event.
 
-    Guilds sent in a `GUILD_CREATE` carry presences of this shape too, in which case they are partial.
+    Guilds sent in a `GUILD_CREATE` carry presences of this shape too, in which
+    case they are partial.
     """
 
     let user: (PartialUser | None)
@@ -2182,7 +2326,9 @@ class val Presence is Jsonable
             | "guild_id" => guild_id' = Snowflake.from_json(value)?
             | "status" => status' = StatusTypes.from(value as String)?
             | "activities" => activities' = _Activities(value)?
-            | "client_status" => client_status' = ClientStatus.from_json(value as json.JsonObject)?
+            | "client_status" =>
+                client_status' =
+                    ClientStatus.from_json(value as json.JsonObject)?
             end
         end
 
@@ -2200,7 +2346,8 @@ class val Presence is Jsonable
         end
 
         match guild_id
-        | let guild_id': Snowflake => obj = obj.update("guild_id", guild_id'.to_json())
+        | let guild_id': Snowflake =>
+            obj = obj.update("guild_id", guild_id'.to_json())
         end
 
         match status
@@ -2208,11 +2355,13 @@ class val Presence is Jsonable
         end
 
         match activities
-        | let activities': Array[Activity] val => obj = obj.update("activities", _Activities.to_json(activities'))
+        | let activities': Array[Activity] val =>
+            obj = obj.update("activities", _Activities.to_json(activities'))
         end
 
         match client_status
-        | let client_status': ClientStatus => obj = obj.update("client_status", client_status'.to_json())
+        | let client_status': ClientStatus =>
+            obj = obj.update("client_status", client_status'.to_json())
         end
 
         obj
@@ -2226,20 +2375,25 @@ primitive _Presences
         let array = value as json.JsonArray
         recover val
             let presences = Array[Presence](array.size())
-            for presence in array.values() do presences.push(Presence.from_json(presence as json.JsonObject)?) end
+            for presence in array.values() do
+                presences.push(Presence.from_json(presence as json.JsonObject)?)
+            end
             presences
         end
 
     fun to_json(presences: Array[Presence] val): json.JsonArray =>
         var array = json.JsonArray
-        for presence in presences.values() do array = array.push(presence.to_json()) end
+        for presence in presences.values() do
+            array = array.push(presence.to_json())
+        end
         array
 
 class val GatewayHello is Jsonable
     """
     https://docs.discord.com/developers/events/gateway-events#hello
 
-    Sent on connection to the websocket. Defines the heartbeat interval that an app should heartbeat to.
+    Sent on connection to the websocket. Defines the heartbeat interval that an
+    app should heartbeat to.
     """
 
     let heartbeat_interval: USize
@@ -2255,7 +2409,8 @@ class val GatewayHello is Jsonable
 
         for (key, value) in obj.pairs() do
             match key
-            | "heartbeat_interval" => heartbeat_interval' = (value as I64).usize()
+            | "heartbeat_interval" =>
+                heartbeat_interval' = (value as I64).usize()
             end
         end
 
@@ -2268,7 +2423,11 @@ class val GatewayReady is Jsonable
     """
     https://docs.discord.com/developers/events/gateway-events#ready
 
-    The ready event is dispatched when a client has completed the initial handshake with the gateway (for new sessions). The ready event can be the largest and most complex event the gateway will send, as it contains all the state required for a client to begin interacting with the rest of the platform.
+    The ready event is dispatched when a client has completed the initial
+    handshake with the gateway (for new sessions). The ready event can be the
+    largest and most complex event the gateway will send, as it contains all the
+    state required for a client to begin interacting with the rest of the
+    platform.
     """
 
     let v: ApiVersion
@@ -2285,7 +2444,8 @@ class val GatewayReady is Jsonable
         """
         Guilds the user is in
 
-        They start out as unavailable when you connect to the gateway. As they become available, your bot will be notified via `GUILD_CREATE` events.
+        They start out as unavailable when you connect to the gateway. As they
+        become available, your bot will be notified via `GUILD_CREATE` events.
         """
 
     let session_id: String
@@ -2344,7 +2504,9 @@ class val GatewayReady is Jsonable
             | "shard" =>
                 let shards = _USizes(value as json.JsonArray)?
                 shard' = (shards(0)?, shards(1)?)
-            | "application" => application' = PartialApplication.from_json(value as json.JsonObject)?
+            | "application" =>
+                application' =
+                    PartialApplication.from_json(value as json.JsonObject)?
             end
         end
 
@@ -2367,7 +2529,11 @@ class val GatewayReady is Jsonable
 
         match shard
         | (let shard_id: USize, let num_shards: USize) =>
-            obj = obj.update("shard", json.JsonArray.push(shard_id.i64()).push(num_shards.i64()))
+            obj =
+                obj.update(
+                    "shard",
+                    json.JsonArray.push(shard_id.i64()).push(num_shards.i64())
+                )
         end
 
         obj
@@ -2376,14 +2542,17 @@ type GatewayRateLimitMetadata is RequestGuildMembersRateLimitMetadata
     """
     https://docs.discord.com/developers/events/gateway-events#rate-limited-rate-limit-metadata-for-opcode-structure
 
-    Metadata for the event that was rate limited. `GatewayOpcodeRequestGuildMembers` is the only opcode Discord documents metadata for.
+    Metadata for the event that was rate limited.
+    `GatewayOpcodeRequestGuildMembers` is the only opcode Discord documents
+    metadata for.
     """
 
 class val GatewayRateLimited is Jsonable
     """
     https://docs.discord.com/developers/events/gateway-events#rate-limited
 
-    Sent when an app encounters a gateway rate limit for an event, such as Request Guild Members.
+    Sent when an app encounters a gateway rate limit for an event, such as
+    Request Guild Members.
     """
 
     let opcode: GatewayOpcode
@@ -2423,7 +2592,11 @@ class val GatewayRateLimited is Jsonable
                 | let float: F64 => retry_after' = float
                 | let integer: I64 => retry_after' = integer.f64()
                 end
-            | "meta" => meta' = RequestGuildMembersRateLimitMetadata.from_json(value as json.JsonObject)?
+            | "meta" =>
+                meta' =
+                    RequestGuildMembersRateLimitMetadata.from_json(
+                        value as json.JsonObject
+                    )?
             end
         end
 
@@ -2483,7 +2656,8 @@ class val AutoModerationActionExecution is Jsonable
     """
     https://docs.discord.com/developers/events/gateway-events#auto-moderation-action-execution
 
-    Sent when a rule is triggered and an action is executed (e.g. when a message is blocked).
+    Sent when a rule is triggered and an action is executed (e.g. when a message
+    is blocked).
     """
 
     let guild_id: Snowflake
@@ -2520,14 +2694,17 @@ class val AutoModerationActionExecution is Jsonable
         """
         ID of any user message which content belongs to
 
-        Will not exist if message was blocked by Auto Moderation or content was not part of any message.
+        Will not exist if message was blocked by Auto Moderation or content was
+        not part of any message.
         """
 
     let alert_system_message_id: (Snowflake | None)
         """
-        ID of any system auto moderation messages posted as a result of this action
+        ID of any system auto moderation messages posted as a result of this
+        action
 
-        Will not exist if this event does not correspond to an action with type `SEND_ALERT_MESSAGE`.
+        Will not exist if this event does not correspond to an action with type
+        `SEND_ALERT_MESSAGE`.
         """
 
     let content: String
@@ -2590,18 +2767,27 @@ class val AutoModerationActionExecution is Jsonable
         for (key, value) in obj.pairs() do
             match key
             | "guild_id" => guild_id' = Snowflake.from_json(value)?
-            | "action" => action' = AutoModerationAction.from_json(value as json.JsonObject)?
+            | "action" =>
+                action' =
+                    AutoModerationAction.from_json(value as json.JsonObject)?
             | "rule_id" => rule_id' = Snowflake.from_json(value)?
-            | "rule_trigger_type" => rule_trigger_type' = AutoModerationTriggerTypes.from((value as I64).u8())?
+            | "rule_trigger_type" =>
+                rule_trigger_type' =
+                    AutoModerationTriggerTypes.from((value as I64).u8())?
             | "user_id" => user_id' = Snowflake.from_json(value)?
             | "channel_id" => channel_id' = Snowflake.from_json(value)?
             | "message_id" => message_id' = Snowflake.from_json(value)?
-            | "alert_system_message_id" => alert_system_message_id' = Snowflake.from_json(value)?
+            | "alert_system_message_id" =>
+                alert_system_message_id' = Snowflake.from_json(value)?
             | "content" => content' = value as String
             | "matched_keyword" =>
-                match value | let string: String => matched_keyword' = string end
+                match value
+                | let string: String => matched_keyword' = string
+                end
             | "matched_content" =>
-                match value | let string: String => matched_content' = string end
+                match value
+                | let string: String => matched_content' = string
+                end
             end
         end
 
@@ -2629,15 +2815,22 @@ class val AutoModerationActionExecution is Jsonable
             .update("matched_content", matched_content)
 
         match channel_id
-        | let channel_id': Snowflake => obj = obj.update("channel_id", channel_id'.to_json())
+        | let channel_id': Snowflake =>
+            obj = obj.update("channel_id", channel_id'.to_json())
         end
 
         match message_id
-        | let message_id': Snowflake => obj = obj.update("message_id", message_id'.to_json())
+        | let message_id': Snowflake =>
+            obj = obj.update("message_id", message_id'.to_json())
         end
 
         match alert_system_message_id
-        | let alert_system_message_id': Snowflake => obj = obj.update("alert_system_message_id", alert_system_message_id'.to_json())
+        | let alert_system_message_id': Snowflake =>
+            obj =
+                obj.update(
+                    "alert_system_message_id",
+                    alert_system_message_id'.to_json()
+                )
         end
 
         obj
@@ -2646,7 +2839,8 @@ class val ChannelInfo is Jsonable
     """
     https://docs.discord.com/developers/events/gateway-events#channel-info
 
-    Includes ephemeral data for channels in a guild. Sent in response to Request Channel Info.
+    Includes ephemeral data for channels in a guild. Sent in response to Request
+    Channel Info.
     """
 
     let guild_id: Snowflake
@@ -2659,7 +2853,10 @@ class val ChannelInfo is Jsonable
         Ephemeral data for channels in the guild
         """
 
-    new val create(guild_id': Snowflake, channels': Array[ChannelInfoChannel] val) =>
+    new val create(
+        guild_id': Snowflake,
+        channels': Array[ChannelInfoChannel] val
+    ) =>
         guild_id = guild_id'
         channels = channels'
 
@@ -2722,7 +2919,9 @@ class val ChannelInfoChannel is Jsonable
             | "status" =>
                 match value | let string: String => status' = string end
             | "voice_start_time" =>
-                match value | let integer: I64 => voice_start_time' = integer.u64() end
+                match value
+                | let integer: I64 => voice_start_time' = integer.u64()
+                end
             end
         end
 
@@ -2738,7 +2937,8 @@ class val ChannelInfoChannel is Jsonable
         end
 
         match voice_start_time
-        | let voice_start_time': U64 => obj = obj.update("voice_start_time", voice_start_time'.i64())
+        | let voice_start_time': U64 =>
+            obj = obj.update("voice_start_time", voice_start_time'.i64())
         end
 
         obj
@@ -2752,13 +2952,19 @@ primitive _ChannelInfoChannels
         let array = value as json.JsonArray
         recover val
             let channels = Array[ChannelInfoChannel](array.size())
-            for channel in array.values() do channels.push(ChannelInfoChannel.from_json(channel as json.JsonObject)?) end
+            for channel in array.values() do
+                channels.push(
+                    ChannelInfoChannel.from_json(channel as json.JsonObject)?
+                )
+            end
             channels
         end
 
     fun to_json(channels: Array[ChannelInfoChannel] val): json.JsonArray =>
         var array = json.JsonArray
-        for channel in channels.values() do array = array.push(channel.to_json()) end
+        for channel in channels.values() do
+            array = array.push(channel.to_json())
+        end
         array
 
 class val VoiceChannelStatusUpdate is Jsonable
@@ -2783,7 +2989,11 @@ class val VoiceChannelStatusUpdate is Jsonable
         The new voice channel status
         """
 
-    new val create(id': Snowflake, guild_id': Snowflake, status': (String | None)) =>
+    new val create(
+        id': Snowflake,
+        guild_id': Snowflake,
+        status': (String | None)
+    ) =>
         id = id'
         guild_id = guild_id'
         status = status'
@@ -2853,7 +3063,9 @@ class val VoiceChannelStartTimeUpdate is Jsonable
             | "id" => id' = Snowflake.from_json(value)?
             | "guild_id" => guild_id' = Snowflake.from_json(value)?
             | "voice_start_time" =>
-                match value | let integer: I64 => voice_start_time' = integer.u64() end
+                match value
+                | let integer: I64 => voice_start_time' = integer.u64()
+                end
             end
         end
 
@@ -2867,7 +3079,8 @@ class val VoiceChannelStartTimeUpdate is Jsonable
             .update("guild_id", guild_id.to_json())
 
         match voice_start_time
-        | let voice_start_time': U64 => obj = obj.update("voice_start_time", voice_start_time'.i64())
+        | let voice_start_time': U64 =>
+            obj = obj.update("voice_start_time", voice_start_time'.i64())
         end
 
         obj
@@ -2876,9 +3089,11 @@ class val ThreadCreate is Jsonable
     """
     https://docs.discord.com/developers/events/gateway-events#thread-create
 
-    Sent when a thread is created, relevant to the current user, or when the current user is added to a thread.
+    Sent when a thread is created, relevant to the current user, or when the
+    current user is added to a thread.
 
-    When being added to an existing private thread, the channel includes a thread member object.
+    When being added to an existing private thread, the channel includes a
+    thread member object.
     """
 
     let channel: Channel
@@ -2888,7 +3103,8 @@ class val ThreadCreate is Jsonable
 
     let newly_created: (Bool | None)
         """
-        Whether the thread was just created, as opposed to the current user having been added to it
+        Whether the thread was just created, as opposed to the current user
+        having been added to it
         """
 
     new val create(channel': Channel, newly_created': (Bool | None) = None) =>
@@ -2912,7 +3128,8 @@ class val ThreadCreate is Jsonable
         var obj = channel.to_json()
 
         match newly_created
-        | let newly_created': Bool => obj = obj.update("newly_created", newly_created')
+        | let newly_created': Bool =>
+            obj = obj.update("newly_created", newly_created')
         end
 
         obj
@@ -2921,7 +3138,9 @@ class val ThreadDelete is Jsonable
     """
     https://docs.discord.com/developers/events/gateway-events#thread-delete
 
-    Sent when a thread relevant to the current user is deleted. A subset of the channel object, containing just the `id`, `guild_id`, `parent_id`, and `type` fields.
+    Sent when a thread relevant to the current user is deleted. A subset of the
+    channel object, containing just the `id`, `guild_id`, `parent_id`, and
+    `type` fields.
     """
 
     let id: Snowflake
@@ -2996,17 +3215,22 @@ class val ThreadListSync is Jsonable
 
     let channel_ids: (Array[Snowflake] val | None)
         """
-        Parent channel IDs whose threads are being synced. If omitted, then threads were synced for the entire guild. This array may contain channel_ids that have no active threads as well, so you know to clear that data.
+        Parent channel IDs whose threads are being synced. If omitted, then
+        threads were synced for the entire guild. This array may contain
+        channel_ids that have no active threads as well, so you know to clear
+        that data.
         """
 
     let threads: Array[Channel] val
         """
-        All active threads in the given channels that the current user can access
+        All active threads in the given channels that the current user can
+        access
         """
 
     let members: Array[ThreadMember] val
         """
-        All thread member objects from the synced threads for the current user, indicating which threads the current user has been added to
+        All thread member objects from the synced threads for the current user,
+        indicating which threads the current user has been added to
         """
 
     new val create(
@@ -3047,7 +3271,8 @@ class val ThreadListSync is Jsonable
             .update("members", _ThreadMembers.to_json(members))
 
         match channel_ids
-        | let channel_ids': Array[Snowflake] val => obj = obj.update("channel_ids", _Snowflakes.to_json(channel_ids'))
+        | let channel_ids': Array[Snowflake] val =>
+            obj = obj.update("channel_ids", _Snowflakes.to_json(channel_ids'))
         end
 
         obj
@@ -3056,7 +3281,9 @@ class val ThreadMemberUpdate is Jsonable
     """
     https://docs.discord.com/developers/events/gateway-events#thread-member-update
 
-    Sent when the thread member object for the current user is updated. For bots, this event largely is just a signal that you are a member of the thread.
+    Sent when the thread member object for the current user is updated. For
+    bots, this event largely is just a signal that you are a member of the
+    thread.
     """
 
     let member: ThreadMember
@@ -3093,7 +3320,9 @@ class val ThreadMembersUpdate is Jsonable
     """
     https://docs.discord.com/developers/events/gateway-events#thread-members-update
 
-    Sent when anyone is added to or removed from a thread. If the current user does not have the `GUILD_MEMBERS` intent, then this event will only be sent if the current user was added to or removed from the thread.
+    Sent when anyone is added to or removed from a thread. If the current user
+    does not have the `GUILD_MEMBERS` intent, then this event will only be sent
+    if the current user was added to or removed from the thread.
     """
 
     let id: Snowflake
@@ -3115,7 +3344,8 @@ class val ThreadMembersUpdate is Jsonable
         """
         Users who were added to the thread
 
-        In this gateway event, the thread member objects will also include the guild member and nullable presence objects for each added thread member.
+        In this gateway event, the thread member objects will also include the
+        guild member and nullable presence objects for each added thread member.
         """
 
     let removed_member_ids: (Array[Snowflake] val | None)
@@ -3166,11 +3396,20 @@ class val ThreadMembersUpdate is Jsonable
             .update("member_count", member_count.i64())
 
         match added_members
-        | let added_members': Array[ThreadMember] val => obj = obj.update("added_members", _ThreadMembers.to_json(added_members'))
+        | let added_members': Array[ThreadMember] val =>
+            obj =
+                obj.update(
+                    "added_members", _ThreadMembers.to_json(added_members')
+                )
         end
 
         match removed_member_ids
-        | let removed_member_ids': Array[Snowflake] val => obj = obj.update("removed_member_ids", _Snowflakes.to_json(removed_member_ids'))
+        | let removed_member_ids': Array[Snowflake] val =>
+            obj =
+                obj.update(
+                    "removed_member_ids",
+                    _Snowflakes.to_json(removed_member_ids')
+                )
         end
 
         obj
@@ -3179,7 +3418,8 @@ class val ChannelPinsUpdate is Jsonable
     """
     https://docs.discord.com/developers/events/gateway-events#channel-pins-update
 
-    Sent when a message is pinned or unpinned in a text channel. This is not sent when a pinned message is deleted.
+    Sent when a message is pinned or unpinned in a text channel. This is not
+    sent when a pinned message is deleted.
     """
 
     let guild_id: (Snowflake | None)
@@ -3216,7 +3456,9 @@ class val ChannelPinsUpdate is Jsonable
             | "guild_id" => guild_id' = Snowflake.from_json(value)?
             | "channel_id" => channel_id' = Snowflake.from_json(value)?
             | "last_pin_timestamp" =>
-                match value | let string: String => last_pin_timestamp' = string end
+                match value
+                | let string: String => last_pin_timestamp' = string
+                end
             end
         end
 
@@ -3228,11 +3470,13 @@ class val ChannelPinsUpdate is Jsonable
         var obj = json.JsonObject.update("channel_id", channel_id.to_json())
 
         match guild_id
-        | let guild_id': Snowflake => obj = obj.update("guild_id", guild_id'.to_json())
+        | let guild_id': Snowflake =>
+            obj = obj.update("guild_id", guild_id'.to_json())
         end
 
         match last_pin_timestamp
-        | let last_pin_timestamp': ISO8601 => obj = obj.update("last_pin_timestamp", last_pin_timestamp')
+        | let last_pin_timestamp': ISO8601 =>
+            obj = obj.update("last_pin_timestamp", last_pin_timestamp')
         end
 
         obj
@@ -3241,11 +3485,16 @@ class val GuildCreate is Jsonable
     """
     https://docs.discord.com/developers/events/gateway-events#guild-create
 
-    Sent when a user is initially connecting, to lazily load and backfill information for all unavailable guilds sent in the Ready event, when a guild becomes available again to the client, or when the current user joins a new guild.
+    Sent when a user is initially connecting, to lazily load and backfill
+    information for all unavailable guilds sent in the Ready event, when a guild
+    becomes available again to the client, or when the current user joins a new
+    guild.
 
     An unavailable guild arrives as an `UnavailableGuild` instead.
 
-    If your bot does not have the `GUILD_PRESENCES` intent, or if the guild has over 75k members, members and presences returned in this event will only contain your bot and users in voice channels.
+    If your bot does not have the `GUILD_PRESENCES` intent, or if the guild has
+    over 75k members, members and presences returned in this event will only
+    contain your bot and users in voice channels.
     """
 
     let guild: Guild
@@ -3295,7 +3544,8 @@ class val GuildCreate is Jsonable
 
     let presences: Array[Presence] val
         """
-        Presences of the members in the guild, will only include non-offline members if the size is greater than `large threshold`
+        Presences of the members in the guild, will only include non-offline
+        members if the size is greater than `large threshold`
         """
 
     let stage_instances: Array[StageInstance] val
@@ -3355,7 +3605,8 @@ class val GuildCreate is Jsonable
         var threads': (Array[Channel] val | None) = None
         var presences': (Array[Presence] val | None) = None
         var stage_instances': (Array[StageInstance] val | None) = None
-        var guild_scheduled_events': (Array[GuildScheduledEvent] val | None) = None
+        var guild_scheduled_events': (Array[GuildScheduledEvent] val | None) =
+            None
         var soundboard_sounds': (Array[SoundboardSound] val | None) = None
 
         for (key, value) in obj.pairs() do
@@ -3370,8 +3621,10 @@ class val GuildCreate is Jsonable
             | "threads" => threads' = _Channels(value)?
             | "presences" => presences' = _Presences(value)?
             | "stage_instances" => stage_instances' = _StageInstances(value)?
-            | "guild_scheduled_events" => guild_scheduled_events' = _GuildScheduledEvents(value)?
-            | "soundboard_sounds" => soundboard_sounds' = _SoundboardSounds(value)?
+            | "guild_scheduled_events" =>
+                guild_scheduled_events' = _GuildScheduledEvents(value)?
+            | "soundboard_sounds" =>
+                soundboard_sounds' = _SoundboardSounds(value)?
             end
         end
 
@@ -3385,7 +3638,8 @@ class val GuildCreate is Jsonable
         threads = threads' as Array[Channel] val
         presences = presences' as Array[Presence] val
         stage_instances = stage_instances' as Array[StageInstance] val
-        guild_scheduled_events = guild_scheduled_events' as Array[GuildScheduledEvent] val
+        guild_scheduled_events =
+            guild_scheduled_events' as Array[GuildScheduledEvent] val
         soundboard_sounds = soundboard_sounds' as Array[SoundboardSound] val
 
     fun to_json(): json.JsonObject =>
@@ -3399,11 +3653,18 @@ class val GuildCreate is Jsonable
             .update("threads", _Channels.to_json(threads))
             .update("presences", _Presences.to_json(presences))
             .update("stage_instances", _StageInstances.to_json(stage_instances))
-            .update("guild_scheduled_events", _GuildScheduledEvents.to_json(guild_scheduled_events))
-            .update("soundboard_sounds", _SoundboardSounds.to_json(soundboard_sounds))
+            .update(
+                "guild_scheduled_events",
+                _GuildScheduledEvents.to_json(guild_scheduled_events)
+            )
+            .update(
+                "soundboard_sounds",
+                _SoundboardSounds.to_json(soundboard_sounds)
+            )
 
         match unavailable
-        | let unavailable': Bool => obj = obj.update("unavailable", unavailable')
+        | let unavailable': Bool =>
+            obj = obj.update("unavailable", unavailable')
         end
 
         obj
@@ -3412,7 +3673,8 @@ class val GuildAuditLogEntryCreate is Jsonable
     """
     https://docs.discord.com/developers/events/gateway-events#guild-audit-log-entry-create
 
-    Sent when a guild audit log entry is created. This event is only sent to bots with the `VIEW_AUDIT_LOG` permission.
+    Sent when a guild audit log entry is created. This event is only sent to
+    bots with the `VIEW_AUDIT_LOG` permission.
     """
 
     let entry: AuditLogEntry
@@ -3449,7 +3711,8 @@ class val GuildBanAdd is Jsonable
     """
     https://docs.discord.com/developers/events/gateway-events#guild-ban-add
 
-    Sent when a user is banned from a guild. This event is only sent to bots with the `BAN_MEMBERS` or `VIEW_AUDIT_LOG` permission.
+    Sent when a user is banned from a guild. This event is only sent to bots
+    with the `BAN_MEMBERS` or `VIEW_AUDIT_LOG` permission.
     """
 
     let guild_id: Snowflake
@@ -3489,7 +3752,8 @@ class val GuildBanRemove is Jsonable
     """
     https://docs.discord.com/developers/events/gateway-events#guild-ban-remove
 
-    Sent when a user is unbanned from a guild. This event is only sent to bots with the `BAN_MEMBERS` or `VIEW_AUDIT_LOG` permission.
+    Sent when a user is unbanned from a guild. This event is only sent to bots
+    with the `BAN_MEMBERS` or `VIEW_AUDIT_LOG` permission.
     """
 
     let guild_id: Snowflake
@@ -3638,7 +3902,9 @@ class val GuildMemberAdd is Jsonable
     """
     https://docs.discord.com/developers/events/gateway-events#guild-member-add
 
-    Sent when a user joins a guild. This event may also be sent for users who are already members of the guild. The `GUILD_MEMBERS` intent is required to receive this event.
+    Sent when a user joins a guild. This event may also be sent for users who
+    are already members of the guild. The `GUILD_MEMBERS` intent is required to
+    receive this event.
     """
 
     let member: GuildMember
@@ -3675,7 +3941,8 @@ class val GuildMemberRemove is Jsonable
     """
     https://docs.discord.com/developers/events/gateway-events#guild-member-remove
 
-    Sent when a user is removed from a guild (leave/kick/ban). The `GUILD_MEMBERS` intent is required to receive this event.
+    Sent when a user is removed from a guild (leave/kick/ban). The
+    `GUILD_MEMBERS` intent is required to receive this event.
     """
 
     let guild_id: Snowflake
@@ -3715,7 +3982,9 @@ class val GuildMemberUpdate is Jsonable
     """
     https://docs.discord.com/developers/events/gateway-events#guild-member-update
 
-    Sent when a guild member is updated. This will also fire when the user object of a guild member changes. The `GUILD_MEMBERS` intent is required to receive this event, except for current-user updates.
+    Sent when a guild member is updated. This will also fire when the user
+    object of a guild member changes. The `GUILD_MEMBERS` intent is required to
+    receive this event, except for current-user updates.
     """
 
     let guild_id: Snowflake
@@ -3770,12 +4039,15 @@ class val GuildMemberUpdate is Jsonable
 
     let pending: (Bool | None)
         """
-        Whether the user has not yet passed the guild's Membership Screening requirements
+        Whether the user has not yet passed the guild's Membership Screening
+        requirements
         """
 
     let communication_disabled_until: (ISO8601 | None)
         """
-        When the user's timeout will expire and the user will be able to communicate in the guild again, null or a time in the past if the user is not timed out
+        When the user's timeout will expire and the user will be able to
+        communicate in the guild again, null or a time in the past if the user
+        is not timed out
         """
 
     let avatar_decoration_data: (AvatarDecorationData | None)
@@ -3854,11 +4126,20 @@ class val GuildMemberUpdate is Jsonable
             | "mute" => mute' = value as Bool
             | "pending" => pending' = value as Bool
             | "communication_disabled_until" =>
-                match value | let string: String => communication_disabled_until' = string end
+                match value
+                | let string: String => communication_disabled_until' = string
+                end
             | "avatar_decoration_data" =>
-                match value | let obj': json.JsonObject => avatar_decoration_data' = AvatarDecorationData.from_json(obj')? end
+                match value
+                | let obj': json.JsonObject =>
+                    avatar_decoration_data' =
+                        AvatarDecorationData.from_json(obj')?
+                end
             | "collectibles" =>
-                match value | let obj': json.JsonObject => collectibles' = Collectibles.from_json(obj')? end
+                match value
+                | let obj': json.JsonObject =>
+                    collectibles' = Collectibles.from_json(obj')?
+                end
             end
         end
 
@@ -3891,7 +4172,8 @@ class val GuildMemberUpdate is Jsonable
         end
 
         match premium_since
-        | let premium_since': ISO8601 => obj = obj.update("premium_since", premium_since')
+        | let premium_since': ISO8601 =>
+            obj = obj.update("premium_since", premium_since')
         end
 
         match deaf
@@ -3907,15 +4189,25 @@ class val GuildMemberUpdate is Jsonable
         end
 
         match communication_disabled_until
-        | let communication_disabled_until': ISO8601 => obj = obj.update("communication_disabled_until", communication_disabled_until')
+        | let communication_disabled_until': ISO8601 =>
+            obj =
+                obj.update(
+                    "communication_disabled_until",
+                    communication_disabled_until'
+                )
         end
 
         match avatar_decoration_data
-        | let avatar_decoration_data': AvatarDecorationData => obj = obj.update("avatar_decoration_data", avatar_decoration_data'.to_json())
+        | let avatar_decoration_data': AvatarDecorationData =>
+            obj =
+                obj.update(
+                    "avatar_decoration_data", avatar_decoration_data'.to_json()
+                )
         end
 
         match collectibles
-        | let collectibles': Collectibles => obj = obj.update("collectibles", collectibles'.to_json())
+        | let collectibles': Collectibles =>
+            obj = obj.update("collectibles", collectibles'.to_json())
         end
 
         obj
@@ -3924,7 +4216,8 @@ class val GuildMembersChunk is Jsonable
     """
     https://docs.discord.com/developers/events/gateway-events#guild-members-chunk
 
-    Sent in response to Request Guild Members. You can use the `chunk_index` and `chunk_count` to calculate how many chunks are left for your request.
+    Sent in response to Request Guild Members. You can use the `chunk_index` and
+    `chunk_count` to calculate how many chunks are left for your request.
     """
 
     let guild_id: Snowflake
@@ -3939,7 +4232,8 @@ class val GuildMembersChunk is Jsonable
 
     let chunk_index: USize
         """
-        Chunk index in the expected chunks for this response (`0 <= chunk_index < chunk_count`)
+        Chunk index in the expected chunks for this response (`0 <= chunk_index
+        < chunk_count`)
         """
 
     let chunk_count: USize
@@ -3949,12 +4243,14 @@ class val GuildMembersChunk is Jsonable
 
     let not_found: (Array[Snowflake] val | None)
         """
-        When passing an invalid ID to `REQUEST_GUILD_MEMBERS`, it will be returned here
+        When passing an invalid ID to `REQUEST_GUILD_MEMBERS`, it will be
+        returned here
         """
 
     let presences: (Array[Presence] val | None)
         """
-        When passing `true` to `REQUEST_GUILD_MEMBERS`, presences of the returned members will be here
+        When passing `true` to `REQUEST_GUILD_MEMBERS`, presences of the
+        returned members will be here
         """
 
     let nonce: (String | None)
@@ -4016,11 +4312,13 @@ class val GuildMembersChunk is Jsonable
             .update("chunk_count", chunk_count.i64())
 
         match not_found
-        | let not_found': Array[Snowflake] val => obj = obj.update("not_found", _Snowflakes.to_json(not_found'))
+        | let not_found': Array[Snowflake] val =>
+            obj = obj.update("not_found", _Snowflakes.to_json(not_found'))
         end
 
         match presences
-        | let presences': Array[Presence] val => obj = obj.update("presences", _Presences.to_json(presences'))
+        | let presences': Array[Presence] val =>
+            obj = obj.update("presences", _Presences.to_json(presences'))
         end
 
         match nonce
@@ -4187,7 +4485,8 @@ class val GuildScheduledEventUserAdd is Jsonable
 
         for (key, value) in obj.pairs() do
             match key
-            | "guild_scheduled_event_id" => guild_scheduled_event_id' = Snowflake.from_json(value)?
+            | "guild_scheduled_event_id" =>
+                guild_scheduled_event_id' = Snowflake.from_json(value)?
             | "user_id" => user_id' = Snowflake.from_json(value)?
             | "guild_id" => guild_id' = Snowflake.from_json(value)?
             end
@@ -4199,7 +4498,9 @@ class val GuildScheduledEventUserAdd is Jsonable
 
     fun to_json(): json.JsonObject =>
         json.JsonObject
-            .update("guild_scheduled_event_id", guild_scheduled_event_id.to_json())
+            .update(
+                "guild_scheduled_event_id", guild_scheduled_event_id.to_json()
+            )
             .update("user_id", user_id.to_json())
             .update("guild_id", guild_id.to_json())
 
@@ -4241,7 +4542,8 @@ class val GuildScheduledEventUserRemove is Jsonable
 
         for (key, value) in obj.pairs() do
             match key
-            | "guild_scheduled_event_id" => guild_scheduled_event_id' = Snowflake.from_json(value)?
+            | "guild_scheduled_event_id" =>
+                guild_scheduled_event_id' = Snowflake.from_json(value)?
             | "user_id" => user_id' = Snowflake.from_json(value)?
             | "guild_id" => guild_id' = Snowflake.from_json(value)?
             end
@@ -4253,7 +4555,9 @@ class val GuildScheduledEventUserRemove is Jsonable
 
     fun to_json(): json.JsonObject =>
         json.JsonObject
-            .update("guild_scheduled_event_id", guild_scheduled_event_id.to_json())
+            .update(
+                "guild_scheduled_event_id", guild_scheduled_event_id.to_json()
+            )
             .update("user_id", user_id.to_json())
             .update("guild_id", guild_id.to_json())
 
@@ -4314,7 +4618,10 @@ class val GuildSoundboardSoundsUpdate is Jsonable
         ID of the guild
         """
 
-    new val create(soundboard_sounds': Array[SoundboardSound] val, guild_id': Snowflake) =>
+    new val create(
+        soundboard_sounds': Array[SoundboardSound] val,
+        guild_id': Snowflake
+    ) =>
         soundboard_sounds = soundboard_sounds'
         guild_id = guild_id'
 
@@ -4324,7 +4631,8 @@ class val GuildSoundboardSoundsUpdate is Jsonable
 
         for (key, value) in obj.pairs() do
             match key
-            | "soundboard_sounds" => soundboard_sounds' = _SoundboardSounds(value)?
+            | "soundboard_sounds" =>
+                soundboard_sounds' = _SoundboardSounds(value)?
             | "guild_id" => guild_id' = Snowflake.from_json(value)?
             end
         end
@@ -4334,14 +4642,18 @@ class val GuildSoundboardSoundsUpdate is Jsonable
 
     fun to_json(): json.JsonObject =>
         json.JsonObject
-            .update("soundboard_sounds", _SoundboardSounds.to_json(soundboard_sounds))
+            .update(
+                "soundboard_sounds",
+                _SoundboardSounds.to_json(soundboard_sounds)
+            )
             .update("guild_id", guild_id.to_json())
 
 class val IntegrationCreate is Jsonable
     """
     https://docs.discord.com/developers/events/gateway-events#integration-create
 
-    Sent when an integration is created. Discord omits `user` from the integration.
+    Sent when an integration is created. Discord omits `user` from the
+    integration.
     """
 
     let integration: Integration
@@ -4378,7 +4690,8 @@ class val IntegrationUpdate is Jsonable
     """
     https://docs.discord.com/developers/events/gateway-events#integration-update
 
-    Sent when an integration is updated. Discord omits `user` from the integration.
+    Sent when an integration is updated. Discord omits `user` from the
+    integration.
     """
 
     let integration: Integration
@@ -4465,7 +4778,8 @@ class val IntegrationDelete is Jsonable
             .update("guild_id", guild_id.to_json())
 
         match application_id
-        | let application_id': Snowflake => obj = obj.update("application_id", application_id'.to_json())
+        | let application_id': Snowflake =>
+            obj = obj.update("application_id", application_id'.to_json())
         end
 
         obj
@@ -4474,7 +4788,8 @@ class val InviteCreate is Jsonable
     """
     https://docs.discord.com/developers/events/gateway-events#invite-create
 
-    Sent when a new invite to a channel is created. Only sent to bot users with the `MANAGE_CHANNELS` permission on the channel.
+    Sent when a new invite to a channel is created. Only sent to bot users with
+    the `MANAGE_CHANNELS` permission on the channel.
     """
 
     let channel_id: Snowflake
@@ -4524,12 +4839,14 @@ class val InviteCreate is Jsonable
 
     let target_application: (PartialApplication | None)
         """
-        Embedded application to open for this voice channel embedded application invite
+        Embedded application to open for this voice channel embedded application
+        invite
         """
 
     let temporary: Bool
         """
-        Whether or not the invite is temporary (invited users will be kicked on disconnect unless they're assigned a role)
+        Whether or not the invite is temporary (invited users will be kicked on
+        disconnect unless they're assigned a role)
         """
 
     let uses: USize
@@ -4544,7 +4861,8 @@ class val InviteCreate is Jsonable
 
     let role_ids: (Array[Snowflake] val | None)
         """
-        the role ID(s) for roles in the guild given to the users that accept this invite
+        the role ID(s) for roles in the guild given to the users that accept
+        this invite
         """
 
     new val create(
@@ -4603,9 +4921,13 @@ class val InviteCreate is Jsonable
             | "inviter" => inviter' = User.from_json(value as json.JsonObject)?
             | "max_age" => max_age' = (value as I64).usize()
             | "max_uses" => max_uses' = (value as I64).usize()
-            | "target_type" => target_type' = InviteTargetTypes.from((value as I64).u8())?
-            | "target_user" => target_user' = User.from_json(value as json.JsonObject)?
-            | "target_application" => target_application' = PartialApplication.from_json(value as json.JsonObject)?
+            | "target_type" =>
+                target_type' = InviteTargetTypes.from((value as I64).u8())?
+            | "target_user" =>
+                target_user' = User.from_json(value as json.JsonObject)?
+            | "target_application" =>
+                target_application' =
+                    PartialApplication.from_json(value as json.JsonObject)?
             | "temporary" => temporary' = value as Bool
             | "uses" => uses' = (value as I64).usize()
             | "expires_at" =>
@@ -4641,7 +4963,8 @@ class val InviteCreate is Jsonable
             .update("expires_at", expires_at)
 
         match guild_id
-        | let guild_id': Snowflake => obj = obj.update("guild_id", guild_id'.to_json())
+        | let guild_id': Snowflake =>
+            obj = obj.update("guild_id", guild_id'.to_json())
         end
 
         match inviter
@@ -4649,19 +4972,24 @@ class val InviteCreate is Jsonable
         end
 
         match target_type
-        | let target_type': InviteTargetType => obj = obj.update("target_type", target_type'.value().i64())
+        | let target_type': InviteTargetType =>
+            obj = obj.update("target_type", target_type'.value().i64())
         end
 
         match target_user
-        | let target_user': User => obj = obj.update("target_user", target_user'.to_json())
+        | let target_user': User =>
+            obj = obj.update("target_user", target_user'.to_json())
         end
 
         match target_application
-        | let target_application': PartialApplication => obj = obj.update("target_application", target_application'.to_json())
+        | let target_application': PartialApplication =>
+            obj =
+                obj.update("target_application", target_application'.to_json())
         end
 
         match role_ids
-        | let role_ids': Array[Snowflake] val => obj = obj.update("role_ids", _Snowflakes.to_json(role_ids'))
+        | let role_ids': Array[Snowflake] val =>
+            obj = obj.update("role_ids", _Snowflakes.to_json(role_ids'))
         end
 
         obj
@@ -4670,7 +4998,8 @@ class val InviteDelete is Jsonable
     """
     https://docs.discord.com/developers/events/gateway-events#invite-delete
 
-    Sent when an invite is deleted. Only sent to bot users with the `MANAGE_CHANNELS` permission on the channel.
+    Sent when an invite is deleted. Only sent to bot users with the
+    `MANAGE_CHANNELS` permission on the channel.
     """
 
     let channel_id: Snowflake
@@ -4720,7 +5049,8 @@ class val InviteDelete is Jsonable
             .update("code", code)
 
         match guild_id
-        | let guild_id': Snowflake => obj = obj.update("guild_id", guild_id'.to_json())
+        | let guild_id': Snowflake =>
+            obj = obj.update("guild_id", guild_id'.to_json())
         end
 
         obj
@@ -4731,7 +5061,9 @@ class val MessageCreate is Jsonable
 
     Sent when a message is created.
 
-    Ephemeral messages are sent directly to the user and the bot who sent the message rather than through the guild channel, so they are tied to the `DIRECT_MESSAGES` intent and carry neither `guild_id` nor `member`.
+    Ephemeral messages are sent directly to the user and the bot who sent the
+    message rather than through the guild channel, so they are tied to the
+    `DIRECT_MESSAGES` intent and carry neither `guild_id` nor `member`.
     """
 
     let message: Message
@@ -4741,12 +5073,14 @@ class val MessageCreate is Jsonable
 
     let guild_id: (Snowflake | None)
         """
-        ID of the guild the message was sent in - unless it is an ephemeral message
+        ID of the guild the message was sent in - unless it is an ephemeral
+        message
         """
 
     let member: (PartialGuildMember | None)
         """
-        Member properties for this message's author. Missing for ephemeral messages and messages from webhooks
+        Member properties for this message's author. Missing for ephemeral
+        messages and messages from webhooks
         """
 
     let channel_type: (ChannelType | None)
@@ -4775,8 +5109,11 @@ class val MessageCreate is Jsonable
         for (key, value) in obj.pairs() do
             match key
             | "guild_id" => guild_id' = Snowflake.from_json(value)?
-            | "member" => member' = PartialGuildMember.from_json(value as json.JsonObject)?
-            | "channel_type" => channel_type' = ChannelTypes.from((value as I64).u8())?
+            | "member" =>
+                member' =
+                    PartialGuildMember.from_json(value as json.JsonObject)?
+            | "channel_type" =>
+                channel_type' = ChannelTypes.from((value as I64).u8())?
             end
         end
 
@@ -4788,15 +5125,18 @@ class val MessageCreate is Jsonable
         var obj = message.to_json()
 
         match guild_id
-        | let guild_id': Snowflake => obj = obj.update("guild_id", guild_id'.to_json())
+        | let guild_id': Snowflake =>
+            obj = obj.update("guild_id", guild_id'.to_json())
         end
 
         match member
-        | let member': PartialGuildMember => obj = obj.update("member", member'.to_json())
+        | let member': PartialGuildMember =>
+            obj = obj.update("member", member'.to_json())
         end
 
         match channel_type
-        | let channel_type': ChannelType => obj = obj.update("channel_type", channel_type'.value().i64())
+        | let channel_type': ChannelType =>
+            obj = obj.update("channel_type", channel_type'.value().i64())
         end
 
         obj
@@ -4805,7 +5145,8 @@ class val MessageUpdate is Jsonable
     """
     https://docs.discord.com/developers/events/gateway-events#message-update
 
-    Sent when a message is updated. Carries the same extra fields as `MESSAGE_CREATE`.
+    Sent when a message is updated. Carries the same extra fields as
+    `MESSAGE_CREATE`.
 
     The value for `tts` will always be false in message updates.
     """
@@ -4817,12 +5158,14 @@ class val MessageUpdate is Jsonable
 
     let guild_id: (Snowflake | None)
         """
-        ID of the guild the message was sent in - unless it is an ephemeral message
+        ID of the guild the message was sent in - unless it is an ephemeral
+        message
         """
 
     let member: (PartialGuildMember | None)
         """
-        Member properties for this message's author. Missing for ephemeral messages and messages from webhooks
+        Member properties for this message's author. Missing for ephemeral
+        messages and messages from webhooks
         """
 
     let channel_type: (ChannelType | None)
@@ -4851,8 +5194,11 @@ class val MessageUpdate is Jsonable
         for (key, value) in obj.pairs() do
             match key
             | "guild_id" => guild_id' = Snowflake.from_json(value)?
-            | "member" => member' = PartialGuildMember.from_json(value as json.JsonObject)?
-            | "channel_type" => channel_type' = ChannelTypes.from((value as I64).u8())?
+            | "member" =>
+                member' =
+                    PartialGuildMember.from_json(value as json.JsonObject)?
+            | "channel_type" =>
+                channel_type' = ChannelTypes.from((value as I64).u8())?
             end
         end
 
@@ -4864,15 +5210,18 @@ class val MessageUpdate is Jsonable
         var obj = message.to_json()
 
         match guild_id
-        | let guild_id': Snowflake => obj = obj.update("guild_id", guild_id'.to_json())
+        | let guild_id': Snowflake =>
+            obj = obj.update("guild_id", guild_id'.to_json())
         end
 
         match member
-        | let member': PartialGuildMember => obj = obj.update("member", member'.to_json())
+        | let member': PartialGuildMember =>
+            obj = obj.update("member", member'.to_json())
         end
 
         match channel_type
-        | let channel_type': ChannelType => obj = obj.update("channel_type", channel_type'.value().i64())
+        | let channel_type': ChannelType =>
+            obj = obj.update("channel_type", channel_type'.value().i64())
         end
 
         obj
@@ -4931,7 +5280,8 @@ class val MessageDelete is Jsonable
             .update("channel_id", channel_id.to_json())
 
         match guild_id
-        | let guild_id': Snowflake => obj = obj.update("guild_id", guild_id'.to_json())
+        | let guild_id': Snowflake =>
+            obj = obj.update("guild_id", guild_id'.to_json())
         end
 
         obj
@@ -4990,7 +5340,8 @@ class val MessageDeleteBulk is Jsonable
             .update("channel_id", channel_id.to_json())
 
         match guild_id
-        | let guild_id': Snowflake => obj = obj.update("guild_id", guild_id'.to_json())
+        | let guild_id': Snowflake =>
+            obj = obj.update("guild_id", guild_id'.to_json())
         end
 
         obj
@@ -5093,9 +5444,11 @@ class val MessageReactionAdd is Jsonable
             | "channel_id" => channel_id' = Snowflake.from_json(value)?
             | "message_id" => message_id' = Snowflake.from_json(value)?
             | "guild_id" => guild_id' = Snowflake.from_json(value)?
-            | "member" => member' = GuildMember.from_json(value as json.JsonObject)?
+            | "member" =>
+                member' = GuildMember.from_json(value as json.JsonObject)?
             | "emoji" => emoji' = Emoji.from_json(value as json.JsonObject)?
-            | "message_author_id" => message_author_id' = Snowflake.from_json(value)?
+            | "message_author_id" =>
+                message_author_id' = Snowflake.from_json(value)?
             | "burst" => burst' = value as Bool
             | "burst_colors" => burst_colors' = _Strings(value)?
             | "type" => type'' = MessageReactionTypes.from((value as I64).u8())?
@@ -5123,19 +5476,23 @@ class val MessageReactionAdd is Jsonable
             .update("type", type'.value().i64())
 
         match guild_id
-        | let guild_id': Snowflake => obj = obj.update("guild_id", guild_id'.to_json())
+        | let guild_id': Snowflake =>
+            obj = obj.update("guild_id", guild_id'.to_json())
         end
 
         match member
-        | let member': GuildMember => obj = obj.update("member", member'.to_json())
+        | let member': GuildMember =>
+            obj = obj.update("member", member'.to_json())
         end
 
         match message_author_id
-        | let message_author_id': Snowflake => obj = obj.update("message_author_id", message_author_id'.to_json())
+        | let message_author_id': Snowflake =>
+            obj = obj.update("message_author_id", message_author_id'.to_json())
         end
 
         match burst_colors
-        | let burst_colors': Array[String] val => obj = obj.update("burst_colors", _Strings.to_json(burst_colors'))
+        | let burst_colors': Array[String] val =>
+            obj = obj.update("burst_colors", _Strings.to_json(burst_colors'))
         end
 
         obj
@@ -5238,7 +5595,8 @@ class val MessageReactionRemove is Jsonable
             .update("type", type'.value().i64())
 
         match guild_id
-        | let guild_id': Snowflake => obj = obj.update("guild_id", guild_id'.to_json())
+        | let guild_id': Snowflake =>
+            obj = obj.update("guild_id", guild_id'.to_json())
         end
 
         obj
@@ -5297,7 +5655,8 @@ class val MessageReactionRemoveAll is Jsonable
             .update("message_id", message_id.to_json())
 
         match guild_id
-        | let guild_id': Snowflake => obj = obj.update("guild_id", guild_id'.to_json())
+        | let guild_id': Snowflake =>
+            obj = obj.update("guild_id", guild_id'.to_json())
         end
 
         obj
@@ -5306,7 +5665,8 @@ class val MessageReactionRemoveEmoji is Jsonable
     """
     https://docs.discord.com/developers/events/gateway-events#message-reaction-remove-emoji
 
-    Sent when a bot removes all instances of a given emoji from the reactions of a message.
+    Sent when a bot removes all instances of a given emoji from the reactions of
+    a message.
     """
 
     let channel_id: Snowflake
@@ -5367,7 +5727,8 @@ class val MessageReactionRemoveEmoji is Jsonable
             .update("emoji", emoji.to_json())
 
         match guild_id
-        | let guild_id': Snowflake => obj = obj.update("guild_id", guild_id'.to_json())
+        | let guild_id': Snowflake =>
+            obj = obj.update("guild_id", guild_id'.to_json())
         end
 
         obj
@@ -5376,7 +5737,8 @@ class val MessagePollVoteAdd is Jsonable
     """
     https://docs.discord.com/developers/events/gateway-events#message-poll-vote-add
 
-    Sent when a user votes on a poll. If the poll allows multiple selection, one event will be sent per answer.
+    Sent when a user votes on a poll. If the poll allows multiple selection, one
+    event will be sent per answer.
     """
 
     let user_id: Snowflake
@@ -5448,7 +5810,8 @@ class val MessagePollVoteAdd is Jsonable
             .update("answer_id", answer_id.i64())
 
         match guild_id
-        | let guild_id': Snowflake => obj = obj.update("guild_id", guild_id'.to_json())
+        | let guild_id': Snowflake =>
+            obj = obj.update("guild_id", guild_id'.to_json())
         end
 
         obj
@@ -5457,7 +5820,8 @@ class val MessagePollVoteRemove is Jsonable
     """
     https://docs.discord.com/developers/events/gateway-events#message-poll-vote-remove
 
-    Sent when a user removes their vote on a poll. If the poll allows for multiple selections, one event will be sent per answer.
+    Sent when a user removes their vote on a poll. If the poll allows for
+    multiple selections, one event will be sent per answer.
     """
 
     let user_id: Snowflake
@@ -5529,7 +5893,8 @@ class val MessagePollVoteRemove is Jsonable
             .update("answer_id", answer_id.i64())
 
         match guild_id
-        | let guild_id': Snowflake => obj = obj.update("guild_id", guild_id'.to_json())
+        | let guild_id': Snowflake =>
+            obj = obj.update("guild_id", guild_id'.to_json())
         end
 
         obj
@@ -5592,7 +5957,8 @@ class val TypingStart is Jsonable
             | "guild_id" => guild_id' = Snowflake.from_json(value)?
             | "user_id" => user_id' = Snowflake.from_json(value)?
             | "timestamp" => timestamp' = (value as I64).u64()
-            | "member" => member' = GuildMember.from_json(value as json.JsonObject)?
+            | "member" =>
+                member' = GuildMember.from_json(value as json.JsonObject)?
             end
         end
 
@@ -5609,11 +5975,13 @@ class val TypingStart is Jsonable
             .update("timestamp", timestamp.i64())
 
         match guild_id
-        | let guild_id': Snowflake => obj = obj.update("guild_id", guild_id'.to_json())
+        | let guild_id': Snowflake =>
+            obj = obj.update("guild_id", guild_id'.to_json())
         end
 
         match member
-        | let member': GuildMember => obj = obj.update("member", member'.to_json())
+        | let member': GuildMember =>
+            obj = obj.update("member", member'.to_json())
         end
 
         obj
@@ -5622,7 +5990,8 @@ class val VoiceChannelEffectSend is Jsonable
     """
     https://docs.discord.com/developers/events/gateway-events#voice-channel-effect-send
 
-    Sent when someone sends an effect, such as an emoji reaction or a soundboard sound, in a voice channel the current user is connected to.
+    Sent when someone sends an effect, such as an emoji reaction or a soundboard
+    sound, in a voice channel the current user is connected to.
     """
 
     let channel_id: Snowflake
@@ -5700,9 +6069,15 @@ class val VoiceChannelEffectSend is Jsonable
             | "guild_id" => guild_id' = Snowflake.from_json(value)?
             | "user_id" => user_id' = Snowflake.from_json(value)?
             | "emoji" =>
-                match value | let obj': json.JsonObject => emoji' = Emoji.from_json(obj')? end
+                match value
+                | let obj': json.JsonObject => emoji' = Emoji.from_json(obj')?
+                end
             | "animation_type" =>
-                match value | let integer: I64 => animation_type' = VoiceChannelEffectAnimationTypes.from(integer.u8())? end
+                match value
+                | let integer: I64 =>
+                    animation_type' =
+                        VoiceChannelEffectAnimationTypes.from(integer.u8())?
+                end
             | "animation_id" => animation_id' = (value as I64).usize()
             | "sound_id" =>
                 match value
@@ -5737,34 +6112,42 @@ class val VoiceChannelEffectSend is Jsonable
         end
 
         match animation_type
-        | let animation_type': VoiceChannelEffectAnimationType => obj = obj.update("animation_type", animation_type'.value().i64())
+        | let animation_type': VoiceChannelEffectAnimationType =>
+            obj = obj.update("animation_type", animation_type'.value().i64())
         end
 
         match animation_id
-        | let animation_id': USize => obj = obj.update("animation_id", animation_id'.i64())
+        | let animation_id': USize =>
+            obj = obj.update("animation_id", animation_id'.i64())
         end
 
         match sound_id
-        | let sound_id': Snowflake => obj = obj.update("sound_id", sound_id'.to_json())
+        | let sound_id': Snowflake =>
+            obj = obj.update("sound_id", sound_id'.to_json())
         end
 
         match sound_volume
-        | let sound_volume': F64 => obj = obj.update("sound_volume", sound_volume')
+        | let sound_volume': F64 =>
+            obj = obj.update("sound_volume", sound_volume')
         end
 
         obj
 
-trait val VoiceChannelEffectAnimationType is _Enum[VoiceChannelEffectAnimationType, U8]
+trait val VoiceChannelEffectAnimationType is _Enum[
+    VoiceChannelEffectAnimationType, U8
+]
     """
     https://docs.discord.com/developers/events/gateway-events#voice-channel-effect-send-animation-types
     """
-primitive PremiumVoiceChannelEffectAnimationType is VoiceChannelEffectAnimationType
+primitive PremiumVoiceChannelEffectAnimationType is
+    VoiceChannelEffectAnimationType
     """
     A fun animation, sent by a Nitro subscriber
     """
 
     fun value(): U8 => 0
-primitive BasicVoiceChannelEffectAnimationType is VoiceChannelEffectAnimationType
+primitive BasicVoiceChannelEffectAnimationType is
+    VoiceChannelEffectAnimationType
     """
     The standard animation
     """
@@ -5782,9 +6165,14 @@ class val VoiceServerUpdate is Jsonable
     """
     https://docs.discord.com/developers/events/gateway-events#voice-server-update
 
-    Sent when a guild's voice server is updated. This is sent when initially connecting to voice, and when the current voice instance fails over to a new server.
+    Sent when a guild's voice server is updated. This is sent when initially
+    connecting to voice, and when the current voice instance fails over to a new
+    server.
 
-    A null endpoint means that the voice server allocated has gone away and is trying to be reallocated. You should attempt to disconnect from the currently connected voice server, and not attempt to reconnect until a new voice server is allocated.
+    A null endpoint means that the voice server allocated has gone away and is
+    trying to be reallocated. You should attempt to disconnect from the
+    currently connected voice server, and not attempt to reconnect until a new
+    voice server is allocated.
     """
 
     let token: String
@@ -5802,7 +6190,11 @@ class val VoiceServerUpdate is Jsonable
         Voice server host
         """
 
-    new val create(token': String, guild_id': Snowflake, endpoint': (String | None)) =>
+    new val create(
+        token': String,
+        guild_id': Snowflake,
+        endpoint': (String | None)
+    ) =>
         token = token'
         guild_id = guild_id'
         endpoint = endpoint'
@@ -5875,7 +6267,8 @@ class val SoundboardSounds is Jsonable
     """
     https://docs.discord.com/developers/events/gateway-events#soundboard-sounds
 
-    Includes a guild's list of soundboard sounds. Sent in response to Request Soundboard Sounds.
+    Includes a guild's list of soundboard sounds. Sent in response to Request
+    Soundboard Sounds.
     """
 
     let soundboard_sounds: Array[SoundboardSound] val
@@ -5888,7 +6281,10 @@ class val SoundboardSounds is Jsonable
         ID of the guild
         """
 
-    new val create(soundboard_sounds': Array[SoundboardSound] val, guild_id': Snowflake) =>
+    new val create(
+        soundboard_sounds': Array[SoundboardSound] val,
+        guild_id': Snowflake
+    ) =>
         soundboard_sounds = soundboard_sounds'
         guild_id = guild_id'
 
@@ -5898,7 +6294,8 @@ class val SoundboardSounds is Jsonable
 
         for (key, value) in obj.pairs() do
             match key
-            | "soundboard_sounds" => soundboard_sounds' = _SoundboardSounds(value)?
+            | "soundboard_sounds" =>
+                soundboard_sounds' = _SoundboardSounds(value)?
             | "guild_id" => guild_id' = Snowflake.from_json(value)?
             end
         end
@@ -5908,7 +6305,10 @@ class val SoundboardSounds is Jsonable
 
     fun to_json(): json.JsonObject =>
         json.JsonObject
-            .update("soundboard_sounds", _SoundboardSounds.to_json(soundboard_sounds))
+            .update(
+                "soundboard_sounds",
+                _SoundboardSounds.to_json(soundboard_sounds)
+            )
             .update("guild_id", guild_id.to_json())
 
 type GatewayDispatchEventData is
@@ -5980,7 +6380,8 @@ type GatewayDispatchEventData is
     """
     https://docs.discord.com/developers/events/gateway-events#receive-events
 
-    The decoded `d` of a dispatch payload. `None` is what an event that carries no data, such as `RESUMED`, decodes to.
+    The decoded `d` of a dispatch payload. `None` is what an event that carries
+    no data, such as `RESUMED`, decodes to.
     """
 
 primitive GatewayDispatchEvents
@@ -5992,84 +6393,147 @@ primitive GatewayDispatchEvents
         match name
         | "READY" => GatewayReady.from_json(data as json.JsonObject)?
         | "RESUMED" => None
-        | "RATE_LIMITED" => GatewayRateLimited.from_json(data as json.JsonObject)?
-        | "APPLICATION_COMMAND_PERMISSIONS_UPDATE" => GuildApplicationCommandPermissions.from_json(data as json.JsonObject)?
-        | "AUTO_MODERATION_RULE_CREATE" => AutoModerationRule.from_json(data as json.JsonObject)?
-        | "AUTO_MODERATION_RULE_UPDATE" => AutoModerationRule.from_json(data as json.JsonObject)?
-        | "AUTO_MODERATION_RULE_DELETE" => AutoModerationRule.from_json(data as json.JsonObject)?
-        | "AUTO_MODERATION_ACTION_EXECUTION" => AutoModerationActionExecution.from_json(data as json.JsonObject)?
+        | "RATE_LIMITED" =>
+            GatewayRateLimited.from_json(data as json.JsonObject)?
+        | "APPLICATION_COMMAND_PERMISSIONS_UPDATE" =>
+            GuildApplicationCommandPermissions.from_json(
+                data as json.JsonObject
+            )?
+        | "AUTO_MODERATION_RULE_CREATE" =>
+            AutoModerationRule.from_json(data as json.JsonObject)?
+        | "AUTO_MODERATION_RULE_UPDATE" =>
+            AutoModerationRule.from_json(data as json.JsonObject)?
+        | "AUTO_MODERATION_RULE_DELETE" =>
+            AutoModerationRule.from_json(data as json.JsonObject)?
+        | "AUTO_MODERATION_ACTION_EXECUTION" =>
+            AutoModerationActionExecution.from_json(data as json.JsonObject)?
         | "CHANNEL_CREATE" => Channel.from_json(data as json.JsonObject)?
         | "CHANNEL_UPDATE" => Channel.from_json(data as json.JsonObject)?
         | "CHANNEL_DELETE" => Channel.from_json(data as json.JsonObject)?
         | "CHANNEL_INFO" => ChannelInfo.from_json(data as json.JsonObject)?
-        | "CHANNEL_PINS_UPDATE" => ChannelPinsUpdate.from_json(data as json.JsonObject)?
+        | "CHANNEL_PINS_UPDATE" =>
+            ChannelPinsUpdate.from_json(data as json.JsonObject)?
         | "THREAD_CREATE" => ThreadCreate.from_json(data as json.JsonObject)?
         | "THREAD_UPDATE" => Channel.from_json(data as json.JsonObject)?
         | "THREAD_DELETE" => ThreadDelete.from_json(data as json.JsonObject)?
-        | "THREAD_LIST_SYNC" => ThreadListSync.from_json(data as json.JsonObject)?
-        | "THREAD_MEMBER_UPDATE" => ThreadMemberUpdate.from_json(data as json.JsonObject)?
-        | "THREAD_MEMBERS_UPDATE" => ThreadMembersUpdate.from_json(data as json.JsonObject)?
-        | "ENTITLEMENT_CREATE" => Entitlement.from_json(data as json.JsonObject)?
-        | "ENTITLEMENT_UPDATE" => Entitlement.from_json(data as json.JsonObject)?
-        | "ENTITLEMENT_DELETE" => Entitlement.from_json(data as json.JsonObject)?
+        | "THREAD_LIST_SYNC" =>
+            ThreadListSync.from_json(data as json.JsonObject)?
+        | "THREAD_MEMBER_UPDATE" =>
+            ThreadMemberUpdate.from_json(data as json.JsonObject)?
+        | "THREAD_MEMBERS_UPDATE" =>
+            ThreadMembersUpdate.from_json(data as json.JsonObject)?
+        | "ENTITLEMENT_CREATE" =>
+            Entitlement.from_json(data as json.JsonObject)?
+        | "ENTITLEMENT_UPDATE" =>
+            Entitlement.from_json(data as json.JsonObject)?
+        | "ENTITLEMENT_DELETE" =>
+            Entitlement.from_json(data as json.JsonObject)?
         | "GUILD_CREATE" =>
             let obj = data as json.JsonObject
-            try GuildCreate.from_json(obj)? else UnavailableGuild.from_json(obj)? end
+            try
+                GuildCreate.from_json(obj)?
+            else
+                UnavailableGuild.from_json(obj)?
+            end
         | "GUILD_UPDATE" => Guild.from_json(data as json.JsonObject)?
         | "GUILD_DELETE" => UnavailableGuild.from_json(data as json.JsonObject)?
-        | "GUILD_AUDIT_LOG_ENTRY_CREATE" => GuildAuditLogEntryCreate.from_json(data as json.JsonObject)?
+        | "GUILD_AUDIT_LOG_ENTRY_CREATE" =>
+            GuildAuditLogEntryCreate.from_json(data as json.JsonObject)?
         | "GUILD_BAN_ADD" => GuildBanAdd.from_json(data as json.JsonObject)?
-        | "GUILD_BAN_REMOVE" => GuildBanRemove.from_json(data as json.JsonObject)?
-        | "GUILD_EMOJIS_UPDATE" => GuildEmojisUpdate.from_json(data as json.JsonObject)?
-        | "GUILD_STICKERS_UPDATE" => GuildStickersUpdate.from_json(data as json.JsonObject)?
-        | "GUILD_INTEGRATIONS_UPDATE" => GuildIntegrationsUpdate.from_json(data as json.JsonObject)?
-        | "GUILD_MEMBER_ADD" => GuildMemberAdd.from_json(data as json.JsonObject)?
-        | "GUILD_MEMBER_REMOVE" => GuildMemberRemove.from_json(data as json.JsonObject)?
-        | "GUILD_MEMBER_UPDATE" => GuildMemberUpdate.from_json(data as json.JsonObject)?
-        | "GUILD_MEMBERS_CHUNK" => GuildMembersChunk.from_json(data as json.JsonObject)?
-        | "GUILD_ROLE_CREATE" => GuildRoleCreate.from_json(data as json.JsonObject)?
-        | "GUILD_ROLE_UPDATE" => GuildRoleUpdate.from_json(data as json.JsonObject)?
-        | "GUILD_ROLE_DELETE" => GuildRoleDelete.from_json(data as json.JsonObject)?
-        | "GUILD_SCHEDULED_EVENT_CREATE" => GuildScheduledEvent.from_json(data as json.JsonObject)?
-        | "GUILD_SCHEDULED_EVENT_UPDATE" => GuildScheduledEvent.from_json(data as json.JsonObject)?
-        | "GUILD_SCHEDULED_EVENT_DELETE" => GuildScheduledEvent.from_json(data as json.JsonObject)?
-        | "GUILD_SCHEDULED_EVENT_USER_ADD" => GuildScheduledEventUserAdd.from_json(data as json.JsonObject)?
-        | "GUILD_SCHEDULED_EVENT_USER_REMOVE" => GuildScheduledEventUserRemove.from_json(data as json.JsonObject)?
-        | "GUILD_SOUNDBOARD_SOUND_CREATE" => SoundboardSound.from_json(data as json.JsonObject)?
-        | "GUILD_SOUNDBOARD_SOUND_UPDATE" => SoundboardSound.from_json(data as json.JsonObject)?
-        | "GUILD_SOUNDBOARD_SOUND_DELETE" => GuildSoundboardSoundDelete.from_json(data as json.JsonObject)?
-        | "GUILD_SOUNDBOARD_SOUNDS_UPDATE" => GuildSoundboardSoundsUpdate.from_json(data as json.JsonObject)?
-        | "SOUNDBOARD_SOUNDS" => SoundboardSounds.from_json(data as json.JsonObject)?
-        | "INTEGRATION_CREATE" => IntegrationCreate.from_json(data as json.JsonObject)?
-        | "INTEGRATION_UPDATE" => IntegrationUpdate.from_json(data as json.JsonObject)?
-        | "INTEGRATION_DELETE" => IntegrationDelete.from_json(data as json.JsonObject)?
-        | "INTERACTION_CREATE" => Interaction.from_json(data as json.JsonObject)?
+        | "GUILD_BAN_REMOVE" =>
+            GuildBanRemove.from_json(data as json.JsonObject)?
+        | "GUILD_EMOJIS_UPDATE" =>
+            GuildEmojisUpdate.from_json(data as json.JsonObject)?
+        | "GUILD_STICKERS_UPDATE" =>
+            GuildStickersUpdate.from_json(data as json.JsonObject)?
+        | "GUILD_INTEGRATIONS_UPDATE" =>
+            GuildIntegrationsUpdate.from_json(data as json.JsonObject)?
+        | "GUILD_MEMBER_ADD" =>
+            GuildMemberAdd.from_json(data as json.JsonObject)?
+        | "GUILD_MEMBER_REMOVE" =>
+            GuildMemberRemove.from_json(data as json.JsonObject)?
+        | "GUILD_MEMBER_UPDATE" =>
+            GuildMemberUpdate.from_json(data as json.JsonObject)?
+        | "GUILD_MEMBERS_CHUNK" =>
+            GuildMembersChunk.from_json(data as json.JsonObject)?
+        | "GUILD_ROLE_CREATE" =>
+            GuildRoleCreate.from_json(data as json.JsonObject)?
+        | "GUILD_ROLE_UPDATE" =>
+            GuildRoleUpdate.from_json(data as json.JsonObject)?
+        | "GUILD_ROLE_DELETE" =>
+            GuildRoleDelete.from_json(data as json.JsonObject)?
+        | "GUILD_SCHEDULED_EVENT_CREATE" =>
+            GuildScheduledEvent.from_json(data as json.JsonObject)?
+        | "GUILD_SCHEDULED_EVENT_UPDATE" =>
+            GuildScheduledEvent.from_json(data as json.JsonObject)?
+        | "GUILD_SCHEDULED_EVENT_DELETE" =>
+            GuildScheduledEvent.from_json(data as json.JsonObject)?
+        | "GUILD_SCHEDULED_EVENT_USER_ADD" =>
+            GuildScheduledEventUserAdd.from_json(data as json.JsonObject)?
+        | "GUILD_SCHEDULED_EVENT_USER_REMOVE" =>
+            GuildScheduledEventUserRemove.from_json(data as json.JsonObject)?
+        | "GUILD_SOUNDBOARD_SOUND_CREATE" =>
+            SoundboardSound.from_json(data as json.JsonObject)?
+        | "GUILD_SOUNDBOARD_SOUND_UPDATE" =>
+            SoundboardSound.from_json(data as json.JsonObject)?
+        | "GUILD_SOUNDBOARD_SOUND_DELETE" =>
+            GuildSoundboardSoundDelete.from_json(data as json.JsonObject)?
+        | "GUILD_SOUNDBOARD_SOUNDS_UPDATE" =>
+            GuildSoundboardSoundsUpdate.from_json(data as json.JsonObject)?
+        | "SOUNDBOARD_SOUNDS" =>
+            SoundboardSounds.from_json(data as json.JsonObject)?
+        | "INTEGRATION_CREATE" =>
+            IntegrationCreate.from_json(data as json.JsonObject)?
+        | "INTEGRATION_UPDATE" =>
+            IntegrationUpdate.from_json(data as json.JsonObject)?
+        | "INTEGRATION_DELETE" =>
+            IntegrationDelete.from_json(data as json.JsonObject)?
+        | "INTERACTION_CREATE" =>
+            Interaction.from_json(data as json.JsonObject)?
         | "INVITE_CREATE" => InviteCreate.from_json(data as json.JsonObject)?
         | "INVITE_DELETE" => InviteDelete.from_json(data as json.JsonObject)?
         | "MESSAGE_CREATE" => MessageCreate.from_json(data as json.JsonObject)?
         | "MESSAGE_UPDATE" => MessageUpdate.from_json(data as json.JsonObject)?
         | "MESSAGE_DELETE" => MessageDelete.from_json(data as json.JsonObject)?
-        | "MESSAGE_DELETE_BULK" => MessageDeleteBulk.from_json(data as json.JsonObject)?
-        | "MESSAGE_REACTION_ADD" => MessageReactionAdd.from_json(data as json.JsonObject)?
-        | "MESSAGE_REACTION_REMOVE" => MessageReactionRemove.from_json(data as json.JsonObject)?
-        | "MESSAGE_REACTION_REMOVE_ALL" => MessageReactionRemoveAll.from_json(data as json.JsonObject)?
-        | "MESSAGE_REACTION_REMOVE_EMOJI" => MessageReactionRemoveEmoji.from_json(data as json.JsonObject)?
-        | "MESSAGE_POLL_VOTE_ADD" => MessagePollVoteAdd.from_json(data as json.JsonObject)?
-        | "MESSAGE_POLL_VOTE_REMOVE" => MessagePollVoteRemove.from_json(data as json.JsonObject)?
+        | "MESSAGE_DELETE_BULK" =>
+            MessageDeleteBulk.from_json(data as json.JsonObject)?
+        | "MESSAGE_REACTION_ADD" =>
+            MessageReactionAdd.from_json(data as json.JsonObject)?
+        | "MESSAGE_REACTION_REMOVE" =>
+            MessageReactionRemove.from_json(data as json.JsonObject)?
+        | "MESSAGE_REACTION_REMOVE_ALL" =>
+            MessageReactionRemoveAll.from_json(data as json.JsonObject)?
+        | "MESSAGE_REACTION_REMOVE_EMOJI" =>
+            MessageReactionRemoveEmoji.from_json(data as json.JsonObject)?
+        | "MESSAGE_POLL_VOTE_ADD" =>
+            MessagePollVoteAdd.from_json(data as json.JsonObject)?
+        | "MESSAGE_POLL_VOTE_REMOVE" =>
+            MessagePollVoteRemove.from_json(data as json.JsonObject)?
         | "PRESENCE_UPDATE" => Presence.from_json(data as json.JsonObject)?
-        | "STAGE_INSTANCE_CREATE" => StageInstance.from_json(data as json.JsonObject)?
-        | "STAGE_INSTANCE_UPDATE" => StageInstance.from_json(data as json.JsonObject)?
-        | "STAGE_INSTANCE_DELETE" => StageInstance.from_json(data as json.JsonObject)?
-        | "SUBSCRIPTION_CREATE" => Subscription.from_json(data as json.JsonObject)?
-        | "SUBSCRIPTION_UPDATE" => Subscription.from_json(data as json.JsonObject)?
-        | "SUBSCRIPTION_DELETE" => Subscription.from_json(data as json.JsonObject)?
+        | "STAGE_INSTANCE_CREATE" =>
+            StageInstance.from_json(data as json.JsonObject)?
+        | "STAGE_INSTANCE_UPDATE" =>
+            StageInstance.from_json(data as json.JsonObject)?
+        | "STAGE_INSTANCE_DELETE" =>
+            StageInstance.from_json(data as json.JsonObject)?
+        | "SUBSCRIPTION_CREATE" =>
+            Subscription.from_json(data as json.JsonObject)?
+        | "SUBSCRIPTION_UPDATE" =>
+            Subscription.from_json(data as json.JsonObject)?
+        | "SUBSCRIPTION_DELETE" =>
+            Subscription.from_json(data as json.JsonObject)?
         | "TYPING_START" => TypingStart.from_json(data as json.JsonObject)?
         | "USER_UPDATE" => User.from_json(data as json.JsonObject)?
-        | "VOICE_CHANNEL_EFFECT_SEND" => VoiceChannelEffectSend.from_json(data as json.JsonObject)?
-        | "VOICE_CHANNEL_STATUS_UPDATE" => VoiceChannelStatusUpdate.from_json(data as json.JsonObject)?
-        | "VOICE_CHANNEL_START_TIME_UPDATE" => VoiceChannelStartTimeUpdate.from_json(data as json.JsonObject)?
+        | "VOICE_CHANNEL_EFFECT_SEND" =>
+            VoiceChannelEffectSend.from_json(data as json.JsonObject)?
+        | "VOICE_CHANNEL_STATUS_UPDATE" =>
+            VoiceChannelStatusUpdate.from_json(data as json.JsonObject)?
+        | "VOICE_CHANNEL_START_TIME_UPDATE" =>
+            VoiceChannelStartTimeUpdate.from_json(data as json.JsonObject)?
         | "VOICE_STATE_UPDATE" => VoiceState.from_json(data as json.JsonObject)?
-        | "VOICE_SERVER_UPDATE" => VoiceServerUpdate.from_json(data as json.JsonObject)?
-        | "WEBHOOKS_UPDATE" => WebhooksUpdate.from_json(data as json.JsonObject)?
+        | "VOICE_SERVER_UPDATE" =>
+            VoiceServerUpdate.from_json(data as json.JsonObject)?
+        | "WEBHOOKS_UPDATE" =>
+            WebhooksUpdate.from_json(data as json.JsonObject)?
         else error
         end

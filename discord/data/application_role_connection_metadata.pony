@@ -7,11 +7,18 @@ class val ApplicationRoleConnectionMetadata is Jsonable
 
     A representation of role connection metadata for an application.
 
-    When a guild has added a bot and that bot has configured its role_connections_verification_url (in the developer portal), the application will render as a potential verification method in the guild’s role verification configuration.
+    When a guild has added a bot and that bot has configured its
+    role_connections_verification_url (in the developer portal), the application
+    will render as a potential verification method in the guild’s role
+    verification configuration.
 
-    If an application has configured role connection metadata, its metadata will appear in the role verification configuration when the application has been added as a verification method to the role.
+    If an application has configured role connection metadata, its metadata will
+    appear in the role verification configuration when the application has been
+    added as a verification method to the role.
 
-    When a user connects their account using the bot’s role_connections_verification_url, the bot will update a user’s role connection with metadata using the OAuth2 role_connections.write scope.
+    When a user connects their account using the bot’s
+    role_connections_verification_url, the bot will update a user’s role
+    connection with metadata using the OAuth2 role_connections.write scope.
     """
 
     let type': ApplicationRoleConnectionMetadataType
@@ -21,7 +28,8 @@ class val ApplicationRoleConnectionMetadata is Jsonable
 
     let key: String
         """
-        dictionary key for the metadata field (must be a-z, 0-9, or _ characters; 1-50 characters)
+        dictionary key for the metadata field (must be a-z, 0-9, or _
+        characters; 1-50 characters)
         """
 
     let name: String
@@ -48,9 +56,13 @@ class val ApplicationRoleConnectionMetadata is Jsonable
         type'': ApplicationRoleConnectionMetadataType,
         key': String,
         name': String,
-        name_localizations': (collections.Map[Locale, String] val | None) = None,
+        name_localizations': (collections.Map[Locale, String] val | None) =
+            None,
         description': String,
-        description_localizations': (collections.Map[Locale, String] val | None) = None
+        description_localizations': (
+            collections.Map[Locale, String] val | None
+        ) =
+            None
     ) =>
         type' = type''
         key = key'
@@ -64,17 +76,26 @@ class val ApplicationRoleConnectionMetadata is Jsonable
         var key': (String | None) = None
         var name': (String | None) = None
         var description': (String | None) = None
-        var name_localizations': (collections.Map[Locale, String] val | None) = None
-        var description_localizations': (collections.Map[Locale, String] val | None) = None
+        var name_localizations': (collections.Map[Locale, String] val | None) =
+            None
+        var description_localizations': (
+            collections.Map[Locale, String] val | None
+        ) =
+            None
 
         for (k, v) in obj.pairs() do
             match k
-            | "type" => type'' = ApplicationRoleConnectionMetadataTypes.from((v as I64).u8())?
+            | "type" =>
+                type'' =
+                    ApplicationRoleConnectionMetadataTypes.from(
+                        (v as I64).u8()
+                    )?
             | "key" => key' = v as String
             | "name" => name' = v as String
             | "description" => description' = v as String
             | "name_localizations" => name_localizations' = _Localizations(v)?
-            | "description_localizations" => description_localizations' = _Localizations(v)?
+            | "description_localizations" =>
+                description_localizations' = _Localizations(v)?
             end
         end
 
@@ -99,13 +120,18 @@ class val ApplicationRoleConnectionMetadata is Jsonable
 
         match description_localizations
         | let m: collections.Map[Locale, String] val =>
-            obj = obj.update("description_localizations", _Localizations.to_json(m))
+            obj =
+                obj.update(
+                    "description_localizations", _Localizations.to_json(m)
+                )
         end
 
         obj
 
 primitive _ApplicationRoleConnectionMetadatas
-    fun apply(value: json.JsonValue): Array[ApplicationRoleConnectionMetadata] val ? =>
+    fun apply(
+        value: json.JsonValue
+    ): Array[ApplicationRoleConnectionMetadata] val ? =>
         """
         Decodes an array of application role connection metadata records.
         """
@@ -113,64 +139,92 @@ primitive _ApplicationRoleConnectionMetadatas
         let array = value as json.JsonArray
         recover val
             let records = Array[ApplicationRoleConnectionMetadata](array.size())
-            for record in array.values() do records.push(ApplicationRoleConnectionMetadata.from_json(record as json.JsonObject)?) end
+            for record in array.values() do
+                records.push(
+                    ApplicationRoleConnectionMetadata.from_json(
+                        record as json.JsonObject
+                    )?
+                )
+            end
             records
         end
 
-    fun to_json(records: Array[ApplicationRoleConnectionMetadata] val): json.JsonArray =>
+    fun to_json(
+        records: Array[ApplicationRoleConnectionMetadata] val
+    ): json.JsonArray =>
         var array = json.JsonArray
-        for record in records.values() do array = array.push(record.to_json()) end
+        for record in records.values() do
+            array = array.push(record.to_json())
+        end
         array
 
-trait val ApplicationRoleConnectionMetadataType is _Enum[ApplicationRoleConnectionMetadataType, U8]
+trait val ApplicationRoleConnectionMetadataType is _Enum[
+    ApplicationRoleConnectionMetadataType, U8
+]
     """
     https://docs.discord.com/developers/resources/application-role-connection-metadata#application-role-connection-metadata-object-application-role-connection-metadata-type
     """
-primitive IntegerLessThanOrEqualApplicationRoleConnectionMetadataType is ApplicationRoleConnectionMetadataType
+primitive IntegerLessThanOrEqualApplicationRoleConnectionMetadataType is
+    ApplicationRoleConnectionMetadataType
     """
-    the metadata value (integer) is less than or equal to the guild’s configured value (integer)
+    the metadata value (integer) is less than or equal to the guild’s configured
+    value (integer)
     """
 
     fun value(): U8 => 1
-primitive IntegerGreaterThanOrEqualApplicationRoleConnectionMetadataType is ApplicationRoleConnectionMetadataType
+primitive IntegerGreaterThanOrEqualApplicationRoleConnectionMetadataType is
+    ApplicationRoleConnectionMetadataType
     """
-    the metadata value (integer) is greater than or equal to the guild’s configured value (integer)
+    the metadata value (integer) is greater than or equal to the guild’s
+    configured value (integer)
     """
 
     fun value(): U8 => 2
-primitive IntegerEqualApplicationRoleConnectionMetadataType is ApplicationRoleConnectionMetadataType
+primitive IntegerEqualApplicationRoleConnectionMetadataType is
+    ApplicationRoleConnectionMetadataType
     """
-    the metadata value (integer) is equal to the guild’s configured value (integer)
+    the metadata value (integer) is equal to the guild’s configured value
+    (integer)
     """
 
     fun value(): U8 => 3
-primitive IntegerNotEqualApplicationRoleConnectionMetadataType is ApplicationRoleConnectionMetadataType
+primitive IntegerNotEqualApplicationRoleConnectionMetadataType is
+    ApplicationRoleConnectionMetadataType
     """
-    the metadata value (integer) is not equal to the guild’s configured value (integer)
+    the metadata value (integer) is not equal to the guild’s configured value
+    (integer)
     """
 
     fun value(): U8 => 4
-primitive DateTimeLessThanOrEqualApplicationRoleConnectionMetadataType is ApplicationRoleConnectionMetadataType
+primitive DateTimeLessThanOrEqualApplicationRoleConnectionMetadataType is
+    ApplicationRoleConnectionMetadataType
     """
-    the metadata value (ISO8601 string) is less than or equal to the guild’s configured value (integer; days before current date)
+    the metadata value (ISO8601 string) is less than or equal to the guild’s
+    configured value (integer; days before current date)
     """
 
     fun value(): U8 => 5
-primitive DateTimeGreaterThanOrEqualApplicationRoleConnectionMetadataType is ApplicationRoleConnectionMetadataType
+primitive DateTimeGreaterThanOrEqualApplicationRoleConnectionMetadataType is
+    ApplicationRoleConnectionMetadataType
     """
-    the metadata value (ISO8601 string) is greater than or equal to the guild’s configured value (integer; days before current date)
+    the metadata value (ISO8601 string) is greater than or equal to the guild’s
+    configured value (integer; days before current date)
     """
 
     fun value(): U8 => 6
-primitive BooleanEqualApplicationRoleConnectionMetadataType is ApplicationRoleConnectionMetadataType
+primitive BooleanEqualApplicationRoleConnectionMetadataType is
+    ApplicationRoleConnectionMetadataType
     """
-    the metadata value (integer) is equal to the guild’s configured value (integer; 1)
+    the metadata value (integer) is equal to the guild’s configured value
+    (integer; 1)
     """
 
     fun value(): U8 => 7
-primitive BooleanNotEqualApplicationRoleConnectionMetadataType is ApplicationRoleConnectionMetadataType
+primitive BooleanNotEqualApplicationRoleConnectionMetadataType is
+    ApplicationRoleConnectionMetadataType
     """
-    the metadata value (integer) is not equal to the guild’s configured value (integer; 1)
+    the metadata value (integer) is not equal to the guild’s configured value
+    (integer; 1)
     """
 
     fun value(): U8 => 8

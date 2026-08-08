@@ -120,9 +120,13 @@ class val VoiceState is Jsonable
             match key
             | "guild_id" => guild_id' = Snowflake.from_json(value)?
             | "channel_id" =>
-                match value | let string: String => channel_id' = Snowflake.from_json(string)? end
+                match value
+                | let string: String =>
+                    channel_id' = Snowflake.from_json(string)?
+                end
             | "user_id" => user_id' = Snowflake.from_json(value)?
-            | "member" => member' = GuildMember.from_json(value as json.JsonObject)?
+            | "member" =>
+                member' = GuildMember.from_json(value as json.JsonObject)?
             | "session_id" => session_id' = value as String
             | "deaf" => deaf' = value as Bool
             | "mute" => mute' = value as Bool
@@ -132,7 +136,9 @@ class val VoiceState is Jsonable
             | "self_video" => self_video' = value as Bool
             | "suppress" => suppress' = value as Bool
             | "request_to_speak_timestamp" =>
-                match value | let string: String => request_to_speak_timestamp' = string end
+                match value
+                | let string: String => request_to_speak_timestamp' = string
+                end
             end
         end
 
@@ -152,7 +158,12 @@ class val VoiceState is Jsonable
 
     fun to_json(): json.JsonObject =>
         var obj = json.JsonObject
-            .update("channel_id", match channel_id | let channel_id': Snowflake => channel_id'.to_json() end)
+            .update(
+                "channel_id",
+                match channel_id
+                | let channel_id': Snowflake => channel_id'.to_json()
+                end
+            )
             .update("user_id", user_id.to_json())
             .update("session_id", session_id)
             .update("deaf", deaf)
@@ -164,15 +175,18 @@ class val VoiceState is Jsonable
             .update("request_to_speak_timestamp", request_to_speak_timestamp)
 
         match guild_id
-        | let guild_id': Snowflake => obj = obj.update("guild_id", guild_id'.to_json())
+        | let guild_id': Snowflake =>
+            obj = obj.update("guild_id", guild_id'.to_json())
         end
 
         match member
-        | let member': GuildMember => obj = obj.update("member", member'.to_json())
+        | let member': GuildMember =>
+            obj = obj.update("member", member'.to_json())
         end
 
         match self_stream
-        | let self_stream': Bool => obj = obj.update("self_stream", self_stream')
+        | let self_stream': Bool =>
+            obj = obj.update("self_stream", self_stream')
         end
 
         obj
@@ -186,7 +200,9 @@ primitive _VoiceStates
         let array = value as json.JsonArray
         recover val
             let states = Array[VoiceState](array.size())
-            for state in array.values() do states.push(VoiceState.from_json(state as json.JsonObject)?) end
+            for state in array.values() do
+                states.push(VoiceState.from_json(state as json.JsonObject)?)
+            end
             states
         end
 
@@ -278,13 +294,17 @@ primitive _VoiceRegions
         let array = value as json.JsonArray
         recover val
             let regions = Array[VoiceRegion](array.size())
-            for region in array.values() do regions.push(VoiceRegion.from_json(region as json.JsonObject)?) end
+            for region in array.values() do
+                regions.push(VoiceRegion.from_json(region as json.JsonObject)?)
+            end
             regions
         end
 
     fun to_json(regions: Array[VoiceRegion] val): json.JsonArray =>
         var array = json.JsonArray
-        for region in regions.values() do array = array.push(region.to_json()) end
+        for region in regions.values() do
+            array = array.push(region.to_json())
+        end
         array
 
 class val UpdateCurrentUserVoiceStateParams is ToJsonable
@@ -295,9 +315,12 @@ class val UpdateCurrentUserVoiceStateParams is ToJsonable
 
     - `channel_id` must currently point to a stage channel.
     - current user must already have joined `channel_id`.
-    - You must have the `MUTE_MEMBERS` permission to unsuppress yourself. You can always suppress yourself.
-    - You must have the `REQUEST_TO_SPEAK` permission to request to speak. You can always clear your own request to speak.
-    - You are able to set `request_to_speak_timestamp` to any present or future time.
+    - You must have the `MUTE_MEMBERS` permission to unsuppress yourself. You
+      can always suppress yourself.
+    - You must have the `REQUEST_TO_SPEAK` permission to request to speak. You
+      can always clear your own request to speak.
+    - You are able to set `request_to_speak_timestamp` to any present or future
+      time.
     """
 
     let channel_id: (Snowflake | None)
@@ -328,7 +351,8 @@ class val UpdateCurrentUserVoiceStateParams is ToJsonable
         var obj = json.JsonObject
 
         match channel_id
-        | let channel_id': Snowflake => obj = obj.update("channel_id", channel_id'.to_json())
+        | let channel_id': Snowflake =>
+            obj = obj.update("channel_id", channel_id'.to_json())
         end
 
         match suppress
@@ -336,7 +360,11 @@ class val UpdateCurrentUserVoiceStateParams is ToJsonable
         end
 
         match request_to_speak_timestamp
-        | let request_to_speak_timestamp': ISO8601 => obj = obj.update("request_to_speak_timestamp", request_to_speak_timestamp')
+        | let request_to_speak_timestamp': ISO8601 =>
+            obj =
+                obj.update(
+                    "request_to_speak_timestamp", request_to_speak_timestamp'
+                )
         | Null => obj = obj.update("request_to_speak_timestamp", None)
         end
 
@@ -351,8 +379,10 @@ class val UpdateUserVoiceStateParams is ToJsonable
     - `channel_id` must currently point to a stage channel.
     - User must already have joined `channel_id`.
     - You must have the `MUTE_MEMBERS` permission.
-    - When unsuppressed, non-bot users will have their `request_to_speak_timestamp` set to the current time. Bot users will not.
-    - When suppressed, the user will have their `request_to_speak_timestamp` removed.
+    - When unsuppressed, non-bot users will have their
+      `request_to_speak_timestamp` set to the current time. Bot users will not.
+    - When suppressed, the user will have their `request_to_speak_timestamp`
+      removed.
     """
 
     let channel_id: (Snowflake | None)
@@ -365,7 +395,10 @@ class val UpdateUserVoiceStateParams is ToJsonable
         toggles the user's suppress state
         """
 
-    new val create(channel_id': (Snowflake | None) = None, suppress': (Bool | None) = None) =>
+    new val create(
+        channel_id': (Snowflake | None) = None,
+        suppress': (Bool | None) = None
+    ) =>
         channel_id = channel_id'
         suppress = suppress'
 
@@ -373,7 +406,8 @@ class val UpdateUserVoiceStateParams is ToJsonable
         var obj = json.JsonObject
 
         match channel_id
-        | let channel_id': Snowflake => obj = obj.update("channel_id", channel_id'.to_json())
+        | let channel_id': Snowflake =>
+            obj = obj.update("channel_id", channel_id'.to_json())
         end
 
         match suppress
@@ -510,7 +544,7 @@ primitive VoiceOpcodeDAVEPrepareEpoch is VoiceOpcode
     """
     Sent by: Server
 
-    A DAVE protocol version or group change is upcoming	
+    A DAVE protocol version or group change is upcoming
     """
 
     fun value(): U16 => 24
@@ -638,7 +672,8 @@ primitive VoiceCloseEventCodeUnknownProtocol is VoiceCloseEventCode
     fun reconnect(): Bool => true
 primitive VoiceCloseEventCodeDisconnected is VoiceCloseEventCode
     """
-    Disconnect individual client (you were kicked, the main gateway session was dropped, etc.). Should not reconnect.
+    Disconnect individual client (you were kicked, the main gateway session was
+    dropped, etc.). Should not reconnect.
     """
 
     fun value(): U16 => 4014
@@ -680,7 +715,8 @@ primitive VoiceCloseEventCodeDisconnectedRateLimited is VoiceCloseEventCode
     fun reconnect(): Bool => false
 primitive VoiceCloseEventCodeDisconnectedCallTerminated is VoiceCloseEventCode
     """
-    Disconnect all clients due to call terminated (channel deleted, voice server changed, etc.). Should not reconnect.
+    Disconnect all clients due to call terminated (channel deleted, voice server
+    changed, etc.). Should not reconnect.
     """
 
     fun value(): U16 => 4022

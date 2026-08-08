@@ -5,7 +5,8 @@ class val Application is Jsonable
     """
     https://docs.discord.com/developers/resources/application#application-object-application-structure
 
-    Applications (or “apps”) are containers for developer platform features, and can be installed to Discord servers and/or user accounts.
+    Applications (or “apps”) are containers for developer platform features, and
+    can be installed to Discord servers and/or user accounts.
     """
 
     let id: Snowflake
@@ -40,7 +41,8 @@ class val Application is Jsonable
 
     let bot_require_code_grant: Bool
         """
-        When true, the app’s bot will only join upon completion of the full OAuth2 code grant flow
+        When true, the app’s bot will only join upon completion of the full
+        OAuth2 code grant flow
         """
 
     let bot: (User | None)
@@ -65,12 +67,14 @@ class val Application is Jsonable
 
     let verify_key: String
         """
-        Hex encoded key for verification in interactions and the GameSDK’s GetTicket
+        Hex encoded key for verification in interactions and the GameSDK’s
+        GetTicket
         """
 
     let team: (Team | None)
         """
-        If the app belongs to a team, this will be a list of the members of that team
+        If the app belongs to a team, this will be a list of the members of that
+        team
         """
 
     let guild_id: (Snowflake | None)
@@ -87,12 +91,14 @@ class val Application is Jsonable
 
     let primary_sku_id: (Snowflake | None)
         """
-        If this app is a game sold on Discord, this field will be the id of the “Game SKU” that is created, if exists
+        If this app is a game sold on Discord, this field will be the id of the
+        “Game SKU” that is created, if exists
         """
 
     let slug: (String | None)
         """
-        If this app is a game sold on Discord, this field will be the URL slug that links to the store page
+        If this app is a game sold on Discord, this field will be the URL slug
+        that links to the store page
         """
 
     let cover_image: (String | None)
@@ -104,7 +110,8 @@ class val Application is Jsonable
         """
         App’s public flags
 
-        Decoded from `flags_new` where present, falling back to the legacy `flags` field otherwise.
+        Decoded from `flags_new` where present, falling back to the legacy
+        `flags` field otherwise.
         """
 
     let approximate_guild_count: (USize | None)
@@ -114,7 +121,8 @@ class val Application is Jsonable
 
     let approximate_user_install_count: (USize | None)
         """
-        Approximate count of users that have installed the app (authorized with application.commands as a scope)
+        Approximate count of users that have installed the app (authorized with
+        application.commands as a scope)
         """
 
     let approximate_user_authorization_count: (USize | None)
@@ -144,7 +152,8 @@ class val Application is Jsonable
 
     let event_webhooks_status: (ApplicationEventWebhookStatus | None)
         """
-        If webhook events are enabled for the app. 1 (default) means disabled, 2 means enabled, and 3 means disabled by Discord
+        If webhook events are enabled for the app. 1 (default) means disabled, 2
+        means enabled, and 3 means disabled by Discord
         """
 
     let event_webhooks_types: (Array[String] val | None)
@@ -154,7 +163,8 @@ class val Application is Jsonable
 
     let tags: (Array[String] val | None)
         """
-        List of tags describing the content and functionality of the app. Max of 5 tags.
+        List of tags describing the content and functionality of the app. Max of
+        5 tags.
         """
 
     let install_params: (InstallParams | None)
@@ -162,9 +172,14 @@ class val Application is Jsonable
         Settings for the app’s default in-app authorization link, if enabled
         """
 
-    let integration_types_config: (collections.Map[ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration] val | None)
+    let integration_types_config: (
+        collections.Map[
+            ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration
+        ] val | None
+    )
         """
-        Default scopes and permissions for each supported installation context. Value for each key is an integration type configuration object
+        Default scopes and permissions for each supported installation context.
+        Value for each key is an integration type configuration object
         """
 
     let custom_install_url: (String | None)
@@ -203,7 +218,13 @@ class val Application is Jsonable
         event_webhooks_types': (Array[String] val | None) = None,
         tags': (Array[String] val | None) = None,
         install_params': (InstallParams | None) = None,
-        integration_types_config': (collections.Map[ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration] val | None) = None,
+        integration_types_config': (
+            collections.Map[
+                ApplicationIntegrationType,
+                ApplicationIntegrationTypeConfiguration
+            ] val | None
+        ) =
+            None,
         custom_install_url': (String | None) = None
     ) =>
         id = id'
@@ -227,7 +248,8 @@ class val Application is Jsonable
         flags = flags'
         approximate_guild_count = approximate_guild_count'
         approximate_user_install_count = approximate_user_install_count'
-        approximate_user_authorization_count = approximate_user_authorization_count'
+        approximate_user_authorization_count =
+            approximate_user_authorization_count'
         redirect_uris = redirect_uris'
         interactions_endpoint_url = interactions_endpoint_url'
         role_connections_verification_url = role_connections_verification_url'
@@ -267,11 +289,18 @@ class val Application is Jsonable
         var interactions_endpoint_url': (String | None) = None
         var role_connections_verification_url': (String | None) = None
         var event_webhooks_url': (String | None) = None
-        var event_webhooks_status': (ApplicationEventWebhookStatus | None) = None
+        var event_webhooks_status': (ApplicationEventWebhookStatus | None) =
+            None
         var event_webhooks_types': (Array[String] val | None) = None
         var tags': (Array[String] val | None) = None
         var install_params': (InstallParams | None) = None
-        var integration_types_config': (collections.Map[ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration] val | None) = None
+        var integration_types_config': (
+            collections.Map[
+                ApplicationIntegrationType,
+                ApplicationIntegrationTypeConfiguration
+            ] val | None
+        ) =
+            None
         var custom_install_url': (String | None) = None
 
         for (key, value) in obj.pairs() do
@@ -283,36 +312,56 @@ class val Application is Jsonable
             | "description" => description' = value as String
             | "rpc_origins" => rpc_origins' = _Strings(value)?
             | "bot_public" => bot_public' = value as Bool
-            | "bot_require_code_grant" => bot_require_code_grant' = value as Bool
+            | "bot_require_code_grant" =>
+                bot_require_code_grant' = value as Bool
             | "bot" => bot' = User.from_json(value as json.JsonObject)?
             | "owner" => owner' = User.from_json(value as json.JsonObject)?
             | "terms_of_service_url" => terms_of_service_url' = value as String
             | "privacy_policy_url" => privacy_policy_url' = value as String
             | "verify_key" => verify_key' = value as String
             | "team" =>
-                match value | let obj': json.JsonObject => team' = Team.from_json(obj')? end
+                match value
+                | let obj': json.JsonObject => team' = Team.from_json(obj')?
+                end
             | "guild_id" => guild_id' = Snowflake.from_json(value)?
-            | "guild" => guild' = PartialGuild.from_json(value as json.JsonObject)?
+            | "guild" =>
+                guild' = PartialGuild.from_json(value as json.JsonObject)?
             | "primary_sku_id" => primary_sku_id' = Snowflake.from_json(value)?
             | "slug" => slug' = value as String
             | "cover_image" => cover_image' = value as String
             | "flags" => flags' = (value as I64).u64()
             | "flags_new" => flags_new' = (value as String).u64()?
-            | "approximate_guild_count" => approximate_guild_count' = (value as I64).usize()
-            | "approximate_user_install_count" => approximate_user_install_count' = (value as I64).usize()
-            | "approximate_user_authorization_count" => approximate_user_authorization_count' = (value as I64).usize()
+            | "approximate_guild_count" =>
+                approximate_guild_count' = (value as I64).usize()
+            | "approximate_user_install_count" =>
+                approximate_user_install_count' = (value as I64).usize()
+            | "approximate_user_authorization_count" =>
+                approximate_user_authorization_count' = (value as I64).usize()
             | "redirect_uris" => redirect_uris' = _Strings(value)?
             | "interactions_endpoint_url" =>
-                match value | let string: String => interactions_endpoint_url' = string end
+                match value
+                | let string: String => interactions_endpoint_url' = string
+                end
             | "role_connections_verification_url" =>
-                match value | let string: String => role_connections_verification_url' = string end
+                match value
+                | let string: String =>
+                    role_connections_verification_url' = string
+                end
             | "event_webhooks_url" =>
-                match value | let string: String => event_webhooks_url' = string end
-            | "event_webhooks_status" => event_webhooks_status' = ApplicationEventWebhookStatuses.from((value as I64).u8())?
+                match value
+                | let string: String => event_webhooks_url' = string
+                end
+            | "event_webhooks_status" =>
+                event_webhooks_status' =
+                    ApplicationEventWebhookStatuses.from((value as I64).u8())?
             | "event_webhooks_types" => event_webhooks_types' = _Strings(value)?
             | "tags" => tags' = _Strings(value)?
-            | "install_params" => install_params' = InstallParams.from_json(value as json.JsonObject)?
-            | "integration_types_config" => integration_types_config' = _IntegrationTypesConfiguration(value)?
+            | "install_params" =>
+                install_params' =
+                    InstallParams.from_json(value as json.JsonObject)?
+            | "integration_types_config" =>
+                integration_types_config' =
+                    _IntegrationTypesConfiguration(value)?
             | "custom_install_url" => custom_install_url' = value as String
             end
         end
@@ -342,7 +391,8 @@ class val Application is Jsonable
             end
         approximate_guild_count = approximate_guild_count'
         approximate_user_install_count = approximate_user_install_count'
-        approximate_user_authorization_count = approximate_user_authorization_count'
+        approximate_user_authorization_count =
+            approximate_user_authorization_count'
         redirect_uris = redirect_uris'
         interactions_endpoint_url = interactions_endpoint_url'
         role_connections_verification_url = role_connections_verification_url'
@@ -365,7 +415,8 @@ class val Application is Jsonable
             .update("verify_key", verify_key)
 
         match rpc_origins
-        | let rpc_origins': Array[String] val => obj = obj.update("rpc_origins", _Strings.to_json(rpc_origins'))
+        | let rpc_origins': Array[String] val =>
+            obj = obj.update("rpc_origins", _Strings.to_json(rpc_origins'))
         end
 
         match bot
@@ -377,11 +428,13 @@ class val Application is Jsonable
         end
 
         match terms_of_service_url
-        | let terms_of_service_url': String => obj = obj.update("terms_of_service_url", terms_of_service_url')
+        | let terms_of_service_url': String =>
+            obj = obj.update("terms_of_service_url", terms_of_service_url')
         end
 
         match privacy_policy_url
-        | let privacy_policy_url': String => obj = obj.update("privacy_policy_url", privacy_policy_url')
+        | let privacy_policy_url': String =>
+            obj = obj.update("privacy_policy_url", privacy_policy_url')
         end
 
         match team
@@ -389,15 +442,18 @@ class val Application is Jsonable
         end
 
         match guild_id
-        | let guild_id': Snowflake => obj = obj.update("guild_id", guild_id'.to_json())
+        | let guild_id': Snowflake =>
+            obj = obj.update("guild_id", guild_id'.to_json())
         end
 
         match guild
-        | let guild': PartialGuild => obj = obj.update("guild", guild'.to_json())
+        | let guild': PartialGuild =>
+            obj = obj.update("guild", guild'.to_json())
         end
 
         match primary_sku_id
-        | let primary_sku_id': Snowflake => obj = obj.update("primary_sku_id", primary_sku_id'.to_json())
+        | let primary_sku_id': Snowflake =>
+            obj = obj.update("primary_sku_id", primary_sku_id'.to_json())
         end
 
         match slug
@@ -405,65 +461,114 @@ class val Application is Jsonable
         end
 
         match cover_image
-        | let cover_image': String => obj = obj.update("cover_image", cover_image')
+        | let cover_image': String =>
+            obj = obj.update("cover_image", cover_image')
         end
 
-        // `flags_new` is for response serialization only; requests that accept flag values are expected to use `flags`.
+        // `flags_new` is for response serialization only; requests that accept
+        // flag values are expected to use `flags`.
         match flags
-        | let flags': Array[ApplicationFlag] val => obj = obj.update("flags", _ApplicationFlags.to_json(flags'))
+        | let flags': Array[ApplicationFlag] val =>
+            obj = obj.update("flags", _ApplicationFlags.to_json(flags'))
         end
 
         match approximate_guild_count
-        | let approximate_guild_count': USize => obj = obj.update("approximate_guild_count", approximate_guild_count'.i64())
+        | let approximate_guild_count': USize =>
+            obj =
+                obj.update(
+                    "approximate_guild_count", approximate_guild_count'.i64()
+                )
         end
 
         match approximate_user_install_count
-        | let approximate_user_install_count': USize => obj = obj.update("approximate_user_install_count", approximate_user_install_count'.i64())
+        | let approximate_user_install_count': USize =>
+            obj =
+                obj.update(
+                    "approximate_user_install_count",
+                    approximate_user_install_count'.i64()
+                )
         end
 
         match approximate_user_authorization_count
-        | let approximate_user_authorization_count': USize => obj = obj.update("approximate_user_authorization_count", approximate_user_authorization_count'.i64())
+        | let approximate_user_authorization_count': USize =>
+            obj =
+                obj.update(
+                    "approximate_user_authorization_count",
+                    approximate_user_authorization_count'.i64()
+                )
         end
 
         match redirect_uris
-        | let redirect_uris': Array[String] val => obj = obj.update("redirect_uris", _Strings.to_json(redirect_uris'))
+        | let redirect_uris': Array[String] val =>
+            obj = obj.update("redirect_uris", _Strings.to_json(redirect_uris'))
         end
 
         match interactions_endpoint_url
-        | let interactions_endpoint_url': String => obj = obj.update("interactions_endpoint_url", interactions_endpoint_url')
+        | let interactions_endpoint_url': String =>
+            obj =
+                obj.update(
+                    "interactions_endpoint_url", interactions_endpoint_url'
+                )
         end
 
         match role_connections_verification_url
-        | let role_connections_verification_url': String => obj = obj.update("role_connections_verification_url", role_connections_verification_url')
+        | let role_connections_verification_url': String =>
+            obj =
+                obj.update(
+                    "role_connections_verification_url",
+                    role_connections_verification_url'
+                )
         end
 
         match event_webhooks_url
-        | let event_webhooks_url': String => obj = obj.update("event_webhooks_url", event_webhooks_url')
+        | let event_webhooks_url': String =>
+            obj = obj.update("event_webhooks_url", event_webhooks_url')
         end
 
         match event_webhooks_status
-        | let event_webhooks_status': ApplicationEventWebhookStatus => obj = obj.update("event_webhooks_status", event_webhooks_status'.value().i64())
+        | let event_webhooks_status': ApplicationEventWebhookStatus =>
+            obj =
+                obj.update(
+                    "event_webhooks_status",
+                    event_webhooks_status'.value().i64()
+                )
         end
 
         match event_webhooks_types
-        | let event_webhooks_types': Array[String] val => obj = obj.update("event_webhooks_types", _Strings.to_json(event_webhooks_types'))
+        | let event_webhooks_types': Array[String] val =>
+            obj =
+                obj.update(
+                    "event_webhooks_types",
+                    _Strings.to_json(event_webhooks_types')
+                )
         end
 
         match tags
-        | let tags': Array[String] val => obj = obj.update("tags", _Strings.to_json(tags'))
+        | let tags': Array[String] val =>
+            obj = obj.update("tags", _Strings.to_json(tags'))
         end
 
         match install_params
-        | let install_params': InstallParams => obj = obj.update("install_params", install_params'.to_json())
+        | let install_params': InstallParams =>
+            obj = obj.update("install_params", install_params'.to_json())
         end
 
         match integration_types_config
-        | let integration_types_config': collections.Map[ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration] val =>
-            obj = obj.update("integration_types_config", _IntegrationTypesConfiguration.to_json(integration_types_config'))
+        | let integration_types_config': collections.Map[
+            ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration
+        ] val =>
+            obj =
+                obj.update(
+                    "integration_types_config",
+                    _IntegrationTypesConfiguration.to_json(
+                        integration_types_config'
+                    )
+                )
         end
 
         match custom_install_url
-        | let custom_install_url': String => obj = obj.update("custom_install_url", custom_install_url')
+        | let custom_install_url': String =>
+            obj = obj.update("custom_install_url", custom_install_url')
         end
 
         obj
@@ -510,7 +615,11 @@ class val PartialApplication is Jsonable
     let event_webhooks_types: (Array[String] val | None)
     let tags: (Array[String] val | None)
     let install_params: (InstallParams | None)
-    let integration_types_config: (collections.Map[ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration] val | None)
+    let integration_types_config: (
+        collections.Map[
+            ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration
+        ] val | None
+    )
     let custom_install_url: (String | None)
 
     new val create(
@@ -542,7 +651,13 @@ class val PartialApplication is Jsonable
         event_webhooks_types': (Array[String] val | None) = None,
         tags': (Array[String] val | None) = None,
         install_params': (InstallParams | None) = None,
-        integration_types_config': (collections.Map[ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration] val | None) = None,
+        integration_types_config': (
+            collections.Map[
+                ApplicationIntegrationType,
+                ApplicationIntegrationTypeConfiguration
+            ] val | None
+        ) =
+            None,
         custom_install_url': (String | None) = None
     ) =>
         id = id'
@@ -564,7 +679,8 @@ class val PartialApplication is Jsonable
         flags = flags'
         approximate_guild_count = approximate_guild_count'
         approximate_user_install_count = approximate_user_install_count'
-        approximate_user_authorization_count = approximate_user_authorization_count'
+        approximate_user_authorization_count =
+            approximate_user_authorization_count'
         redirect_uris = redirect_uris'
         interactions_endpoint_url = interactions_endpoint_url'
         role_connections_verification_url = role_connections_verification_url'
@@ -602,11 +718,18 @@ class val PartialApplication is Jsonable
         var interactions_endpoint_url': (String | None) = None
         var role_connections_verification_url': (String | None) = None
         var event_webhooks_url': (String | None) = None
-        var event_webhooks_status': (ApplicationEventWebhookStatus | None) = None
+        var event_webhooks_status': (ApplicationEventWebhookStatus | None) =
+            None
         var event_webhooks_types': (Array[String] val | None) = None
         var tags': (Array[String] val | None) = None
         var install_params': (InstallParams | None) = None
-        var integration_types_config': (collections.Map[ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration] val | None) = None
+        var integration_types_config': (
+            collections.Map[
+                ApplicationIntegrationType,
+                ApplicationIntegrationTypeConfiguration
+            ] val | None
+        ) =
+            None
         var custom_install_url': (String | None) = None
 
         for (key, value) in obj.pairs() do
@@ -618,7 +741,8 @@ class val PartialApplication is Jsonable
             | "description" => description' = value as String
             | "rpc_origins" => rpc_origins' = _Strings(value)?
             | "bot_public" => bot_public' = value as Bool
-            | "bot_require_code_grant" => bot_require_code_grant' = value as Bool
+            | "bot_require_code_grant" =>
+                bot_require_code_grant' = value as Bool
             | "bot" => bot' = User.from_json(value as json.JsonObject)?
             | "owner" => owner' = User.from_json(value as json.JsonObject)?
             | "terms_of_service_url" => terms_of_service_url' = value as String
@@ -630,21 +754,37 @@ class val PartialApplication is Jsonable
             | "cover_image" => cover_image' = value as String
             | "flags" => flags' = (value as I64).u64()
             | "flags_new" => flags_new' = (value as String).u64()?
-            | "approximate_guild_count" => approximate_guild_count' = (value as I64).usize()
-            | "approximate_user_install_count" => approximate_user_install_count' = (value as I64).usize()
-            | "approximate_user_authorization_count" => approximate_user_authorization_count' = (value as I64).usize()
+            | "approximate_guild_count" =>
+                approximate_guild_count' = (value as I64).usize()
+            | "approximate_user_install_count" =>
+                approximate_user_install_count' = (value as I64).usize()
+            | "approximate_user_authorization_count" =>
+                approximate_user_authorization_count' = (value as I64).usize()
             | "redirect_uris" => redirect_uris' = _Strings(value)?
             | "interactions_endpoint_url" =>
-                match value | let string: String => interactions_endpoint_url' = string end
+                match value
+                | let string: String => interactions_endpoint_url' = string
+                end
             | "role_connections_verification_url" =>
-                match value | let string: String => role_connections_verification_url' = string end
+                match value
+                | let string: String =>
+                    role_connections_verification_url' = string
+                end
             | "event_webhooks_url" =>
-                match value | let string: String => event_webhooks_url' = string end
-            | "event_webhooks_status" => event_webhooks_status' = ApplicationEventWebhookStatuses.from((value as I64).u8())?
+                match value
+                | let string: String => event_webhooks_url' = string
+                end
+            | "event_webhooks_status" =>
+                event_webhooks_status' =
+                    ApplicationEventWebhookStatuses.from((value as I64).u8())?
             | "event_webhooks_types" => event_webhooks_types' = _Strings(value)?
             | "tags" => tags' = _Strings(value)?
-            | "install_params" => install_params' = InstallParams.from_json(value as json.JsonObject)?
-            | "integration_types_config" => integration_types_config' = _IntegrationTypesConfiguration(value)?
+            | "install_params" =>
+                install_params' =
+                    InstallParams.from_json(value as json.JsonObject)?
+            | "integration_types_config" =>
+                integration_types_config' =
+                    _IntegrationTypesConfiguration(value)?
             | "custom_install_url" => custom_install_url' = value as String
             end
         end
@@ -672,7 +812,8 @@ class val PartialApplication is Jsonable
             end
         approximate_guild_count = approximate_guild_count'
         approximate_user_install_count = approximate_user_install_count'
-        approximate_user_authorization_count = approximate_user_authorization_count'
+        approximate_user_authorization_count =
+            approximate_user_authorization_count'
         redirect_uris = redirect_uris'
         interactions_endpoint_url = interactions_endpoint_url'
         role_connections_verification_url = role_connections_verification_url'
@@ -696,11 +837,13 @@ class val PartialApplication is Jsonable
         end
 
         match description
-        | let description': String => obj = obj.update("description", description')
+        | let description': String =>
+            obj = obj.update("description", description')
         end
 
         match rpc_origins
-        | let rpc_origins': Array[String] val => obj = obj.update("rpc_origins", _Strings.to_json(rpc_origins'))
+        | let rpc_origins': Array[String] val =>
+            obj = obj.update("rpc_origins", _Strings.to_json(rpc_origins'))
         end
 
         match bot_public
@@ -708,7 +851,8 @@ class val PartialApplication is Jsonable
         end
 
         match bot_require_code_grant
-        | let bot_require_code_grant': Bool => obj = obj.update("bot_require_code_grant", bot_require_code_grant')
+        | let bot_require_code_grant': Bool =>
+            obj = obj.update("bot_require_code_grant", bot_require_code_grant')
         end
 
         match bot
@@ -716,11 +860,13 @@ class val PartialApplication is Jsonable
         end
 
         match terms_of_service_url
-        | let terms_of_service_url': String => obj = obj.update("terms_of_service_url", terms_of_service_url')
+        | let terms_of_service_url': String =>
+            obj = obj.update("terms_of_service_url", terms_of_service_url')
         end
 
         match privacy_policy_url
-        | let privacy_policy_url': String => obj = obj.update("privacy_policy_url", privacy_policy_url')
+        | let privacy_policy_url': String =>
+            obj = obj.update("privacy_policy_url", privacy_policy_url')
         end
 
         match owner
@@ -732,11 +878,13 @@ class val PartialApplication is Jsonable
         end
 
         match guild_id
-        | let guild_id': Snowflake => obj = obj.update("guild_id", guild_id'.to_json())
+        | let guild_id': Snowflake =>
+            obj = obj.update("guild_id", guild_id'.to_json())
         end
 
         match primary_sku_id
-        | let primary_sku_id': Snowflake => obj = obj.update("primary_sku_id", primary_sku_id'.to_json())
+        | let primary_sku_id': Snowflake =>
+            obj = obj.update("primary_sku_id", primary_sku_id'.to_json())
         end
 
         match slug
@@ -744,65 +892,114 @@ class val PartialApplication is Jsonable
         end
 
         match cover_image
-        | let cover_image': String => obj = obj.update("cover_image", cover_image')
+        | let cover_image': String =>
+            obj = obj.update("cover_image", cover_image')
         end
 
-        // `flags_new` is for response serialization only; requests that accept flag values are expected to use `flags`.
+        // `flags_new` is for response serialization only; requests that accept
+        // flag values are expected to use `flags`.
         match flags
-        | let flags': Array[ApplicationFlag] val => obj = obj.update("flags", _ApplicationFlags.to_json(flags'))
+        | let flags': Array[ApplicationFlag] val =>
+            obj = obj.update("flags", _ApplicationFlags.to_json(flags'))
         end
 
         match approximate_guild_count
-        | let approximate_guild_count': USize => obj = obj.update("approximate_guild_count", approximate_guild_count'.i64())
+        | let approximate_guild_count': USize =>
+            obj =
+                obj.update(
+                    "approximate_guild_count", approximate_guild_count'.i64()
+                )
         end
 
         match approximate_user_install_count
-        | let approximate_user_install_count': USize => obj = obj.update("approximate_user_install_count", approximate_user_install_count'.i64())
+        | let approximate_user_install_count': USize =>
+            obj =
+                obj.update(
+                    "approximate_user_install_count",
+                    approximate_user_install_count'.i64()
+                )
         end
 
         match approximate_user_authorization_count
-        | let approximate_user_authorization_count': USize => obj = obj.update("approximate_user_authorization_count", approximate_user_authorization_count'.i64())
+        | let approximate_user_authorization_count': USize =>
+            obj =
+                obj.update(
+                    "approximate_user_authorization_count",
+                    approximate_user_authorization_count'.i64()
+                )
         end
 
         match redirect_uris
-        | let redirect_uris': Array[String] val => obj = obj.update("redirect_uris", _Strings.to_json(redirect_uris'))
+        | let redirect_uris': Array[String] val =>
+            obj = obj.update("redirect_uris", _Strings.to_json(redirect_uris'))
         end
 
         match interactions_endpoint_url
-        | let interactions_endpoint_url': String => obj = obj.update("interactions_endpoint_url", interactions_endpoint_url')
+        | let interactions_endpoint_url': String =>
+            obj =
+                obj.update(
+                    "interactions_endpoint_url", interactions_endpoint_url'
+                )
         end
 
         match role_connections_verification_url
-        | let role_connections_verification_url': String => obj = obj.update("role_connections_verification_url", role_connections_verification_url')
+        | let role_connections_verification_url': String =>
+            obj =
+                obj.update(
+                    "role_connections_verification_url",
+                    role_connections_verification_url'
+                )
         end
 
         match event_webhooks_url
-        | let event_webhooks_url': String => obj = obj.update("event_webhooks_url", event_webhooks_url')
+        | let event_webhooks_url': String =>
+            obj = obj.update("event_webhooks_url", event_webhooks_url')
         end
 
         match event_webhooks_status
-        | let event_webhooks_status': ApplicationEventWebhookStatus => obj = obj.update("event_webhooks_status", event_webhooks_status'.value().i64())
+        | let event_webhooks_status': ApplicationEventWebhookStatus =>
+            obj =
+                obj.update(
+                    "event_webhooks_status",
+                    event_webhooks_status'.value().i64()
+                )
         end
 
         match event_webhooks_types
-        | let event_webhooks_types': Array[String] val => obj = obj.update("event_webhooks_types", _Strings.to_json(event_webhooks_types'))
+        | let event_webhooks_types': Array[String] val =>
+            obj =
+                obj.update(
+                    "event_webhooks_types",
+                    _Strings.to_json(event_webhooks_types')
+                )
         end
 
         match tags
-        | let tags': Array[String] val => obj = obj.update("tags", _Strings.to_json(tags'))
+        | let tags': Array[String] val =>
+            obj = obj.update("tags", _Strings.to_json(tags'))
         end
 
         match install_params
-        | let install_params': InstallParams => obj = obj.update("install_params", install_params'.to_json())
+        | let install_params': InstallParams =>
+            obj = obj.update("install_params", install_params'.to_json())
         end
 
         match integration_types_config
-        | let integration_types_config': collections.Map[ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration] val =>
-            obj = obj.update("integration_types_config", _IntegrationTypesConfiguration.to_json(integration_types_config'))
+        | let integration_types_config': collections.Map[
+            ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration
+        ] val =>
+            obj =
+                obj.update(
+                    "integration_types_config",
+                    _IntegrationTypesConfiguration.to_json(
+                        integration_types_config'
+                    )
+                )
         end
 
         match custom_install_url
-        | let custom_install_url': String => obj = obj.update("custom_install_url", custom_install_url')
+        | let custom_install_url': String =>
+            obj = obj.update("custom_install_url", custom_install_url')
         end
 
         obj
@@ -811,7 +1008,8 @@ trait val ApplicationIntegrationType is _Enum[ApplicationIntegrationType, U8]
     """
     https://docs.discord.com/developers/resources/application#application-object-application-integration-types
 
-    Where an app can be installed, also called its supported installation contexts.
+    Where an app can be installed, also called its supported installation
+    contexts.
     """
 primitive GuildInstallApplicationIntegrationType is ApplicationIntegrationType
     """
@@ -840,7 +1038,8 @@ class val ApplicationIntegrationTypeConfiguration is Jsonable
 
     let oauth2_install_params: (InstallParams | None)
         """
-        Install params for each installation context’s default in-app authorization link
+        Install params for each installation context’s default in-app
+        authorization link
         """
 
     new val create(oauth2_install_params': (InstallParams | None) = None) =>
@@ -851,7 +1050,9 @@ class val ApplicationIntegrationTypeConfiguration is Jsonable
 
         for (key, value) in obj.pairs() do
             match key
-            | "oauth2_install_params" => oauth2_install_params' = InstallParams.from_json(value as json.JsonObject)?
+            | "oauth2_install_params" =>
+                oauth2_install_params' =
+                    InstallParams.from_json(value as json.JsonObject)?
             end
         end
 
@@ -861,13 +1062,23 @@ class val ApplicationIntegrationTypeConfiguration is Jsonable
         var obj = json.JsonObject
 
         match oauth2_install_params
-        | let oauth2_install_params': InstallParams => obj = obj.update("oauth2_install_params", oauth2_install_params'.to_json())
+        | let oauth2_install_params': InstallParams =>
+            obj =
+                obj.update(
+                    "oauth2_install_params", oauth2_install_params'.to_json()
+                )
         end
 
         obj
 
 primitive _IntegrationTypesConfiguration
-    fun apply(value: json.JsonValue): (collections.Map[ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration] val | None) ? =>
+    fun apply(
+        value: json.JsonValue
+    ): (
+        collections.Map[
+            ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration
+        ] val | None
+    ) ? =>
         """
         Decodes a dictionary keyed by application integration type.
         """
@@ -875,17 +1086,30 @@ primitive _IntegrationTypesConfiguration
         match value
         | let obj: json.JsonObject =>
             recover val
-                let map = collections.Map[ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration](obj.size())
+                let map =
+                    collections.Map[
+                        ApplicationIntegrationType,
+                        ApplicationIntegrationTypeConfiguration
+                    ](obj.size())
                 for (key, value') in obj.pairs() do
-                    map(ApplicationIntegrationTypes.from(key.u8()?)?) = ApplicationIntegrationTypeConfiguration.from_json(value' as json.JsonObject)?
+                    map(ApplicationIntegrationTypes.from(key.u8()?)?) =
+                        ApplicationIntegrationTypeConfiguration.from_json(
+                            value' as json.JsonObject
+                        )?
                 end
                 map
             end
         end
 
-    fun to_json(map: collections.Map[ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration] box): json.JsonObject =>
+    fun to_json(
+        map: collections.Map[
+            ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration
+        ] box
+    ): json.JsonObject =>
         var obj = json.JsonObject
-        for (type', configuration) in map.pairs() do obj = obj.update(type'.value().string(), configuration.to_json()) end
+        for (type', configuration) in map.pairs() do
+            obj = obj.update(type'.value().string(), configuration.to_json())
+        end
         obj
 
 primitive _ApplicationIntegrationTypes
@@ -897,20 +1121,29 @@ primitive _ApplicationIntegrationTypes
         let array = value as json.JsonArray
         recover val
             let types = Array[ApplicationIntegrationType](array.size())
-            for type' in array.values() do types.push(ApplicationIntegrationTypes.from((type' as I64).u8())?) end
+            for type' in array.values() do
+                types.push(
+                    ApplicationIntegrationTypes.from((type' as I64).u8())?
+                )
+            end
             types
         end
 
     fun to_json(types: Array[ApplicationIntegrationType] val): json.JsonArray =>
         var array = json.JsonArray
-        for type' in types.values() do array = array.push(type'.value().i64()) end
+        for type' in types.values() do
+            array = array.push(type'.value().i64())
+        end
         array
 
-trait val ApplicationEventWebhookStatus is _Enum[ApplicationEventWebhookStatus, U8]
+trait val ApplicationEventWebhookStatus is _Enum[
+    ApplicationEventWebhookStatus, U8
+]
     """
     https://docs.discord.com/developers/resources/application#application-object-application-event-webhook-status
 
-    Status indicating whether event webhooks are enabled or disabled for an application
+    Status indicating whether event webhooks are enabled or disabled for an
+    application
     """
 primitive DisabledApplicationEventWebhookStatus is ApplicationEventWebhookStatus
     """
@@ -924,7 +1157,8 @@ primitive EnabledApplicationEventWebhookStatus is ApplicationEventWebhookStatus
     """
 
     fun value(): U8 => 2
-primitive DisabledByDiscordApplicationEventWebhookStatus is ApplicationEventWebhookStatus
+primitive DisabledByDiscordApplicationEventWebhookStatus is
+    ApplicationEventWebhookStatus
     """
     Webhook events are disabled by Discord, usually due to inactivity
     """
@@ -943,9 +1177,15 @@ trait val ApplicationFlag is _Enum[ApplicationFlag, U8]
     """
     https://docs.discord.com/developers/resources/application#application-object-application-flags
 
-    The flags field is serialized as a number; however, this number will not grow beyond 31 bits. New flag bits beyond bit 30 will only appear in flags_new, a string-serialized integer containing the full set of flag bits. Existing integrations consuming flags are not impacted. flags_new is for response serialization only — requests that accept flag values should continue to use the original flags field.
+    The flags field is serialized as a number; however, this number will not
+    grow beyond 31 bits. New flag bits beyond bit 30 will only appear in
+    flags_new, a string-serialized integer containing the full set of flag bits.
+    Existing integrations consuming flags are not impacted. flags_new is for
+    response serialization only — requests that accept flag values should
+    continue to use the original flags field.
     """
-primitive ApplicationAutoModerationRuleCreateBadgeApplicationFlag is ApplicationFlag
+primitive ApplicationAutoModerationRuleCreateBadgeApplicationFlag is
+    ApplicationFlag
     """
     Indicates if an app uses the Auto Moderation API
     """
@@ -953,25 +1193,31 @@ primitive ApplicationAutoModerationRuleCreateBadgeApplicationFlag is Application
     fun value(): U8 => 6
 primitive GatewayPresenceApplicationFlag is ApplicationFlag
     """
-    Intent required for bots in 100 or more servers to receive presence_update events
+    Intent required for bots in 100 or more servers to receive presence_update
+    events
     """
 
     fun value(): U8 => 12
 primitive GatewayPresenceLimitedApplicationFlag is ApplicationFlag
     """
-    Intent required for bots in under 100 servers to receive presence_update events, found on the Bot page in your app’s settings
+    Intent required for bots in under 100 servers to receive presence_update
+    events, found on the Bot page in your app’s settings
     """
 
     fun value(): U8 => 13
 primitive GatewayGuildMembersApplicationFlag is ApplicationFlag
     """
-    Intent required for bots in 100 or more servers to receive member-related events like guild_member_add. See the list of member-related events under GUILD_MEMBERS
+    Intent required for bots in 100 or more servers to receive member-related
+    events like guild_member_add. See the list of member-related events under
+    GUILD_MEMBERS
     """
 
     fun value(): U8 => 14
 primitive GatewayGuildMembersLimitedApplicationFlag is ApplicationFlag
     """
-    Intent required for bots in under 100 servers to receive member-related events like guild_member_add, found on the Bot page in your app’s settings. See the list of member-related events under GUILD_MEMBERS
+    Intent required for bots in under 100 servers to receive member-related
+    events like guild_member_add, found on the Bot page in your app’s settings.
+    See the list of member-related events under GUILD_MEMBERS
     """
 
     fun value(): U8 => 15
@@ -983,7 +1229,8 @@ primitive VerificationPendingGuildLimitApplicationFlag is ApplicationFlag
     fun value(): U8 => 16
 primitive EmbeddedApplicationFlag is ApplicationFlag
     """
-    Indicates if an app is embedded within the Discord client (currently unavailable publicly)
+    Indicates if an app is embedded within the Discord client (currently
+    unavailable publicly)
     """
 
     fun value(): U8 => 17
@@ -995,7 +1242,8 @@ primitive GatewayMessageContentApplicationFlag is ApplicationFlag
     fun value(): U8 => 18
 primitive GatewayMessageContentLimitedApplicationFlag is ApplicationFlag
     """
-    Intent required for bots in under 100 servers to receive message content, found on the Bot page in your app’s settings
+    Intent required for bots in under 100 servers to receive message content,
+    found on the Bot page in your app’s settings
     """
 
     fun value(): U8 => 19
@@ -1037,7 +1285,9 @@ primitive _ApplicationFlags
 
     fun to_json(flags: Array[ApplicationFlag] val): I64 =>
         var bits: U64 = 0
-        for flag in flags.values() do bits = bits or (U64(1) << flag.value().u64()) end
+        for flag in flags.values() do
+            bits = bits or (U64(1) << flag.value().u64())
+        end
         bits.i64()
 
 class val InstallParams is Jsonable
@@ -1055,7 +1305,10 @@ class val InstallParams is Jsonable
         Permissions to request for the bot role
         """
 
-    new val create(scopes': Array[String] val, permissions': Array[Permission] val) =>
+    new val create(
+        scopes': Array[String] val,
+        permissions': Array[Permission] val
+    ) =>
         scopes = scopes'
         permissions = permissions'
 
@@ -1199,7 +1452,9 @@ class val TeamMember is Jsonable
 
         for (key, value) in obj.pairs() do
             match key
-            | "membership_state" => membership_state' = TeamMembershipStates.from((value as I64).u8())?
+            | "membership_state" =>
+                membership_state' =
+                    TeamMembershipStates.from((value as I64).u8())?
             | "team_id" => team_id' = Snowflake.from_json(value)?
             | "user" => user' = User.from_json(value as json.JsonObject)?
             | "role" => role' = TeamMemberRoles.from(value as String)?
@@ -1227,13 +1482,17 @@ primitive _TeamMembers
         let array = value as json.JsonArray
         recover val
             let members = Array[TeamMember](array.size())
-            for member in array.values() do members.push(TeamMember.from_json(member as json.JsonObject)?) end
+            for member in array.values() do
+                members.push(TeamMember.from_json(member as json.JsonObject)?)
+            end
             members
         end
 
     fun to_json(members: Array[TeamMember] val): json.JsonArray =>
         var array = json.JsonArray
-        for member in members.values() do array = array.push(member.to_json()) end
+        for member in members.values() do
+            array = array.push(member.to_json())
+        end
         array
 
 trait val TeamMembershipState is _Enum[TeamMembershipState, U8]
@@ -1256,23 +1515,33 @@ trait val TeamMemberRole is _Enum[TeamMemberRole, String]
     """
     https://docs.discord.com/developers/topics/teams#team-member-roles-team-member-role-types
 
-    Team member roles are hierarchical, with the owner — who is identified by the team's `owner_user_id` rather than by a role — sitting above all of them.
+    Team member roles are hierarchical, with the owner — who is identified by
+    the team's `owner_user_id` rather than by a role — sitting above all of
+    them.
     """
 primitive AdminTeamMemberRole is TeamMemberRole
     """
-    Admins have similar access to owners, except they cannot take destructive actions on the team or team-owned apps.
+    Admins have similar access to owners, except they cannot take destructive
+    actions on the team or team-owned apps.
     """
 
     fun value(): String => "admin"
 primitive DeveloperTeamMemberRole is TeamMemberRole
     """
-    Developers can access information about team-owned apps, like the client secret or public key. They can also take limited actions on team-owned apps, like configuring interaction endpoints or resetting the bot token. Members with the Developer role *cannot* manage the team or its membership, or take destructive actions on team-owned apps.
+    Developers can access information about team-owned apps, like the client
+    secret or public key. They can also take limited actions on team-owned apps,
+    like configuring interaction endpoints or resetting the bot token. Members
+    with the Developer role *cannot* manage the team or its membership, or take
+    destructive actions on team-owned apps.
     """
 
     fun value(): String => "developer"
 primitive ReadOnlyTeamMemberRole is TeamMemberRole
     """
-    Read-only members can access information about a team and any team-owned apps. Some examples include getting the IDs of applications and exporting payout records. Members can also invite a bot associated with a team-owned app that is marked private.
+    Read-only members can access information about a team and any team-owned
+    apps. Some examples include getting the IDs of applications and exporting
+    payout records. Members can also invite a bot associated with a team-owned
+    app that is marked private.
     """
 
     fun value(): String => "read_only"
@@ -1285,12 +1554,12 @@ primitive TeamMemberRoles
         else error
         end
 
-
 class val ActivityInstance is Jsonable
     """
     https://docs.discord.com/developers/resources/application#get-application-activity-instance-activity-instance-object
 
-    A serialized activity instance. Useful for preventing unwanted activity sessions.
+    A serialized activity instance. Useful for preventing unwanted activity
+    sessions.
     """
 
     let application_id: Snowflake
@@ -1343,7 +1612,9 @@ class val ActivityInstance is Jsonable
             | "application_id" => application_id' = Snowflake.from_json(value)?
             | "instance_id" => instance_id' = value as String
             | "launch_id" => launch_id' = Snowflake.from_json(value)?
-            | "location" => location' = ActivityLocation.from_json(value as json.JsonObject)?
+            | "location" =>
+                location' =
+                    ActivityLocation.from_json(value as json.JsonObject)?
             | "users" => users' = _Snowflakes(value)?
             end
         end
@@ -1366,7 +1637,8 @@ class val ActivityLocation is Jsonable
     """
     https://docs.discord.com/developers/resources/application#get-application-activity-instance-activity-location-object
 
-    The Activity Location is an object that describes the location in which an activity instance is running.
+    The Activity Location is an object that describes the location in which an
+    activity instance is running.
     """
 
     let id: String
@@ -1412,7 +1684,9 @@ class val ActivityLocation is Jsonable
             | "kind" => kind' = ActivityLocationKinds.from(value as String)?
             | "channel_id" => channel_id' = Snowflake.from_json(value)?
             | "guild_id" =>
-                match value | let string: String => guild_id' = Snowflake.from_json(string)? end
+                match value
+                | let string: String => guild_id' = Snowflake.from_json(string)?
+                end
             end
         end
 
@@ -1428,7 +1702,8 @@ class val ActivityLocation is Jsonable
             .update("channel_id", channel_id.to_json())
 
         match guild_id
-        | let guild_id': Snowflake => obj = obj.update("guild_id", guild_id'.to_json())
+        | let guild_id': Snowflake =>
+            obj = obj.update("guild_id", guild_id'.to_json())
         end
 
         obj
@@ -1502,16 +1777,23 @@ class val UpdateApplicationParams is ToJsonable
         Settings for the app’s default in-app authorization link, if enabled
         """
 
-    let integration_types_config: (collections.Map[ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration] val | None)
+    let integration_types_config: (
+        collections.Map[
+            ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration
+        ] val | None
+    )
         """
-        Default scopes and permissions for each supported installation context. Value for each key is an integration type configuration object
+        Default scopes and permissions for each supported installation context.
+        Value for each key is an integration type configuration object
         """
 
     let flags: (Array[ApplicationFlag] val | None)
         """
         App’s public flags
 
-        Only limited intent flags (`GATEWAY_PRESENCE_LIMITED`, `GATEWAY_GUILD_MEMBERS_LIMITED`, and `GATEWAY_MESSAGE_CONTENT_LIMITED`) can be updated via the API.
+        Only limited intent flags (`GATEWAY_PRESENCE_LIMITED`,
+        `GATEWAY_GUILD_MEMBERS_LIMITED`, and `GATEWAY_MESSAGE_CONTENT_LIMITED`)
+        can be updated via the API.
         """
 
     let icon: Nullable[ImageData]
@@ -1528,12 +1810,14 @@ class val UpdateApplicationParams is ToJsonable
         """
         Interactions endpoint URL for the app
 
-        To update an interactions endpoint URL via the API, the URL must be valid according to the receiving an interaction documentation.
+        To update an interactions endpoint URL via the API, the URL must be
+        valid according to the receiving an interaction documentation.
         """
 
     let tags: (Array[String] val | None)
         """
-        List of tags describing the content and functionality of the app (max of 20 characters per tag). Max of 5 tags.
+        List of tags describing the content and functionality of the app (max of
+        20 characters per tag). Max of 5 tags.
         """
 
     let event_webhooks_url: (String | None)
@@ -1543,7 +1827,8 @@ class val UpdateApplicationParams is ToJsonable
 
     let event_webhooks_status: (ApplicationEventWebhookStatus | None)
         """
-        If webhook events are enabled for the app. `1` to disable, and `2` to enable.
+        If webhook events are enabled for the app. `1` to disable, and `2` to
+        enable.
         """
 
     let event_webhooks_types: (Array[String] val | None)
@@ -1556,7 +1841,13 @@ class val UpdateApplicationParams is ToJsonable
         description': (String | None) = None,
         role_connections_verification_url': (String | None) = None,
         install_params': (InstallParams | None) = None,
-        integration_types_config': (collections.Map[ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration] val | None) = None,
+        integration_types_config': (
+            collections.Map[
+                ApplicationIntegrationType,
+                ApplicationIntegrationTypeConfiguration
+            ] val | None
+        ) =
+            None,
         flags': (Array[ApplicationFlag] val | None) = None,
         icon': Nullable[ImageData] = None,
         cover_image': Nullable[ImageData] = None,
@@ -1584,28 +1875,45 @@ class val UpdateApplicationParams is ToJsonable
         var obj = json.JsonObject
 
         match custom_install_url
-        | let custom_install_url': String => obj = obj.update("custom_install_url", custom_install_url')
+        | let custom_install_url': String =>
+            obj = obj.update("custom_install_url", custom_install_url')
         end
 
         match description
-        | let description': String => obj = obj.update("description", description')
+        | let description': String =>
+            obj = obj.update("description", description')
         end
 
         match role_connections_verification_url
-        | let role_connections_verification_url': String => obj = obj.update("role_connections_verification_url", role_connections_verification_url')
+        | let role_connections_verification_url': String =>
+            obj =
+                obj.update(
+                    "role_connections_verification_url",
+                    role_connections_verification_url'
+                )
         end
 
         match install_params
-        | let install_params': InstallParams => obj = obj.update("install_params", install_params'.to_json())
+        | let install_params': InstallParams =>
+            obj = obj.update("install_params", install_params'.to_json())
         end
 
         match integration_types_config
-        | let integration_types_config': collections.Map[ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration] val =>
-            obj = obj.update("integration_types_config", _IntegrationTypesConfiguration.to_json(integration_types_config'))
+        | let integration_types_config': collections.Map[
+            ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration
+        ] val =>
+            obj =
+                obj.update(
+                    "integration_types_config",
+                    _IntegrationTypesConfiguration.to_json(
+                        integration_types_config'
+                    )
+                )
         end
 
         match flags
-        | let flags': Array[ApplicationFlag] val => obj = obj.update("flags", _ApplicationFlags.to_json(flags'))
+        | let flags': Array[ApplicationFlag] val =>
+            obj = obj.update("flags", _ApplicationFlags.to_json(flags'))
         end
 
         match icon
@@ -1614,28 +1922,45 @@ class val UpdateApplicationParams is ToJsonable
         end
 
         match cover_image
-        | let cover_image': ImageData => obj = obj.update("cover_image", cover_image')
+        | let cover_image': ImageData =>
+            obj = obj.update("cover_image", cover_image')
         | Null => obj = obj.update("cover_image", None)
         end
 
         match interactions_endpoint_url
-        | let interactions_endpoint_url': String => obj = obj.update("interactions_endpoint_url", interactions_endpoint_url')
+        | let interactions_endpoint_url': String =>
+            obj =
+                obj.update(
+                    "interactions_endpoint_url", interactions_endpoint_url'
+                )
         end
 
         match tags
-        | let tags': Array[String] val => obj = obj.update("tags", _Strings.to_json(tags'))
+        | let tags': Array[String] val =>
+            obj = obj.update("tags", _Strings.to_json(tags'))
         end
 
         match event_webhooks_url
-        | let event_webhooks_url': String => obj = obj.update("event_webhooks_url", event_webhooks_url')
+        | let event_webhooks_url': String =>
+            obj = obj.update("event_webhooks_url", event_webhooks_url')
         end
 
         match event_webhooks_status
-        | let event_webhooks_status': ApplicationEventWebhookStatus => obj = obj.update("event_webhooks_status", event_webhooks_status'.value().i64())
+        | let event_webhooks_status': ApplicationEventWebhookStatus =>
+            obj =
+                obj.update(
+                    "event_webhooks_status",
+                    event_webhooks_status'.value().i64()
+                )
         end
 
         match event_webhooks_types
-        | let event_webhooks_types': Array[String] val => obj = obj.update("event_webhooks_types", _Strings.to_json(event_webhooks_types'))
+        | let event_webhooks_types': Array[String] val =>
+            obj =
+                obj.update(
+                    "event_webhooks_types",
+                    _Strings.to_json(event_webhooks_types')
+                )
         end
 
         obj

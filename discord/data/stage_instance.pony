@@ -8,11 +8,16 @@ class val StageInstance is Jsonable
 
     Definitions
 
-        Liveness: A Stage channel is considered live when there is an associated stage instance. Conversely, a Stage channel is not live when there is no associated stage instance.
+        Liveness: A Stage channel is considered live when there is an associated
+        stage instance. Conversely, a Stage channel is not live when there is no
+        associated stage instance.
 
-        Speakers: A participant of a Stage channel is a speaker when they are not server muted, and do not have the suppress flag set on their voice state.
+        Speakers: A participant of a Stage channel is a speaker when they are
+        not server muted, and do not have the suppress flag set on their voice
+        state.
 
-        Topic: The blurb that gets shown below the channel's name, among other places.
+        Topic: The blurb that gets shown below the channel's name, among other
+        places.
     """
 
     let id: Snowflake
@@ -82,10 +87,15 @@ class val StageInstance is Jsonable
             | "guild_id" => guild_id' = Snowflake.from_json(value)?
             | "channel_id" => channel_id' = Snowflake.from_json(value)?
             | "topic" => topic' = value as String
-            | "privacy_level" => privacy_level' = StageInstancePrivacyLevels.from((value as I64).u8())?
+            | "privacy_level" =>
+                privacy_level' =
+                    StageInstancePrivacyLevels.from((value as I64).u8())?
             | "discoverable_disabled" => discoverable_disabled' = value as Bool
             | "guild_scheduled_event_id" =>
-                match value | let string: String => guild_scheduled_event_id' = Snowflake.from_json(string)? end
+                match value
+                | let string: String =>
+                    guild_scheduled_event_id' = Snowflake.from_json(string)?
+                end
             end
         end
 
@@ -105,7 +115,13 @@ class val StageInstance is Jsonable
             .update("topic", topic)
             .update("privacy_level", privacy_level.value().i64())
             .update("discoverable_disabled", discoverable_disabled)
-            .update("guild_scheduled_event_id", match guild_scheduled_event_id | let guild_scheduled_event_id': Snowflake => guild_scheduled_event_id'.to_json() end)
+            .update(
+                "guild_scheduled_event_id",
+                match guild_scheduled_event_id
+                | let guild_scheduled_event_id': Snowflake =>
+                    guild_scheduled_event_id'.to_json()
+                end
+            )
 
 primitive _StageInstances
     fun apply(value: json.JsonValue): Array[StageInstance] val ? =>
@@ -116,13 +132,19 @@ primitive _StageInstances
         let array = value as json.JsonArray
         recover val
             let instances = Array[StageInstance](array.size())
-            for instance in array.values() do instances.push(StageInstance.from_json(instance as json.JsonObject)?) end
+            for instance in array.values() do
+                instances.push(
+                    StageInstance.from_json(instance as json.JsonObject)?
+                )
+            end
             instances
         end
 
     fun to_json(instances: Array[StageInstance] val): json.JsonArray =>
         var array = json.JsonArray
-        for instance in instances.values() do array = array.push(instance.to_json()) end
+        for instance in instances.values() do
+            array = array.push(instance.to_json())
+        end
         array
 
 trait val StageInstancePrivacyLevel is _Enum[StageInstancePrivacyLevel, U8]
@@ -173,7 +195,8 @@ class val CreateStageInstanceParams is ToJsonable
         """
         Notify @everyone that a Stage instance has started
 
-        The stage moderator must have the MENTION_EVERYONE permission for this notification to be sent.
+        The stage moderator must have the MENTION_EVERYONE permission for this
+        notification to be sent.
         """
 
     let guild_scheduled_event_id: (Snowflake | None)
@@ -200,15 +223,23 @@ class val CreateStageInstanceParams is ToJsonable
             .update("topic", topic)
 
         match privacy_level
-        | let privacy_level': StageInstancePrivacyLevel => obj = obj.update("privacy_level", privacy_level'.value().i64())
+        | let privacy_level': StageInstancePrivacyLevel =>
+            obj = obj.update("privacy_level", privacy_level'.value().i64())
         end
 
         match send_start_notification
-        | let send_start_notification': Bool => obj = obj.update("send_start_notification", send_start_notification')
+        | let send_start_notification': Bool =>
+            obj =
+                obj.update("send_start_notification", send_start_notification')
         end
 
         match guild_scheduled_event_id
-        | let guild_scheduled_event_id': Snowflake => obj = obj.update("guild_scheduled_event_id", guild_scheduled_event_id'.to_json())
+        | let guild_scheduled_event_id': Snowflake =>
+            obj =
+                obj.update(
+                    "guild_scheduled_event_id",
+                    guild_scheduled_event_id'.to_json()
+                )
         end
 
         obj
@@ -230,7 +261,10 @@ class val UpdateStageInstanceParams is ToJsonable
         The privacy level of the Stage instance
         """
 
-    new val create(topic': (String | None) = None, privacy_level': (StageInstancePrivacyLevel | None) = None) =>
+    new val create(
+        topic': (String | None) = None,
+        privacy_level': (StageInstancePrivacyLevel | None) = None
+    ) =>
         topic = topic'
         privacy_level = privacy_level'
 
@@ -242,7 +276,8 @@ class val UpdateStageInstanceParams is ToJsonable
         end
 
         match privacy_level
-        | let privacy_level': StageInstancePrivacyLevel => obj = obj.update("privacy_level", privacy_level'.value().i64())
+        | let privacy_level': StageInstancePrivacyLevel =>
+            obj = obj.update("privacy_level", privacy_level'.value().i64())
         end
 
         obj

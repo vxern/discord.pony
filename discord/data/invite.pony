@@ -4,7 +4,8 @@ class val Invite is Jsonable
     """
     https://docs.discord.com/developers/resources/invite#invite-object-invite-structure
 
-    Represents a code that when used, adds a user to a guild or group DM channel.
+    Represents a code that when used, adds a user to a guild or group DM
+    channel.
     """
 
     let type': InviteType
@@ -48,27 +49,32 @@ class val Invite is Jsonable
 
     let target_application: (Application | None)
         """
-        the embedded application to open for this voice channel embedded application invite
+        the embedded application to open for this voice channel embedded
+        application invite
         """
 
     let approximate_presence_count: (USize | None)
         """
-        approximate count of online members, returned from the GET /invites/<code> endpoint when with_counts is true
+        approximate count of online members, returned from the GET
+        /invites/<code> endpoint when with_counts is true
         """
 
     let approximate_member_count: (USize | None)
         """
-        approximate count of total members, returned from the GET /invites/<code> endpoint when with_counts is true
+        approximate count of total members, returned from the GET
+        /invites/<code> endpoint when with_counts is true
         """
 
     let expires_at: (ISO8601 | None)
         """
-        the expiration date of this invite, returned from the GET /invites/<code> endpoint when with_expiration is true
+        the expiration date of this invite, returned from the GET
+        /invites/<code> endpoint when with_expiration is true
         """
 
     let guild_scheduled_event: (GuildScheduledEvent | None)
         """
-        guild scheduled event data, only included if guild_scheduled_event_id contains a valid guild scheduled event id
+        guild scheduled event data, only included if guild_scheduled_event_id
+        contains a valid guild scheduled event id
         """
 
     let flags: (Array[InviteFlag] val | None)
@@ -125,18 +131,32 @@ class val Invite is Jsonable
             | "type" => type'' = InviteTypes.from((value as I64).u8())?
             | "code" => code' = value as String
             | "guild" =>
-                match value | let obj': json.JsonObject => guild' = PartialGuild.from_json(obj')? end
+                match value
+                | let obj': json.JsonObject =>
+                    guild' = PartialGuild.from_json(obj')?
+                end
             | "channel" =>
-                match value | let obj': json.JsonObject => channel' = PartialChannel.from_json(obj')? end
+                match value
+                | let obj': json.JsonObject =>
+                    channel' = PartialChannel.from_json(obj')?
+                end
             | "inviter" => inviter' = User.from_json(value as json.JsonObject)?
-            | "target_type" => target_type' = InviteTargetTypes.from((value as I64).u8())?
-            | "target_user" => target_user' = User.from_json(value as json.JsonObject)?
-            | "target_application" => target_application' = Application.from_json(value as json.JsonObject)?
-            | "approximate_presence_count" => approximate_presence_count' = (value as I64).usize()
-            | "approximate_member_count" => approximate_member_count' = (value as I64).usize()
+            | "target_type" =>
+                target_type' = InviteTargetTypes.from((value as I64).u8())?
+            | "target_user" =>
+                target_user' = User.from_json(value as json.JsonObject)?
+            | "target_application" =>
+                target_application' =
+                    Application.from_json(value as json.JsonObject)?
+            | "approximate_presence_count" =>
+                approximate_presence_count' = (value as I64).usize()
+            | "approximate_member_count" =>
+                approximate_member_count' = (value as I64).usize()
             | "expires_at" =>
                 match value | let string: String => expires_at' = string end
-            | "guild_scheduled_event" => guild_scheduled_event' = GuildScheduledEvent.from_json(value as json.JsonObject)?
+            | "guild_scheduled_event" =>
+                guild_scheduled_event' =
+                    GuildScheduledEvent.from_json(value as json.JsonObject)?
             | "flags" => flags' = _InviteFlags((value as I64).u64())
             end
         end
@@ -161,11 +181,13 @@ class val Invite is Jsonable
             .update("code", code)
 
         match guild
-        | let guild': PartialGuild => obj = obj.update("guild", guild'.to_json())
+        | let guild': PartialGuild =>
+            obj = obj.update("guild", guild'.to_json())
         end
 
         match channel
-        | let channel': PartialChannel => obj = obj.update("channel", channel'.to_json())
+        | let channel': PartialChannel =>
+            obj = obj.update("channel", channel'.to_json())
         end
 
         match inviter
@@ -173,35 +195,54 @@ class val Invite is Jsonable
         end
 
         match target_type
-        | let target_type': InviteTargetType => obj = obj.update("target_type", target_type'.value().i64())
+        | let target_type': InviteTargetType =>
+            obj = obj.update("target_type", target_type'.value().i64())
         end
 
         match target_user
-        | let target_user': User => obj = obj.update("target_user", target_user'.to_json())
+        | let target_user': User =>
+            obj = obj.update("target_user", target_user'.to_json())
         end
 
         match target_application
-        | let target_application': Application => obj = obj.update("target_application", target_application'.to_json())
+        | let target_application': Application =>
+            obj =
+                obj.update("target_application", target_application'.to_json())
         end
 
         match approximate_presence_count
-        | let approximate_presence_count': USize => obj = obj.update("approximate_presence_count", approximate_presence_count'.i64())
+        | let approximate_presence_count': USize =>
+            obj =
+                obj.update(
+                    "approximate_presence_count",
+                    approximate_presence_count'.i64()
+                )
         end
 
         match approximate_member_count
-        | let approximate_member_count': USize => obj = obj.update("approximate_member_count", approximate_member_count'.i64())
+        | let approximate_member_count': USize =>
+            obj =
+                obj.update(
+                    "approximate_member_count", approximate_member_count'.i64()
+                )
         end
 
         match expires_at
-        | let expires_at': ISO8601 => obj = obj.update("expires_at", expires_at')
+        | let expires_at': ISO8601 =>
+            obj = obj.update("expires_at", expires_at')
         end
 
         match guild_scheduled_event
-        | let guild_scheduled_event': GuildScheduledEvent => obj = obj.update("guild_scheduled_event", guild_scheduled_event'.to_json())
+        | let guild_scheduled_event': GuildScheduledEvent =>
+            obj =
+                obj.update(
+                    "guild_scheduled_event", guild_scheduled_event'.to_json()
+                )
         end
 
         match flags
-        | let flags': Array[InviteFlag] val => obj = obj.update("flags", _InviteFlags.to_json(flags'))
+        | let flags': Array[InviteFlag] val =>
+            obj = obj.update("flags", _InviteFlags.to_json(flags'))
         end
 
         obj
@@ -215,13 +256,17 @@ primitive _Invites
         let array = value as json.JsonArray
         recover val
             let invites = Array[Invite](array.size())
-            for invite in array.values() do invites.push(Invite.from_json(invite as json.JsonObject)?) end
+            for invite in array.values() do
+                invites.push(Invite.from_json(invite as json.JsonObject)?)
+            end
             invites
         end
 
     fun to_json(invites: Array[Invite] val): json.JsonArray =>
         var array = json.JsonArray
-        for invite in invites.values() do array = array.push(invite.to_json()) end
+        for invite in invites.values() do
+            array = array.push(invite.to_json())
+        end
         array
 
 trait val InviteType is _Enum[InviteType, U8]
@@ -299,7 +344,9 @@ primitive _InviteFlags
 
     fun to_json(flags: Array[InviteFlag] val): I64 =>
         var bits: U64 = 0
-        for flag in flags.values() do bits = bits or (U64(1) << flag.value().u64()) end
+        for flag in flags.values() do
+            bits = bits or (U64(1) << flag.value().u64())
+        end
         bits.i64()
 
 class val InviteMetadata is Jsonable
@@ -389,7 +436,8 @@ class val InviteStageInstance is Jsonable
         """
         the members speaking in the Stage
 
-        These are partial guild member objects, so most of their fields may be absent.
+        These are partial guild member objects, so most of their fields may be
+        absent.
         """
 
     let participant_count: USize
@@ -507,7 +555,8 @@ class val TargetUsersJobStatus is Jsonable
 
         for (key, value) in obj.pairs() do
             match key
-            | "status" => status' = TargetUsersJobStatusCodes.from((value as I64).u8())?
+            | "status" =>
+                status' = TargetUsersJobStatusCodes.from((value as I64).u8())?
             | "total_users" => total_users' = (value as I64).usize()
             | "processed_users" => processed_users' = (value as I64).usize()
             | "created_at" => created_at' = value as String
@@ -605,15 +654,20 @@ class val GetInviteParams
         let query = recover iso Array[(String, String)] end
 
         match with_counts
-        | let with_counts': Bool => query.push(("with_counts", with_counts'.string()))
+        | let with_counts': Bool =>
+            query.push(("with_counts", with_counts'.string()))
         end
 
         match with_expiration
-        | let with_expiration': Bool => query.push(("with_expiration", with_expiration'.string()))
+        | let with_expiration': Bool =>
+            query.push(("with_expiration", with_expiration'.string()))
         end
 
         match guild_scheduled_event_id
-        | let guild_scheduled_event_id': Snowflake => query.push(("guild_scheduled_event_id", guild_scheduled_event_id'.string()))
+        | let guild_scheduled_event_id': Snowflake =>
+            query.push(
+                ("guild_scheduled_event_id", guild_scheduled_event_id'.string())
+            )
         end
 
         consume query

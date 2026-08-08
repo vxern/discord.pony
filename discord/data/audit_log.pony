@@ -4,9 +4,15 @@ class val AuditLog is Jsonable
     """
     https://docs.discord.com/developers/resources/audit-log#audit-log-object-audit-log-structure
 
-    When an administrative action is performed in a guild, an entry is added to its audit log. Viewing audit logs requires the VIEW_AUDIT_LOG permission and can be fetched by apps using the GET /guilds/{guild.id}/audit-logs endpoint, or seen by users in the guild’s Server Settings. All audit log entries are stored for 45 days.
+    When an administrative action is performed in a guild, an entry is added to
+    its audit log. Viewing audit logs requires the VIEW_AUDIT_LOG permission and
+    can be fetched by apps using the GET /guilds/{guild.id}/audit-logs endpoint,
+    or seen by users in the guild’s Server Settings. All audit log entries are
+    stored for 45 days.
 
-    When an app is performing an eligible action using the APIs, it can pass an X-Audit-Log-Reason header to indicate why the action was taken. More information is in the audit log entry section.
+    When an app is performing an eligible action using the APIs, it can pass an
+    X-Audit-Log-Reason header to indicate why the action was taken. More
+    information is in the audit log entry section.
     """
 
     let application_commands: Array[ApplicationCommand] val
@@ -40,7 +46,9 @@ class val AuditLog is Jsonable
         """
         List of threads referenced in the audit log
 
-        Threads referenced in THREAD_CREATE and THREAD_UPDATE events are included in the threads map since archived threads might not be kept in memory by clients.
+        Threads referenced in THREAD_CREATE and THREAD_UPDATE events are
+        included in the threads map since archived threads might not be kept in
+        memory by clients.
         """
 
     let users: Array[User] val
@@ -75,8 +83,10 @@ class val AuditLog is Jsonable
     new val from_json(obj: json.JsonObject) ? =>
         var application_commands': (Array[ApplicationCommand] val | None) = None
         var audit_log_entries': (Array[AuditLogEntry] val | None) = None
-        var auto_moderation_rules': (Array[AutoModerationRule] val | None) = None
-        var guild_scheduled_events': (Array[GuildScheduledEvent] val | None) = None
+        var auto_moderation_rules': (Array[AutoModerationRule] val | None) =
+            None
+        var guild_scheduled_events': (Array[GuildScheduledEvent] val | None) =
+            None
         var integrations': (Array[PartialIntegration] val | None) = None
         var threads': (Array[Channel] val | None) = None
         var users': (Array[User] val | None) = None
@@ -84,10 +94,14 @@ class val AuditLog is Jsonable
 
         for (key, value) in obj.pairs() do
             match key
-            | "application_commands" => application_commands' = _ApplicationCommands(value)?
-            | "audit_log_entries" => audit_log_entries' = _AuditLogEntries(value)?
-            | "auto_moderation_rules" => auto_moderation_rules' = _AutoModerationRules(value)?
-            | "guild_scheduled_events" => guild_scheduled_events' = _GuildScheduledEvents(value)?
+            | "application_commands" =>
+                application_commands' = _ApplicationCommands(value)?
+            | "audit_log_entries" =>
+                audit_log_entries' = _AuditLogEntries(value)?
+            | "auto_moderation_rules" =>
+                auto_moderation_rules' = _AutoModerationRules(value)?
+            | "guild_scheduled_events" =>
+                guild_scheduled_events' = _GuildScheduledEvents(value)?
             | "integrations" => integrations' = _PartialIntegrations(value)?
             | "threads" => threads' = _Channels(value)?
             | "users" => users' = _Users(value)?
@@ -95,10 +109,13 @@ class val AuditLog is Jsonable
             end
         end
 
-        application_commands = application_commands' as Array[ApplicationCommand] val
+        application_commands =
+            application_commands' as Array[ApplicationCommand] val
         audit_log_entries = audit_log_entries' as Array[AuditLogEntry] val
-        auto_moderation_rules = auto_moderation_rules' as Array[AutoModerationRule] val
-        guild_scheduled_events = guild_scheduled_events' as Array[GuildScheduledEvent] val
+        auto_moderation_rules =
+            auto_moderation_rules' as Array[AutoModerationRule] val
+        guild_scheduled_events =
+            guild_scheduled_events' as Array[GuildScheduledEvent] val
         integrations = integrations' as Array[PartialIntegration] val
         threads = threads' as Array[Channel] val
         users = users' as Array[User] val
@@ -106,10 +123,21 @@ class val AuditLog is Jsonable
 
     fun to_json(): json.JsonObject =>
         json.JsonObject
-            .update("application_commands", _ApplicationCommands.to_json(application_commands))
-            .update("audit_log_entries", _AuditLogEntries.to_json(audit_log_entries))
-            .update("auto_moderation_rules", _AutoModerationRules.to_json(auto_moderation_rules))
-            .update("guild_scheduled_events", _GuildScheduledEvents.to_json(guild_scheduled_events))
+            .update(
+                "application_commands",
+                _ApplicationCommands.to_json(application_commands)
+            )
+            .update(
+                "audit_log_entries", _AuditLogEntries.to_json(audit_log_entries)
+            )
+            .update(
+                "auto_moderation_rules",
+                _AutoModerationRules.to_json(auto_moderation_rules)
+            )
+            .update(
+                "guild_scheduled_events",
+                _GuildScheduledEvents.to_json(guild_scheduled_events)
+            )
             .update("integrations", _PartialIntegrations.to_json(integrations))
             .update("threads", _Channels.to_json(threads))
             .update("users", _Users.to_json(users))
@@ -119,11 +147,23 @@ class val AuditLogEntry is Jsonable
     """
     https://docs.discord.com/developers/resources/audit-log#audit-log-entry-object-audit-log-entry-structure
 
-    Each audit log entry represents a single administrative action (or event), indicated by action_type. Most entries contain one to many changes in the changes array that affected an entity in Discord—whether that’s a user, channel, guild, emoji, or something else.
+    Each audit log entry represents a single administrative action (or event),
+    indicated by action_type. Most entries contain one to many changes in the
+    changes array that affected an entity in Discord—whether that’s a user,
+    channel, guild, emoji, or something else.
 
-    The information (and structure) of an entry’s changes will be different depending on its type. For example, in MEMBER_ROLE_UPDATE events there is only one change: a member is either added or removed from a specific role. However, in CHANNEL_CREATE events there are many changes, including (but not limited to) the channel’s name, type, and permission overwrites added. More details are in the change object section.
+    The information (and structure) of an entry’s changes will be different
+    depending on its type. For example, in MEMBER_ROLE_UPDATE events there is
+    only one change: a member is either added or removed from a specific role.
+    However, in CHANNEL_CREATE events there are many changes, including (but not
+    limited to) the channel’s name, type, and permission overwrites added. More
+    details are in the change object section.
 
-    Apps can specify why an administrative action is being taken by passing an X-Audit-Log-Reason request header, which will be stored as the audit log entry’s reason field. The X-Audit-Log-Reason header supports 1-512 URL-encoded UTF-8 characters. Reasons are visible to users in the client and to apps when fetching audit log entries with the API.
+    Apps can specify why an administrative action is being taken by passing an
+    X-Audit-Log-Reason request header, which will be stored as the audit log
+    entry’s reason field. The X-Audit-Log-Reason header supports 1-512
+    URL-encoded UTF-8 characters. Reasons are visible to users in the client and
+    to apps when fetching audit log entries with the API.
     """
 
     let target_id: (String | None)
@@ -193,10 +233,15 @@ class val AuditLogEntry is Jsonable
                 match value | let string: String => target_id' = string end
             | "changes" => changes' = _AuditLogChanges(value)?
             | "user_id" =>
-                match value | let string: String => user_id' = Snowflake.from_json(string)? end
+                match value
+                | let string: String => user_id' = Snowflake.from_json(string)?
+                end
             | "id" => id' = Snowflake.from_json(value)?
-            | "action_type" => action_type' = AuditLogEvents.from((value as I64).u8())?
-            | "options" => options' = OptionalAuditEntryInfo.from_json(value as json.JsonObject)?
+            | "action_type" =>
+                action_type' = AuditLogEvents.from((value as I64).u8())?
+            | "options" =>
+                options' =
+                    OptionalAuditEntryInfo.from_json(value as json.JsonObject)?
             | "reason" => reason' = value as String
             end
         end
@@ -212,16 +257,23 @@ class val AuditLogEntry is Jsonable
     fun to_json(): json.JsonObject =>
         var obj = json.JsonObject
             .update("target_id", target_id)
-            .update("user_id", match user_id | let user_id': Snowflake => user_id'.to_json() end)
+            .update(
+                "user_id",
+                match user_id
+                | let user_id': Snowflake => user_id'.to_json()
+                end
+            )
             .update("id", id.to_json())
             .update("action_type", action_type.value().i64())
 
         match changes
-        | let changes': Array[AuditLogChange] val => obj = obj.update("changes", _AuditLogChanges.to_json(changes'))
+        | let changes': Array[AuditLogChange] val =>
+            obj = obj.update("changes", _AuditLogChanges.to_json(changes'))
         end
 
         match options
-        | let options': OptionalAuditEntryInfo => obj = obj.update("options", options'.to_json())
+        | let options': OptionalAuditEntryInfo =>
+            obj = obj.update("options", options'.to_json())
         end
 
         match reason
@@ -239,7 +291,9 @@ primitive _AuditLogEntries
         let array = value as json.JsonArray
         recover val
             let entries = Array[AuditLogEntry](array.size())
-            for entry in array.values() do entries.push(AuditLogEntry.from_json(entry as json.JsonObject)?) end
+            for entry in array.values() do
+                entries.push(AuditLogEntry.from_json(entry as json.JsonObject)?)
+            end
             entries
         end
 
@@ -252,13 +306,20 @@ trait val AuditLogEvent is _Enum[AuditLogEvent, U8]
     """
     https://docs.discord.com/developers/resources/audit-log#audit-log-entry-object-audit-log-events
 
-    Audit log events and values (the action_type field) that your app may receive.
+    Audit log events and values (the action_type field) that your app may
+    receive.
 
-    The Object Changed column notes which object’s values may be included in the entry. Though there are exceptions, possible keys in the changes array typically correspond to the object’s fields. The descriptions and types for those fields can be found in the linked documentation for the object.
+    The Object Changed column notes which object’s values may be included in the
+    entry. Though there are exceptions, possible keys in the changes array
+    typically correspond to the object’s fields. The descriptions and types for
+    those fields can be found in the linked documentation for the object.
 
-    If no object is noted, there won’t be a changes array in the entry, though other fields like the target_id still exist and many have fields in the options object.
+    If no object is noted, there won’t be a changes array in the entry, though
+    other fields like the target_id still exist and many have fields in the
+    options object.
 
-    * Object has exception(s) to available keys. See the exceptions section below for details.
+    * Object has exception(s) to available keys. See the exceptions section
+      below for details.
     """
 primitive GuildUpdateAuditLogEvent is AuditLogEvent
     """
@@ -860,28 +921,40 @@ class val OptionalAuditEntryInfo is Jsonable
         """
         Name of the Auto Moderation rule that was triggered
 
-        Event types: AUTO_MODERATION_BLOCK_MESSAGE & AUTO_MODERATION_FLAG_TO_CHANNEL & AUTO_MODERATION_USER_COMMUNICATION_DISABLED & AUTO_MODERATION_QUARANTINE_USER
+        Event types: AUTO_MODERATION_BLOCK_MESSAGE &
+        AUTO_MODERATION_FLAG_TO_CHANNEL &
+        AUTO_MODERATION_USER_COMMUNICATION_DISABLED &
+        AUTO_MODERATION_QUARANTINE_USER
         """
 
     let auto_moderation_rule_trigger_type: (String | None)
         """
         Trigger type of the Auto Moderation rule that was triggered
 
-        Event types: AUTO_MODERATION_BLOCK_MESSAGE & AUTO_MODERATION_FLAG_TO_CHANNEL & AUTO_MODERATION_USER_COMMUNICATION_DISABLED & AUTO_MODERATION_QUARANTINE_USER
+        Event types: AUTO_MODERATION_BLOCK_MESSAGE &
+        AUTO_MODERATION_FLAG_TO_CHANNEL &
+        AUTO_MODERATION_USER_COMMUNICATION_DISABLED &
+        AUTO_MODERATION_QUARANTINE_USER
         """
 
     let channel_id: (Snowflake | None)
         """
         Channel in which the entities were targeted
 
-        Event types: MEMBER_MOVE & MESSAGE_PIN & MESSAGE_UNPIN & MESSAGE_DELETE & STAGE_INSTANCE_CREATE & STAGE_INSTANCE_UPDATE & STAGE_INSTANCE_DELETE & AUTO_MODERATION_BLOCK_MESSAGE & AUTO_MODERATION_FLAG_TO_CHANNEL & AUTO_MODERATION_USER_COMMUNICATION_DISABLED & AUTO_MODERATION_QUARANTINE_USER & VOICE_CHANNEL_STATUS_CREATE & VOICE_CHANNEL_STATUS_DELETE
+        Event types: MEMBER_MOVE & MESSAGE_PIN & MESSAGE_UNPIN & MESSAGE_DELETE
+        & STAGE_INSTANCE_CREATE & STAGE_INSTANCE_UPDATE & STAGE_INSTANCE_DELETE
+        & AUTO_MODERATION_BLOCK_MESSAGE & AUTO_MODERATION_FLAG_TO_CHANNEL &
+        AUTO_MODERATION_USER_COMMUNICATION_DISABLED &
+        AUTO_MODERATION_QUARANTINE_USER & VOICE_CHANNEL_STATUS_CREATE &
+        VOICE_CHANNEL_STATUS_DELETE
         """
 
     let count: (String | None)
         """
         Number of entities that were targeted
 
-        Event types: MESSAGE_DELETE & MESSAGE_BULK_DELETE & MEMBER_DISCONNECT & MEMBER_MOVE
+        Event types: MESSAGE_DELETE & MESSAGE_BULK_DELETE & MEMBER_DISCONNECT &
+        MEMBER_MOVE
         """
 
     let delete_member_days: (String | None)
@@ -895,7 +968,8 @@ class val OptionalAuditEntryInfo is Jsonable
         """
         ID of the overwritten entity
 
-        Event types: CHANNEL_OVERWRITE_CREATE & CHANNEL_OVERWRITE_UPDATE & CHANNEL_OVERWRITE_DELETE
+        Event types: CHANNEL_OVERWRITE_CREATE & CHANNEL_OVERWRITE_UPDATE &
+        CHANNEL_OVERWRITE_DELETE
         """
 
     let members_removed: (String | None)
@@ -916,14 +990,16 @@ class val OptionalAuditEntryInfo is Jsonable
         """
         Name of the role if type is "0" (not present if type is "1")
 
-        Event types: CHANNEL_OVERWRITE_CREATE & CHANNEL_OVERWRITE_UPDATE & CHANNEL_OVERWRITE_DELETE
+        Event types: CHANNEL_OVERWRITE_CREATE & CHANNEL_OVERWRITE_UPDATE &
+        CHANNEL_OVERWRITE_DELETE
         """
 
     let type': (String | None)
         """
         Type of overwritten entity - role ("0") or member ("1")
 
-        Event types: CHANNEL_OVERWRITE_CREATE & CHANNEL_OVERWRITE_UPDATE & CHANNEL_OVERWRITE_DELETE
+        Event types: CHANNEL_OVERWRITE_CREATE & CHANNEL_OVERWRITE_UPDATE &
+        CHANNEL_OVERWRITE_DELETE
         """
 
     let integration_type: (String | None)
@@ -987,8 +1063,10 @@ class val OptionalAuditEntryInfo is Jsonable
         for (key, value) in obj.pairs() do
             match key
             | "application_id" => application_id' = Snowflake.from_json(value)?
-            | "auto_moderation_rule_name" => auto_moderation_rule_name' = value as String
-            | "auto_moderation_rule_trigger_type" => auto_moderation_rule_trigger_type' = value as String
+            | "auto_moderation_rule_name" =>
+                auto_moderation_rule_name' = value as String
+            | "auto_moderation_rule_trigger_type" =>
+                auto_moderation_rule_trigger_type' = value as String
             | "channel_id" => channel_id' = Snowflake.from_json(value)?
             | "count" => count' = value as String
             | "delete_member_days" => delete_member_days' = value as String
@@ -1020,19 +1098,30 @@ class val OptionalAuditEntryInfo is Jsonable
         var obj = json.JsonObject
 
         match application_id
-        | let application_id': Snowflake => obj = obj.update("application_id", application_id'.to_json())
+        | let application_id': Snowflake =>
+            obj = obj.update("application_id", application_id'.to_json())
         end
 
         match auto_moderation_rule_name
-        | let auto_moderation_rule_name': String => obj = obj.update("auto_moderation_rule_name", auto_moderation_rule_name')
+        | let auto_moderation_rule_name': String =>
+            obj =
+                obj.update(
+                    "auto_moderation_rule_name", auto_moderation_rule_name'
+                )
         end
 
         match auto_moderation_rule_trigger_type
-        | let auto_moderation_rule_trigger_type': String => obj = obj.update("auto_moderation_rule_trigger_type", auto_moderation_rule_trigger_type')
+        | let auto_moderation_rule_trigger_type': String =>
+            obj =
+                obj.update(
+                    "auto_moderation_rule_trigger_type",
+                    auto_moderation_rule_trigger_type'
+                )
         end
 
         match channel_id
-        | let channel_id': Snowflake => obj = obj.update("channel_id", channel_id'.to_json())
+        | let channel_id': Snowflake =>
+            obj = obj.update("channel_id", channel_id'.to_json())
         end
 
         match count
@@ -1040,7 +1129,8 @@ class val OptionalAuditEntryInfo is Jsonable
         end
 
         match delete_member_days
-        | let delete_member_days': String => obj = obj.update("delete_member_days", delete_member_days')
+        | let delete_member_days': String =>
+            obj = obj.update("delete_member_days", delete_member_days')
         end
 
         match id
@@ -1048,11 +1138,13 @@ class val OptionalAuditEntryInfo is Jsonable
         end
 
         match members_removed
-        | let members_removed': String => obj = obj.update("members_removed", members_removed')
+        | let members_removed': String =>
+            obj = obj.update("members_removed", members_removed')
         end
 
         match message_id
-        | let message_id': Snowflake => obj = obj.update("message_id", message_id'.to_json())
+        | let message_id': Snowflake =>
+            obj = obj.update("message_id", message_id'.to_json())
         end
 
         match role_name
@@ -1064,7 +1156,8 @@ class val OptionalAuditEntryInfo is Jsonable
         end
 
         match integration_type
-        | let integration_type': String => obj = obj.update("integration_type", integration_type')
+        | let integration_type': String =>
+            obj = obj.update("integration_type", integration_type')
         end
 
         match status
@@ -1077,26 +1170,39 @@ class val AuditLogChange is Jsonable
     """
     https://docs.discord.com/developers/resources/audit-log#audit-log-change-object-audit-log-change-structure
 
-    Many audit log events include a changes array in their entry object. The structure for the individual changes varies based on the event type and its changed objects, so apps shouldn’t depend on a single pattern of handling audit log events.
+    Many audit log events include a changes array in their entry object. The
+    structure for the individual changes varies based on the event type and its
+    changed objects, so apps shouldn’t depend on a single pattern of handling
+    audit log events.
 
-    Some events don’t follow the same pattern as other audit log events. Details about these exceptions are explained in the next section.
+    Some events don’t follow the same pattern as other audit log events. Details
+    about these exceptions are explained in the next section.
 
-    If new_value is not present in the change object while old_value is, it indicates that the property has been reset or set to null. If old_value isn’t included, it indicated that the property was previously null.
+    If new_value is not present in the change object while old_value is, it
+    indicates that the property has been reset or set to null. If old_value
+    isn’t included, it indicated that the property was previously null.
 
     Audit Log Change Exceptions
 
-        For most objects, the change keys may be any field on the changed object. The following table details the exceptions to this pattern.
+        For most objects, the change keys may be any field on the changed
+        object. The following table details the exceptions to this pattern.
 
         Command Permission
             Change key exceptions: snowflake as key
-            Change object exceptions: The changes array contains objects with a key field representing the entity whose command was affected (role, channel, or user ID), a previous permissions object (with an old_value key), and an updated permissions object (with a new_value key)
+            Change object exceptions: The changes array contains objects with a
+            key field representing the entity whose command was affected (role,
+            channel, or user ID), a previous permissions object (with an
+            old_value key), and an updated permissions object (with a new_value
+            key)
 
         Invite and Invite Metadata
-            Change key exceptions: Additional channel_id key (instead of object’s channel.id)
+            Change key exceptions: Additional channel_id key (instead of
+            object’s channel.id)
 
         Partial Role
             Change key exceptions: $add and $remove as keys
-            Change object exceptions: new_value is an array of objects that contain the role id and name
+            Change object exceptions: new_value is an array of objects that
+            contain the role id and name
 
         Webhook
             Change key exceptions: avatar_hash key (instead of avatar)
@@ -1106,14 +1212,18 @@ class val AuditLogChange is Jsonable
         """
         New value of the key
 
-        The value matches the type of the field on the changed object, so it is left undecoded. An absent value and a null value are both represented as `None`.
+        The value matches the type of the field on the changed object, so it is
+        left undecoded. An absent value and a null value are both represented as
+        `None`.
         """
 
     let old_value: json.JsonValue
         """
         Old value of the key
 
-        The value matches the type of the field on the changed object, so it is left undecoded. An absent value and a null value are both represented as `None`.
+        The value matches the type of the field on the changed object, so it is
+        left undecoded. An absent value and a null value are both represented as
+        `None`.
         """
 
     let key: String
@@ -1121,7 +1231,11 @@ class val AuditLogChange is Jsonable
         Name of the changed entity, with a few exceptions
         """
 
-    new val create(new_value': json.JsonValue, old_value': json.JsonValue, key': String) =>
+    new val create(
+        new_value': json.JsonValue,
+        old_value': json.JsonValue,
+        key': String
+    ) =>
         new_value = new_value'
         old_value = old_value'
         key = key'
@@ -1131,7 +1245,8 @@ class val AuditLogChange is Jsonable
         var old_value': json.JsonValue = None
         var key': (String | None) = None
 
-        // The loop variable cannot be named `key`, as the name is taken by the field of the same name.
+        // The loop variable cannot be named `key`, as the name is taken by the
+        // field of the same name.
         for (field, value) in obj.pairs() do
             match field
             | "new_value" => new_value' = value
@@ -1163,20 +1278,27 @@ primitive _AuditLogChanges
         let array = value as json.JsonArray
         recover val
             let changes = Array[AuditLogChange](array.size())
-            for change in array.values() do changes.push(AuditLogChange.from_json(change as json.JsonObject)?) end
+            for change in array.values() do
+                changes.push(
+                    AuditLogChange.from_json(change as json.JsonObject)?
+                )
+            end
             changes
         end
 
     fun to_json(changes: Array[AuditLogChange] val): json.JsonArray =>
         var array = json.JsonArray
-        for change in changes.values() do array = array.push(change.to_json()) end
+        for change in changes.values() do
+            array = array.push(change.to_json())
+        end
         array
 
 class val GetAuditLogParams
     """
     https://docs.discord.com/developers/resources/audit-log#get-guild-audit-log-query-string-params
 
-    The returned list of audit log entries is ordered based on whether `before` or `after` is used.
+    The returned list of audit log entries is ordered based on whether `before`
+    or `after` is used.
     """
 
     let user_id: (Snowflake | None)
@@ -1225,7 +1347,8 @@ class val GetAuditLogParams
         end
 
         match action_type
-        | let action_type': AuditLogEvent => query.push(("action_type", action_type'.value().string()))
+        | let action_type': AuditLogEvent =>
+            query.push(("action_type", action_type'.value().string()))
         end
 
         match before

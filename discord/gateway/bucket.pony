@@ -30,7 +30,9 @@ actor _GatewayBucket
 
     be enqueue(event: GatewaySendableEvent) =>
         if _disposed then
-            Debug.out("[gateway/bucket] dropping an event: the bucket was disposed of")
+            Debug.out(
+                "[gateway/bucket] dropping an event: the bucket was disposed of"
+            )
             return
         end
 
@@ -53,7 +55,8 @@ actor _GatewayBucket
             end
         else
             Debug.out(
-                "[gateway/bucket] queued opcode " + event.opcode().value().string()
+                "[gateway/bucket] queued opcode "
+                + event.opcode().value().string()
                 + ", " + _queue.size().string() + " waiting"
             )
         end
@@ -62,7 +65,10 @@ actor _GatewayBucket
 
     be handshake(event: GatewaySendableEvent) =>
         if _disposed then
-            Debug.out("[gateway/bucket] dropping a handshake: the bucket was disposed of")
+            Debug.out(
+                "[gateway/bucket] dropping a handshake: the bucket was "
+                + "disposed of"
+            )
             return
         end
 
@@ -75,7 +81,10 @@ actor _GatewayBucket
 
     be heartbeat(event: GatewaySendableEvent) =>
         if _disposed then
-            Debug.out("[gateway/bucket] dropping a heartbeat: the bucket was disposed of")
+            Debug.out(
+                "[gateway/bucket] dropping a heartbeat: the bucket was "
+                + "disposed of"
+            )
             return
         end
 
@@ -139,7 +148,9 @@ actor _GatewayBucket
         _throttled = true
 
     be unthrottle() =>
-        Debug.out("[gateway/bucket] the connection has caught up, draining again")
+        Debug.out(
+            "[gateway/bucket] the connection has caught up, draining again"
+        )
 
         _throttled = false
         _drain()
@@ -167,7 +178,10 @@ actor _GatewayBucket
 
     be _retry_handshake(event: GatewaySendableEvent, generation: USize) =>
         if _disposed then
-            Debug.out("[gateway/bucket] abandoning a handshake retry: the bucket was disposed of")
+            Debug.out(
+                "[gateway/bucket] abandoning a handshake retry: the bucket was "
+                + "disposed of"
+            )
             return
         end
 
@@ -196,7 +210,8 @@ actor _GatewayBucket
             match _identifies.blocked_until(now)
             | let at: U64 =>
                 Debug.out(
-                    "[gateway/bucket] the identify window is spent, holding the identify for "
+                    "[gateway/bucket] the identify window is spent, holding "
+                    + "the identify for "
                     + ((at - now) / 1_000_000).string() + "ms"
                 )
 
@@ -229,13 +244,16 @@ actor _GatewayBucket
 
     fun ref _drain() =>
         if _disposed then
-            Debug.out("[gateway/bucket] not draining: the bucket was disposed of")
+            Debug.out(
+                "[gateway/bucket] not draining: the bucket was disposed of"
+            )
             return
         end
 
         if not _open then
             Debug.out(
-                "[gateway/bucket] not draining: the handshake has not gone through yet, "
+                "[gateway/bucket] not draining: the handshake has not gone "
+                + "through yet, "
                 + _queue.size().string() + " event(s) held back"
             )
             return

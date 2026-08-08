@@ -4,11 +4,20 @@ trait val Component is Jsonable
     """
     https://docs.discord.com/developers/components/reference#component-object
 
-    Components allow you to style and structure your messages, modals, and interactions. They are interactive elements that can create rich user experiences in your Discord applications.
+    Components allow you to style and structure your messages, modals, and
+    interactions. They are interactive elements that can create rich user
+    experiences in your Discord applications.
 
-    Components are a field on the message object and modal. You can use them when creating messages or responding to an interaction, like an application command.
+    Components are a field on the message object and modal. You can use them
+    when creating messages or responding to an interaction, like an application
+    command.
 
-    Every component carries a `type` and an optional `id`. The `id` is used to identify components in the response from an interaction. It must be unique within the message and is generated sequentially if left empty. Generation of `id`s won't use another `id` that exists in the message if you have one defined for another component. Sending components with an `id` of `0` is allowed but will be treated as empty and replaced by the API.
+    Every component carries a `type` and an optional `id`. The `id` is used to
+    identify components in the response from an interaction. It must be unique
+    within the message and is generated sequentially if left empty. Generation
+    of `id`s won't use another `id` that exists in the message if you have one
+    defined for another component. Sending components with an `id` of `0` is
+    allowed but will be treated as empty and replaced by the API.
     """
 
     fun component_type(): ComponentType
@@ -219,7 +228,8 @@ primitive Components
         | TextInputComponentType => TextInputComponent.from_json(obj)?
         | UserSelectComponentType => UserSelectComponent.from_json(obj)?
         | RoleSelectComponentType => RoleSelectComponent.from_json(obj)?
-        | MentionableSelectComponentType => MentionableSelectComponent.from_json(obj)?
+        | MentionableSelectComponentType =>
+            MentionableSelectComponent.from_json(obj)?
         | ChannelSelectComponentType => ChannelSelectComponent.from_json(obj)?
         | SectionComponentType => SectionComponent.from_json(obj)?
         | TextDisplayComponentType => TextDisplayComponent.from_json(obj)?
@@ -245,13 +255,19 @@ primitive _Components
         let array = value as json.JsonArray
         recover val
             let components = Array[Component](array.size())
-            for component in array.values() do components.push(Components.from_json(component as json.JsonObject)?) end
+            for component in array.values() do
+                components.push(
+                    Components.from_json(component as json.JsonObject)?
+                )
+            end
             components
         end
 
     fun to_json(components: Array[Component] val): json.JsonArray =>
         var array = json.JsonArray
-        for component in components.values() do array = array.push(component.to_json()) end
+        for component in components.values() do
+            array = array.push(component.to_json())
+        end
         array
 
 primitive _ComponentJson
@@ -276,9 +292,11 @@ class val ActionRowComponent is Component
 
     Action Rows can contain one of the following:
     - Up to 5 contextually grouped buttons
-    - A single select component (string select, user select, role select, mentionable select, or channel select)
+    - A single select component (string select, user select, role select,
+      mentionable select, or channel select)
 
-    `LabelComponent` is recommended for use over an Action Row in modals. Action Rows with Text Inputs in modals are now deprecated.
+    `LabelComponent` is recommended for use over an Action Row in modals. Action
+    Rows with Text Inputs in modals are now deprecated.
     """
 
     let id: (U32 | None)
@@ -291,7 +309,10 @@ class val ActionRowComponent is Component
         Up to 5 interactive button components or a single select component
         """
 
-    new val create(id': (U32 | None) = None, components': Array[ActionRowChildComponent] val) =>
+    new val create(
+        id': (U32 | None) = None,
+        components': Array[ActionRowChildComponent] val
+    ) =>
         id = id'
         components = components'
 
@@ -317,8 +338,12 @@ class val ActionRowComponent is Component
 
 // https://docs.discord.com/developers/components/reference#action-row-action-row-child-components
 //
-// An Action Row can contain up to 5 Buttons, or a single String Select, User Select, Role Select, Mentionable Select or Channel Select.
-type ActionRowChildComponent is (ButtonComponent | StringSelectComponent | UserSelectComponent | RoleSelectComponent | MentionableSelectComponent | ChannelSelectComponent)
+// An Action Row can contain up to 5 Buttons, or a single String Select, User
+// Select, Role Select, Mentionable Select or Channel Select.
+type ActionRowChildComponent is (
+    ButtonComponent | StringSelectComponent | UserSelectComponent
+    | RoleSelectComponent | MentionableSelectComponent | ChannelSelectComponent
+)
 
 primitive _ActionRowChildComponents
     fun apply(value: json.JsonValue): Array[ActionRowChildComponent] val ? =>
@@ -330,29 +355,43 @@ primitive _ActionRowChildComponents
         recover val
             let components = Array[ActionRowChildComponent](array.size())
             for component in array.values() do
-                components.push(Components.from_json(component as json.JsonObject)? as ActionRowChildComponent)
+                components.push(
+                    Components.from_json(
+                        component as json.JsonObject
+                    )? as ActionRowChildComponent
+                )
             end
             components
         end
 
-    fun to_json(components: Array[ActionRowChildComponent] val): json.JsonArray =>
+    fun to_json(
+        components: Array[ActionRowChildComponent] val
+    ): json.JsonArray =>
         var array = json.JsonArray
-        for component in components.values() do array = array.push(component.to_json()) end
+        for component in components.values() do
+            array = array.push(component.to_json())
+        end
         array
 
 class val ButtonComponent is Component
     """
     https://docs.discord.com/developers/components/reference#button
 
-    A Button is an interactive component that can only be used in messages. It creates clickable elements that users can interact with, sending an interaction to your app when clicked.
+    A Button is an interactive component that can only be used in messages. It
+    creates clickable elements that users can interact with, sending an
+    interaction to your app when clicked.
 
-    Buttons must be placed inside an Action Row or a Section's `accessory` field.
+    Buttons must be placed inside an Action Row or a Section's `accessory`
+    field.
 
-    Buttons come in various styles to convey different types of actions. These styles also define what fields are valid for a button.
-    - Non-link and non-premium buttons **must** have a `custom_id`, and cannot have a `url` or a `sku_id`.
+    Buttons come in various styles to convey different types of actions. These
+    styles also define what fields are valid for a button.
+    - Non-link and non-premium buttons **must** have a `custom_id`, and cannot
+      have a `url` or a `sku_id`.
     - Link buttons **must** have a `url`, and cannot have a `custom_id`.
     - Link buttons do not send an interaction to your app when clicked.
-    - Premium buttons **must** contain a `sku_id`, and cannot have a `custom_id`, `label`, `url`, or `emoji`.
+    - Premium buttons **must** contain a `sku_id`, and cannot have a
+      `custom_id`, `label`, `url`, or `emoji`.
     - Premium buttons do not send an interaction to your app when clicked.
     """
 
@@ -383,7 +422,8 @@ class val ButtonComponent is Component
 
     let sku_id: (Snowflake | None)
         """
-        Identifier for a purchasable SKU, only available when using premium-style buttons
+        Identifier for a purchasable SKU, only available when using
+        premium-style buttons
         """
 
     let url: (String | None)
@@ -466,7 +506,8 @@ class val ButtonComponent is Component
         end
 
         match sku_id
-        | let sku_id': Snowflake => obj = obj.update("sku_id", sku_id'.to_json())
+        | let sku_id': Snowflake =>
+            obj = obj.update("sku_id", sku_id'.to_json())
         end
 
         match url
@@ -547,11 +588,15 @@ class val StringSelectComponent is Component
     """
     https://docs.discord.com/developers/components/reference#string-select
 
-    A String Select is an interactive component that allows users to select one or more provided `options`.
+    A String Select is an interactive component that allows users to select one
+    or more provided `options`.
 
-    String Selects can be configured for both single-select and multi-select behavior. When a user finishes making their choice(s) your app receives an interaction.
+    String Selects can be configured for both single-select and multi-select
+    behavior. When a user finishes making their choice(s) your app receives an
+    interaction.
 
-    String Selects are available in messages and modals. They must be placed inside an Action Row in messages and a Label in modals.
+    String Selects are available in messages and modals. They must be placed
+    inside an Action Row in messages and a Label in modals.
     """
 
     let id: (U32 | None)
@@ -576,9 +621,11 @@ class val StringSelectComponent is Component
 
     let min_values: (USize | None)
         """
-        Minimum number of items that must be chosen (defaults to 1); min 0, max 25
+        Minimum number of items that must be chosen (defaults to 1); min 0, max
+        25
 
-        Must be either omitted or at least `1` if `required` is omitted or `true`.
+        Must be either omitted or at least `1` if `required` is omitted or
+        `true`.
         """
 
     let max_values: (USize | None)
@@ -588,7 +635,8 @@ class val StringSelectComponent is Component
 
     let required: (Bool | None)
         """
-        Whether the string select is required to answer in a modal (defaults to `true`)
+        Whether the string select is required to answer in a modal (defaults to
+        `true`)
 
         Only available in modals. It is ignored in messages.
         """
@@ -597,7 +645,8 @@ class val StringSelectComponent is Component
         """
         Whether select menu is disabled in a message (defaults to `false`)
 
-        Using this in a modal will result in an error. Modals can not currently have disabled components in them.
+        Using this in a modal will result in an error. Modals can not currently
+        have disabled components in them.
         """
 
     new val create(
@@ -659,15 +708,18 @@ class val StringSelectComponent is Component
             .update("options", _SelectOptions.to_json(options))
 
         match placeholder
-        | let placeholder': String => obj = obj.update("placeholder", placeholder')
+        | let placeholder': String =>
+            obj = obj.update("placeholder", placeholder')
         end
 
         match min_values
-        | let min_values': USize => obj = obj.update("min_values", min_values'.i64())
+        | let min_values': USize =>
+            obj = obj.update("min_values", min_values'.i64())
         end
 
         match max_values
-        | let max_values': USize => obj = obj.update("max_values", max_values'.i64())
+        | let max_values': USize =>
+            obj = obj.update("max_values", max_values'.i64())
         end
 
         match required
@@ -752,7 +804,8 @@ class val SelectOption is Jsonable
             .update("value", value)
 
         match description
-        | let description': String => obj = obj.update("description", description')
+        | let description': String =>
+            obj = obj.update("description", description')
         end
 
         match emoji
@@ -774,24 +827,32 @@ primitive _SelectOptions
         let array = value as json.JsonArray
         recover val
             let options = Array[SelectOption](array.size())
-            for option in array.values() do options.push(SelectOption.from_json(option as json.JsonObject)?) end
+            for option in array.values() do
+                options.push(SelectOption.from_json(option as json.JsonObject)?)
+            end
             options
         end
 
     fun to_json(options: Array[SelectOption] val): json.JsonArray =>
         var array = json.JsonArray
-        for option in options.values() do array = array.push(option.to_json()) end
+        for option in options.values() do
+            array = array.push(option.to_json())
+        end
         array
 
 class val TextInputComponent is Component
     """
     https://docs.discord.com/developers/components/reference#text-input
 
-    Text Input is an interactive component that allows users to enter free-form text responses in modals. It supports both short, single-line inputs and longer, multi-line paragraph inputs.
+    Text Input is an interactive component that allows users to enter free-form
+    text responses in modals. It supports both short, single-line inputs and
+    longer, multi-line paragraph inputs.
 
-    Text Inputs can only be used within modals and must be placed inside a Label.
+    Text Inputs can only be used within modals and must be placed inside a
+    Label.
 
-    The `label` field on a Text Input is deprecated in favour of `label` and `description` on the Label component, and so is not modelled here.
+    The `label` field on a Text Input is deprecated in favour of `label` and
+    `description` on the Label component, and so is not modelled here.
     """
 
     let id: (U32 | None)
@@ -893,11 +954,13 @@ class val TextInputComponent is Component
             .update("style", style.value().i64())
 
         match min_length
-        | let min_length': USize => obj = obj.update("min_length", min_length'.i64())
+        | let min_length': USize =>
+            obj = obj.update("min_length", min_length'.i64())
         end
 
         match max_length
-        | let max_length': USize => obj = obj.update("max_length", max_length'.i64())
+        | let max_length': USize =>
+            obj = obj.update("max_length", max_length'.i64())
         end
 
         match required
@@ -909,7 +972,8 @@ class val TextInputComponent is Component
         end
 
         match placeholder
-        | let placeholder': String => obj = obj.update("placeholder", placeholder')
+        | let placeholder': String =>
+            obj = obj.update("placeholder", placeholder')
         end
 
         obj
@@ -942,9 +1006,12 @@ class val UserSelectComponent is Component
     """
     https://docs.discord.com/developers/components/reference#user-select
 
-    A User Select is an interactive component that allows users to select one or more users in a message or modal. Options are automatically populated based on the server's available users.
+    A User Select is an interactive component that allows users to select one or
+    more users in a message or modal. Options are automatically populated based
+    on the server's available users.
 
-    User Selects are available in messages and modals. They must be placed inside an Action Row in messages and a Label in modals.
+    User Selects are available in messages and modals. They must be placed
+    inside an Action Row in messages and a Label in modals.
     """
 
     let id: (U32 | None)
@@ -964,14 +1031,18 @@ class val UserSelectComponent is Component
 
     let default_values: (Array[SelectDefaultValue] val | None)
         """
-        List of default values for auto-populated select menu components; number of default values must be in the range defined by `min_values` and `max_values`
+        List of default values for auto-populated select menu components; number
+        of default values must be in the range defined by `min_values` and
+        `max_values`
         """
 
     let min_values: (USize | None)
         """
-        Minimum number of items that must be chosen (defaults to 1); min 0, max 25
+        Minimum number of items that must be chosen (defaults to 1); min 0, max
+        25
 
-        Must be either omitted or at least `1` if `required` is omitted or `true`.
+        Must be either omitted or at least `1` if `required` is omitted or
+        `true`.
         """
 
     let max_values: (USize | None)
@@ -981,7 +1052,8 @@ class val UserSelectComponent is Component
 
     let required: (Bool | None)
         """
-        Whether the user select is required to answer in a modal (defaults to `true`)
+        Whether the user select is required to answer in a modal (defaults to
+        `true`)
 
         Only available in modals. It is ignored in messages.
         """
@@ -990,7 +1062,8 @@ class val UserSelectComponent is Component
         """
         Whether select menu is disabled in a message (defaults to `false`)
 
-        Using this in a modal will result in an error. Modals can not currently have disabled components in them.
+        Using this in a modal will result in an error. Modals can not currently
+        have disabled components in them.
         """
 
     new val create(
@@ -1047,15 +1120,27 @@ class val UserSelectComponent is Component
     fun component_type(): ComponentType => UserSelectComponentType
 
     fun to_json(): json.JsonObject =>
-        _SelectJson(_ComponentJson(component_type(), id), custom_id, placeholder, default_values, min_values, max_values, required, disabled)
+        _SelectJson(
+            _ComponentJson(component_type(), id),
+            custom_id,
+            placeholder,
+            default_values,
+            min_values,
+            max_values,
+            required,
+            disabled
+        )
 
 class val RoleSelectComponent is Component
     """
     https://docs.discord.com/developers/components/reference#role-select
 
-    A Role Select is an interactive component that allows users to select one or more roles in a message or modal. Options are automatically populated based on the server's available roles.
+    A Role Select is an interactive component that allows users to select one or
+    more roles in a message or modal. Options are automatically populated based
+    on the server's available roles.
 
-    Role Selects are available in messages and modals. They must be placed inside an Action Row in messages and a Label in modals.
+    Role Selects are available in messages and modals. They must be placed
+    inside an Action Row in messages and a Label in modals.
     """
 
     let id: (U32 | None)
@@ -1075,14 +1160,18 @@ class val RoleSelectComponent is Component
 
     let default_values: (Array[SelectDefaultValue] val | None)
         """
-        List of default values for auto-populated select menu components; number of default values must be in the range defined by `min_values` and `max_values`
+        List of default values for auto-populated select menu components; number
+        of default values must be in the range defined by `min_values` and
+        `max_values`
         """
 
     let min_values: (USize | None)
         """
-        Minimum number of items that must be chosen (defaults to 1); min 0, max 25
+        Minimum number of items that must be chosen (defaults to 1); min 0, max
+        25
 
-        Must be either omitted or at least `1` if `required` is omitted or `true`.
+        Must be either omitted or at least `1` if `required` is omitted or
+        `true`.
         """
 
     let max_values: (USize | None)
@@ -1092,7 +1181,8 @@ class val RoleSelectComponent is Component
 
     let required: (Bool | None)
         """
-        Whether the role select is required to answer in a modal (defaults to `true`)
+        Whether the role select is required to answer in a modal (defaults to
+        `true`)
 
         Only available in modals. It is ignored in messages.
         """
@@ -1101,7 +1191,8 @@ class val RoleSelectComponent is Component
         """
         Whether select menu is disabled in a message (defaults to `false`)
 
-        Using this in a modal will result in an error. Modals can not currently have disabled components in them.
+        Using this in a modal will result in an error. Modals can not currently
+        have disabled components in them.
         """
 
     new val create(
@@ -1158,15 +1249,27 @@ class val RoleSelectComponent is Component
     fun component_type(): ComponentType => RoleSelectComponentType
 
     fun to_json(): json.JsonObject =>
-        _SelectJson(_ComponentJson(component_type(), id), custom_id, placeholder, default_values, min_values, max_values, required, disabled)
+        _SelectJson(
+            _ComponentJson(component_type(), id),
+            custom_id,
+            placeholder,
+            default_values,
+            min_values,
+            max_values,
+            required,
+            disabled
+        )
 
 class val MentionableSelectComponent is Component
     """
     https://docs.discord.com/developers/components/reference#mentionable-select
 
-    A Mentionable Select is an interactive component that allows users to select one or more mentionables (users *and* roles) in a message or modal. Options are automatically populated based on the server's available mentionables.
+    A Mentionable Select is an interactive component that allows users to select
+    one or more mentionables (users *and* roles) in a message or modal. Options
+    are automatically populated based on the server's available mentionables.
 
-    Mentionable Selects are available in messages and modals. They must be placed inside an Action Row in messages and a Label in modals.
+    Mentionable Selects are available in messages and modals. They must be
+    placed inside an Action Row in messages and a Label in modals.
     """
 
     let id: (U32 | None)
@@ -1186,14 +1289,18 @@ class val MentionableSelectComponent is Component
 
     let default_values: (Array[SelectDefaultValue] val | None)
         """
-        List of default values for auto-populated select menu components; number of default values must be in the range defined by `min_values` and `max_values`
+        List of default values for auto-populated select menu components; number
+        of default values must be in the range defined by `min_values` and
+        `max_values`
         """
 
     let min_values: (USize | None)
         """
-        Minimum number of items that must be chosen (defaults to 1); min 0, max 25
+        Minimum number of items that must be chosen (defaults to 1); min 0, max
+        25
 
-        Must be either omitted or at least `1` if `required` is omitted or `true`.
+        Must be either omitted or at least `1` if `required` is omitted or
+        `true`.
         """
 
     let max_values: (USize | None)
@@ -1203,7 +1310,8 @@ class val MentionableSelectComponent is Component
 
     let required: (Bool | None)
         """
-        Whether the mentionable select is required to answer in a modal (defaults to `true`)
+        Whether the mentionable select is required to answer in a modal
+        (defaults to `true`)
 
         Only available in modals. It is ignored in messages.
         """
@@ -1212,7 +1320,8 @@ class val MentionableSelectComponent is Component
         """
         Whether select menu is disabled in a message (defaults to `false`)
 
-        Using this in a modal will result in an error. Modals can not currently have disabled components in them.
+        Using this in a modal will result in an error. Modals can not currently
+        have disabled components in them.
         """
 
     new val create(
@@ -1269,15 +1378,28 @@ class val MentionableSelectComponent is Component
     fun component_type(): ComponentType => MentionableSelectComponentType
 
     fun to_json(): json.JsonObject =>
-        _SelectJson(_ComponentJson(component_type(), id), custom_id, placeholder, default_values, min_values, max_values, required, disabled)
+        _SelectJson(
+            _ComponentJson(component_type(), id),
+            custom_id,
+            placeholder,
+            default_values,
+            min_values,
+            max_values,
+            required,
+            disabled
+        )
 
 class val ChannelSelectComponent is Component
     """
     https://docs.discord.com/developers/components/reference#channel-select
 
-    A Channel Select is an interactive component that allows users to select one or more channels in a message or modal. Options are automatically populated based on the server's available channels and can be filtered by channel types.
+    A Channel Select is an interactive component that allows users to select one
+    or more channels in a message or modal. Options are automatically populated
+    based on the server's available channels and can be filtered by channel
+    types.
 
-    Channel Selects are available in messages and modals. They must be placed inside an Action Row in messages and a Label in modals.
+    Channel Selects are available in messages and modals. They must be placed
+    inside an Action Row in messages and a Label in modals.
     """
 
     let id: (U32 | None)
@@ -1302,14 +1424,18 @@ class val ChannelSelectComponent is Component
 
     let default_values: (Array[SelectDefaultValue] val | None)
         """
-        List of default values for auto-populated select menu components; number of default values must be in the range defined by `min_values` and `max_values`
+        List of default values for auto-populated select menu components; number
+        of default values must be in the range defined by `min_values` and
+        `max_values`
         """
 
     let min_values: (USize | None)
         """
-        Minimum number of items that must be chosen (defaults to 1); min 0, max 25
+        Minimum number of items that must be chosen (defaults to 1); min 0, max
+        25
 
-        Must be either omitted or at least `1` if `required` is omitted or `true`.
+        Must be either omitted or at least `1` if `required` is omitted or
+        `true`.
         """
 
     let max_values: (USize | None)
@@ -1319,7 +1445,8 @@ class val ChannelSelectComponent is Component
 
     let required: (Bool | None)
         """
-        Whether the channel select is required to answer in a modal (defaults to `true`)
+        Whether the channel select is required to answer in a modal (defaults to
+        `true`)
 
         Only available in modals. It is ignored in messages.
         """
@@ -1328,7 +1455,8 @@ class val ChannelSelectComponent is Component
         """
         Whether select menu is disabled in a message (defaults to `false`)
 
-        Using this in a modal will result in an error. Modals can not currently have disabled components in them.
+        Using this in a modal will result in an error. Modals can not currently
+        have disabled components in them.
         """
 
     new val create(
@@ -1393,13 +1521,35 @@ class val ChannelSelectComponent is Component
         var obj = _ComponentJson(component_type(), id)
 
         match channel_types
-        | let channel_types': Array[ChannelType] val => obj = obj.update("channel_types", _ChannelTypes.to_json(channel_types'))
+        | let channel_types': Array[ChannelType] val =>
+            obj =
+                obj.update(
+                    "channel_types", _ChannelTypes.to_json(channel_types')
+                )
         end
 
-        _SelectJson(obj, custom_id, placeholder, default_values, min_values, max_values, required, disabled)
+        _SelectJson(
+            obj,
+            custom_id,
+            placeholder,
+            default_values,
+            min_values,
+            max_values,
+            required,
+            disabled
+        )
 
 primitive _SelectJson
-    fun apply(obj': json.JsonObject, custom_id: String, placeholder: (String | None), default_values: (Array[SelectDefaultValue] val | None), min_values: (USize | None), max_values: (USize | None), required: (Bool | None), disabled: (Bool | None)): json.JsonObject =>
+    fun apply(
+        obj': json.JsonObject,
+        custom_id: String,
+        placeholder: (String | None),
+        default_values: (Array[SelectDefaultValue] val | None),
+        min_values: (USize | None),
+        max_values: (USize | None),
+        required: (Bool | None),
+        disabled: (Bool | None)
+    ): json.JsonObject =>
         """
         Encodes the fields shared by the auto-populated select menu components.
         """
@@ -1407,19 +1557,27 @@ primitive _SelectJson
         var obj = obj'.update("custom_id", custom_id)
 
         match placeholder
-        | let placeholder': String => obj = obj.update("placeholder", placeholder')
+        | let placeholder': String =>
+            obj = obj.update("placeholder", placeholder')
         end
 
         match default_values
-        | let default_values': Array[SelectDefaultValue] val => obj = obj.update("default_values", _SelectDefaultValues.to_json(default_values'))
+        | let default_values': Array[SelectDefaultValue] val =>
+            obj =
+                obj.update(
+                    "default_values",
+                    _SelectDefaultValues.to_json(default_values')
+                )
         end
 
         match min_values
-        | let min_values': USize => obj = obj.update("min_values", min_values'.i64())
+        | let min_values': USize =>
+            obj = obj.update("min_values", min_values'.i64())
         end
 
         match max_values
-        | let max_values': USize => obj = obj.update("max_values", max_values'.i64())
+        | let max_values': USize =>
+            obj = obj.update("max_values", max_values'.i64())
         end
 
         match required
@@ -1436,7 +1594,8 @@ class val SelectDefaultValue is Jsonable
     """
     https://docs.discord.com/developers/components/reference#user-select-select-default-value-structure
 
-    Shared across the user, role, mentionable and channel selects for specifying pre-selected defaults.
+    Shared across the user, role, mentionable and channel selects for specifying
+    pre-selected defaults.
     """
 
     let id: Snowflake
@@ -1500,7 +1659,11 @@ primitive _SelectDefaultValues
         let array = value as json.JsonArray
         recover val
             let values = Array[SelectDefaultValue](array.size())
-            for entry in array.values() do values.push(SelectDefaultValue.from_json(entry as json.JsonObject)?) end
+            for entry in array.values() do
+                values.push(
+                    SelectDefaultValue.from_json(entry as json.JsonObject)?
+                )
+            end
             values
         end
 
@@ -1513,11 +1676,14 @@ class val SectionComponent is Component
     """
     https://docs.discord.com/developers/components/reference#section
 
-    A Section is a top-level layout component that allows you to contextually associate content with an accessory component. The typical use-case is to contextually associate text content with an accessory.
+    A Section is a top-level layout component that allows you to contextually
+    associate content with an accessory component. The typical use-case is to
+    contextually associate text content with an accessory.
 
     Sections are currently only available in messages.
 
-    To use this component in messages you must send the message flag `1 << 15` (`IsComponentsV2MessageFlag`) which can be activated on a per-message basis.
+    To use this component in messages you must send the message flag `1 << 15`
+    (`IsComponentsV2MessageFlag`) which can be activated on a per-message basis.
     """
 
     let id: (U32 | None)
@@ -1527,12 +1693,14 @@ class val SectionComponent is Component
 
     let components: Array[SectionChildComponent] val
         """
-        One to three child components representing the content of the section that is contextually associated to the accessory
+        One to three child components representing the content of the section
+        that is contextually associated to the accessory
         """
 
     let accessory: SectionAccessoryComponent
         """
-        A component that is contextually associated to the content of the section
+        A component that is contextually associated to the content of the
+        section
         """
 
     new val create(
@@ -1553,7 +1721,11 @@ class val SectionComponent is Component
             match key
             | "id" => id' = (value as I64).u32()
             | "components" => components' = _SectionChildComponents(value)?
-            | "accessory" => accessory' = Components.from_json(value as json.JsonObject)? as SectionAccessoryComponent
+            | "accessory" =>
+                accessory' =
+                    Components.from_json(
+                        value as json.JsonObject
+                    )? as SectionAccessoryComponent
             end
         end
 
@@ -1570,7 +1742,8 @@ class val SectionComponent is Component
 
 // https://docs.discord.com/developers/components/reference#section-section-child-components
 //
-// Don't hardcode `components` to contain only text components. Discord may add other components in the future.
+// Don't hardcode `components` to contain only text components. Discord may add
+// other components in the future.
 type SectionChildComponent is TextDisplayComponent
 
 // https://docs.discord.com/developers/components/reference#section-section-accessory-components
@@ -1588,25 +1761,38 @@ primitive _SectionChildComponents
         recover val
             let components = Array[SectionChildComponent](array.size())
             for component in array.values() do
-                components.push(Components.from_json(component as json.JsonObject)? as SectionChildComponent)
+                components.push(
+                    Components.from_json(
+                        component as json.JsonObject
+                    )? as SectionChildComponent
+                )
             end
             components
         end
 
     fun to_json(components: Array[SectionChildComponent] val): json.JsonArray =>
         var array = json.JsonArray
-        for component in components.values() do array = array.push(component.to_json()) end
+        for component in components.values() do
+            array = array.push(component.to_json())
+        end
         array
 
 class val TextDisplayComponent is Component
     """
     https://docs.discord.com/developers/components/reference#text-display
 
-    A Text Display is a top-level content component that allows you to add markdown formatted text, including mentions (users, roles, etc) and emojis. The behavior of this component is extremely similar to the `content` field of a message, but allows you to add multiple text components, controlling the layout of your message.
+    A Text Display is a top-level content component that allows you to add
+    markdown formatted text, including mentions (users, roles, etc) and emojis.
+    The behavior of this component is extremely similar to the `content` field
+    of a message, but allows you to add multiple text components, controlling
+    the layout of your message.
 
-    When sent in a message, pingable mentions (@user, @role, etc) present in this component will ping and send notifications based on the value of the allowed mention object set in `message.allowed_mentions`.
+    When sent in a message, pingable mentions (@user, @role, etc) present in
+    this component will ping and send notifications based on the value of the
+    allowed mention object set in `message.allowed_mentions`.
 
-    To use this component in messages you must send the message flag `1 << 15` (`IsComponentsV2MessageFlag`) which can be activated on a per-message basis.
+    To use this component in messages you must send the message flag `1 << 15`
+    (`IsComponentsV2MessageFlag`) which can be activated on a per-message basis.
     """
 
     let id: (U32 | None)
@@ -1647,13 +1833,21 @@ class val ThumbnailComponent is Component
     """
     https://docs.discord.com/developers/components/reference#thumbnail
 
-    A Thumbnail is a content component that displays visual media in a small form-factor. It is intended as an accessory to other content, and is primarily usable with sections. The media displayed is defined by the unfurled media item structure, which supports both uploaded media and externally hosted media.
+    A Thumbnail is a content component that displays visual media in a small
+    form-factor. It is intended as an accessory to other content, and is
+    primarily usable with sections. The media displayed is defined by the
+    unfurled media item structure, which supports both uploaded media and
+    externally hosted media.
 
-    Thumbnails are currently only available in messages as an accessory in a section.
+    Thumbnails are currently only available in messages as an accessory in a
+    section.
 
-    Thumbnails currently only support images, including animated formats like GIF and WEBP. Videos are not supported at this time.
+    Thumbnails currently only support images, including animated formats like
+    GIF and WEBP. Videos are not supported at this time.
 
-    To use this component, you need to send the message flag `1 << 15` (`IsComponentsV2MessageFlag`), which can be activated on a per-message basis.
+    To use this component, you need to send the message flag `1 << 15`
+    (`IsComponentsV2MessageFlag`), which can be activated on a per-message
+    basis.
     """
 
     let id: (U32 | None)
@@ -1673,7 +1867,8 @@ class val ThumbnailComponent is Component
 
     let spoiler: (Bool | None)
         """
-        Whether the thumbnail should be a spoiler (or blurred out). Defaults to `false`
+        Whether the thumbnail should be a spoiler (or blurred out). Defaults to
+        `false`
         """
 
     new val create(
@@ -1696,7 +1891,8 @@ class val ThumbnailComponent is Component
         for (key, value) in obj.pairs() do
             match key
             | "id" => id' = (value as I64).u32()
-            | "media" => media' = UnfurledMediaItem.from_json(value as json.JsonObject)?
+            | "media" =>
+                media' = UnfurledMediaItem.from_json(value as json.JsonObject)?
             | "description" =>
                 match value | let string: String => description' = string end
             | "spoiler" => spoiler' = value as Bool
@@ -1725,11 +1921,14 @@ class val MediaGalleryComponent is Component
     """
     https://docs.discord.com/developers/components/reference#media-gallery
 
-    A Media Gallery is a top-level content component that allows you to display 1-10 media attachments in an organized gallery format. Each item can have optional descriptions and can be marked as spoilers.
+    A Media Gallery is a top-level content component that allows you to display
+    1-10 media attachments in an organized gallery format. Each item can have
+    optional descriptions and can be marked as spoilers.
 
     Media Galleries are currently only available in messages.
 
-    To use this component in messages you must send the message flag `1 << 15` (`IsComponentsV2MessageFlag`) which can be activated on a per-message basis.
+    To use this component in messages you must send the message flag `1 << 15`
+    (`IsComponentsV2MessageFlag`) which can be activated on a per-message basis.
     """
 
     let id: (U32 | None)
@@ -1742,7 +1941,10 @@ class val MediaGalleryComponent is Component
         1 to 10 media gallery items
         """
 
-    new val create(id': (U32 | None) = None, items': Array[MediaGalleryItem] val) =>
+    new val create(
+        id': (U32 | None) = None,
+        items': Array[MediaGalleryItem] val
+    ) =>
         id = id'
         items = items'
 
@@ -1783,10 +1985,15 @@ class val MediaGalleryItem is Jsonable
 
     let spoiler: (Bool | None)
         """
-        Whether the media should be a spoiler (or blurred out). Defaults to `false`
+        Whether the media should be a spoiler (or blurred out). Defaults to
+        `false`
         """
 
-    new val create(media': UnfurledMediaItem, description': (String | None) = None, spoiler': (Bool | None) = None) =>
+    new val create(
+        media': UnfurledMediaItem,
+        description': (String | None) = None,
+        spoiler': (Bool | None) = None
+    ) =>
         media = media'
         description = description'
         spoiler = spoiler'
@@ -1798,7 +2005,8 @@ class val MediaGalleryItem is Jsonable
 
         for (key, value) in obj.pairs() do
             match key
-            | "media" => media' = UnfurledMediaItem.from_json(value as json.JsonObject)?
+            | "media" =>
+                media' = UnfurledMediaItem.from_json(value as json.JsonObject)?
             | "description" =>
                 match value | let string: String => description' = string end
             | "spoiler" => spoiler' = value as Bool
@@ -1829,7 +2037,9 @@ primitive _MediaGalleryItems
         let array = value as json.JsonArray
         recover val
             let items = Array[MediaGalleryItem](array.size())
-            for item in array.values() do items.push(MediaGalleryItem.from_json(item as json.JsonObject)?) end
+            for item in array.values() do
+                items.push(MediaGalleryItem.from_json(item as json.JsonObject)?)
+            end
             items
         end
 
@@ -1842,13 +2052,19 @@ class val FileComponent is Component
     """
     https://docs.discord.com/developers/components/reference#file
 
-    A File is a top-level content component that allows you to display an uploaded file as an attachment to the message and reference it in the component. Each file component can only display 1 attached file, but you can upload multiple files and add them to different file components within your payload.
+    A File is a top-level content component that allows you to display an
+    uploaded file as an attachment to the message and reference it in the
+    component. Each file component can only display 1 attached file, but you can
+    upload multiple files and add them to different file components within your
+    payload.
 
     Files are currently only available in messages.
 
-    The File component only supports using the `attachment://` protocol in the unfurled media item.
+    The File component only supports using the `attachment://` protocol in the
+    unfurled media item.
 
-    To use this component in messages you must send the message flag `1 << 15` (`IsComponentsV2MessageFlag`) which can be activated on a per-message basis.
+    To use this component in messages you must send the message flag `1 << 15`
+    (`IsComponentsV2MessageFlag`) which can be activated on a per-message basis.
     """
 
     let id: (U32 | None)
@@ -1858,12 +2074,14 @@ class val FileComponent is Component
 
     let file: UnfurledMediaItem
         """
-        This unfurled media item is unique in that it **only** supports attachment references using the `attachment://<filename>` syntax
+        This unfurled media item is unique in that it **only** supports
+        attachment references using the `attachment://<filename>` syntax
         """
 
     let spoiler: (Bool | None)
         """
-        Whether the media should be a spoiler (or blurred out). Defaults to `false`
+        Whether the media should be a spoiler (or blurred out). Defaults to
+        `false`
         """
 
     let name: (String | None)
@@ -1903,7 +2121,8 @@ class val FileComponent is Component
         for (key, value) in obj.pairs() do
             match key
             | "id" => id' = (value as I64).u32()
-            | "file" => file' = UnfurledMediaItem.from_json(value as json.JsonObject)?
+            | "file" =>
+                file' = UnfurledMediaItem.from_json(value as json.JsonObject)?
             | "spoiler" => spoiler' = value as Bool
             | "name" => name' = value as String
             | "size" => size' = (value as I64).usize()
@@ -1940,11 +2159,13 @@ class val SeparatorComponent is Component
     """
     https://docs.discord.com/developers/components/reference#separator
 
-    A Separator is a top-level layout component that adds vertical padding and visual division between other components.
+    A Separator is a top-level layout component that adds vertical padding and
+    visual division between other components.
 
     Separators are currently only available in messages.
 
-    To use this component in messages you must send the message flag `1 << 15` (`IsComponentsV2MessageFlag`) which can be activated on a per-message basis.
+    To use this component in messages you must send the message flag `1 << 15`
+    (`IsComponentsV2MessageFlag`) which can be activated on a per-message basis.
     """
 
     let id: (U32 | None)
@@ -1954,7 +2175,8 @@ class val SeparatorComponent is Component
 
     let divider: (Bool | None)
         """
-        Whether a visual divider should be displayed in the component. Defaults to `true`
+        Whether a visual divider should be displayed in the component. Defaults
+        to `true`
         """
 
     let spacing: (SeparatorSpacingSize | None)
@@ -1980,7 +2202,8 @@ class val SeparatorComponent is Component
             match key
             | "id" => id' = (value as I64).u32()
             | "divider" => divider' = value as Bool
-            | "spacing" => spacing' = SeparatorSpacingSizes.from((value as I64).u8())?
+            | "spacing" =>
+                spacing' = SeparatorSpacingSizes.from((value as I64).u8())?
             end
         end
 
@@ -1998,7 +2221,8 @@ class val SeparatorComponent is Component
         end
 
         match spacing
-        | let spacing': SeparatorSpacingSize => obj = obj.update("spacing", spacing'.value().i64())
+        | let spacing': SeparatorSpacingSize =>
+            obj = obj.update("spacing", spacing'.value().i64())
         end
 
         obj
@@ -2031,11 +2255,14 @@ class val ContainerComponent is Component
     """
     https://docs.discord.com/developers/components/reference#container
 
-    A Container is a top-level layout component. Containers offer the ability to visually encapsulate a collection of components and have an optional customizable accent color bar.
+    A Container is a top-level layout component. Containers offer the ability to
+    visually encapsulate a collection of components and have an optional
+    customizable accent color bar.
 
     Containers are currently only available in messages.
 
-    To use this component in messages you must send the message flag `1 << 15` (`IsComponentsV2MessageFlag`) which can be activated on a per-message basis.
+    To use this component in messages you must send the message flag `1 << 15`
+    (`IsComponentsV2MessageFlag`) which can be activated on a per-message basis.
     """
 
     let id: (U32 | None)
@@ -2050,12 +2277,14 @@ class val ContainerComponent is Component
 
     let accent_color: (I64 | None)
         """
-        Color for the accent on the container as RGB from `0x000000` to `0xFFFFFF`
+        Color for the accent on the container as RGB from `0x000000` to
+        `0xFFFFFF`
         """
 
     let spoiler: (Bool | None)
         """
-        Whether the container should be a spoiler (or blurred out). Defaults to `false`
+        Whether the container should be a spoiler (or blurred out). Defaults to
+        `false`
         """
 
     new val create(
@@ -2104,7 +2333,10 @@ class val ContainerComponent is Component
         obj
 
 // https://docs.discord.com/developers/components/reference#container-container-child-components
-type ContainerChildComponent is (ActionRowComponent | TextDisplayComponent | SectionComponent | MediaGalleryComponent | SeparatorComponent | FileComponent)
+type ContainerChildComponent is (
+    ActionRowComponent | TextDisplayComponent | SectionComponent
+    | MediaGalleryComponent | SeparatorComponent | FileComponent
+)
 
 primitive _ContainerChildComponents
     fun apply(value: json.JsonValue): Array[ContainerChildComponent] val ? =>
@@ -2116,23 +2348,33 @@ primitive _ContainerChildComponents
         recover val
             let components = Array[ContainerChildComponent](array.size())
             for component in array.values() do
-                components.push(Components.from_json(component as json.JsonObject)? as ContainerChildComponent)
+                components.push(
+                    Components.from_json(
+                        component as json.JsonObject
+                    )? as ContainerChildComponent
+                )
             end
             components
         end
 
-    fun to_json(components: Array[ContainerChildComponent] val): json.JsonArray =>
+    fun to_json(
+        components: Array[ContainerChildComponent] val
+    ): json.JsonArray =>
         var array = json.JsonArray
-        for component in components.values() do array = array.push(component.to_json()) end
+        for component in components.values() do
+            array = array.push(component.to_json())
+        end
         array
 
 class val LabelComponent is Component
     """
     https://docs.discord.com/developers/components/reference#label
 
-    A Label is a top-level layout component. Labels wrap modal components with text as a label and optional description.
+    A Label is a top-level layout component. Labels wrap modal components with
+    text as a label and optional description.
 
-    The `description` may display above or below the `component` depending on the platform.
+    The `description` may display above or below the `component` depending on
+    the platform.
     """
 
     let id: (U32 | None)
@@ -2177,7 +2419,11 @@ class val LabelComponent is Component
             | "id" => id' = (value as I64).u32()
             | "label" => label' = value as String
             | "description" => description' = value as String
-            | "component" => component' = Components.from_json(value as json.JsonObject)? as LabelChildComponent
+            | "component" =>
+                component' =
+                    Components.from_json(
+                        value as json.JsonObject
+                    )? as LabelChildComponent
             end
         end
 
@@ -2194,19 +2440,29 @@ class val LabelComponent is Component
             .update("component", component.to_json())
 
         match description
-        | let description': String => obj = obj.update("description", description')
+        | let description': String =>
+            obj = obj.update("description", description')
         end
 
         obj
 
 // https://docs.discord.com/developers/components/reference#label-label-child-components
-type LabelChildComponent is (TextInputComponent | StringSelectComponent | UserSelectComponent | RoleSelectComponent | MentionableSelectComponent | ChannelSelectComponent | FileUploadComponent | RadioGroupComponent | CheckboxGroupComponent | CheckboxComponent)
+type LabelChildComponent is (
+    TextInputComponent | StringSelectComponent | UserSelectComponent
+    | RoleSelectComponent | MentionableSelectComponent | ChannelSelectComponent
+    | FileUploadComponent | RadioGroupComponent | CheckboxGroupComponent
+    | CheckboxComponent
+)
 
 class val FileUploadComponent is Component
     """
     https://docs.discord.com/developers/components/reference#file-upload
 
-    File Upload is an interactive component that allows users to upload files in modals. File Uploads can be configured to have a minimum and maximum number of files between 0 and 10, along with `required` for if the upload is required to submit the modal. The max file size a user can upload is based on the user's upload limit in that channel.
+    File Upload is an interactive component that allows users to upload files in
+    modals. File Uploads can be configured to have a minimum and maximum number
+    of files between 0 and 10, along with `required` for if the upload is
+    required to submit the modal. The max file size a user can upload is based
+    on the user's upload limit in that channel.
 
     File Uploads are available on modals. They must be placed inside a Label.
     """
@@ -2223,9 +2479,11 @@ class val FileUploadComponent is Component
 
     let min_values: (USize | None)
         """
-        Minimum number of items that must be uploaded (defaults to 1); min 0, max 10
+        Minimum number of items that must be uploaded (defaults to 1); min 0,
+        max 10
 
-        Must be either omitted or at least `1` if `required` is omitted or `true`.
+        Must be either omitted or at least `1` if `required` is omitted or
+        `true`.
         """
 
     let max_values: (USize | None)
@@ -2235,7 +2493,8 @@ class val FileUploadComponent is Component
 
     let required: (Bool | None)
         """
-        Whether the file upload requires files to be uploaded before submitting the modal (defaults to `true`)
+        Whether the file upload requires files to be uploaded before submitting
+        the modal (defaults to `true`)
         """
 
     new val create(
@@ -2281,11 +2540,13 @@ class val FileUploadComponent is Component
             .update("custom_id", custom_id)
 
         match min_values
-        | let min_values': USize => obj = obj.update("min_values", min_values'.i64())
+        | let min_values': USize =>
+            obj = obj.update("min_values", min_values'.i64())
         end
 
         match max_values
-        | let max_values': USize => obj = obj.update("max_values", max_values'.i64())
+        | let max_values': USize =>
+            obj = obj.update("max_values", max_values'.i64())
         end
 
         match required
@@ -2298,7 +2559,9 @@ class val RadioGroupComponent is Component
     """
     https://docs.discord.com/developers/components/reference#radio-group
 
-    A Radio Group is an interactive component for selecting exactly one option from a defined list. Radio Groups are available in modals and must be placed inside a Label.
+    A Radio Group is an interactive component for selecting exactly one option
+    from a defined list. Radio Groups are available in modals and must be placed
+    inside a Label.
     """
 
     let id: (U32 | None)
@@ -2427,7 +2690,8 @@ class val RadioGroupOption is Jsonable
             .update("label", label)
 
         match description
-        | let description': String => obj = obj.update("description", description')
+        | let description': String =>
+            obj = obj.update("description", description')
         end
 
         match default
@@ -2445,20 +2709,28 @@ primitive _RadioGroupOptions
         let array = value as json.JsonArray
         recover val
             let options = Array[RadioGroupOption](array.size())
-            for option in array.values() do options.push(RadioGroupOption.from_json(option as json.JsonObject)?) end
+            for option in array.values() do
+                options.push(
+                    RadioGroupOption.from_json(option as json.JsonObject)?
+                )
+            end
             options
         end
 
     fun to_json(options: Array[RadioGroupOption] val): json.JsonArray =>
         var array = json.JsonArray
-        for option in options.values() do array = array.push(option.to_json()) end
+        for option in options.values() do
+            array = array.push(option.to_json())
+        end
         array
 
 class val CheckboxGroupComponent is Component
     """
     https://docs.discord.com/developers/components/reference#checkbox-group
 
-    A Checkbox Group is an interactive component for selecting one or many options via checkboxes. Checkbox Groups are available in modals and must be placed inside a Label.
+    A Checkbox Group is an interactive component for selecting one or many
+    options via checkboxes. Checkbox Groups are available in modals and must be
+    placed inside a Label.
     """
 
     let id: (U32 | None)
@@ -2478,14 +2750,17 @@ class val CheckboxGroupComponent is Component
 
     let min_values: (USize | None)
         """
-        Minimum number of items that must be chosen; min 0, max 10 (defaults to 1)
+        Minimum number of items that must be chosen; min 0, max 10 (defaults to
+        1)
 
-        Must be either omitted or at least `1` if `required` is omitted or `true`.
+        Must be either omitted or at least `1` if `required` is omitted or
+        `true`.
         """
 
     let max_values: (USize | None)
         """
-        Maximum number of items that can be chosen; min 1, max 10 (defaults to the number of options)
+        Maximum number of items that can be chosen; min 1, max 10 (defaults to
+        the number of options)
         """
 
     let required: (Bool | None)
@@ -2542,11 +2817,13 @@ class val CheckboxGroupComponent is Component
             .update("options", _CheckboxGroupOptions.to_json(options))
 
         match min_values
-        | let min_values': USize => obj = obj.update("min_values", min_values'.i64())
+        | let min_values': USize =>
+            obj = obj.update("min_values", min_values'.i64())
         end
 
         match max_values
-        | let max_values': USize => obj = obj.update("max_values", max_values'.i64())
+        | let max_values': USize =>
+            obj = obj.update("max_values", max_values'.i64())
         end
 
         match required
@@ -2617,7 +2894,8 @@ class val CheckboxGroupOption is Jsonable
             .update("label", label)
 
         match description
-        | let description': String => obj = obj.update("description", description')
+        | let description': String =>
+            obj = obj.update("description", description')
         end
 
         match default
@@ -2635,22 +2913,31 @@ primitive _CheckboxGroupOptions
         let array = value as json.JsonArray
         recover val
             let options = Array[CheckboxGroupOption](array.size())
-            for option in array.values() do options.push(CheckboxGroupOption.from_json(option as json.JsonObject)?) end
+            for option in array.values() do
+                options.push(
+                    CheckboxGroupOption.from_json(option as json.JsonObject)?
+                )
+            end
             options
         end
 
     fun to_json(options: Array[CheckboxGroupOption] val): json.JsonArray =>
         var array = json.JsonArray
-        for option in options.values() do array = array.push(option.to_json()) end
+        for option in options.values() do
+            array = array.push(option.to_json())
+        end
         array
 
 class val CheckboxComponent is Component
     """
     https://docs.discord.com/developers/components/reference#checkbox
 
-    A Checkbox is a single interactive component for simple yes/no style questions. Checkboxes are available in modals and must be placed inside a Label.
+    A Checkbox is a single interactive component for simple yes/no style
+    questions. Checkboxes are available in modals and must be placed inside a
+    Label.
 
-    While you can't set a checkbox as required, you can use a Checkbox Group with a single option and `required` to achieve similar functionality.
+    While you can't set a checkbox as required, you can use a Checkbox Group
+    with a single option and `required` to achieve similar functionality.
     """
 
     let id: (U32 | None)
@@ -2668,7 +2955,11 @@ class val CheckboxComponent is Component
         Whether the checkbox is selected by default
         """
 
-    new val create(id': (U32 | None) = None, custom_id': String, default': (Bool | None) = None) =>
+    new val create(
+        id': (U32 | None) = None,
+        custom_id': String,
+        default': (Bool | None) = None
+    ) =>
         id = id'
         custom_id = custom_id'
         default = default'
@@ -2706,9 +2997,15 @@ class val UnfurledMediaItem is Jsonable
     """
     https://docs.discord.com/developers/components/reference#unfurled-media-item
 
-    An Unfurled Media Item is a piece of media, represented by a URL, that is used within a component. It can be constructed via either uploading media to Discord, or by referencing external media via **a direct link** to the asset.
+    An Unfurled Media Item is a piece of media, represented by a URL, that is
+    used within a component. It can be constructed via either uploading media to
+    Discord, or by referencing external media via **a direct link** to the
+    asset.
 
-    While the structure below is the full representation of an Unfurled Media Item, **only the `url` field is settable by developers** when making requests that utilize this structure. All other fields will be automatically populated by Discord.
+    While the structure below is the full representation of an Unfurled Media
+    Item, **only the `url` field is settable by developers** when making
+    requests that utilize this structure. All other fields will be automatically
+    populated by Discord.
     """
 
     let url: String
@@ -2769,7 +3066,8 @@ class val UnfurledMediaItem is Jsonable
         """
         The id of the uploaded attachment
 
-        This field is ignored and provided by the API as part of the response, and is only present if the media item was uploaded as an attachment.
+        This field is ignored and provided by the API as part of the response,
+        and is only present if the media item was uploaded as an attachment.
         """
 
     new val create(
@@ -2813,7 +3111,8 @@ class val UnfurledMediaItem is Jsonable
             | "width" =>
                 match value | let integer: I64 => width' = integer.usize() end
             | "placeholder" => placeholder' = value as String
-            | "placeholder_version" => placeholder_version' = (value as I64).usize()
+            | "placeholder_version" =>
+                placeholder_version' = (value as I64).usize()
             | "content_type" => content_type' = value as String
             | "flags" => flags' = _UnfurledMediaItemFlags((value as I64).u64())
             | "attachment_id" => attachment_id' = Snowflake.from_json(value)?
@@ -2847,23 +3146,28 @@ class val UnfurledMediaItem is Jsonable
         end
 
         match placeholder
-        | let placeholder': String => obj = obj.update("placeholder", placeholder')
+        | let placeholder': String =>
+            obj = obj.update("placeholder", placeholder')
         end
 
         match placeholder_version
-        | let placeholder_version': USize => obj = obj.update("placeholder_version", placeholder_version'.i64())
+        | let placeholder_version': USize =>
+            obj = obj.update("placeholder_version", placeholder_version'.i64())
         end
 
         match content_type
-        | let content_type': String => obj = obj.update("content_type", content_type')
+        | let content_type': String =>
+            obj = obj.update("content_type", content_type')
         end
 
         match flags
-        | let flags': Array[UnfurledMediaItemFlag] val => obj = obj.update("flags", _UnfurledMediaItemFlags.to_json(flags'))
+        | let flags': Array[UnfurledMediaItemFlag] val =>
+            obj = obj.update("flags", _UnfurledMediaItemFlags.to_json(flags'))
         end
 
         match attachment_id
-        | let attachment_id': Snowflake => obj = obj.update("attachment_id", attachment_id'.to_json())
+        | let attachment_id': Snowflake =>
+            obj = obj.update("attachment_id", attachment_id'.to_json())
         end
 
         obj
@@ -2901,5 +3205,7 @@ primitive _UnfurledMediaItemFlags
 
     fun to_json(flags: Array[UnfurledMediaItemFlag] val): I64 =>
         var bits: U64 = 0
-        for flag in flags.values() do bits = bits or (U64(1) << flag.value().u64()) end
+        for flag in flags.values() do
+            bits = bits or (U64(1) << flag.value().u64())
+        end
         bits.i64()

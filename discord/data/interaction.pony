@@ -1,24 +1,32 @@
 use collections = "collections"
 use json = "json"
 
-type InteractionData is (ApplicationCommandData | MessageComponentData | ModalSubmitData)
+type InteractionData is (
+    ApplicationCommandData | MessageComponentData | ModalSubmitData
+)
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-object-interaction-data
 
-    While the `data` field is present for every interaction type except PING, its structure depends on the interaction's type.
+    While the `data` field is present for every interaction type except PING,
+    its structure depends on the interaction's type.
     """
 
 class val Interaction is Jsonable
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-object-interaction-structure
 
-    An Interaction is the message that your application receives when a user uses an application command or a message component.
+    An Interaction is the message that your application receives when a user
+    uses an application command or a message component.
 
     For Slash Commands, it includes the values that the user submitted.
 
-    For User Commands and Message Commands, it includes the resolved user or message on which the action was taken.
+    For User Commands and Message Commands, it includes the resolved user or
+    message on which the action was taken.
 
-    For Message Components it includes identifying information about the component that was used. It will also include some metadata about how the interaction was triggered: the `guild_id`, `channel`, `member` and other fields.
+    For Message Components it includes identifying information about the
+    component that was used. It will also include some metadata about how the
+    interaction was triggered: the `guild_id`, `channel`, `member` and other
+    fields.
     """
 
     let id: Snowflake
@@ -94,7 +102,8 @@ class val Interaction is Jsonable
 
     let app_permissions: Array[Permission] val
         """
-        Bitwise set of permissions the app has in the source location of the interaction
+        Bitwise set of permissions the app has in the source location of the
+        interaction
         """
 
     let locale: (Locale | None)
@@ -111,12 +120,16 @@ class val Interaction is Jsonable
 
     let entitlements: Array[Entitlement] val
         """
-        For monetized apps, any entitlements for the invoking user, representing access to premium SKUs
+        For monetized apps, any entitlements for the invoking user, representing
+        access to premium SKUs
         """
 
-    let authorizing_integration_owners: collections.Map[ApplicationIntegrationType, Snowflake] val
+    let authorizing_integration_owners: collections.Map[
+        ApplicationIntegrationType, Snowflake
+    ] val
         """
-        Mapping of installation contexts that the interaction was authorized for to related user or guild IDs
+        Mapping of installation contexts that the interaction was authorized for
+        to related user or guild IDs
         """
 
     let context: (InteractionContextType | None)
@@ -147,7 +160,9 @@ class val Interaction is Jsonable
         locale': (Locale | None) = None,
         guild_locale': (Locale | None) = None,
         entitlements': Array[Entitlement] val,
-        authorizing_integration_owners': collections.Map[ApplicationIntegrationType, Snowflake] val,
+        authorizing_integration_owners': collections.Map[
+            ApplicationIntegrationType, Snowflake
+        ] val,
         context': (InteractionContextType | None) = None,
         attachment_size_limit': USize
     ) =>
@@ -189,11 +204,16 @@ class val Interaction is Jsonable
         var locale': (Locale | None) = None
         var guild_locale': (Locale | None) = None
         var entitlements': (Array[Entitlement] val | None) = None
-        var authorizing_integration_owners': (collections.Map[ApplicationIntegrationType, Snowflake] val | None) = None
+        var authorizing_integration_owners': (
+            collections.Map[ApplicationIntegrationType, Snowflake] val | None
+        ) =
+            None
         var context': (InteractionContextType | None) = None
         var attachment_size_limit': (USize | None) = None
 
-        // `data` is held undecoded until the whole object has been walked, as which shape it takes depends on `type`, and the two keys may arrive in either order.
+        // `data` is held undecoded until the whole object has been walked, as
+        // which shape it takes depends on `type`, and the two keys may arrive
+        // in either order.
         var data': (json.JsonObject | None) = None
 
         for (key, value) in obj.pairs() do
@@ -202,22 +222,30 @@ class val Interaction is Jsonable
             | "application_id" => application_id' = Snowflake.from_json(value)?
             | "type" => type'' = InteractionTypes.from((value as I64).u8())?
             | "data" => data' = value as json.JsonObject
-            | "guild" => guild' = PartialGuild.from_json(value as json.JsonObject)?
+            | "guild" =>
+                guild' = PartialGuild.from_json(value as json.JsonObject)?
             | "guild_id" => guild_id' = Snowflake.from_json(value)?
-            | "channel" => channel' = PartialChannel.from_json(value as json.JsonObject)?
+            | "channel" =>
+                channel' = PartialChannel.from_json(value as json.JsonObject)?
             | "channel_id" => channel_id' = Snowflake.from_json(value)?
-            | "member" => member' = GuildMember.from_json(value as json.JsonObject)?
+            | "member" =>
+                member' = GuildMember.from_json(value as json.JsonObject)?
             | "user" => user' = User.from_json(value as json.JsonObject)?
             | "token" => token' = value as String
             | "version" => version' = (value as I64).usize()
-            | "message" => message' = Message.from_json(value as json.JsonObject)?
+            | "message" =>
+                message' = Message.from_json(value as json.JsonObject)?
             | "app_permissions" => app_permissions' = _Permissions(value)?
             | "locale" => locale' = Locales.from(value as String)?
             | "guild_locale" => guild_locale' = Locales.from(value as String)?
             | "entitlements" => entitlements' = _Entitlements(value)?
-            | "authorizing_integration_owners" => authorizing_integration_owners' = _AuthorizingIntegrationOwners(value)?
-            | "context" => context' = InteractionContextTypes.from((value as I64).u8())?
-            | "attachment_size_limit" => attachment_size_limit' = (value as I64).usize()
+            | "authorizing_integration_owners" =>
+                authorizing_integration_owners' =
+                    _AuthorizingIntegrationOwners(value)?
+            | "context" =>
+                context' = InteractionContextTypes.from((value as I64).u8())?
+            | "attachment_size_limit" =>
+                attachment_size_limit' = (value as I64).usize()
             end
         end
 
@@ -237,16 +265,26 @@ class val Interaction is Jsonable
         locale = locale'
         guild_locale = guild_locale'
         entitlements = entitlements' as Array[Entitlement] val
-        authorizing_integration_owners = authorizing_integration_owners' as collections.Map[ApplicationIntegrationType, Snowflake] val
+        authorizing_integration_owners =
+            authorizing_integration_owners' as collections.Map[
+                ApplicationIntegrationType, Snowflake
+            ] val
         context = context'
         attachment_size_limit = attachment_size_limit' as USize
 
         data =
             match (type', data')
-            | (ApplicationCommandInteractionType, let obj': json.JsonObject) => ApplicationCommandData.from_json(obj')?
-            | (ApplicationCommandAutocompleteInteractionType, let obj': json.JsonObject) => ApplicationCommandData.from_json(obj')?
-            | (MessageComponentInteractionType, let obj': json.JsonObject) => MessageComponentData.from_json(obj')?
-            | (ModalSubmitInteractionType, let obj': json.JsonObject) => ModalSubmitData.from_json(obj')?
+            | (ApplicationCommandInteractionType, let obj': json.JsonObject) =>
+                ApplicationCommandData.from_json(obj')?
+            | (
+                ApplicationCommandAutocompleteInteractionType,
+                let obj': json.JsonObject
+            ) =>
+                ApplicationCommandData.from_json(obj')?
+            | (MessageComponentInteractionType, let obj': json.JsonObject) =>
+                MessageComponentData.from_json(obj')?
+            | (ModalSubmitInteractionType, let obj': json.JsonObject) =>
+                ModalSubmitData.from_json(obj')?
             end
 
     fun to_json(): json.JsonObject =>
@@ -258,33 +296,46 @@ class val Interaction is Jsonable
             .update("version", version.i64())
             .update("app_permissions", _Permissions.to_json(app_permissions))
             .update("entitlements", _Entitlements.to_json(entitlements))
-            .update("authorizing_integration_owners", _AuthorizingIntegrationOwners.to_json(authorizing_integration_owners))
+            .update(
+                "authorizing_integration_owners",
+                _AuthorizingIntegrationOwners.to_json(
+                    authorizing_integration_owners
+                )
+            )
             .update("attachment_size_limit", attachment_size_limit.i64())
 
         match data
-        | let data': ApplicationCommandData => obj = obj.update("data", data'.to_json())
-        | let data': MessageComponentData => obj = obj.update("data", data'.to_json())
-        | let data': ModalSubmitData => obj = obj.update("data", data'.to_json())
+        | let data': ApplicationCommandData =>
+            obj = obj.update("data", data'.to_json())
+        | let data': MessageComponentData =>
+            obj = obj.update("data", data'.to_json())
+        | let data': ModalSubmitData =>
+            obj = obj.update("data", data'.to_json())
         end
 
         match guild
-        | let guild': PartialGuild => obj = obj.update("guild", guild'.to_json())
+        | let guild': PartialGuild =>
+            obj = obj.update("guild", guild'.to_json())
         end
 
         match guild_id
-        | let guild_id': Snowflake => obj = obj.update("guild_id", guild_id'.to_json())
+        | let guild_id': Snowflake =>
+            obj = obj.update("guild_id", guild_id'.to_json())
         end
 
         match channel
-        | let channel': PartialChannel => obj = obj.update("channel", channel'.to_json())
+        | let channel': PartialChannel =>
+            obj = obj.update("channel", channel'.to_json())
         end
 
         match channel_id
-        | let channel_id': Snowflake => obj = obj.update("channel_id", channel_id'.to_json())
+        | let channel_id': Snowflake =>
+            obj = obj.update("channel_id", channel_id'.to_json())
         end
 
         match member
-        | let member': GuildMember => obj = obj.update("member", member'.to_json())
+        | let member': GuildMember =>
+            obj = obj.update("member", member'.to_json())
         end
 
         match user
@@ -292,7 +343,8 @@ class val Interaction is Jsonable
         end
 
         match message
-        | let message': Message => obj = obj.update("message", message'.to_json())
+        | let message': Message =>
+            obj = obj.update("message", message'.to_json())
         end
 
         match locale
@@ -300,33 +352,46 @@ class val Interaction is Jsonable
         end
 
         match guild_locale
-        | let guild_locale': Locale => obj = obj.update("guild_locale", guild_locale'.value())
+        | let guild_locale': Locale =>
+            obj = obj.update("guild_locale", guild_locale'.value())
         end
 
         match context
-        | let context': InteractionContextType => obj = obj.update("context", context'.value().i64())
+        | let context': InteractionContextType =>
+            obj = obj.update("context", context'.value().i64())
         end
 
         obj
 
 primitive _AuthorizingIntegrationOwners
-    fun apply(value: json.JsonValue): collections.Map[ApplicationIntegrationType, Snowflake] val ? =>
+    fun apply(
+        value: json.JsonValue
+    ): collections.Map[ApplicationIntegrationType, Snowflake] val ? =>
         """
-        Decodes a mapping of installation contexts to the related user or guild IDs.
+        Decodes a mapping of installation contexts to the related user or guild
+        IDs.
         """
 
         let obj = value as json.JsonObject
         recover val
-            let map = collections.Map[ApplicationIntegrationType, Snowflake](obj.size())
+            let map =
+                collections.Map[ApplicationIntegrationType, Snowflake](
+                    obj.size()
+                )
             for (key, value') in obj.pairs() do
-                map(ApplicationIntegrationTypes.from(key.u8()?)?) = Snowflake.from_json(value')?
+                map(ApplicationIntegrationTypes.from(key.u8()?)?) =
+                    Snowflake.from_json(value')?
             end
             map
         end
 
-    fun to_json(map: collections.Map[ApplicationIntegrationType, Snowflake] box): json.JsonObject =>
+    fun to_json(
+        map: collections.Map[ApplicationIntegrationType, Snowflake] box
+    ): json.JsonObject =>
         var obj = json.JsonObject
-        for (integration_type, id) in map.pairs() do obj = obj.update(integration_type.value().string(), id.to_json()) end
+        for (integration_type, id) in map.pairs() do
+            obj = obj.update(integration_type.value().string(), id.to_json())
+        end
         obj
 
 trait val InteractionType is _Enum[InteractionType, U8]
@@ -358,7 +423,9 @@ trait val InteractionContextType is _Enum[InteractionContextType, U8]
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-object-interaction-context-types
 
-    Context in Discord where an interaction can be used, or where it was triggered from. Details about using interaction contexts for application commands is in the commands context documentation.
+    Context in Discord where an interaction can be used, or where it was
+    triggered from. Details about using interaction contexts for application
+    commands is in the commands context documentation.
     """
 primitive GuildInteractionContextType is InteractionContextType
     """
@@ -374,7 +441,8 @@ primitive BotDMInteractionContextType is InteractionContextType
     fun value(): U8 => 1
 primitive PrivateChannelInteractionContextType is InteractionContextType
     """
-    Interaction can be used within Group DMs and DMs other than the app’s bot user
+    Interaction can be used within Group DMs and DMs other than the app’s bot
+    user
     """
 
     fun value(): U8 => 2
@@ -389,14 +457,18 @@ primitive InteractionContextTypes
 
 type ApplicationCommandInteractionDataOptionValue is (String | I64 | F64 | Bool)
     """
-    The value a user supplied for an application command option, whose type follows the option's own `type`.
+    The value a user supplied for an application command option, whose type
+    follows the option's own `type`.
     """
 
 class val ApplicationCommandInteractionDataOption is Jsonable
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-object-application-command-interaction-data-option-structure
 
-    All options have names, and an option can either be a parameter and input value — in which case `value` will be set — or it can denote a subcommand or group, in which case it will contain a top-level key and another array of `options`.
+    All options have names, and an option can either be a parameter and input
+    value — in which case `value` will be set — or it can denote a subcommand or
+    group, in which case it will contain a top-level key and another array of
+    `options`.
 
     `value` and `options` are mutually exclusive.
     """
@@ -430,7 +502,8 @@ class val ApplicationCommandInteractionDataOption is Jsonable
         name': String,
         type'': ApplicationCommandOptionType,
         value': (ApplicationCommandInteractionDataOptionValue | None) = None,
-        options': (Array[ApplicationCommandInteractionDataOption] val | None) = None,
+        options': (Array[ApplicationCommandInteractionDataOption] val | None) =
+            None,
         focused': (Bool | None) = None
     ) =>
         name = name'
@@ -443,13 +516,18 @@ class val ApplicationCommandInteractionDataOption is Jsonable
         var name': (String | None) = None
         var type'': (ApplicationCommandOptionType | None) = None
         var value': (ApplicationCommandInteractionDataOptionValue | None) = None
-        var options': (Array[ApplicationCommandInteractionDataOption] val | None) = None
+        var options': (
+            Array[ApplicationCommandInteractionDataOption] val | None
+        ) =
+            None
         var focused': (Bool | None) = None
 
         for (key, value'') in obj.pairs() do
             match key
             | "name" => name' = value'' as String
-            | "type" => type'' = ApplicationCommandOptionTypes.from((value'' as I64).u8())?
+            | "type" =>
+                type'' =
+                    ApplicationCommandOptionTypes.from((value'' as I64).u8())?
             | "value" =>
                 match value''
                 | let string: String => value' = string
@@ -457,7 +535,8 @@ class val ApplicationCommandInteractionDataOption is Jsonable
                 | let float: F64 => value' = float
                 | let boolean: Bool => value' = boolean
                 end
-            | "options" => options' = _ApplicationCommandInteractionDataOptions(value'')?
+            | "options" =>
+                options' = _ApplicationCommandInteractionDataOptions(value'')?
             | "focused" => focused' = value'' as Bool
             end
         end
@@ -481,7 +560,12 @@ class val ApplicationCommandInteractionDataOption is Jsonable
         end
 
         match options
-        | let options': Array[ApplicationCommandInteractionDataOption] val => obj = obj.update("options", _ApplicationCommandInteractionDataOptions.to_json(options'))
+        | let options': Array[ApplicationCommandInteractionDataOption] val =>
+            obj =
+                obj.update(
+                    "options",
+                    _ApplicationCommandInteractionDataOptions.to_json(options')
+                )
         end
 
         match focused
@@ -491,21 +575,34 @@ class val ApplicationCommandInteractionDataOption is Jsonable
         obj
 
 primitive _ApplicationCommandInteractionDataOptions
-    fun apply(value: json.JsonValue): Array[ApplicationCommandInteractionDataOption] val ? =>
+    fun apply(
+        value: json.JsonValue
+    ): Array[ApplicationCommandInteractionDataOption] val ? =>
         """
         Decodes an array of application command interaction data options.
         """
 
         let array = value as json.JsonArray
         recover val
-            let options = Array[ApplicationCommandInteractionDataOption](array.size())
-            for option in array.values() do options.push(ApplicationCommandInteractionDataOption.from_json(option as json.JsonObject)?) end
+            let options =
+                Array[ApplicationCommandInteractionDataOption](array.size())
+            for option in array.values() do
+                options.push(
+                    ApplicationCommandInteractionDataOption.from_json(
+                        option as json.JsonObject
+                    )?
+                )
+            end
             options
         end
 
-    fun to_json(options: Array[ApplicationCommandInteractionDataOption] val): json.JsonArray =>
+    fun to_json(
+        options: Array[ApplicationCommandInteractionDataOption] val
+    ): json.JsonArray =>
         var array = json.JsonArray
-        for option in options.values() do array = array.push(option.to_json()) end
+        for option in options.values() do
+            array = array.push(option.to_json())
+        end
         array
 
 primitive _InteractionContextTypes
@@ -517,20 +614,25 @@ primitive _InteractionContextTypes
         let array = value as json.JsonArray
         recover val
             let types = Array[InteractionContextType](array.size())
-            for type' in array.values() do types.push(InteractionContextTypes.from((type' as I64).u8())?) end
+            for type' in array.values() do
+                types.push(InteractionContextTypes.from((type' as I64).u8())?)
+            end
             types
         end
 
     fun to_json(types: Array[InteractionContextType] val): json.JsonArray =>
         var array = json.JsonArray
-        for type' in types.values() do array = array.push(type'.value().i64()) end
+        for type' in types.values() do
+            array = array.push(type'.value().i64())
+        end
         array
 
 class val ApplicationCommandData is Jsonable
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-object-application-command-data-structure
 
-    Sent in APPLICATION_COMMAND and APPLICATION_COMMAND_AUTOCOMPLETE interactions.
+    Sent in APPLICATION_COMMAND and APPLICATION_COMMAND_AUTOCOMPLETE
+    interactions.
     """
 
     let id: Snowflake
@@ -573,7 +675,8 @@ class val ApplicationCommandData is Jsonable
         name': String,
         type'': ApplicationCommandType,
         resolved': (ResolvedData | None) = None,
-        options': (Array[ApplicationCommandInteractionDataOption] val | None) = None,
+        options': (Array[ApplicationCommandInteractionDataOption] val | None) =
+            None,
         guild_id': (Snowflake | None) = None,
         target_id': (Snowflake | None) = None
     ) =>
@@ -590,7 +693,10 @@ class val ApplicationCommandData is Jsonable
         var name': (String | None) = None
         var type'': (ApplicationCommandType | None) = None
         var resolved': (ResolvedData | None) = None
-        var options': (Array[ApplicationCommandInteractionDataOption] val | None) = None
+        var options': (
+            Array[ApplicationCommandInteractionDataOption] val | None
+        ) =
+            None
         var guild_id': (Snowflake | None) = None
         var target_id': (Snowflake | None) = None
 
@@ -598,9 +704,12 @@ class val ApplicationCommandData is Jsonable
             match key
             | "id" => id' = Snowflake.from_json(value)?
             | "name" => name' = value as String
-            | "type" => type'' = ApplicationCommandTypes.from((value as I64).u8())?
-            | "resolved" => resolved' = ResolvedData.from_json(value as json.JsonObject)?
-            | "options" => options' = _ApplicationCommandInteractionDataOptions(value)?
+            | "type" =>
+                type'' = ApplicationCommandTypes.from((value as I64).u8())?
+            | "resolved" =>
+                resolved' = ResolvedData.from_json(value as json.JsonObject)?
+            | "options" =>
+                options' = _ApplicationCommandInteractionDataOptions(value)?
             | "guild_id" => guild_id' = Snowflake.from_json(value)?
             | "target_id" => target_id' = Snowflake.from_json(value)?
             end
@@ -621,19 +730,27 @@ class val ApplicationCommandData is Jsonable
             .update("type", type'.value().i64())
 
         match resolved
-        | let resolved': ResolvedData => obj = obj.update("resolved", resolved'.to_json())
+        | let resolved': ResolvedData =>
+            obj = obj.update("resolved", resolved'.to_json())
         end
 
         match options
-        | let options': Array[ApplicationCommandInteractionDataOption] val => obj = obj.update("options", _ApplicationCommandInteractionDataOptions.to_json(options'))
+        | let options': Array[ApplicationCommandInteractionDataOption] val =>
+            obj =
+                obj.update(
+                    "options",
+                    _ApplicationCommandInteractionDataOptions.to_json(options')
+                )
         end
 
         match guild_id
-        | let guild_id': Snowflake => obj = obj.update("guild_id", guild_id'.to_json())
+        | let guild_id': Snowflake =>
+            obj = obj.update("guild_id", guild_id'.to_json())
         end
 
         match target_id
-        | let target_id': Snowflake => obj = obj.update("target_id", target_id'.to_json())
+        | let target_id': Snowflake =>
+            obj = obj.update("target_id", target_id'.to_json())
         end
 
         obj
@@ -687,9 +804,11 @@ class val MessageComponentData is Jsonable
         for (key, value) in obj.pairs() do
             match key
             | "custom_id" => custom_id' = value as String
-            | "component_type" => component_type' = ComponentTypes.from((value as I64).u8())?
+            | "component_type" =>
+                component_type' = ComponentTypes.from((value as I64).u8())?
             | "values" => values' = _Strings(value)?
-            | "resolved" => resolved' = ResolvedData.from_json(value as json.JsonObject)?
+            | "resolved" =>
+                resolved' = ResolvedData.from_json(value as json.JsonObject)?
             end
         end
 
@@ -704,11 +823,13 @@ class val MessageComponentData is Jsonable
             .update("component_type", component_type.value().i64())
 
         match values
-        | let values': Array[String] val => obj = obj.update("values", _Strings.to_json(values'))
+        | let values': Array[String] val =>
+            obj = obj.update("values", _Strings.to_json(values'))
         end
 
         match resolved
-        | let resolved': ResolvedData => obj = obj.update("resolved", resolved'.to_json())
+        | let resolved': ResolvedData =>
+            obj = obj.update("resolved", resolved'.to_json())
         end
 
         obj
@@ -757,7 +878,8 @@ class val ResolvedData is Jsonable
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-object-resolved-data-structure
 
-    If data for a Member is included, data for its corresponding User will also be included.
+    If data for a Member is included, data for its corresponding User will also
+    be included.
     """
 
     let users: (collections.Map[Snowflake, User] val | None)
@@ -781,7 +903,8 @@ class val ResolvedData is Jsonable
         """
         the ids and partial Channel objects
 
-        Partial Channel objects only have `id`, `name`, `type` and `permissions` fields. Threads will also have `thread_metadata` and `parent_id` fields.
+        Partial Channel objects only have `id`, `name`, `type` and `permissions`
+        fields. Threads will also have `thread_metadata` and `parent_id` fields.
         """
 
     let messages: (collections.Map[Snowflake, Message] val | None)
@@ -796,11 +919,16 @@ class val ResolvedData is Jsonable
 
     new val create(
         users': (collections.Map[Snowflake, User] val | None) = None,
-        members': (collections.Map[Snowflake, PartialGuildMember] val | None) = None,
+        members': (collections.Map[Snowflake, PartialGuildMember] val | None) =
+            None,
         roles': (collections.Map[Snowflake, Role] val | None) = None,
-        channels': (collections.Map[Snowflake, PartialChannel] val | None) = None,
+        channels': (collections.Map[Snowflake, PartialChannel] val | None) =
+            None,
         messages': (collections.Map[Snowflake, Message] val | None) = None,
-        attachments': (collections.Map[Snowflake, MessageAttachment] val | None) = None
+        attachments': (
+            collections.Map[Snowflake, MessageAttachment] val | None
+        ) =
+            None
     ) =>
         users = users'
         members = members'
@@ -811,11 +939,18 @@ class val ResolvedData is Jsonable
 
     new val from_json(obj: json.JsonObject) ? =>
         var users': (collections.Map[Snowflake, User] val | None) = None
-        var members': (collections.Map[Snowflake, PartialGuildMember] val | None) = None
+        var members': (
+            collections.Map[Snowflake, PartialGuildMember] val | None
+        ) =
+            None
         var roles': (collections.Map[Snowflake, Role] val | None) = None
-        var channels': (collections.Map[Snowflake, PartialChannel] val | None) = None
+        var channels': (collections.Map[Snowflake, PartialChannel] val | None) =
+            None
         var messages': (collections.Map[Snowflake, Message] val | None) = None
-        var attachments': (collections.Map[Snowflake, MessageAttachment] val | None) = None
+        var attachments': (
+            collections.Map[Snowflake, MessageAttachment] val | None
+        ) =
+            None
 
         for (key, value) in obj.pairs() do
             match key
@@ -839,27 +974,36 @@ class val ResolvedData is Jsonable
         var obj = json.JsonObject
 
         match users
-        | let users': collections.Map[Snowflake, User] val => obj = obj.update("users", _ResolvedUsers.to_json(users'))
+        | let users': collections.Map[Snowflake, User] val =>
+            obj = obj.update("users", _ResolvedUsers.to_json(users'))
         end
 
         match members
-        | let members': collections.Map[Snowflake, PartialGuildMember] val => obj = obj.update("members", _ResolvedMembers.to_json(members'))
+        | let members': collections.Map[Snowflake, PartialGuildMember] val =>
+            obj = obj.update("members", _ResolvedMembers.to_json(members'))
         end
 
         match roles
-        | let roles': collections.Map[Snowflake, Role] val => obj = obj.update("roles", _ResolvedRoles.to_json(roles'))
+        | let roles': collections.Map[Snowflake, Role] val =>
+            obj = obj.update("roles", _ResolvedRoles.to_json(roles'))
         end
 
         match channels
-        | let channels': collections.Map[Snowflake, PartialChannel] val => obj = obj.update("channels", _ResolvedChannels.to_json(channels'))
+        | let channels': collections.Map[Snowflake, PartialChannel] val =>
+            obj = obj.update("channels", _ResolvedChannels.to_json(channels'))
         end
 
         match messages
-        | let messages': collections.Map[Snowflake, Message] val => obj = obj.update("messages", _ResolvedMessages.to_json(messages'))
+        | let messages': collections.Map[Snowflake, Message] val =>
+            obj = obj.update("messages", _ResolvedMessages.to_json(messages'))
         end
 
         match attachments
-        | let attachments': collections.Map[Snowflake, MessageAttachment] val => obj = obj.update("attachments", _ResolvedAttachments.to_json(attachments'))
+        | let attachments': collections.Map[Snowflake, MessageAttachment] val =>
+            obj =
+                obj.update(
+                    "attachments", _ResolvedAttachments.to_json(attachments')
+                )
         end
 
         obj
@@ -874,14 +1018,17 @@ primitive _ResolvedUsers
         recover val
             let map = collections.Map[Snowflake, User](obj.size())
             for (key, value') in obj.pairs() do
-                map(Snowflake.from_json(key)?) = User.from_json(value' as json.JsonObject)?
+                map(Snowflake.from_json(key)?) =
+                    User.from_json(value' as json.JsonObject)?
             end
             map
         end
 
     fun to_json(map: collections.Map[Snowflake, User] box): json.JsonObject =>
         var obj = json.JsonObject
-        for (id, user) in map.pairs() do obj = obj.update(id.string(), user.to_json()) end
+        for (id, user) in map.pairs() do
+            obj = obj.update(id.string(), user.to_json())
+        end
         obj
 
 primitive _ResolvedRoles
@@ -894,18 +1041,23 @@ primitive _ResolvedRoles
         recover val
             let map = collections.Map[Snowflake, Role](obj.size())
             for (key, value') in obj.pairs() do
-                map(Snowflake.from_json(key)?) = Role.from_json(value' as json.JsonObject)?
+                map(Snowflake.from_json(key)?) =
+                    Role.from_json(value' as json.JsonObject)?
             end
             map
         end
 
     fun to_json(map: collections.Map[Snowflake, Role] box): json.JsonObject =>
         var obj = json.JsonObject
-        for (id, role) in map.pairs() do obj = obj.update(id.string(), role.to_json()) end
+        for (id, role) in map.pairs() do
+            obj = obj.update(id.string(), role.to_json())
+        end
         obj
 
 primitive _ResolvedMembers
-    fun apply(value: json.JsonValue): collections.Map[Snowflake, PartialGuildMember] val ? =>
+    fun apply(
+        value: json.JsonValue
+    ): collections.Map[Snowflake, PartialGuildMember] val ? =>
         """
         Decodes a mapping of snowflakes to partial guild members.
         """
@@ -914,18 +1066,25 @@ primitive _ResolvedMembers
         recover val
             let map = collections.Map[Snowflake, PartialGuildMember](obj.size())
             for (key, value') in obj.pairs() do
-                map(Snowflake.from_json(key)?) = PartialGuildMember.from_json(value' as json.JsonObject)?
+                map(Snowflake.from_json(key)?) =
+                    PartialGuildMember.from_json(value' as json.JsonObject)?
             end
             map
         end
 
-    fun to_json(map: collections.Map[Snowflake, PartialGuildMember] box): json.JsonObject =>
+    fun to_json(
+        map: collections.Map[Snowflake, PartialGuildMember] box
+    ): json.JsonObject =>
         var obj = json.JsonObject
-        for (id, member) in map.pairs() do obj = obj.update(id.string(), member.to_json()) end
+        for (id, member) in map.pairs() do
+            obj = obj.update(id.string(), member.to_json())
+        end
         obj
 
 primitive _ResolvedChannels
-    fun apply(value: json.JsonValue): collections.Map[Snowflake, PartialChannel] val ? =>
+    fun apply(
+        value: json.JsonValue
+    ): collections.Map[Snowflake, PartialChannel] val ? =>
         """
         Decodes a mapping of snowflakes to partial channels.
         """
@@ -934,18 +1093,25 @@ primitive _ResolvedChannels
         recover val
             let map = collections.Map[Snowflake, PartialChannel](obj.size())
             for (key, value') in obj.pairs() do
-                map(Snowflake.from_json(key)?) = PartialChannel.from_json(value' as json.JsonObject)?
+                map(Snowflake.from_json(key)?) =
+                    PartialChannel.from_json(value' as json.JsonObject)?
             end
             map
         end
 
-    fun to_json(map: collections.Map[Snowflake, PartialChannel] box): json.JsonObject =>
+    fun to_json(
+        map: collections.Map[Snowflake, PartialChannel] box
+    ): json.JsonObject =>
         var obj = json.JsonObject
-        for (id, channel) in map.pairs() do obj = obj.update(id.string(), channel.to_json()) end
+        for (id, channel) in map.pairs() do
+            obj = obj.update(id.string(), channel.to_json())
+        end
         obj
 
 primitive _ResolvedMessages
-    fun apply(value: json.JsonValue): collections.Map[Snowflake, Message] val ? =>
+    fun apply(
+        value: json.JsonValue
+    ): collections.Map[Snowflake, Message] val ? =>
         """
         Decodes a mapping of snowflakes to messages.
         """
@@ -954,18 +1120,25 @@ primitive _ResolvedMessages
         recover val
             let map = collections.Map[Snowflake, Message](obj.size())
             for (key, value') in obj.pairs() do
-                map(Snowflake.from_json(key)?) = Message.from_json(value' as json.JsonObject)?
+                map(Snowflake.from_json(key)?) =
+                    Message.from_json(value' as json.JsonObject)?
             end
             map
         end
 
-    fun to_json(map: collections.Map[Snowflake, Message] box): json.JsonObject =>
+    fun to_json(
+        map: collections.Map[Snowflake, Message] box
+    ): json.JsonObject =>
         var obj = json.JsonObject
-        for (id, message) in map.pairs() do obj = obj.update(id.string(), message.to_json()) end
+        for (id, message) in map.pairs() do
+            obj = obj.update(id.string(), message.to_json())
+        end
         obj
 
 primitive _ResolvedAttachments
-    fun apply(value: json.JsonValue): collections.Map[Snowflake, MessageAttachment] val ? =>
+    fun apply(
+        value: json.JsonValue
+    ): collections.Map[Snowflake, MessageAttachment] val ? =>
         """
         Decodes a mapping of snowflakes to attachments.
         """
@@ -974,21 +1147,28 @@ primitive _ResolvedAttachments
         recover val
             let map = collections.Map[Snowflake, MessageAttachment](obj.size())
             for (key, value') in obj.pairs() do
-                map(Snowflake.from_json(key)?) = MessageAttachment.from_json(value' as json.JsonObject)?
+                map(Snowflake.from_json(key)?) =
+                    MessageAttachment.from_json(value' as json.JsonObject)?
             end
             map
         end
 
-    fun to_json(map: collections.Map[Snowflake, MessageAttachment] box): json.JsonObject =>
+    fun to_json(
+        map: collections.Map[Snowflake, MessageAttachment] box
+    ): json.JsonObject =>
         var obj = json.JsonObject
-        for (id, attachment) in map.pairs() do obj = obj.update(id.string(), attachment.to_json()) end
+        for (id, attachment) in map.pairs() do
+            obj = obj.update(id.string(), attachment.to_json())
+        end
         obj
 
 class val InteractionResponse is ToJsonable
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-response-object-interaction-response-structure
 
-    An app returns this to respond to an interaction. Discord never sends one, so this is serialised only — the callback data shapes are request bodies with no decoded form.
+    An app returns this to respond to an interaction. Discord never sends one,
+    so this is serialised only — the callback data shapes are request bodies
+    with no decoded form.
     """
 
     let type': InteractionCallbackType
@@ -1000,10 +1180,16 @@ class val InteractionResponse is ToJsonable
         """
         an optional response message
 
-        Which of the three shapes this holds is determined by `type` rather than by a tag on the data itself: messages for the message callback types, `choices` for `APPLICATION_COMMAND_AUTOCOMPLETE_RESULT`, and a modal for `MODAL`.
+        Which of the three shapes this holds is determined by `type` rather than
+        by a tag on the data itself: messages for the message callback types,
+        `choices` for `APPLICATION_COMMAND_AUTOCOMPLETE_RESULT`, and a modal for
+        `MODAL`.
         """
 
-    new val create(type'': InteractionCallbackType, data': (InteractionCallbackData | None) = None) =>
+    new val create(
+        type'': InteractionCallbackType,
+        data': (InteractionCallbackData | None) = None
+    ) =>
         type' = type''
         data = data'
 
@@ -1011,9 +1197,12 @@ class val InteractionResponse is ToJsonable
         var obj = json.JsonObject.update("type", type'.value().i64())
 
         match data
-        | let data': InteractionCallbackMessageParams => obj = obj.update("data", data'.to_json())
-        | let data': InteractionCallbackAutocompleteParams => obj = obj.update("data", data'.to_json())
-        | let data': InteractionCallbackModalParams => obj = obj.update("data", data'.to_json())
+        | let data': InteractionCallbackMessageParams =>
+            obj = obj.update("data", data'.to_json())
+        | let data': InteractionCallbackAutocompleteParams =>
+            obj = obj.update("data", data'.to_json())
+        | let data': InteractionCallbackModalParams =>
+            obj = obj.update("data", data'.to_json())
         end
 
         obj
@@ -1028,21 +1217,25 @@ primitive PongInteractionCallbackType is InteractionCallbackType
     """
 
     fun value(): U8 => 1
-primitive ChannelMessageWithSourceInteractionCallbackType is InteractionCallbackType
+primitive ChannelMessageWithSourceInteractionCallbackType is
+    InteractionCallbackType
     """
     respond to an interaction with a message
     """
 
     fun value(): U8 => 4
-primitive DeferredChannelMessageWithSourceInteractionCallbackType is InteractionCallbackType
+primitive DeferredChannelMessageWithSourceInteractionCallbackType is
+    InteractionCallbackType
     """
     ACK an interaction and edit a response later, the user sees a loading state
     """
 
     fun value(): U8 => 5
-primitive DeferredUpdateMessageInteractionCallbackType is InteractionCallbackType
+primitive DeferredUpdateMessageInteractionCallbackType is
+    InteractionCallbackType
     """
-    for components, ACK an interaction and edit the original message later; the user does not see a loading state
+    for components, ACK an interaction and edit the original message later; the
+    user does not see a loading state
 
     Only valid for component-based interactions.
     """
@@ -1056,7 +1249,8 @@ primitive UpdateMessageInteractionCallbackType is InteractionCallbackType
     """
 
     fun value(): U8 => 7
-primitive ApplicationCommandAutocompleteResultInteractionCallbackType is InteractionCallbackType
+primitive ApplicationCommandAutocompleteResultInteractionCallbackType is
+    InteractionCallbackType
     """
     respond to an autocomplete interaction with suggested choices
     """
@@ -1072,7 +1266,8 @@ primitive ModalInteractionCallbackType is InteractionCallbackType
     fun value(): U8 => 9
 primitive PremiumRequiredInteractionCallbackType is InteractionCallbackType
     """
-    deprecated; respond to an interaction with an upgrade button, only available for apps with monetization enabled
+    deprecated; respond to an interaction with an upgrade button, only available
+    for apps with monetization enabled
     """
 
     fun value(): U8 => 10
@@ -1114,7 +1309,10 @@ class val InteractionCallbackResponse is Jsonable
         The resource that was created by the interaction response
         """
 
-    new val create(interaction': InteractionCallback, resource': (InteractionCallbackResource | None) = None) =>
+    new val create(
+        interaction': InteractionCallback,
+        resource': (InteractionCallbackResource | None) = None
+    ) =>
         interaction = interaction'
         resource = resource'
 
@@ -1124,8 +1322,14 @@ class val InteractionCallbackResponse is Jsonable
 
         for (key, value) in obj.pairs() do
             match key
-            | "interaction" => interaction' = InteractionCallback.from_json(value as json.JsonObject)?
-            | "resource" => resource' = InteractionCallbackResource.from_json(value as json.JsonObject)?
+            | "interaction" =>
+                interaction' =
+                    InteractionCallback.from_json(value as json.JsonObject)?
+            | "resource" =>
+                resource' =
+                    InteractionCallbackResource.from_json(
+                        value as json.JsonObject
+                    )?
             end
         end
 
@@ -1137,7 +1341,8 @@ class val InteractionCallbackResponse is Jsonable
             .update("interaction", interaction.to_json())
 
         match resource
-        | let resource': InteractionCallbackResource => obj = obj.update("resource", resource'.to_json())
+        | let resource': InteractionCallbackResource =>
+            obj = obj.update("resource", resource'.to_json())
         end
 
         obj
@@ -1205,11 +1410,18 @@ class val InteractionCallback is Jsonable
             | "id" => id' = Snowflake.from_json(value)?
             | "type" => type'' = InteractionTypes.from((value as I64).u8())?
             | "activity_instance_id" =>
-                match value | let string: String => activity_instance_id' = string end
+                match value
+                | let string: String => activity_instance_id' = string
+                end
             | "response_message_id" =>
-                match value | let string: String => response_message_id' = Snowflake.from_json(string)? end
-            | "response_message_loading" => response_message_loading' = value as Bool
-            | "response_message_ephemeral" => response_message_ephemeral' = value as Bool
+                match value
+                | let string: String =>
+                    response_message_id' = Snowflake.from_json(string)?
+                end
+            | "response_message_loading" =>
+                response_message_loading' = value as Bool
+            | "response_message_ephemeral" =>
+                response_message_ephemeral' = value as Bool
             end
         end
 
@@ -1226,19 +1438,32 @@ class val InteractionCallback is Jsonable
             .update("type", type'.value().i64())
 
         match activity_instance_id
-        | let activity_instance_id': String => obj = obj.update("activity_instance_id", activity_instance_id')
+        | let activity_instance_id': String =>
+            obj = obj.update("activity_instance_id", activity_instance_id')
         end
 
         match response_message_id
-        | let response_message_id': Snowflake => obj = obj.update("response_message_id", response_message_id'.to_json())
+        | let response_message_id': Snowflake =>
+            obj =
+                obj.update(
+                    "response_message_id", response_message_id'.to_json()
+                )
         end
 
         match response_message_loading
-        | let response_message_loading': Bool => obj = obj.update("response_message_loading", response_message_loading')
+        | let response_message_loading': Bool =>
+            obj =
+                obj.update(
+                    "response_message_loading", response_message_loading'
+                )
         end
 
         match response_message_ephemeral
-        | let response_message_ephemeral': Bool => obj = obj.update("response_message_ephemeral", response_message_ephemeral')
+        | let response_message_ephemeral': Bool =>
+            obj =
+                obj.update(
+                    "response_message_ephemeral", response_message_ephemeral'
+                )
         end
 
         obj
@@ -1264,12 +1489,16 @@ class val InteractionCallbackResource is Jsonable
         """
         Message created by the interaction
 
-        Only present if `type` is either CHANNEL_MESSAGE_WITH_SOURCE or UPDATE_MESSAGE.
+        Only present if `type` is either CHANNEL_MESSAGE_WITH_SOURCE or
+        UPDATE_MESSAGE.
         """
 
     new val create(
         type'': InteractionCallbackType,
-        activity_instance': (InteractionCallbackActivityInstanceResource | None) = None,
+        activity_instance': (
+            InteractionCallbackActivityInstanceResource | None
+        ) =
+            None,
         message': (Message | None) = None
     ) =>
         type' = type''
@@ -1278,14 +1507,23 @@ class val InteractionCallbackResource is Jsonable
 
     new val from_json(obj: json.JsonObject) ? =>
         var type'': (InteractionCallbackType | None) = None
-        var activity_instance': (InteractionCallbackActivityInstanceResource | None) = None
+        var activity_instance': (
+            InteractionCallbackActivityInstanceResource | None
+        ) =
+            None
         var message': (Message | None) = None
 
         for (key, value) in obj.pairs() do
             match key
-            | "type" => type'' = InteractionCallbackTypes.from((value as I64).u8())?
-            | "activity_instance" => activity_instance' = InteractionCallbackActivityInstanceResource.from_json(value as json.JsonObject)?
-            | "message" => message' = Message.from_json(value as json.JsonObject)?
+            | "type" =>
+                type'' = InteractionCallbackTypes.from((value as I64).u8())?
+            | "activity_instance" =>
+                activity_instance' =
+                    InteractionCallbackActivityInstanceResource.from_json(
+                        value as json.JsonObject
+                    )?
+            | "message" =>
+                message' = Message.from_json(value as json.JsonObject)?
             end
         end
 
@@ -1298,11 +1536,13 @@ class val InteractionCallbackResource is Jsonable
             .update("type", type'.value().i64())
 
         match activity_instance
-        | let activity_instance': InteractionCallbackActivityInstanceResource => obj = obj.update("activity_instance", activity_instance'.to_json())
+        | let activity_instance': InteractionCallbackActivityInstanceResource =>
+            obj = obj.update("activity_instance", activity_instance'.to_json())
         end
 
         match message
-        | let message': Message => obj = obj.update("message", message'.to_json())
+        | let message': Message =>
+            obj = obj.update("message", message'.to_json())
         end
 
         obj
@@ -1335,11 +1575,15 @@ class val InteractionCallbackActivityInstanceResource is Jsonable
         json.JsonObject
             .update("id", id)
 
-type InteractionCallbackData is (InteractionCallbackMessageParams | InteractionCallbackAutocompleteParams | InteractionCallbackModalParams)
+type InteractionCallbackData is (
+    InteractionCallbackMessageParams | InteractionCallbackAutocompleteParams
+    | InteractionCallbackModalParams
+)
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-response-object-interaction-callback-data-structures
 
-    Which of the three shapes is expected is determined by the `type` of the interaction response rather than by a tag on the data itself.
+    Which of the three shapes is expected is determined by the `type` of the
+    interaction response rather than by a tag on the data itself.
     """
 
 class val InteractionCallbackMessageParams is ToJsonable
@@ -1371,7 +1615,8 @@ class val InteractionCallbackMessageParams is ToJsonable
 
     let flags: (Array[MessageFlag] val | None)
         """
-        message flags combined as a bitfield (only `SUPPRESS_EMBEDS`, `EPHEMERAL` and `IS_COMPONENTS_V2` can be set)
+        message flags combined as a bitfield (only `SUPPRESS_EMBEDS`,
+        `EPHEMERAL` and `IS_COMPONENTS_V2` can be set)
         """
 
     let components: (Array[Component] val | None)
@@ -1420,23 +1665,32 @@ class val InteractionCallbackMessageParams is ToJsonable
         end
 
         match embeds
-        | let embeds': Array[MessageEmbed] val => obj = obj.update("embeds", _MessageEmbeds.to_json(embeds'))
+        | let embeds': Array[MessageEmbed] val =>
+            obj = obj.update("embeds", _MessageEmbeds.to_json(embeds'))
         end
 
         match allowed_mentions
-        | let allowed_mentions': AllowedMentions => obj = obj.update("allowed_mentions", allowed_mentions'.to_json())
+        | let allowed_mentions': AllowedMentions =>
+            obj = obj.update("allowed_mentions", allowed_mentions'.to_json())
         end
 
         match flags
-        | let flags': Array[MessageFlag] val => obj = obj.update("flags", _MessageFlags.to_json(flags'))
+        | let flags': Array[MessageFlag] val =>
+            obj = obj.update("flags", _MessageFlags.to_json(flags'))
         end
 
         match components
-        | let components': Array[Component] val => obj = obj.update("components", _Components.to_json(components'))
+        | let components': Array[Component] val =>
+            obj = obj.update("components", _Components.to_json(components'))
         end
 
         match attachments
-        | let attachments': Array[MessageAttachmentParams] val => obj = obj.update("attachments", _MessageAttachmentParams.to_json(attachments'))
+        | let attachments': Array[MessageAttachmentParams] val =>
+            obj =
+                obj.update(
+                    "attachments",
+                    _MessageAttachmentParams.to_json(attachments')
+                )
         end
 
         match poll
@@ -1459,7 +1713,9 @@ class val InteractionCallbackAutocompleteParams is ToJsonable
         choices = choices'
 
     fun to_json(): json.JsonObject =>
-        json.JsonObject.update("choices", _ApplicationCommandOptionChoices.to_json(choices))
+        json.JsonObject.update(
+            "choices", _ApplicationCommandOptionChoices.to_json(choices)
+        )
 
 class val InteractionCallbackModalParams is ToJsonable
     """
@@ -1481,7 +1737,11 @@ class val InteractionCallbackModalParams is ToJsonable
         Components that make up the modal
         """
 
-    new val create(custom_id': String, title': String, components': Array[Component] val) =>
+    new val create(
+        custom_id': String,
+        title': String,
+        components': Array[Component] val
+    ) =>
         custom_id = custom_id'
         title = title'
         components = components'
@@ -1520,9 +1780,12 @@ class val CreateInteractionResponseParams is ToJsonable
         var obj = json.JsonObject.update("type", type'.value().i64())
 
         match data
-        | let data': InteractionCallbackMessageParams => obj = obj.update("data", data'.to_json())
-        | let data': InteractionCallbackAutocompleteParams => obj = obj.update("data", data'.to_json())
-        | let data': InteractionCallbackModalParams => obj = obj.update("data", data'.to_json())
+        | let data': InteractionCallbackMessageParams =>
+            obj = obj.update("data", data'.to_json())
+        | let data': InteractionCallbackAutocompleteParams =>
+            obj = obj.update("data", data'.to_json())
+        | let data': InteractionCallbackModalParams =>
+            obj = obj.update("data", data'.to_json())
         end
 
         obj
@@ -1546,7 +1809,8 @@ class val GetOriginalInteractionResponseParams
         let query = recover iso Array[(String, String)] end
 
         match thread_id
-        | let thread_id': Snowflake => query.push(("thread_id", thread_id'.string()))
+        | let thread_id': Snowflake =>
+            query.push(("thread_id", thread_id'.string()))
         end
 
         consume query
@@ -1555,7 +1819,8 @@ class val UpdateOriginalInteractionResponseParams is ToJsonable
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#edit-original-interaction-response
 
-    Functions the same as Edit Webhook Message, and so takes both query string parameters and a JSON body.
+    Functions the same as Edit Webhook Message, and so takes both query string
+    parameters and a JSON body.
     """
 
     let content: Nullable[String]
@@ -1585,7 +1850,8 @@ class val UpdateOriginalInteractionResponseParams is ToJsonable
 
     let flags: (Array[MessageFlag] val | None)
         """
-        message flags combined as a bitfield (only `SUPPRESS_EMBEDS` and `IS_COMPONENTS_V2` can be set)
+        message flags combined as a bitfield (only `SUPPRESS_EMBEDS` and
+        `IS_COMPONENTS_V2` can be set)
         """
 
     let thread_id: (Snowflake | None)
@@ -1595,7 +1861,8 @@ class val UpdateOriginalInteractionResponseParams is ToJsonable
 
     let with_components: (Bool | None)
         """
-        whether to respect the `components` field of the request (defaults to `false`; when `false`, only components without custom_id are allowed)
+        whether to respect the `components` field of the request (defaults to
+        `false`; when `false`, only components without custom_id are allowed)
         """
 
     new val create(
@@ -1621,11 +1888,13 @@ class val UpdateOriginalInteractionResponseParams is ToJsonable
         let query = recover iso Array[(String, String)] end
 
         match thread_id
-        | let thread_id': Snowflake => query.push(("thread_id", thread_id'.string()))
+        | let thread_id': Snowflake =>
+            query.push(("thread_id", thread_id'.string()))
         end
 
         match with_components
-        | let with_components': Bool => query.push(("with_components", with_components'.string()))
+        | let with_components': Bool =>
+            query.push(("with_components", with_components'.string()))
         end
 
         consume query
@@ -1639,27 +1908,36 @@ class val UpdateOriginalInteractionResponseParams is ToJsonable
         end
 
         match embeds
-        | let embeds': Array[MessageEmbed] val => obj = obj.update("embeds", _MessageEmbeds.to_json(embeds'))
+        | let embeds': Array[MessageEmbed] val =>
+            obj = obj.update("embeds", _MessageEmbeds.to_json(embeds'))
         | Null => obj = obj.update("embeds", None)
         end
 
         match allowed_mentions
-        | let allowed_mentions': AllowedMentions => obj = obj.update("allowed_mentions", allowed_mentions'.to_json())
+        | let allowed_mentions': AllowedMentions =>
+            obj = obj.update("allowed_mentions", allowed_mentions'.to_json())
         | Null => obj = obj.update("allowed_mentions", None)
         end
 
         match components
-        | let components': Array[Component] val => obj = obj.update("components", _Components.to_json(components'))
+        | let components': Array[Component] val =>
+            obj = obj.update("components", _Components.to_json(components'))
         | Null => obj = obj.update("components", None)
         end
 
         match attachments
-        | let attachments': Array[MessageAttachmentParams] val => obj = obj.update("attachments", _MessageAttachmentParams.to_json(attachments'))
+        | let attachments': Array[MessageAttachmentParams] val =>
+            obj =
+                obj.update(
+                    "attachments",
+                    _MessageAttachmentParams.to_json(attachments')
+                )
         | Null => obj = obj.update("attachments", None)
         end
 
         match flags
-        | let flags': Array[MessageFlag] val => obj = obj.update("flags", _MessageFlags.to_json(flags'))
+        | let flags': Array[MessageFlag] val =>
+            obj = obj.update("flags", _MessageFlags.to_json(flags'))
         end
 
         obj
@@ -1668,7 +1946,10 @@ class val CreateFollowupMessageParams is ToJsonable
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#create-followup-message
 
-    Functions the same as Execute Webhook, and so takes both query string parameters and a JSON body, but `wait` is always true. The `thread_id`, `avatar_url` and `username` parameters are not supported when using this endpoint for interaction followups.
+    Functions the same as Execute Webhook, and so takes both query string
+    parameters and a JSON body, but `wait` is always true. The `thread_id`,
+    `avatar_url` and `username` parameters are not supported when using this
+    endpoint for interaction followups.
     """
 
     let content: (String | None)
@@ -1703,7 +1984,8 @@ class val CreateFollowupMessageParams is ToJsonable
 
     let flags: (Array[MessageFlag] val | None)
         """
-        message flags combined as a bitfield (only `SUPPRESS_EMBEDS`, `EPHEMERAL` and `IS_COMPONENTS_V2` can be set)
+        message flags combined as a bitfield (only `SUPPRESS_EMBEDS`,
+        `EPHEMERAL` and `IS_COMPONENTS_V2` can be set)
         """
 
     let poll: (PollParams | None)
@@ -1713,7 +1995,8 @@ class val CreateFollowupMessageParams is ToJsonable
 
     let with_components: (Bool | None)
         """
-        whether to respect the `components` field of the request (defaults to `false`; when `false`, only components without custom_id are allowed)
+        whether to respect the `components` field of the request (defaults to
+        `false`; when `false`, only components without custom_id are allowed)
         """
 
     new val create(
@@ -1741,7 +2024,8 @@ class val CreateFollowupMessageParams is ToJsonable
         let query = recover iso Array[(String, String)] end
 
         match with_components
-        | let with_components': Bool => query.push(("with_components", with_components'.string()))
+        | let with_components': Bool =>
+            query.push(("with_components", with_components'.string()))
         end
 
         consume query
@@ -1758,23 +2042,32 @@ class val CreateFollowupMessageParams is ToJsonable
         end
 
         match embeds
-        | let embeds': Array[MessageEmbed] val => obj = obj.update("embeds", _MessageEmbeds.to_json(embeds'))
+        | let embeds': Array[MessageEmbed] val =>
+            obj = obj.update("embeds", _MessageEmbeds.to_json(embeds'))
         end
 
         match allowed_mentions
-        | let allowed_mentions': AllowedMentions => obj = obj.update("allowed_mentions", allowed_mentions'.to_json())
+        | let allowed_mentions': AllowedMentions =>
+            obj = obj.update("allowed_mentions", allowed_mentions'.to_json())
         end
 
         match components
-        | let components': Array[Component] val => obj = obj.update("components", _Components.to_json(components'))
+        | let components': Array[Component] val =>
+            obj = obj.update("components", _Components.to_json(components'))
         end
 
         match attachments
-        | let attachments': Array[MessageAttachmentParams] val => obj = obj.update("attachments", _MessageAttachmentParams.to_json(attachments'))
+        | let attachments': Array[MessageAttachmentParams] val =>
+            obj =
+                obj.update(
+                    "attachments",
+                    _MessageAttachmentParams.to_json(attachments')
+                )
         end
 
         match flags
-        | let flags': Array[MessageFlag] val => obj = obj.update("flags", _MessageFlags.to_json(flags'))
+        | let flags': Array[MessageFlag] val =>
+            obj = obj.update("flags", _MessageFlags.to_json(flags'))
         end
 
         match poll
@@ -1802,7 +2095,8 @@ class val GetFollowupMessageParams
         let query = recover iso Array[(String, String)] end
 
         match thread_id
-        | let thread_id': Snowflake => query.push(("thread_id", thread_id'.string()))
+        | let thread_id': Snowflake =>
+            query.push(("thread_id", thread_id'.string()))
         end
 
         consume query
@@ -1811,7 +2105,8 @@ class val UpdateFollowupMessageParams is ToJsonable
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#edit-followup-message
 
-    Functions the same as Edit Webhook Message, and so takes both query string parameters and a JSON body.
+    Functions the same as Edit Webhook Message, and so takes both query string
+    parameters and a JSON body.
     """
 
     let content: Nullable[String]
@@ -1841,7 +2136,8 @@ class val UpdateFollowupMessageParams is ToJsonable
 
     let flags: (Array[MessageFlag] val | None)
         """
-        message flags combined as a bitfield (only `SUPPRESS_EMBEDS` and `IS_COMPONENTS_V2` can be set)
+        message flags combined as a bitfield (only `SUPPRESS_EMBEDS` and
+        `IS_COMPONENTS_V2` can be set)
         """
 
     let thread_id: (Snowflake | None)
@@ -1851,7 +2147,8 @@ class val UpdateFollowupMessageParams is ToJsonable
 
     let with_components: (Bool | None)
         """
-        whether to respect the `components` field of the request (defaults to `false`; when `false`, only components without custom_id are allowed)
+        whether to respect the `components` field of the request (defaults to
+        `false`; when `false`, only components without custom_id are allowed)
         """
 
     new val create(
@@ -1877,11 +2174,13 @@ class val UpdateFollowupMessageParams is ToJsonable
         let query = recover iso Array[(String, String)] end
 
         match thread_id
-        | let thread_id': Snowflake => query.push(("thread_id", thread_id'.string()))
+        | let thread_id': Snowflake =>
+            query.push(("thread_id", thread_id'.string()))
         end
 
         match with_components
-        | let with_components': Bool => query.push(("with_components", with_components'.string()))
+        | let with_components': Bool =>
+            query.push(("with_components", with_components'.string()))
         end
 
         consume query
@@ -1895,27 +2194,36 @@ class val UpdateFollowupMessageParams is ToJsonable
         end
 
         match embeds
-        | let embeds': Array[MessageEmbed] val => obj = obj.update("embeds", _MessageEmbeds.to_json(embeds'))
+        | let embeds': Array[MessageEmbed] val =>
+            obj = obj.update("embeds", _MessageEmbeds.to_json(embeds'))
         | Null => obj = obj.update("embeds", None)
         end
 
         match allowed_mentions
-        | let allowed_mentions': AllowedMentions => obj = obj.update("allowed_mentions", allowed_mentions'.to_json())
+        | let allowed_mentions': AllowedMentions =>
+            obj = obj.update("allowed_mentions", allowed_mentions'.to_json())
         | Null => obj = obj.update("allowed_mentions", None)
         end
 
         match components
-        | let components': Array[Component] val => obj = obj.update("components", _Components.to_json(components'))
+        | let components': Array[Component] val =>
+            obj = obj.update("components", _Components.to_json(components'))
         | Null => obj = obj.update("components", None)
         end
 
         match attachments
-        | let attachments': Array[MessageAttachmentParams] val => obj = obj.update("attachments", _MessageAttachmentParams.to_json(attachments'))
+        | let attachments': Array[MessageAttachmentParams] val =>
+            obj =
+                obj.update(
+                    "attachments",
+                    _MessageAttachmentParams.to_json(attachments')
+                )
         | Null => obj = obj.update("attachments", None)
         end
 
         match flags
-        | let flags': Array[MessageFlag] val => obj = obj.update("flags", _MessageFlags.to_json(flags'))
+        | let flags': Array[MessageFlag] val =>
+            obj = obj.update("flags", _MessageFlags.to_json(flags'))
         end
 
         obj

@@ -31,7 +31,8 @@ class val Sticker is Jsonable
         """
         autocomplete/suggestion tags for the sticker (max 200 characters)
 
-        A comma separated list of keywords. This is the only field required for guild stickers, and Discord will use the name as the value.
+        A comma separated list of keywords. This is the only field required for
+        guild stickers, and Discord will use the name as the value.
         """
 
     let type': StickerType
@@ -46,7 +47,8 @@ class val Sticker is Jsonable
 
     let available: (Bool | None)
         """
-        whether this guild sticker can be used, may be false due to loss of Server Boosts
+        whether this guild sticker can be used, may be false due to loss of
+        Server Boosts
         """
 
     let guild_id: (Snowflake | None)
@@ -111,7 +113,8 @@ class val Sticker is Jsonable
                 match value | let string: String => description' = string end
             | "tags" => tags' = value as String
             | "type" => type'' = StickerTypes.from((value as I64).u8())?
-            | "format_type" => format_type' = StickerFormatTypes.from((value as I64).u8())?
+            | "format_type" =>
+                format_type' = StickerFormatTypes.from((value as I64).u8())?
             | "available" => available' = value as Bool
             | "guild_id" => guild_id' = Snowflake.from_json(value)?
             | "user" => user' = User.from_json(value as json.JsonObject)?
@@ -141,7 +144,8 @@ class val Sticker is Jsonable
             .update("format_type", format_type.value().i64())
 
         match pack_id
-        | let pack_id': Snowflake => obj = obj.update("pack_id", pack_id'.to_json())
+        | let pack_id': Snowflake =>
+            obj = obj.update("pack_id", pack_id'.to_json())
         end
 
         match available
@@ -149,7 +153,8 @@ class val Sticker is Jsonable
         end
 
         match guild_id
-        | let guild_id': Snowflake => obj = obj.update("guild_id", guild_id'.to_json())
+        | let guild_id': Snowflake =>
+            obj = obj.update("guild_id", guild_id'.to_json())
         end
 
         match user
@@ -157,7 +162,8 @@ class val Sticker is Jsonable
         end
 
         match sort_value
-        | let sort_value': USize => obj = obj.update("sort_value", sort_value'.i64())
+        | let sort_value': USize =>
+            obj = obj.update("sort_value", sort_value'.i64())
         end
 
         obj
@@ -171,13 +177,17 @@ primitive _Stickers
         let array = value as json.JsonArray
         recover val
             let stickers = Array[Sticker](array.size())
-            for sticker in array.values() do stickers.push(Sticker.from_json(sticker as json.JsonObject)?) end
+            for sticker in array.values() do
+                stickers.push(Sticker.from_json(sticker as json.JsonObject)?)
+            end
             stickers
         end
 
     fun to_json(stickers: Array[Sticker] val): json.JsonArray =>
         var array = json.JsonArray
-        for sticker in stickers.values() do array = array.push(sticker.to_json()) end
+        for sticker in stickers.values() do
+            array = array.push(sticker.to_json())
+        end
         array
 
 trait val StickerType is _Enum[StickerType, U8]
@@ -230,7 +240,8 @@ class val StickerItem is Jsonable
     """
     https://docs.discord.com/developers/resources/sticker#sticker-item-object-sticker-item-structure
 
-    The smallest amount of data required to render a sticker. A partial sticker object.
+    The smallest amount of data required to render a sticker. A partial sticker
+    object.
     """
 
     let id: Snowflake
@@ -248,7 +259,11 @@ class val StickerItem is Jsonable
         type of sticker format
         """
 
-    new val create(id': Snowflake, name': String, format_type': StickerFormatType) =>
+    new val create(
+        id': Snowflake,
+        name': String,
+        format_type': StickerFormatType
+    ) =>
         id = id'
         name = name'
         format_type = format_type'
@@ -262,7 +277,8 @@ class val StickerItem is Jsonable
             match key
             | "id" => id' = Snowflake.from_json(value)?
             | "name" => name' = value as String
-            | "format_type" => format_type' = StickerFormatTypes.from((value as I64).u8())?
+            | "format_type" =>
+                format_type' = StickerFormatTypes.from((value as I64).u8())?
             end
         end
 
@@ -350,9 +366,11 @@ class val StickerPack is Jsonable
             | "stickers" => stickers' = _Stickers(value)?
             | "name" => name' = value as String
             | "sku_id" => sku_id' = Snowflake.from_json(value)?
-            | "cover_sticker_id" => cover_sticker_id' = Snowflake.from_json(value)?
+            | "cover_sticker_id" =>
+                cover_sticker_id' = Snowflake.from_json(value)?
             | "description" => description' = value as String
-            | "banner_asset_id" => banner_asset_id' = Snowflake.from_json(value)?
+            | "banner_asset_id" =>
+                banner_asset_id' = Snowflake.from_json(value)?
             end
         end
 
@@ -373,11 +391,13 @@ class val StickerPack is Jsonable
             .update("description", description)
 
         match cover_sticker_id
-        | let cover_sticker_id': Snowflake => obj = obj.update("cover_sticker_id", cover_sticker_id'.to_json())
+        | let cover_sticker_id': Snowflake =>
+            obj = obj.update("cover_sticker_id", cover_sticker_id'.to_json())
         end
 
         match banner_asset_id
-        | let banner_asset_id': Snowflake => obj = obj.update("banner_asset_id", banner_asset_id'.to_json())
+        | let banner_asset_id': Snowflake =>
+            obj = obj.update("banner_asset_id", banner_asset_id'.to_json())
         end
 
         obj
@@ -391,7 +411,9 @@ primitive _StickerPacks
         let array = value as json.JsonArray
         recover val
             let packs = Array[StickerPack](array.size())
-            for pack in array.values() do packs.push(StickerPack.from_json(pack as json.JsonObject)?) end
+            for pack in array.values() do
+                packs.push(StickerPack.from_json(pack as json.JsonObject)?)
+            end
             packs
         end
 
@@ -409,7 +431,9 @@ primitive _StickerItems
         let array = value as json.JsonArray
         recover val
             let items = Array[StickerItem](array.size())
-            for item in array.values() do items.push(StickerItem.from_json(item as json.JsonObject)?) end
+            for item in array.values() do
+                items.push(StickerItem.from_json(item as json.JsonObject)?)
+            end
             items
         end
 
@@ -422,13 +446,17 @@ class val CreateGuildStickerParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/sticker#create-guild-sticker-form-params
 
-    Every guild has five free sticker slots by default, and each Boost level will grant access to more slots.
+    Every guild has five free sticker slots by default, and each Boost level
+    will grant access to more slots.
 
-    Lottie stickers can only be uploaded on guilds that have either the `VERIFIED` and/or the `PARTNERED` guild feature.
+    Lottie stickers can only be uploaded on guilds that have either the
+    `VERIFIED` and/or the `PARTNERED` guild feature.
 
-    Uploaded stickers are constrained to 5 seconds in length for animated stickers, and 320 x 320 pixels.
+    Uploaded stickers are constrained to 5 seconds in length for animated
+    stickers, and 320 x 320 pixels.
 
-    This endpoint is a `multipart/form-data` endpoint: the sticker `file` itself is uploaded as a separate part alongside the fields serialised here.
+    This endpoint is a `multipart/form-data` endpoint: the sticker `file` itself
+    is uploaded as a separate part alongside the fields serialised here.
     """
 
     let name: String
@@ -496,7 +524,8 @@ class val UpdateGuildStickerParams is ToJsonable
         end
 
         match description
-        | let description': String => obj = obj.update("description", description')
+        | let description': String =>
+            obj = obj.update("description", description')
         | Null => obj = obj.update("description", None)
         end
 

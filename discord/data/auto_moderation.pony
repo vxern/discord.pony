@@ -4,9 +4,13 @@ class val AutoModerationRule is Jsonable
     """
     https://docs.discord.com/developers/resources/auto-moderation#auto-moderation-rule-object-auto-moderation-rule-structure
 
-    Auto Moderation is a feature which allows each guild to set up rules that trigger based on some criteria. For example, a rule can trigger whenever a message contains a specific keyword.
+    Auto Moderation is a feature which allows each guild to set up rules that
+    trigger based on some criteria. For example, a rule can trigger whenever a
+    message contains a specific keyword.
 
-    Rules can be configured to automatically execute actions whenever they trigger. For example, if a user tries to send a message which contains a certain keyword, a rule can trigger and block the message before it is sent.
+    Rules can be configured to automatically execute actions whenever they
+    trigger. For example, if a user tries to send a message which contains a
+    certain keyword, a rule can trigger and block the message before it is sent.
     """
 
     let id: Snowflake
@@ -108,9 +112,17 @@ class val AutoModerationRule is Jsonable
             | "guild_id" => guild_id' = Snowflake.from_json(value)?
             | "name" => name' = value as String
             | "creator_id" => creator_id' = Snowflake.from_json(value)?
-            | "event_type" => event_type' = AutoModerationEventTypes.from((value as I64).u8())?
-            | "trigger_type" => trigger_type' = AutoModerationTriggerTypes.from((value as I64).u8())?
-            | "trigger_metadata" => trigger_metadata' = AutoModerationTriggerMetadata.from_json(value as json.JsonObject)?
+            | "event_type" =>
+                event_type' =
+                    AutoModerationEventTypes.from((value as I64).u8())?
+            | "trigger_type" =>
+                trigger_type' =
+                    AutoModerationTriggerTypes.from((value as I64).u8())?
+            | "trigger_metadata" =>
+                trigger_metadata' =
+                    AutoModerationTriggerMetadata.from_json(
+                        value as json.JsonObject
+                    )?
             | "actions" => actions' = _AutoModerationActions(value)?
             | "enabled" => enabled' = value as Bool
             | "exempt_roles" => exempt_roles' = _Snowflakes(value)?
@@ -153,7 +165,11 @@ primitive _AutoModerationRules
         let array = value as json.JsonArray
         recover val
             let rules = Array[AutoModerationRule](array.size())
-            for rule in array.values() do rules.push(AutoModerationRule.from_json(rule as json.JsonObject)?) end
+            for rule in array.values() do
+                rules.push(
+                    AutoModerationRule.from_json(rule as json.JsonObject)?
+                )
+            end
             rules
         end
 
@@ -223,7 +239,8 @@ class val AutoModerationTriggerMetadata is Jsonable
     """
     https://docs.discord.com/developers/resources/auto-moderation#auto-moderation-rule-object-trigger-metadata
 
-    Additional data used to determine whether a rule should be triggered. Different fields are relevant based on the value of trigger_type.
+    Additional data used to determine whether a rule should be triggered.
+    Different fields are relevant based on the value of trigger_type.
     """
 
     let keyword_filter: (Array[String] val | None)
@@ -235,14 +252,16 @@ class val AutoModerationTriggerMetadata is Jsonable
 
     let regex_patterns: (Array[String] val | None)
         """
-        regular expression patterns which will be matched against content (Maximum of 10)
+        regular expression patterns which will be matched against content
+        (Maximum of 10)
 
         Trigger types: KEYWORD & MEMBER_PROFILE
         """
 
     let presets: (Array[KeywordPresetType] val | None)
         """
-        the internally pre-defined wordsets which will be searched for in content
+        the internally pre-defined wordsets which will be searched for in
+        content
 
         Trigger types: KEYWORD_PRESET
         """
@@ -256,7 +275,8 @@ class val AutoModerationTriggerMetadata is Jsonable
 
     let mention_total_limit: (USize | None)
         """
-        total number of unique role and user mentions allowed per message (Maximum of 50)
+        total number of unique role and user mentions allowed per message
+        (Maximum of 50)
 
         Trigger types: MENTION_SPAM
         """
@@ -297,8 +317,10 @@ class val AutoModerationTriggerMetadata is Jsonable
             | "regex_patterns" => regex_patterns' = _Strings(value)?
             | "presets" => presets' = _KeywordPresets(value)?
             | "allow_list" => allow_list' = _Strings(value)?
-            | "mention_total_limit" => mention_total_limit' = (value as I64).usize()
-            | "mention_raid_protection_enabled" => mention_raid_protection_enabled' = value as Bool
+            | "mention_total_limit" =>
+                mention_total_limit' = (value as I64).usize()
+            | "mention_raid_protection_enabled" =>
+                mention_raid_protection_enabled' = value as Bool
             end
         end
 
@@ -313,27 +335,39 @@ class val AutoModerationTriggerMetadata is Jsonable
         var obj = json.JsonObject
 
         match keyword_filter
-        | let keyword_filter': Array[String] val => obj = obj.update("keyword_filter", _Strings.to_json(keyword_filter'))
+        | let keyword_filter': Array[String] val =>
+            obj =
+                obj.update("keyword_filter", _Strings.to_json(keyword_filter'))
         end
 
         match regex_patterns
-        | let regex_patterns': Array[String] val => obj = obj.update("regex_patterns", _Strings.to_json(regex_patterns'))
+        | let regex_patterns': Array[String] val =>
+            obj =
+                obj.update("regex_patterns", _Strings.to_json(regex_patterns'))
         end
 
         match presets
-        | let presets': Array[KeywordPresetType] val => obj = obj.update("presets", _KeywordPresets.to_json(presets'))
+        | let presets': Array[KeywordPresetType] val =>
+            obj = obj.update("presets", _KeywordPresets.to_json(presets'))
         end
 
         match allow_list
-        | let allow_list': Array[String] val => obj = obj.update("allow_list", _Strings.to_json(allow_list'))
+        | let allow_list': Array[String] val =>
+            obj = obj.update("allow_list", _Strings.to_json(allow_list'))
         end
 
         match mention_total_limit
-        | let mention_total_limit': USize => obj = obj.update("mention_total_limit", mention_total_limit'.i64())
+        | let mention_total_limit': USize =>
+            obj = obj.update("mention_total_limit", mention_total_limit'.i64())
         end
 
         match mention_raid_protection_enabled
-        | let mention_raid_protection_enabled': Bool => obj = obj.update("mention_raid_protection_enabled", mention_raid_protection_enabled')
+        | let mention_raid_protection_enabled': Bool =>
+            obj =
+                obj.update(
+                    "mention_raid_protection_enabled",
+                    mention_raid_protection_enabled'
+                )
         end
 
         obj
@@ -378,13 +412,17 @@ primitive _KeywordPresets
         let array = value as json.JsonArray
         recover val
             let presets = Array[KeywordPresetType](array.size())
-            for preset in array.values() do presets.push(KeywordPresetTypes.from((preset as I64).u8())?) end
+            for preset in array.values() do
+                presets.push(KeywordPresetTypes.from((preset as I64).u8())?)
+            end
             presets
         end
 
     fun to_json(presets: Array[KeywordPresetType] val): json.JsonArray =>
         var array = json.JsonArray
-        for preset in presets.values() do array = array.push(preset.value().i64()) end
+        for preset in presets.values() do
+            array = array.push(preset.value().i64())
+        end
         array
 
 trait val AutoModerationEventType is _Enum[AutoModerationEventType, U8]
@@ -427,10 +465,14 @@ class val AutoModerationAction is Jsonable
 
     let metadata: (AutoModerationActionMetadata | None)
         """
-        additional metadata needed during execution for this specific action type
+        additional metadata needed during execution for this specific action
+        type
         """
 
-    new val create(type'': AutoModerationActionType, metadata': (AutoModerationActionMetadata | None) = None) =>
+    new val create(
+        type'': AutoModerationActionType,
+        metadata': (AutoModerationActionMetadata | None) = None
+    ) =>
         type' = type''
         metadata = metadata'
 
@@ -440,8 +482,13 @@ class val AutoModerationAction is Jsonable
 
         for (key, value) in obj.pairs() do
             match key
-            | "type" => type'' = AutoModerationActionTypes.from((value as I64).u8())?
-            | "metadata" => metadata' = AutoModerationActionMetadata.from_json(value as json.JsonObject)?
+            | "type" =>
+                type'' = AutoModerationActionTypes.from((value as I64).u8())?
+            | "metadata" =>
+                metadata' =
+                    AutoModerationActionMetadata.from_json(
+                        value as json.JsonObject
+                    )?
             end
         end
 
@@ -453,7 +500,8 @@ class val AutoModerationAction is Jsonable
             .update("type", type'.value().i64())
 
         match metadata
-        | let metadata': AutoModerationActionMetadata => obj = obj.update("metadata", metadata'.to_json())
+        | let metadata': AutoModerationActionMetadata =>
+            obj = obj.update("metadata", metadata'.to_json())
         end
 
         obj
@@ -467,13 +515,19 @@ primitive _AutoModerationActions
         let array = value as json.JsonArray
         recover val
             let actions = Array[AutoModerationAction](array.size())
-            for action in array.values() do actions.push(AutoModerationAction.from_json(action as json.JsonObject)?) end
+            for action in array.values() do
+                actions.push(
+                    AutoModerationAction.from_json(action as json.JsonObject)?
+                )
+            end
             actions
         end
 
     fun to_json(actions: Array[AutoModerationAction] val): json.JsonArray =>
         var array = json.JsonArray
-        for action in actions.values() do array = array.push(action.to_json()) end
+        for action in actions.values() do
+            array = array.push(action.to_json())
+        end
         array
 
 trait val AutoModerationActionType is _Enum[AutoModerationActionType, U8]
@@ -482,7 +536,9 @@ trait val AutoModerationActionType is _Enum[AutoModerationActionType, U8]
     """
 primitive BlockMessageAutoModerationActionType is AutoModerationActionType
     """
-    blocks a member's message and prevents it from being posted. A custom explanation can be specified and shown to members whenever their message is blocked.
+    blocks a member's message and prevents it from being posted. A custom
+    explanation can be specified and shown to members whenever their message is
+    blocked.
     """
 
     fun value(): U8 => 1
@@ -500,7 +556,8 @@ primitive TimeoutAutoModerationActionType is AutoModerationActionType
     """
 
     fun value(): U8 => 3
-primitive BlockMemberInteractionAutoModerationActionType is AutoModerationActionType
+primitive BlockMemberInteractionAutoModerationActionType is
+    AutoModerationActionType
     """
     prevents a member from using text, voice, or other interactions
     """
@@ -520,7 +577,8 @@ class val AutoModerationActionMetadata is Jsonable
     """
     https://docs.discord.com/developers/resources/auto-moderation#auto-moderation-action-object-action-metadata
 
-    Additional data used when an action is executed. Different fields are relevant based on the value of action type.
+    Additional data used when an action is executed. Different fields are
+    relevant based on the value of action type.
     """
 
     let channel_id: (Snowflake | None)
@@ -539,7 +597,8 @@ class val AutoModerationActionMetadata is Jsonable
 
     let custom_message: (String | None)
         """
-        additional explanation that will be shown to members whenever their message is blocked (maximum of 150 characters)
+        additional explanation that will be shown to members whenever their
+        message is blocked (maximum of 150 characters)
 
         Action types: BLOCK_MESSAGE
         """
@@ -574,15 +633,18 @@ class val AutoModerationActionMetadata is Jsonable
         var obj = json.JsonObject
 
         match channel_id
-        | let channel_id': Snowflake => obj = obj.update("channel_id", channel_id'.to_json())
+        | let channel_id': Snowflake =>
+            obj = obj.update("channel_id", channel_id'.to_json())
         end
 
         match duration_seconds
-        | let duration_seconds': USize => obj = obj.update("duration_seconds", duration_seconds'.i64())
+        | let duration_seconds': USize =>
+            obj = obj.update("duration_seconds", duration_seconds'.i64())
         end
 
         match custom_message
-        | let custom_message': String => obj = obj.update("custom_message", custom_message')
+        | let custom_message': String =>
+            obj = obj.update("custom_message", custom_message')
         end
 
         obj
@@ -661,7 +723,8 @@ class val CreateAutoModerationRuleParams is ToJsonable
             .update("actions", _AutoModerationActions.to_json(actions))
 
         match trigger_metadata
-        | let trigger_metadata': AutoModerationTriggerMetadata => obj = obj.update("trigger_metadata", trigger_metadata'.to_json())
+        | let trigger_metadata': AutoModerationTriggerMetadata =>
+            obj = obj.update("trigger_metadata", trigger_metadata'.to_json())
         end
 
         match enabled
@@ -669,11 +732,16 @@ class val CreateAutoModerationRuleParams is ToJsonable
         end
 
         match exempt_roles
-        | let exempt_roles': Array[Snowflake] val => obj = obj.update("exempt_roles", _Snowflakes.to_json(exempt_roles'))
+        | let exempt_roles': Array[Snowflake] val =>
+            obj = obj.update("exempt_roles", _Snowflakes.to_json(exempt_roles'))
         end
 
         match exempt_channels
-        | let exempt_channels': Array[Snowflake] val => obj = obj.update("exempt_channels", _Snowflakes.to_json(exempt_channels'))
+        | let exempt_channels': Array[Snowflake] val =>
+            obj =
+                obj.update(
+                    "exempt_channels", _Snowflakes.to_json(exempt_channels')
+                )
         end
 
         obj
@@ -747,15 +815,19 @@ class val UpdateAutoModerationRuleParams is ToJsonable
         end
 
         match event_type
-        | let event_type': AutoModerationEventType => obj = obj.update("event_type", event_type'.value().i64())
+        | let event_type': AutoModerationEventType =>
+            obj = obj.update("event_type", event_type'.value().i64())
         end
 
         match trigger_metadata
-        | let trigger_metadata': AutoModerationTriggerMetadata => obj = obj.update("trigger_metadata", trigger_metadata'.to_json())
+        | let trigger_metadata': AutoModerationTriggerMetadata =>
+            obj = obj.update("trigger_metadata", trigger_metadata'.to_json())
         end
 
         match actions
-        | let actions': Array[AutoModerationAction] val => obj = obj.update("actions", _AutoModerationActions.to_json(actions'))
+        | let actions': Array[AutoModerationAction] val =>
+            obj =
+                obj.update("actions", _AutoModerationActions.to_json(actions'))
         end
 
         match enabled
@@ -763,11 +835,16 @@ class val UpdateAutoModerationRuleParams is ToJsonable
         end
 
         match exempt_roles
-        | let exempt_roles': Array[Snowflake] val => obj = obj.update("exempt_roles", _Snowflakes.to_json(exempt_roles'))
+        | let exempt_roles': Array[Snowflake] val =>
+            obj = obj.update("exempt_roles", _Snowflakes.to_json(exempt_roles'))
         end
 
         match exempt_channels
-        | let exempt_channels': Array[Snowflake] val => obj = obj.update("exempt_channels", _Snowflakes.to_json(exempt_channels'))
+        | let exempt_channels': Array[Snowflake] val =>
+            obj =
+                obj.update(
+                    "exempt_channels", _Snowflakes.to_json(exempt_channels')
+                )
         end
 
         obj

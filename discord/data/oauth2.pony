@@ -22,7 +22,8 @@ class val AuthorizationInformation is Jsonable
 
     let user: (User | None)
         """
-        the user who has authorized, if the user has authorized with the `identify` scope
+        the user who has authorized, if the user has authorized with the
+        `identify` scope
         """
 
     new val create(
@@ -44,7 +45,9 @@ class val AuthorizationInformation is Jsonable
 
         for (key, value) in obj.pairs() do
             match key
-            | "application" => application' = PartialApplication.from_json(value as json.JsonObject)?
+            | "application" =>
+                application' =
+                    PartialApplication.from_json(value as json.JsonObject)?
             | "scopes" => scopes' = _Strings(value)?
             | "expires" => expires' = value as String
             | "user" => user' = User.from_json(value as json.JsonObject)?

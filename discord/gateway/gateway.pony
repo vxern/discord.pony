@@ -59,7 +59,8 @@ class val GatewayOptions
     new val create(
         token': String,
         intents': Array[GatewayIntent] val,
-        properties': IdentifyConnectionProperties = GatewayDefaults.properties(),
+        properties': IdentifyConnectionProperties =
+            GatewayDefaults.properties(),
         version': ApiVersion val = GatewayDefaults.version(),
         user_agent': String = GatewayDefaults.user_agent(),
         ca_certificates_path': String = GatewayDefaults.ca_certificates_path(),
@@ -141,7 +142,8 @@ primitive GatewayDefaults
 primitive _GatewayUrl
     fun host(url: String): String =>
         let start: ISize = try url.find("://")? + 3 else 0 end
-        let finish: ISize = try url.find("/", start)? else url.size().isize() end
+        let finish: ISize =
+            try url.find("/", start)? else url.size().isize() end
 
         url.substring(start, finish)
 
@@ -150,9 +152,12 @@ primitive _GatewayFailure
         match reason'
         | lori.ConnectionFailedDNS => "could not resolve the gateway host"
         | lori.ConnectionFailedTCP => "could not connect to the gateway"
-        | lori.ConnectionFailedSSL => "the TLS handshake with the gateway failed"
-        | lori.ConnectionFailedTimeout => "the connection to the gateway timed out"
-        | lori.ConnectionFailedTimerError => "the connection timer could not be created"
+        | lori.ConnectionFailedSSL =>
+            "the TLS handshake with the gateway failed"
+        | lori.ConnectionFailedTimeout =>
+            "the connection to the gateway timed out"
+        | lori.ConnectionFailedTimerError =>
+            "the connection timer could not be created"
         end
 
 actor _GatewayConnection is mare.WebSocketClientActor
@@ -210,7 +215,8 @@ actor _GatewayConnection is mare.WebSocketClientActor
         match options.shard
         | (let id: USize, let count: USize) =>
             Debug.out(
-                "[gateway] this is shard " + id.string() + " of " + count.string()
+                "[gateway] this is shard " + id.string() + " of "
+                + count.string()
             )
         end
 
@@ -225,7 +231,9 @@ actor _GatewayConnection is mare.WebSocketClientActor
 
     fun ref _connect() =>
         if _disposed then
-            Debug.out("[gateway] not connecting: the connection was disposed of")
+            Debug.out(
+                "[gateway] not connecting: the connection was disposed of"
+            )
             return
         end
 
@@ -236,11 +244,14 @@ actor _GatewayConnection is mare.WebSocketClientActor
 
         match _resume_url
         | let url': String =>
-            Debug.out("[gateway] a session is in hand, resuming through " + url')
+            Debug.out(
+                "[gateway] a session is in hand, resuming through " + url'
+            )
             _dial(url')
         else
             Debug.out(
-                "[gateway] no session in hand, so checking the session start limit"
+                "[gateway] no session in hand, so checking the session start "
+                + "limit"
             )
 
             _check_session_limits()
@@ -258,7 +269,9 @@ actor _GatewayConnection is mare.WebSocketClientActor
 
         _timers(
             time.Timer(
-                _OnceElapsed({() => self._session_limits_timed_out(generation)}),
+                _OnceElapsed(
+                    {() => self._session_limits_timed_out(generation)}
+                ),
                 time.Nanos.from_millis(
                     GatewayConstants.session_limit_timeout_ms()
                 )
@@ -271,7 +284,9 @@ actor _GatewayConnection is mare.WebSocketClientActor
             | let context': ssl.SSLContext val => context'
             else
                 Debug.out("[gateway] giving up: there is no SSL context")
-                options.on_error(GatewayError("could not create an SSL context"))
+                options.on_error(
+                    GatewayError("could not create an SSL context")
+                )
                 return
             end
 
@@ -296,7 +311,8 @@ actor _GatewayConnection is mare.WebSocketClientActor
                 where
                 path' = options.path(),
                 headers' = headers,
-                max_message_size' = GatewayConstants.max_receive_message_size_bytes()
+                max_message_size' =
+                    GatewayConstants.max_receive_message_size_bytes()
             )
         )
 
@@ -338,13 +354,18 @@ actor _GatewayConnection is mare.WebSocketClientActor
         let payload =
         try
             match json.JsonParser.parse(text)
-            | let parsed: json.JsonObject => GatewayEventPayload.from_json(parsed)?
+            | let parsed: json.JsonObject =>
+                GatewayEventPayload.from_json(parsed)?
             else
-                Debug.out("[gateway] dropping a message that is not a JSON object")
+                Debug.out(
+                    "[gateway] dropping a message that is not a JSON object"
+                )
                 return
             end
         else
-            Debug.out("[gateway] dropping a message that could not be read: " + text)
+            Debug.out(
+                "[gateway] dropping a message that could not be read: " + text
+            )
             return
         end
 
@@ -365,7 +386,8 @@ actor _GatewayConnection is mare.WebSocketClientActor
             end
 
             try
-                let hello = GatewayHello.from_json(payload.d as json.JsonObject)?
+                let hello =
+                    GatewayHello.from_json(payload.d as json.JsonObject)?
                 let asked = hello.heartbeat_interval.u64()
                 let interval =
                     asked.max(GatewayConstants.min_heartbeat_interval_ms())
@@ -379,7 +401,8 @@ actor _GatewayConnection is mare.WebSocketClientActor
                 end
 
                 Debug.out(
-                    "[gateway] hello: heartbeat every " + interval.string() + "ms"
+                    "[gateway] hello: heartbeat every " + interval.string()
+                    + "ms"
                 )
 
                 _open = true
@@ -391,7 +414,10 @@ actor _GatewayConnection is mare.WebSocketClientActor
                     GatewayConstants.ready_timeout_ms()
                 )
             else
-                Debug.out("[gateway] the hello could not be read, so no heartbeat was started")
+                Debug.out(
+                    "[gateway] the hello could not be read, so no heartbeat "
+                    + "was started"
+                )
             end
         | GatewayOpcodeHeartbeat =>
             Debug.out("[gateway] the gateway asked for a heartbeat right away")
@@ -399,7 +425,9 @@ actor _GatewayConnection is mare.WebSocketClientActor
             match _heartbeat
             | let heartbeat: _GatewayHeartbeat => heartbeat._beat_now()
             else
-                Debug.out("[gateway] ...but there is no heartbeat running to ask")
+                Debug.out(
+                    "[gateway] ...but there is no heartbeat running to ask"
+                )
             end
         | GatewayOpcodeHeartbeatACK =>
             Debug.out("[gateway] the heartbeat was acknowledged")
@@ -407,7 +435,10 @@ actor _GatewayConnection is mare.WebSocketClientActor
             match _heartbeat
             | let heartbeat: _GatewayHeartbeat => heartbeat._acknowledge()
             else
-                Debug.out("[gateway] ...but there is no heartbeat running to acknowledge")
+                Debug.out(
+                    "[gateway] ...but there is no heartbeat running to "
+                    + "acknowledge"
+                )
             end
         | GatewayOpcodeReconnect =>
             Debug.out("[gateway] the gateway asked us to reconnect")
@@ -426,7 +457,10 @@ actor _GatewayConnection is mare.WebSocketClientActor
                 try
                     payload.t as String
                 else
-                    Debug.out("[gateway] dropping a dispatch that carries no event name")
+                    Debug.out(
+                        "[gateway] dropping a dispatch that carries no event "
+                        + "name"
+                    )
                     return
                 end
 
@@ -434,27 +468,37 @@ actor _GatewayConnection is mare.WebSocketClientActor
                 try
                     GatewayDispatchEvents.from(name, payload.d)?
                 else
-                    Debug.out("[gateway] dropping " + name + ": its data could not be read")
+                    Debug.out(
+                        "[gateway] dropping " + name
+                        + ": its data could not be read"
+                    )
                     return
                 end
 
             _on_dispatch(name, event)
         else
             Debug.out(
-                "[gateway] nothing to do for opcode " + payload.op.value().string()
+                "[gateway] nothing to do for opcode "
+                + payload.op.value().string()
             )
         end
 
     fun ref on_throttled() =>
-        Debug.out("[gateway] the connection is backed up, so holding off on sends")
+        Debug.out(
+            "[gateway] the connection is backed up, so holding off on sends"
+        )
         _bucket.throttle()
 
     fun ref on_unthrottled() =>
-        Debug.out("[gateway] the connection has caught up, so sends can go out again")
+        Debug.out(
+            "[gateway] the connection has caught up, so sends can go out again"
+        )
         _bucket.unthrottle()
 
     fun ref on_connection_failure(reason: lori.ConnectionFailureReason) =>
-        Debug.out("[gateway] the connection failed: " + _GatewayFailure.reason(reason))
+        Debug.out(
+            "[gateway] the connection failed: " + _GatewayFailure.reason(reason)
+        )
         _disarm_watchdog()
         options.on_error(GatewayError(_GatewayFailure.reason(reason)))
         _schedule_connect()
@@ -496,7 +540,9 @@ actor _GatewayConnection is mare.WebSocketClientActor
                 + " cannot be recovered from, so staying down"
             )
             options.on_error(
-                GatewayError("the gateway closed the connection: " + status.string())
+                GatewayError(
+                    "the gateway closed the connection: " + status.string()
+                )
             )
             return
         end
@@ -527,7 +573,9 @@ actor _GatewayConnection is mare.WebSocketClientActor
 
     be _send_heartbeat() =>
         if not _open then
-            Debug.out("[gateway] skipping a heartbeat: the connection is not open")
+            Debug.out(
+                "[gateway] skipping a heartbeat: the connection is not open"
+            )
             return
         end
 
@@ -604,7 +652,8 @@ actor _GatewayConnection is mare.WebSocketClientActor
         )
         options.on_error(
             GatewayError(
-                "the session start limit could not be read, so connecting anyway"
+                "the session start limit could not be read, so connecting "
+                + "anyway"
             )
         )
 
@@ -636,7 +685,8 @@ actor _GatewayConnection is mare.WebSocketClientActor
 
     be _heartbeat_dropped(reserve: USize) =>
         Debug.out(
-            "[gateway] a heartbeat was dropped to keep inside the command budget"
+            "[gateway] a heartbeat was dropped to keep inside the command "
+            + "budget"
         )
         options.on_error(
             GatewayError(
@@ -646,7 +696,10 @@ actor _GatewayConnection is mare.WebSocketClientActor
         )
 
     be _heartbeat_timed_out() =>
-        Debug.out("[gateway] a heartbeat went unacknowledged, so the connection is stale")
+        Debug.out(
+            "[gateway] a heartbeat went unacknowledged, so the connection is "
+            + "stale"
+        )
         _reconnect(true)
 
     be _reconnect_now() =>
@@ -718,7 +771,8 @@ actor _GatewayConnection is mare.WebSocketClientActor
                 _give_up("the identify is too big to ever go out")
             | GatewayOpcodeResume =>
                 Debug.out(
-                    "[gateway] the resume is too big, so starting a fresh session"
+                    "[gateway] the resume is too big, so starting a fresh "
+                    + "session"
                 )
                 _reconnect(false)
             end
@@ -782,7 +836,9 @@ actor _GatewayConnection is mare.WebSocketClientActor
         end
 
         if (name == "READY") or (name == "RESUMED") then
-            Debug.out("[gateway] the connection is settled, resetting the backoff")
+            Debug.out(
+                "[gateway] the connection is settled, resetting the backoff"
+            )
             _reconnect_attempts = 0
             _disarm_watchdog()
         end
@@ -790,18 +846,28 @@ actor _GatewayConnection is mare.WebSocketClientActor
         match _events
         | let events: Events => events._dispatch(name, event)
         else
-            Debug.out("[gateway] dropping " + name + ": nothing is listening yet")
+            Debug.out(
+                "[gateway] dropping " + name + ": nothing is listening yet"
+            )
         end
 
     fun ref _reconnect(resume: Bool) =>
         if _disposed then
-            Debug.out("[gateway] not reconnecting: the connection was disposed of")
+            Debug.out(
+                "[gateway] not reconnecting: the connection was disposed of"
+            )
             return
         end
 
         Debug.out(
             "[gateway] reconnecting, "
-            + (if resume then "keeping the session" else "dropping the session" end)
+            + (
+                if resume then
+                    "keeping the session"
+                else
+                    "dropping the session"
+                end
+            )
         )
 
         if not resume then
@@ -820,7 +886,8 @@ actor _GatewayConnection is mare.WebSocketClientActor
             )
         else
             Debug.out(
-                "[gateway] there is no open websocket to close, so dropping the socket"
+                "[gateway] there is no open websocket to close, so dropping "
+                + "the socket"
             )
             _connection().hard_close()
             _schedule_connect()
@@ -835,7 +902,10 @@ actor _GatewayConnection is mare.WebSocketClientActor
 
     fun ref _schedule_connect(delay_ms: (U64 | None) = None) =>
         if _disposed then
-            Debug.out("[gateway] not scheduling a connect: the connection was disposed of")
+            Debug.out(
+                "[gateway] not scheduling a connect: the connection was "
+                + "disposed of"
+            )
             return
         end
 
@@ -855,7 +925,8 @@ actor _GatewayConnection is mare.WebSocketClientActor
             match delay_ms
             | let ms: U64 =>
                 Debug.out(
-                    "[gateway] the next connect is held back by " + ms.string() + "ms"
+                    "[gateway] the next connect is held back by " + ms.string()
+                    + "ms"
                 )
                 time.Nanos.from_millis(ms)
             else
@@ -907,7 +978,9 @@ actor _GatewayConnection is mare.WebSocketClientActor
 
     fun ref _backoff(): U64 =>
         let exponent =
-            (_reconnect_attempts - 1).min(GatewayConstants.max_backoff_exponent())
+            (_reconnect_attempts - 1).min(
+                GatewayConstants.max_backoff_exponent()
+            )
         let delay_ms =
             GatewayConstants.base_backoff_ms() * (U64(1) << exponent.u64())
 
@@ -916,7 +989,10 @@ actor _GatewayConnection is mare.WebSocketClientActor
     fun ref _start_heartbeat(interval_ms: U64) =>
         _stop_heartbeat()
 
-        Debug.out("[gateway] starting a heartbeat every " + interval_ms.string() + "ms")
+        Debug.out(
+            "[gateway] starting a heartbeat every " + interval_ms.string()
+            + "ms"
+        )
 
         let self: _GatewayConnection tag = this
         _heartbeat = _GatewayHeartbeat(self, _timers, interval_ms)
@@ -969,7 +1045,9 @@ actor _GatewayHeartbeat
 
     be _beat() =>
         if _disposed then
-            Debug.out("[gateway] skipping a beat: the heartbeat was disposed of")
+            Debug.out(
+                "[gateway] skipping a beat: the heartbeat was disposed of"
+            )
             return
         end
 
@@ -993,7 +1071,10 @@ actor _GatewayHeartbeat
 
     be _beat_now() =>
         if _disposed then
-            Debug.out("[gateway] skipping an out-of-band beat: the heartbeat was disposed of")
+            Debug.out(
+                "[gateway] skipping an out-of-band beat: the heartbeat was "
+                + "disposed of"
+            )
             return
         end
 

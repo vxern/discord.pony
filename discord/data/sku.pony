@@ -4,9 +4,14 @@ class val SKU is Jsonable
     """
     https://docs.discord.com/developers/resources/sku#sku-object-sku-structure
 
-    SKUs (stock-keeping units) in Discord represent premium offerings that can be made available to your application's users or guilds.
+    SKUs (stock-keeping units) in Discord represent premium offerings that can
+    be made available to your application's users or guilds.
 
-    For subscriptions, SKUs will have a type of either SUBSCRIPTION represented by type: 5 or SUBSCRIPTION_GROUP represented by type: 6. For any current implementations, you will want to use the SKU defined by type: 5. A SUBSCRIPTION_GROUP is automatically created for each SUBSCRIPTION SKU and are not used at this time.
+    For subscriptions, SKUs will have a type of either SUBSCRIPTION represented
+    by type: 5 or SUBSCRIPTION_GROUP represented by type: 6. For any current
+    implementations, you will want to use the SKU defined by type: 5. A
+    SUBSCRIPTION_GROUP is automatically created for each SUBSCRIPTION SKU and
+    are not used at this time.
     """
 
     let id: Snowflake
@@ -98,7 +103,9 @@ primitive _SKUs
         let array = value as json.JsonArray
         recover val
             let skus = Array[SKU](array.size())
-            for sku in array.values() do skus.push(SKU.from_json(sku as json.JsonObject)?) end
+            for sku in array.values() do
+                skus.push(SKU.from_json(sku as json.JsonObject)?)
+            end
             skus
         end
 
@@ -111,11 +118,14 @@ trait val SKUType is _Enum[SKUType, U8]
     """
     https://docs.discord.com/developers/resources/sku#sku-object-sku-types
 
-    For subscriptions, there are two types of access levels you can offer to users:
+    For subscriptions, there are two types of access levels you can offer to
+    users:
 
-        Guild Subscriptions: A subscription purchased by a user and applied to a single server. Everyone in that server gets your premium benefits.
+        Guild Subscriptions: A subscription purchased by a user and applied to a
+        single server. Everyone in that server gets your premium benefits.
 
-        User Subscriptions: A subscription purchased by a user for themselves. They get access to your premium benefits in every server.
+        User Subscriptions: A subscription purchased by a user for themselves.
+        They get access to your premium benefits in every server.
     """
 primitive DurableSKUType is SKUType
     """
@@ -163,13 +173,15 @@ primitive AvailableSKUFlag is SKUFlag
     fun value(): U8 => 2
 primitive GuildSubscriptionSKUFlag is SKUFlag
     """
-    Recurring SKU that can be purchased by a user and applied to a single server. Grants access to every user in that server.
+    Recurring SKU that can be purchased by a user and applied to a single
+    server. Grants access to every user in that server.
     """
 
     fun value(): U8 => 7
 primitive UserSubscriptionSKUFlag is SKUFlag
     """
-    Recurring SKU purchased by a user for themselves. Grants access to the purchasing user in every server.
+    Recurring SKU purchased by a user for themselves. Grants access to the
+    purchasing user in every server.
     """
 
     fun value(): U8 => 8
@@ -198,5 +210,7 @@ primitive _SKUFlags
 
     fun to_json(flags: Array[SKUFlag] val): I64 =>
         var bits: U64 = 0
-        for flag in flags.values() do bits = bits or (U64(1) << flag.value().u64()) end
+        for flag in flags.values() do
+            bits = bits or (U64(1) << flag.value().u64())
+        end
         bits.i64()

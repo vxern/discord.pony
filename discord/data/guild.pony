@@ -5,7 +5,8 @@ class val Guild is Jsonable
     """
     https://docs.discord.com/developers/resources/guild#guild-object-guild-structure
 
-    Guilds in Discord represent an isolated collection of users and channels, and are often referred to as "servers" in the UI.
+    Guilds in Discord represent an isolated collection of users and channels,
+    and are often referred to as "servers" in the UI.
     """
 
     let id: Snowflake
@@ -35,7 +36,8 @@ class val Guild is Jsonable
 
     let discovery_splash: (String | None)
         """
-        discovery splash hash; only present for guilds with the "DISCOVERABLE" feature
+        discovery splash hash; only present for guilds with the "DISCOVERABLE"
+        feature
         """
 
     let owner: (Bool | None)
@@ -50,7 +52,8 @@ class val Guild is Jsonable
 
     let permissions: (Array[Permission] val | None)
         """
-        total permissions for the user in the guild (excludes overwrites and implicit permissions)
+        total permissions for the user in the guild (excludes overwrites and
+        implicit permissions)
         """
 
     let afk_channel_id: (Snowflake | None)
@@ -70,7 +73,8 @@ class val Guild is Jsonable
 
     let widget_channel_id: (Snowflake | None)
         """
-        the channel id that the widget will generate an invite to, or null if set to no invite
+        the channel id that the widget will generate an invite to, or null if
+        set to no invite
         """
 
     let verification_level: VerificationLevel
@@ -102,7 +106,9 @@ class val Guild is Jsonable
         """
         enabled guild features
 
-        Features are left as strings rather than decoded into an enum because Discord adds new feature flags without notice, and an unrecognised one would otherwise fail the decode of the whole guild.
+        Features are left as strings rather than decoded into an enum because
+        Discord adds new feature flags without notice, and an unrecognised one
+        would otherwise fail the decode of the whole guild.
         """
 
     let mfa_level: MFALevel
@@ -117,7 +123,8 @@ class val Guild is Jsonable
 
     let system_channel_id: (Snowflake | None)
         """
-        the id of the channel where guild notices such as welcome messages and boost events are posted
+        the id of the channel where guild notices such as welcome messages and
+        boost events are posted
         """
 
     let system_channel_flags: Array[SystemChannelFlag] val
@@ -127,12 +134,14 @@ class val Guild is Jsonable
 
     let rules_channel_id: (Snowflake | None)
         """
-        the id of the channel where Community guilds can display rules and/or guidelines
+        the id of the channel where Community guilds can display rules and/or
+        guidelines
         """
 
     let max_presences: (USize | None)
         """
-        the maximum number of presences for the guild (null is always returned, apart from the largest of guilds)
+        the maximum number of presences for the guild (null is always returned,
+        apart from the largest of guilds)
         """
 
     let max_members: (USize | None)
@@ -167,12 +176,14 @@ class val Guild is Jsonable
 
     let preferred_locale: Locale
         """
-        the preferred locale of a Community guild; used in server discovery and notices from Discord, and sent in interactions; defaults to "en-US"
+        the preferred locale of a Community guild; used in server discovery and
+        notices from Discord, and sent in interactions; defaults to "en-US"
         """
 
     let public_updates_channel_id: (Snowflake | None)
         """
-        the id of the channel where admins and moderators of Community guilds receive notices from Discord
+        the id of the channel where admins and moderators of Community guilds
+        receive notices from Discord
         """
 
     let max_video_channel_users: (USize | None)
@@ -187,17 +198,21 @@ class val Guild is Jsonable
 
     let approximate_member_count: (USize | None)
         """
-        approximate number of members in this guild, returned from the GET /guilds/<id> and /users/@me/guilds endpoints when with_counts is true
+        approximate number of members in this guild, returned from the GET
+        /guilds/<id> and /users/@me/guilds endpoints when with_counts is true
         """
 
     let approximate_presence_count: (USize | None)
         """
-        approximate number of non-offline members in this guild, returned from the GET /guilds/<id> and /users/@me/guilds endpoints when with_counts is true
+        approximate number of non-offline members in this guild, returned from
+        the GET /guilds/<id> and /users/@me/guilds endpoints when with_counts is
+        true
         """
 
     let welcome_screen: (WelcomeScreen | None)
         """
-        the welcome screen of a Community guild, shown to new members, returned in an Invite's guild object
+        the welcome screen of a Community guild, shown to new members, returned
+        in an Invite's guild object
         """
 
     let nsfw_level: GuildNSFWLevel
@@ -217,7 +232,8 @@ class val Guild is Jsonable
 
     let safety_alerts_channel_id: (Snowflake | None)
         """
-        the id of the channel where admins and moderators of Community guilds receive safety alerts from Discord
+        the id of the channel where admins and moderators of Community guilds
+        receive safety alerts from Discord
         """
 
     let incidents_data: (IncidentsData | None)
@@ -329,7 +345,10 @@ class val Guild is Jsonable
         var widget_enabled': (Bool | None) = None
         var widget_channel_id': (Snowflake | None) = None
         var verification_level': (VerificationLevel | None) = None
-        var default_message_notifications': (DefaultMessageNotificationLevel | None) = None
+        var default_message_notifications': (
+            DefaultMessageNotificationLevel | None
+        ) =
+            None
         var explicit_content_filter': (ExplicitContentFilterLevel | None) = None
         var roles': (Array[Role] val | None) = None
         var emojis': (Array[Emoji] val | None) = None
@@ -370,56 +389,105 @@ class val Guild is Jsonable
             | "splash" =>
                 match value | let string: String => splash' = string end
             | "discovery_splash" =>
-                match value | let string: String => discovery_splash' = string end
+                match value
+                | let string: String => discovery_splash' = string
+                end
             | "owner" => owner' = value as Bool
             | "owner_id" => owner_id' = Snowflake.from_json(value)?
             | "permissions" => permissions' = _Permissions(value)?
             | "afk_channel_id" =>
-                match value | let string: String => afk_channel_id' = Snowflake.from_json(string)? end
+                match value
+                | let string: String =>
+                    afk_channel_id' = Snowflake.from_json(string)?
+                end
             | "afk_timeout" => afk_timeout' = (value as I64).usize()
             | "widget_enabled" => widget_enabled' = value as Bool
             | "widget_channel_id" =>
-                match value | let string: String => widget_channel_id' = Snowflake.from_json(string)? end
-            | "verification_level" => verification_level' = VerificationLevels.from((value as I64).u8())?
-            | "default_message_notifications" => default_message_notifications' = DefaultMessageNotificationLevels.from((value as I64).u8())?
-            | "explicit_content_filter" => explicit_content_filter' = ExplicitContentFilterLevels.from((value as I64).u8())?
+                match value
+                | let string: String =>
+                    widget_channel_id' = Snowflake.from_json(string)?
+                end
+            | "verification_level" =>
+                verification_level' =
+                    VerificationLevels.from((value as I64).u8())?
+            | "default_message_notifications" =>
+                default_message_notifications' =
+                    DefaultMessageNotificationLevels.from((value as I64).u8())?
+            | "explicit_content_filter" =>
+                explicit_content_filter' =
+                    ExplicitContentFilterLevels.from((value as I64).u8())?
             | "roles" => roles' = _Roles(value)?
             | "emojis" => emojis' = _Emojis(value)?
             | "features" => features' = _Strings(value)?
             | "mfa_level" => mfa_level' = MFALevels.from((value as I64).u8())?
             | "application_id" =>
-                match value | let string: String => application_id' = Snowflake.from_json(string)? end
+                match value
+                | let string: String =>
+                    application_id' = Snowflake.from_json(string)?
+                end
             | "system_channel_id" =>
-                match value | let string: String => system_channel_id' = Snowflake.from_json(string)? end
-            | "system_channel_flags" => system_channel_flags' = _SystemChannelFlags((value as I64).u64())
+                match value
+                | let string: String =>
+                    system_channel_id' = Snowflake.from_json(string)?
+                end
+            | "system_channel_flags" =>
+                system_channel_flags' =
+                    _SystemChannelFlags((value as I64).u64())
             | "rules_channel_id" =>
-                match value | let string: String => rules_channel_id' = Snowflake.from_json(string)? end
+                match value
+                | let string: String =>
+                    rules_channel_id' = Snowflake.from_json(string)?
+                end
             | "max_presences" =>
-                match value | let integer: I64 => max_presences' = integer.usize() end
+                match value
+                | let integer: I64 => max_presences' = integer.usize()
+                end
             | "max_members" => max_members' = (value as I64).usize()
             | "vanity_url_code" =>
-                match value | let string: String => vanity_url_code' = string end
+                match value
+                | let string: String => vanity_url_code' = string
+                end
             | "description" =>
                 match value | let string: String => description' = string end
             | "banner" =>
                 match value | let string: String => banner' = string end
-            | "premium_tier" => premium_tier' = PremiumTiers.from((value as I64).u8())?
-            | "premium_subscription_count" => premium_subscription_count' = (value as I64).usize()
-            | "preferred_locale" => preferred_locale' = Locales.from(value as String)?
+            | "premium_tier" =>
+                premium_tier' = PremiumTiers.from((value as I64).u8())?
+            | "premium_subscription_count" =>
+                premium_subscription_count' = (value as I64).usize()
+            | "preferred_locale" =>
+                preferred_locale' = Locales.from(value as String)?
             | "public_updates_channel_id" =>
-                match value | let string: String => public_updates_channel_id' = Snowflake.from_json(string)? end
-            | "max_video_channel_users" => max_video_channel_users' = (value as I64).usize()
-            | "max_stage_video_channel_users" => max_stage_video_channel_users' = (value as I64).usize()
-            | "approximate_member_count" => approximate_member_count' = (value as I64).usize()
-            | "approximate_presence_count" => approximate_presence_count' = (value as I64).usize()
-            | "welcome_screen" => welcome_screen' = WelcomeScreen.from_json(value as json.JsonObject)?
-            | "nsfw_level" => nsfw_level' = GuildNSFWLevels.from((value as I64).u8())?
+                match value
+                | let string: String =>
+                    public_updates_channel_id' = Snowflake.from_json(string)?
+                end
+            | "max_video_channel_users" =>
+                max_video_channel_users' = (value as I64).usize()
+            | "max_stage_video_channel_users" =>
+                max_stage_video_channel_users' = (value as I64).usize()
+            | "approximate_member_count" =>
+                approximate_member_count' = (value as I64).usize()
+            | "approximate_presence_count" =>
+                approximate_presence_count' = (value as I64).usize()
+            | "welcome_screen" =>
+                welcome_screen' =
+                    WelcomeScreen.from_json(value as json.JsonObject)?
+            | "nsfw_level" =>
+                nsfw_level' = GuildNSFWLevels.from((value as I64).u8())?
             | "stickers" => stickers' = _Stickers(value)?
-            | "premium_progress_bar_enabled" => premium_progress_bar_enabled' = value as Bool
+            | "premium_progress_bar_enabled" =>
+                premium_progress_bar_enabled' = value as Bool
             | "safety_alerts_channel_id" =>
-                match value | let string: String => safety_alerts_channel_id' = Snowflake.from_json(string)? end
+                match value
+                | let string: String =>
+                    safety_alerts_channel_id' = Snowflake.from_json(string)?
+                end
             | "incidents_data" =>
-                match value | let obj': json.JsonObject => incidents_data' = IncidentsData.from_json(obj') end
+                match value
+                | let obj': json.JsonObject =>
+                    incidents_data' = IncidentsData.from_json(obj')
+                end
             end
         end
 
@@ -437,15 +505,18 @@ class val Guild is Jsonable
         widget_enabled = widget_enabled'
         widget_channel_id = widget_channel_id'
         verification_level = verification_level' as VerificationLevel
-        default_message_notifications = default_message_notifications' as DefaultMessageNotificationLevel
-        explicit_content_filter = explicit_content_filter' as ExplicitContentFilterLevel
+        default_message_notifications =
+            default_message_notifications' as DefaultMessageNotificationLevel
+        explicit_content_filter =
+            explicit_content_filter' as ExplicitContentFilterLevel
         roles = roles' as Array[Role] val
         emojis = emojis' as Array[Emoji] val
         features = features' as Array[String] val
         mfa_level = mfa_level' as MFALevel
         application_id = application_id'
         system_channel_id = system_channel_id'
-        system_channel_flags = system_channel_flags' as Array[SystemChannelFlag] val
+        system_channel_flags =
+            system_channel_flags' as Array[SystemChannelFlag] val
         rules_channel_id = rules_channel_id'
         max_presences = max_presences'
         max_members = max_members'
@@ -475,29 +546,79 @@ class val Guild is Jsonable
             .update("splash", splash)
             .update("discovery_splash", discovery_splash)
             .update("owner_id", owner_id.to_json())
-            .update("afk_channel_id", match afk_channel_id | let afk_channel_id': Snowflake => afk_channel_id'.to_json() end)
+            .update(
+                "afk_channel_id",
+                match afk_channel_id
+                | let afk_channel_id': Snowflake => afk_channel_id'.to_json()
+                end
+            )
             .update("afk_timeout", afk_timeout.i64())
             .update("verification_level", verification_level.value().i64())
-            .update("default_message_notifications", default_message_notifications.value().i64())
-            .update("explicit_content_filter", explicit_content_filter.value().i64())
+            .update(
+                "default_message_notifications",
+                default_message_notifications.value().i64()
+            )
+            .update(
+                "explicit_content_filter", explicit_content_filter.value().i64()
+            )
             .update("roles", _Roles.to_json(roles))
             .update("emojis", _Emojis.to_json(emojis))
             .update("features", _Strings.to_json(features))
             .update("mfa_level", mfa_level.value().i64())
-            .update("application_id", match application_id | let application_id': Snowflake => application_id'.to_json() end)
-            .update("system_channel_id", match system_channel_id | let system_channel_id': Snowflake => system_channel_id'.to_json() end)
-            .update("system_channel_flags", _SystemChannelFlags.to_json(system_channel_flags))
-            .update("rules_channel_id", match rules_channel_id | let rules_channel_id': Snowflake => rules_channel_id'.to_json() end)
+            .update(
+                "application_id",
+                match application_id
+                | let application_id': Snowflake => application_id'.to_json()
+                end
+            )
+            .update(
+                "system_channel_id",
+                match system_channel_id
+                | let system_channel_id': Snowflake =>
+                    system_channel_id'.to_json()
+                end
+            )
+            .update(
+                "system_channel_flags",
+                _SystemChannelFlags.to_json(system_channel_flags)
+            )
+            .update(
+                "rules_channel_id",
+                match rules_channel_id
+                | let rules_channel_id': Snowflake =>
+                    rules_channel_id'.to_json()
+                end
+            )
             .update("vanity_url_code", vanity_url_code)
             .update("description", description)
             .update("banner", banner)
             .update("premium_tier", premium_tier.value().i64())
             .update("preferred_locale", preferred_locale.value())
-            .update("public_updates_channel_id", match public_updates_channel_id | let public_updates_channel_id': Snowflake => public_updates_channel_id'.to_json() end)
+            .update(
+                "public_updates_channel_id",
+                match public_updates_channel_id
+                | let public_updates_channel_id': Snowflake =>
+                    public_updates_channel_id'.to_json()
+                end
+            )
             .update("nsfw_level", nsfw_level.value().i64())
-            .update("premium_progress_bar_enabled", premium_progress_bar_enabled)
-            .update("safety_alerts_channel_id", match safety_alerts_channel_id | let safety_alerts_channel_id': Snowflake => safety_alerts_channel_id'.to_json() end)
-            .update("incidents_data", match incidents_data | let incidents_data': IncidentsData => incidents_data'.to_json() end)
+            .update(
+                "premium_progress_bar_enabled", premium_progress_bar_enabled
+            )
+            .update(
+                "safety_alerts_channel_id",
+                match safety_alerts_channel_id
+                | let safety_alerts_channel_id': Snowflake =>
+                    safety_alerts_channel_id'.to_json()
+                end
+            )
+            .update(
+                "incidents_data",
+                match incidents_data
+                | let incidents_data': IncidentsData =>
+                    incidents_data'.to_json()
+                end
+            )
 
         match icon_hash
         | let icon_hash': String => obj = obj.update("icon_hash", icon_hash')
@@ -508,51 +629,81 @@ class val Guild is Jsonable
         end
 
         match permissions
-        | let permissions': Array[Permission] val => obj = obj.update("permissions", _Permissions.to_json(permissions'))
+        | let permissions': Array[Permission] val =>
+            obj = obj.update("permissions", _Permissions.to_json(permissions'))
         end
 
         match widget_enabled
-        | let widget_enabled': Bool => obj = obj.update("widget_enabled", widget_enabled')
+        | let widget_enabled': Bool =>
+            obj = obj.update("widget_enabled", widget_enabled')
         end
 
         match widget_channel_id
-        | let widget_channel_id': Snowflake => obj = obj.update("widget_channel_id", widget_channel_id'.to_json())
+        | let widget_channel_id': Snowflake =>
+            obj = obj.update("widget_channel_id", widget_channel_id'.to_json())
         end
 
         match max_presences
-        | let max_presences': USize => obj = obj.update("max_presences", max_presences'.i64())
+        | let max_presences': USize =>
+            obj = obj.update("max_presences", max_presences'.i64())
         end
 
         match max_members
-        | let max_members': USize => obj = obj.update("max_members", max_members'.i64())
+        | let max_members': USize =>
+            obj = obj.update("max_members", max_members'.i64())
         end
 
         match premium_subscription_count
-        | let premium_subscription_count': USize => obj = obj.update("premium_subscription_count", premium_subscription_count'.i64())
+        | let premium_subscription_count': USize =>
+            obj =
+                obj.update(
+                    "premium_subscription_count",
+                    premium_subscription_count'.i64()
+                )
         end
 
         match max_video_channel_users
-        | let max_video_channel_users': USize => obj = obj.update("max_video_channel_users", max_video_channel_users'.i64())
+        | let max_video_channel_users': USize =>
+            obj =
+                obj.update(
+                    "max_video_channel_users", max_video_channel_users'.i64()
+                )
         end
 
         match max_stage_video_channel_users
-        | let max_stage_video_channel_users': USize => obj = obj.update("max_stage_video_channel_users", max_stage_video_channel_users'.i64())
+        | let max_stage_video_channel_users': USize =>
+            obj =
+                obj.update(
+                    "max_stage_video_channel_users",
+                    max_stage_video_channel_users'.i64()
+                )
         end
 
         match approximate_member_count
-        | let approximate_member_count': USize => obj = obj.update("approximate_member_count", approximate_member_count'.i64())
+        | let approximate_member_count': USize =>
+            obj =
+                obj.update(
+                    "approximate_member_count", approximate_member_count'.i64()
+                )
         end
 
         match approximate_presence_count
-        | let approximate_presence_count': USize => obj = obj.update("approximate_presence_count", approximate_presence_count'.i64())
+        | let approximate_presence_count': USize =>
+            obj =
+                obj.update(
+                    "approximate_presence_count",
+                    approximate_presence_count'.i64()
+                )
         end
 
         match welcome_screen
-        | let welcome_screen': WelcomeScreen => obj = obj.update("welcome_screen", welcome_screen'.to_json())
+        | let welcome_screen': WelcomeScreen =>
+            obj = obj.update("welcome_screen", welcome_screen'.to_json())
         end
 
         match stickers
-        | let stickers': Array[Sticker] val => obj = obj.update("stickers", _Stickers.to_json(stickers'))
+        | let stickers': Array[Sticker] val =>
+            obj = obj.update("stickers", _Stickers.to_json(stickers'))
         end
 
         obj
@@ -566,7 +717,9 @@ primitive _Guilds
         let array = value as json.JsonArray
         recover val
             let guilds = Array[Guild](array.size())
-            for guild in array.values() do guilds.push(Guild.from_json(guild as json.JsonObject)?) end
+            for guild in array.values() do
+                guilds.push(Guild.from_json(guild as json.JsonObject)?)
+            end
             guilds
         end
 
@@ -585,9 +738,10 @@ class val PartialGuild is Jsonable
     fields they include, so every field here but `id` is optional.
 
     The fields mean exactly what their `Guild` counterparts do, and are
-    documented there. `Guild` is what a route hands back when it promises a whole
-    guild; this is what it hands back when it promises a piece of one. A field
-    Discord omits is indistinguishable from a field Discord sent as `null`.
+    documented there. `Guild` is what a route hands back when it promises a
+    whole guild; this is what it hands back when it promises a piece of one. A
+    field Discord omits is indistinguishable from a field Discord sent as
+    `null`.
     """
 
     let id: Snowflake
@@ -649,7 +803,10 @@ class val PartialGuild is Jsonable
         widget_enabled': (Bool | None) = None,
         widget_channel_id': (Snowflake | None) = None,
         verification_level': (VerificationLevel | None) = None,
-        default_message_notifications': (DefaultMessageNotificationLevel | None) = None,
+        default_message_notifications': (
+            DefaultMessageNotificationLevel | None
+        ) =
+            None,
         explicit_content_filter': (ExplicitContentFilterLevel | None) = None,
         roles': (Array[Role] val | None) = None,
         emojis': (Array[Emoji] val | None) = None,
@@ -738,7 +895,10 @@ class val PartialGuild is Jsonable
         var widget_enabled': (Bool | None) = None
         var widget_channel_id': (Snowflake | None) = None
         var verification_level': (VerificationLevel | None) = None
-        var default_message_notifications': (DefaultMessageNotificationLevel | None) = None
+        var default_message_notifications': (
+            DefaultMessageNotificationLevel | None
+        ) =
+            None
         var explicit_content_filter': (ExplicitContentFilterLevel | None) = None
         var roles': (Array[Role] val | None) = None
         var emojis': (Array[Emoji] val | None) = None
@@ -780,56 +940,105 @@ class val PartialGuild is Jsonable
             | "splash" =>
                 match value | let string: String => splash' = string end
             | "discovery_splash" =>
-                match value | let string: String => discovery_splash' = string end
+                match value
+                | let string: String => discovery_splash' = string
+                end
             | "owner" => owner' = value as Bool
             | "owner_id" => owner_id' = Snowflake.from_json(value)?
             | "permissions" => permissions' = _Permissions(value)?
             | "afk_channel_id" =>
-                match value | let string: String => afk_channel_id' = Snowflake.from_json(string)? end
+                match value
+                | let string: String =>
+                    afk_channel_id' = Snowflake.from_json(string)?
+                end
             | "afk_timeout" => afk_timeout' = (value as I64).usize()
             | "widget_enabled" => widget_enabled' = value as Bool
             | "widget_channel_id" =>
-                match value | let string: String => widget_channel_id' = Snowflake.from_json(string)? end
-            | "verification_level" => verification_level' = VerificationLevels.from((value as I64).u8())?
-            | "default_message_notifications" => default_message_notifications' = DefaultMessageNotificationLevels.from((value as I64).u8())?
-            | "explicit_content_filter" => explicit_content_filter' = ExplicitContentFilterLevels.from((value as I64).u8())?
+                match value
+                | let string: String =>
+                    widget_channel_id' = Snowflake.from_json(string)?
+                end
+            | "verification_level" =>
+                verification_level' =
+                    VerificationLevels.from((value as I64).u8())?
+            | "default_message_notifications" =>
+                default_message_notifications' =
+                    DefaultMessageNotificationLevels.from((value as I64).u8())?
+            | "explicit_content_filter" =>
+                explicit_content_filter' =
+                    ExplicitContentFilterLevels.from((value as I64).u8())?
             | "roles" => roles' = _Roles(value)?
             | "emojis" => emojis' = _Emojis(value)?
             | "features" => features' = _Strings(value)?
             | "mfa_level" => mfa_level' = MFALevels.from((value as I64).u8())?
             | "application_id" =>
-                match value | let string: String => application_id' = Snowflake.from_json(string)? end
+                match value
+                | let string: String =>
+                    application_id' = Snowflake.from_json(string)?
+                end
             | "system_channel_id" =>
-                match value | let string: String => system_channel_id' = Snowflake.from_json(string)? end
-            | "system_channel_flags" => system_channel_flags' = _SystemChannelFlags((value as I64).u64())
+                match value
+                | let string: String =>
+                    system_channel_id' = Snowflake.from_json(string)?
+                end
+            | "system_channel_flags" =>
+                system_channel_flags' =
+                    _SystemChannelFlags((value as I64).u64())
             | "rules_channel_id" =>
-                match value | let string: String => rules_channel_id' = Snowflake.from_json(string)? end
+                match value
+                | let string: String =>
+                    rules_channel_id' = Snowflake.from_json(string)?
+                end
             | "max_presences" =>
-                match value | let integer: I64 => max_presences' = integer.usize() end
+                match value
+                | let integer: I64 => max_presences' = integer.usize()
+                end
             | "max_members" => max_members' = (value as I64).usize()
             | "vanity_url_code" =>
-                match value | let string: String => vanity_url_code' = string end
+                match value
+                | let string: String => vanity_url_code' = string
+                end
             | "description" =>
                 match value | let string: String => description' = string end
             | "banner" =>
                 match value | let string: String => banner' = string end
-            | "premium_tier" => premium_tier' = PremiumTiers.from((value as I64).u8())?
-            | "premium_subscription_count" => premium_subscription_count' = (value as I64).usize()
-            | "preferred_locale" => preferred_locale' = Locales.from(value as String)?
+            | "premium_tier" =>
+                premium_tier' = PremiumTiers.from((value as I64).u8())?
+            | "premium_subscription_count" =>
+                premium_subscription_count' = (value as I64).usize()
+            | "preferred_locale" =>
+                preferred_locale' = Locales.from(value as String)?
             | "public_updates_channel_id" =>
-                match value | let string: String => public_updates_channel_id' = Snowflake.from_json(string)? end
-            | "max_video_channel_users" => max_video_channel_users' = (value as I64).usize()
-            | "max_stage_video_channel_users" => max_stage_video_channel_users' = (value as I64).usize()
-            | "approximate_member_count" => approximate_member_count' = (value as I64).usize()
-            | "approximate_presence_count" => approximate_presence_count' = (value as I64).usize()
-            | "welcome_screen" => welcome_screen' = WelcomeScreen.from_json(value as json.JsonObject)?
-            | "nsfw_level" => nsfw_level' = GuildNSFWLevels.from((value as I64).u8())?
+                match value
+                | let string: String =>
+                    public_updates_channel_id' = Snowflake.from_json(string)?
+                end
+            | "max_video_channel_users" =>
+                max_video_channel_users' = (value as I64).usize()
+            | "max_stage_video_channel_users" =>
+                max_stage_video_channel_users' = (value as I64).usize()
+            | "approximate_member_count" =>
+                approximate_member_count' = (value as I64).usize()
+            | "approximate_presence_count" =>
+                approximate_presence_count' = (value as I64).usize()
+            | "welcome_screen" =>
+                welcome_screen' =
+                    WelcomeScreen.from_json(value as json.JsonObject)?
+            | "nsfw_level" =>
+                nsfw_level' = GuildNSFWLevels.from((value as I64).u8())?
             | "stickers" => stickers' = _Stickers(value)?
-            | "premium_progress_bar_enabled" => premium_progress_bar_enabled' = value as Bool
+            | "premium_progress_bar_enabled" =>
+                premium_progress_bar_enabled' = value as Bool
             | "safety_alerts_channel_id" =>
-                match value | let string: String => safety_alerts_channel_id' = Snowflake.from_json(string)? end
+                match value
+                | let string: String =>
+                    safety_alerts_channel_id' = Snowflake.from_json(string)?
+                end
             | "incidents_data" =>
-                match value | let obj': json.JsonObject => incidents_data' = IncidentsData.from_json(obj') end
+                match value
+                | let obj': json.JsonObject =>
+                    incidents_data' = IncidentsData.from_json(obj')
+                end
             end
         end
 
@@ -897,7 +1106,8 @@ class val PartialGuild is Jsonable
         end
 
         match discovery_splash
-        | let discovery_splash': String => obj = obj.update("discovery_splash", discovery_splash')
+        | let discovery_splash': String =>
+            obj = obj.update("discovery_splash", discovery_splash')
         end
 
         match owner
@@ -905,87 +1115,123 @@ class val PartialGuild is Jsonable
         end
 
         match owner_id
-        | let owner_id': Snowflake => obj = obj.update("owner_id", owner_id'.to_json())
+        | let owner_id': Snowflake =>
+            obj = obj.update("owner_id", owner_id'.to_json())
         end
 
         match permissions
-        | let permissions': Array[Permission] val => obj = obj.update("permissions", _Permissions.to_json(permissions'))
+        | let permissions': Array[Permission] val =>
+            obj = obj.update("permissions", _Permissions.to_json(permissions'))
         end
 
         match afk_channel_id
-        | let afk_channel_id': Snowflake => obj = obj.update("afk_channel_id", afk_channel_id'.to_json())
+        | let afk_channel_id': Snowflake =>
+            obj = obj.update("afk_channel_id", afk_channel_id'.to_json())
         end
 
         match afk_timeout
-        | let afk_timeout': USize => obj = obj.update("afk_timeout", afk_timeout'.i64())
+        | let afk_timeout': USize =>
+            obj = obj.update("afk_timeout", afk_timeout'.i64())
         end
 
         match widget_enabled
-        | let widget_enabled': Bool => obj = obj.update("widget_enabled", widget_enabled')
+        | let widget_enabled': Bool =>
+            obj = obj.update("widget_enabled", widget_enabled')
         end
 
         match widget_channel_id
-        | let widget_channel_id': Snowflake => obj = obj.update("widget_channel_id", widget_channel_id'.to_json())
+        | let widget_channel_id': Snowflake =>
+            obj = obj.update("widget_channel_id", widget_channel_id'.to_json())
         end
 
         match verification_level
-        | let verification_level': VerificationLevel => obj = obj.update("verification_level", verification_level'.value().i64())
+        | let verification_level': VerificationLevel =>
+            obj =
+                obj.update(
+                    "verification_level", verification_level'.value().i64()
+                )
         end
 
         match default_message_notifications
-        | let default_message_notifications': DefaultMessageNotificationLevel => obj = obj.update("default_message_notifications", default_message_notifications'.value().i64())
+        | let default_message_notifications': DefaultMessageNotificationLevel =>
+            obj =
+                obj.update(
+                    "default_message_notifications",
+                    default_message_notifications'.value().i64()
+                )
         end
 
         match explicit_content_filter
-        | let explicit_content_filter': ExplicitContentFilterLevel => obj = obj.update("explicit_content_filter", explicit_content_filter'.value().i64())
+        | let explicit_content_filter': ExplicitContentFilterLevel =>
+            obj =
+                obj.update(
+                    "explicit_content_filter",
+                    explicit_content_filter'.value().i64()
+                )
         end
 
         match roles
-        | let roles': Array[Role] val => obj = obj.update("roles", _Roles.to_json(roles'))
+        | let roles': Array[Role] val =>
+            obj = obj.update("roles", _Roles.to_json(roles'))
         end
 
         match emojis
-        | let emojis': Array[Emoji] val => obj = obj.update("emojis", _Emojis.to_json(emojis'))
+        | let emojis': Array[Emoji] val =>
+            obj = obj.update("emojis", _Emojis.to_json(emojis'))
         end
 
         match features
-        | let features': Array[String] val => obj = obj.update("features", _Strings.to_json(features'))
+        | let features': Array[String] val =>
+            obj = obj.update("features", _Strings.to_json(features'))
         end
 
         match mfa_level
-        | let mfa_level': MFALevel => obj = obj.update("mfa_level", mfa_level'.value().i64())
+        | let mfa_level': MFALevel =>
+            obj = obj.update("mfa_level", mfa_level'.value().i64())
         end
 
         match application_id
-        | let application_id': Snowflake => obj = obj.update("application_id", application_id'.to_json())
+        | let application_id': Snowflake =>
+            obj = obj.update("application_id", application_id'.to_json())
         end
 
         match system_channel_id
-        | let system_channel_id': Snowflake => obj = obj.update("system_channel_id", system_channel_id'.to_json())
+        | let system_channel_id': Snowflake =>
+            obj = obj.update("system_channel_id", system_channel_id'.to_json())
         end
 
         match system_channel_flags
-        | let system_channel_flags': Array[SystemChannelFlag] val => obj = obj.update("system_channel_flags", _SystemChannelFlags.to_json(system_channel_flags'))
+        | let system_channel_flags': Array[SystemChannelFlag] val =>
+            obj =
+                obj.update(
+                    "system_channel_flags",
+                    _SystemChannelFlags.to_json(system_channel_flags')
+                )
         end
 
         match rules_channel_id
-        | let rules_channel_id': Snowflake => obj = obj.update("rules_channel_id", rules_channel_id'.to_json())
+        | let rules_channel_id': Snowflake =>
+            obj = obj.update("rules_channel_id", rules_channel_id'.to_json())
         end
 
         match max_presences
-        | let max_presences': USize => obj = obj.update("max_presences", max_presences'.i64())
+        | let max_presences': USize =>
+            obj = obj.update("max_presences", max_presences'.i64())
         end
 
         match max_members
-        | let max_members': USize => obj = obj.update("max_members", max_members'.i64())
+        | let max_members': USize =>
+            obj = obj.update("max_members", max_members'.i64())
         end
 
         match vanity_url_code
-        | let vanity_url_code': String => obj = obj.update("vanity_url_code", vanity_url_code')
+        | let vanity_url_code': String =>
+            obj = obj.update("vanity_url_code", vanity_url_code')
         end
 
         match description
-        | let description': String => obj = obj.update("description", description')
+        | let description': String =>
+            obj = obj.update("description", description')
         end
 
         match banner
@@ -993,59 +1239,103 @@ class val PartialGuild is Jsonable
         end
 
         match premium_tier
-        | let premium_tier': PremiumTier => obj = obj.update("premium_tier", premium_tier'.value().i64())
+        | let premium_tier': PremiumTier =>
+            obj = obj.update("premium_tier", premium_tier'.value().i64())
         end
 
         match premium_subscription_count
-        | let premium_subscription_count': USize => obj = obj.update("premium_subscription_count", premium_subscription_count'.i64())
+        | let premium_subscription_count': USize =>
+            obj =
+                obj.update(
+                    "premium_subscription_count",
+                    premium_subscription_count'.i64()
+                )
         end
 
         match preferred_locale
-        | let preferred_locale': Locale => obj = obj.update("preferred_locale", preferred_locale'.value())
+        | let preferred_locale': Locale =>
+            obj = obj.update("preferred_locale", preferred_locale'.value())
         end
 
         match public_updates_channel_id
-        | let public_updates_channel_id': Snowflake => obj = obj.update("public_updates_channel_id", public_updates_channel_id'.to_json())
+        | let public_updates_channel_id': Snowflake =>
+            obj =
+                obj.update(
+                    "public_updates_channel_id",
+                    public_updates_channel_id'.to_json()
+                )
         end
 
         match max_video_channel_users
-        | let max_video_channel_users': USize => obj = obj.update("max_video_channel_users", max_video_channel_users'.i64())
+        | let max_video_channel_users': USize =>
+            obj =
+                obj.update(
+                    "max_video_channel_users", max_video_channel_users'.i64()
+                )
         end
 
         match max_stage_video_channel_users
-        | let max_stage_video_channel_users': USize => obj = obj.update("max_stage_video_channel_users", max_stage_video_channel_users'.i64())
+        | let max_stage_video_channel_users': USize =>
+            obj =
+                obj.update(
+                    "max_stage_video_channel_users",
+                    max_stage_video_channel_users'.i64()
+                )
         end
 
         match approximate_member_count
-        | let approximate_member_count': USize => obj = obj.update("approximate_member_count", approximate_member_count'.i64())
+        | let approximate_member_count': USize =>
+            obj =
+                obj.update(
+                    "approximate_member_count", approximate_member_count'.i64()
+                )
         end
 
         match approximate_presence_count
-        | let approximate_presence_count': USize => obj = obj.update("approximate_presence_count", approximate_presence_count'.i64())
+        | let approximate_presence_count': USize =>
+            obj =
+                obj.update(
+                    "approximate_presence_count",
+                    approximate_presence_count'.i64()
+                )
         end
 
         match welcome_screen
-        | let welcome_screen': WelcomeScreen => obj = obj.update("welcome_screen", welcome_screen'.to_json())
+        | let welcome_screen': WelcomeScreen =>
+            obj = obj.update("welcome_screen", welcome_screen'.to_json())
         end
 
         match nsfw_level
-        | let nsfw_level': GuildNSFWLevel => obj = obj.update("nsfw_level", nsfw_level'.value().i64())
+        | let nsfw_level': GuildNSFWLevel =>
+            obj = obj.update("nsfw_level", nsfw_level'.value().i64())
         end
 
         match stickers
-        | let stickers': Array[Sticker] val => obj = obj.update("stickers", _Stickers.to_json(stickers'))
+        | let stickers': Array[Sticker] val =>
+            obj = obj.update("stickers", _Stickers.to_json(stickers'))
         end
 
         match premium_progress_bar_enabled
-        | let premium_progress_bar_enabled': Bool => obj = obj.update("premium_progress_bar_enabled", premium_progress_bar_enabled')
+        | let premium_progress_bar_enabled': Bool =>
+            obj =
+                obj.update(
+                    "premium_progress_bar_enabled",
+                    premium_progress_bar_enabled'
+                )
         end
 
         match safety_alerts_channel_id
-        | let safety_alerts_channel_id': Snowflake => obj = obj.update("safety_alerts_channel_id", safety_alerts_channel_id'.to_json())
+        | let safety_alerts_channel_id': Snowflake =>
+            obj =
+                obj.update(
+                    "safety_alerts_channel_id",
+                    safety_alerts_channel_id'.to_json()
+                )
         end
 
         match incidents_data
-        | let incidents_data': IncidentsData => obj = obj.update("incidents_data", incidents_data'.to_json())
+        | let incidents_data': IncidentsData =>
+            obj = obj.update("incidents_data", incidents_data'.to_json())
         end
 
         obj
@@ -1059,7 +1349,9 @@ primitive _PartialGuilds
         let array = value as json.JsonArray
         recover val
             let guilds = Array[PartialGuild](array.size())
-            for guild in array.values() do guilds.push(PartialGuild.from_json(guild as json.JsonObject)?) end
+            for guild in array.values() do
+                guilds.push(PartialGuild.from_json(guild as json.JsonObject)?)
+            end
             guilds
         end
 
@@ -1072,7 +1364,9 @@ class val UnavailableGuild is Jsonable
     """
     https://docs.discord.com/developers/resources/guild#unavailable-guild-object
 
-    A partial guild object. Represents an Offline Guild, or a Guild whose information has not been provided through `GUILD_CREATE` events during the Gateway connect.
+    A partial guild object. Represents an Offline Guild, or a Guild whose
+    information has not been provided through `GUILD_CREATE` events during the
+    Gateway connect.
     """
 
     let id: Snowflake
@@ -1084,7 +1378,8 @@ class val UnavailableGuild is Jsonable
         """
         `true` if this guild is unavailable due to an outage
 
-        A `GUILD_DELETE` without this field set means the user was removed from the guild.
+        A `GUILD_DELETE` without this field set means the user was removed from
+        the guild.
         """
 
     new val create(id': Snowflake, unavailable': (Bool | None) = None) =>
@@ -1109,7 +1404,8 @@ class val UnavailableGuild is Jsonable
         var obj = json.JsonObject.update("id", id.to_json())
 
         match unavailable
-        | let unavailable': Bool => obj = obj.update("unavailable", unavailable')
+        | let unavailable': Bool =>
+            obj = obj.update("unavailable", unavailable')
         end
 
         obj
@@ -1123,7 +1419,11 @@ primitive _UnavailableGuilds
         let array = value as json.JsonArray
         recover val
             let guilds = Array[UnavailableGuild](array.size())
-            for guild in array.values() do guilds.push(UnavailableGuild.from_json(guild as json.JsonObject)?) end
+            for guild in array.values() do
+                guilds.push(
+                    UnavailableGuild.from_json(guild as json.JsonObject)?
+                )
+            end
             guilds
         end
 
@@ -1132,19 +1432,24 @@ primitive _UnavailableGuilds
         for guild in guilds.values() do array = array.push(guild.to_json()) end
         array
 
-trait val DefaultMessageNotificationLevel is _Enum[DefaultMessageNotificationLevel, U8]
+trait val DefaultMessageNotificationLevel is _Enum[
+    DefaultMessageNotificationLevel, U8
+]
     """
     https://docs.discord.com/developers/resources/guild#guild-object-default-message-notification-level
     """
-primitive AllMessagesDefaultMessageNotificationLevel is DefaultMessageNotificationLevel
+primitive AllMessagesDefaultMessageNotificationLevel is
+    DefaultMessageNotificationLevel
     """
     members will receive notifications for all messages by default
     """
 
     fun value(): U8 => 0
-primitive OnlyMentionsDefaultMessageNotificationLevel is DefaultMessageNotificationLevel
+primitive OnlyMentionsDefaultMessageNotificationLevel is
+    DefaultMessageNotificationLevel
     """
-    members will receive notifications only for messages that @mention them by default
+    members will receive notifications only for messages that @mention them by
+    default
     """
 
     fun value(): U8 => 1
@@ -1166,7 +1471,8 @@ primitive DisabledExplicitContentFilterLevel is ExplicitContentFilterLevel
     """
 
     fun value(): U8 => 0
-primitive MembersWithoutRolesExplicitContentFilterLevel is ExplicitContentFilterLevel
+primitive MembersWithoutRolesExplicitContentFilterLevel is
+    ExplicitContentFilterLevel
     """
     media content sent by members without roles will be scanned
     """
@@ -1332,7 +1638,8 @@ primitive SuppressPremiumSubscriptionsSystemChannelFlag is SystemChannelFlag
     """
 
     fun value(): U8 => 1
-primitive SuppressGuildReminderNotificationsSystemChannelFlag is SystemChannelFlag
+primitive SuppressGuildReminderNotificationsSystemChannelFlag is
+    SystemChannelFlag
     """
     Suppress server setup tips
     """
@@ -1344,13 +1651,15 @@ primitive SuppressJoinNotificationRepliesSystemChannelFlag is SystemChannelFlag
     """
 
     fun value(): U8 => 3
-primitive SuppressRoleSubscriptionPurchaseNotificationsSystemChannelFlag is SystemChannelFlag
+primitive SuppressRoleSubscriptionPurchaseNotificationsSystemChannelFlag is
+    SystemChannelFlag
     """
     Suppress role subscription purchase and renewal notifications
     """
 
     fun value(): U8 => 4
-primitive SuppressRoleSubscriptionPurchaseNotificationRepliesSystemChannelFlag is SystemChannelFlag
+primitive SuppressRoleSubscriptionPurchaseNotificationRepliesSystemChannelFlag
+    is SystemChannelFlag
     """
     Hide role subscription sticker reply buttons
     """
@@ -1364,7 +1673,8 @@ primitive SystemChannelFlags
         | 2 => SuppressGuildReminderNotificationsSystemChannelFlag
         | 3 => SuppressJoinNotificationRepliesSystemChannelFlag
         | 4 => SuppressRoleSubscriptionPurchaseNotificationsSystemChannelFlag
-        | 5 => SuppressRoleSubscriptionPurchaseNotificationRepliesSystemChannelFlag
+        | 5 =>
+            SuppressRoleSubscriptionPurchaseNotificationRepliesSystemChannelFlag
         else error
         end
 
@@ -1384,7 +1694,9 @@ primitive _SystemChannelFlags
 
     fun to_json(flags: Array[SystemChannelFlag] val): I64 =>
         var bits: U64 = 0
-        for flag in flags.values() do bits = bits or (U64(1) << flag.value().u64()) end
+        for flag in flags.values() do
+            bits = bits or (U64(1) << flag.value().u64())
+        end
         bits.i64()
 
 class val GuildPreview is Jsonable
@@ -1494,11 +1806,15 @@ class val GuildPreview is Jsonable
             | "splash" =>
                 match value | let string: String => splash' = string end
             | "discovery_splash" =>
-                match value | let string: String => discovery_splash' = string end
+                match value
+                | let string: String => discovery_splash' = string
+                end
             | "emojis" => emojis' = _Emojis(value)?
             | "features" => features' = _Strings(value)?
-            | "approximate_member_count" => approximate_member_count' = (value as I64).usize()
-            | "approximate_presence_count" => approximate_presence_count' = (value as I64).usize()
+            | "approximate_member_count" =>
+                approximate_member_count' = (value as I64).usize()
+            | "approximate_presence_count" =>
+                approximate_presence_count' = (value as I64).usize()
             | "description" =>
                 match value | let string: String => description' = string end
             | "stickers" => stickers' = _Stickers(value)?
@@ -1527,7 +1843,9 @@ class val GuildPreview is Jsonable
             .update("emojis", _Emojis.to_json(emojis))
             .update("features", _Strings.to_json(features))
             .update("approximate_member_count", approximate_member_count.i64())
-            .update("approximate_presence_count", approximate_presence_count.i64())
+            .update(
+                "approximate_presence_count", approximate_presence_count.i64()
+            )
             .update("description", description)
             .update("stickers", _Stickers.to_json(stickers))
 
@@ -1558,7 +1876,10 @@ class val GuildWidgetSettings is Jsonable
             match key
             | "enabled" => enabled' = value as Bool
             | "channel_id" =>
-                match value | let string: String => channel_id' = Snowflake.from_json(string)? end
+                match value
+                | let string: String =>
+                    channel_id' = Snowflake.from_json(string)?
+                end
             end
         end
 
@@ -1568,7 +1889,12 @@ class val GuildWidgetSettings is Jsonable
     fun to_json(): json.JsonObject =>
         json.JsonObject
             .update("enabled", enabled)
-            .update("channel_id", match channel_id | let channel_id': Snowflake => channel_id'.to_json() end)
+            .update(
+                "channel_id",
+                match channel_id
+                | let channel_id': Snowflake => channel_id'.to_json()
+                end
+            )
 
 class val GuildWidget is Jsonable
     """
@@ -1594,14 +1920,17 @@ class val GuildWidget is Jsonable
         """
         voice and stage channels which are accessible by @everyone
 
-        These are partial channel objects: the widget carries only `id`, `name` and `position`.
+        These are partial channel objects: the widget carries only `id`, `name`
+        and `position`.
         """
 
     let members: Array[User] val
         """
         special widget user objects that includes users presence (Limit 100)
 
-        These are anonymised: the `id`, `discriminator` and `avatar` fields are placeholders. They also carry `status` and `avatar_url` fields that `User` does not model, so those are dropped on decode.
+        These are anonymised: the `id`, `discriminator` and `avatar` fields are
+        placeholders. They also carry `status` and `avatar_url` fields that
+        `User` does not model, so those are dropped on decode.
         """
 
     let presence_count: USize
@@ -1664,9 +1993,12 @@ class val GuildMember is Jsonable
     """
     https://docs.discord.com/developers/resources/guild#guild-member-object-guild-member-structure
 
-    The field `user` won't be included in the member object attached to MESSAGE_CREATE and MESSAGE_UPDATE gateway events.
+    The field `user` won't be included in the member object attached to
+    MESSAGE_CREATE and MESSAGE_UPDATE gateway events.
 
-    In GUILD_ events, `pending` will always be included as true or false. In non `GUILD_` events which can only be triggered by non-`pending` users, `pending` will not be included.
+    In GUILD_ events, `pending` will always be included as true or false. In non
+    `GUILD_` events which can only be triggered by non-`pending` users,
+    `pending` will not be included.
     """
 
     let user: (User | None)
@@ -1721,17 +2053,21 @@ class val GuildMember is Jsonable
 
     let pending: (Bool | None)
         """
-        whether the user has not yet passed the guild's Membership Screening requirements
+        whether the user has not yet passed the guild's Membership Screening
+        requirements
         """
 
     let permissions: (Array[Permission] val | None)
         """
-        total permissions of the member in the channel, including overwrites, returned when in the interaction object
+        total permissions of the member in the channel, including overwrites,
+        returned when in the interaction object
         """
 
     let communication_disabled_until: (ISO8601 | None)
         """
-        when the user's timeout will expire and the user will be able to communicate in the guild again, null or a time in the past if the user is not timed out
+        when the user's timeout will expire and the user will be able to
+        communicate in the guild again, null or a time in the past if the user
+        is not timed out
         """
 
     let avatar_decoration_data: (AvatarDecorationData | None)
@@ -1805,9 +2141,15 @@ class val GuildMember is Jsonable
             | "pending" => pending' = value as Bool
             | "permissions" => permissions' = _Permissions(value)?
             | "communication_disabled_until" =>
-                match value | let string: String => communication_disabled_until' = string end
+                match value
+                | let string: String => communication_disabled_until' = string
+                end
             | "avatar_decoration_data" =>
-                match value | let obj': json.JsonObject => avatar_decoration_data' = AvatarDecorationData.from_json(obj')? end
+                match value
+                | let obj': json.JsonObject =>
+                    avatar_decoration_data' =
+                        AvatarDecorationData.from_json(obj')?
+                end
             end
         end
 
@@ -1851,7 +2193,8 @@ class val GuildMember is Jsonable
         end
 
         match premium_since
-        | let premium_since': ISO8601 => obj = obj.update("premium_since", premium_since')
+        | let premium_since': ISO8601 =>
+            obj = obj.update("premium_since", premium_since')
         end
 
         match pending
@@ -1859,15 +2202,25 @@ class val GuildMember is Jsonable
         end
 
         match permissions
-        | let permissions': Array[Permission] val => obj = obj.update("permissions", _Permissions.to_json(permissions'))
+        | let permissions': Array[Permission] val =>
+            obj = obj.update("permissions", _Permissions.to_json(permissions'))
         end
 
         match communication_disabled_until
-        | let communication_disabled_until': ISO8601 => obj = obj.update("communication_disabled_until", communication_disabled_until')
+        | let communication_disabled_until': ISO8601 =>
+            obj =
+                obj.update(
+                    "communication_disabled_until",
+                    communication_disabled_until'
+                )
         end
 
         match avatar_decoration_data
-        | let avatar_decoration_data': AvatarDecorationData => obj = obj.update("avatar_decoration_data", avatar_decoration_data'.to_json())
+        | let avatar_decoration_data': AvatarDecorationData =>
+            obj =
+                obj.update(
+                    "avatar_decoration_data", avatar_decoration_data'.to_json()
+                )
         end
 
         obj
@@ -1881,13 +2234,17 @@ primitive _GuildMembers
         let array = value as json.JsonArray
         recover val
             let members = Array[GuildMember](array.size())
-            for member in array.values() do members.push(GuildMember.from_json(member as json.JsonObject)?) end
+            for member in array.values() do
+                members.push(GuildMember.from_json(member as json.JsonObject)?)
+            end
             members
         end
 
     fun to_json(members: Array[GuildMember] val): json.JsonArray =>
         var array = json.JsonArray
-        for member in members.values() do array = array.push(member.to_json()) end
+        for member in members.values() do
+            array = array.push(member.to_json())
+        end
         array
 
 class val PartialGuildMember is Jsonable
@@ -1898,8 +2255,8 @@ class val PartialGuildMember is Jsonable
     `GuildMember`, but carrying only some of its fields. Interaction resolved
     data omits `user`, `deaf` and `mute`; message interactions and invite stage
     instances trim their own sets. A guild member has no id of its own — it is
-    identified by the `user` it wraps, or by the key it is filed under — so every
-    field here is optional.
+    identified by the `user` it wraps, or by the key it is filed under — so
+    every field here is optional.
 
     The fields mean exactly what their `GuildMember` counterparts do, and are
     documented there. A field Discord omits is indistinguishable from a field
@@ -1987,9 +2344,15 @@ class val PartialGuildMember is Jsonable
             | "pending" => pending' = value as Bool
             | "permissions" => permissions' = _Permissions(value)?
             | "communication_disabled_until" =>
-                match value | let string: String => communication_disabled_until' = string end
+                match value
+                | let string: String => communication_disabled_until' = string
+                end
             | "avatar_decoration_data" =>
-                match value | let obj': json.JsonObject => avatar_decoration_data' = AvatarDecorationData.from_json(obj')? end
+                match value
+                | let obj': json.JsonObject =>
+                    avatar_decoration_data' =
+                        AvatarDecorationData.from_json(obj')?
+                end
             end
         end
 
@@ -2028,7 +2391,8 @@ class val PartialGuildMember is Jsonable
         end
 
         match roles
-        | let roles': Array[Snowflake] val => obj = obj.update("roles", _Snowflakes.to_json(roles'))
+        | let roles': Array[Snowflake] val =>
+            obj = obj.update("roles", _Snowflakes.to_json(roles'))
         end
 
         match joined_at
@@ -2036,7 +2400,8 @@ class val PartialGuildMember is Jsonable
         end
 
         match premium_since
-        | let premium_since': ISO8601 => obj = obj.update("premium_since", premium_since')
+        | let premium_since': ISO8601 =>
+            obj = obj.update("premium_since", premium_since')
         end
 
         match deaf
@@ -2048,7 +2413,8 @@ class val PartialGuildMember is Jsonable
         end
 
         match flags
-        | let flags': Array[GuildMemberFlag] val => obj = obj.update("flags", _GuildMemberFlags.to_json(flags'))
+        | let flags': Array[GuildMemberFlag] val =>
+            obj = obj.update("flags", _GuildMemberFlags.to_json(flags'))
         end
 
         match pending
@@ -2056,15 +2422,25 @@ class val PartialGuildMember is Jsonable
         end
 
         match permissions
-        | let permissions': Array[Permission] val => obj = obj.update("permissions", _Permissions.to_json(permissions'))
+        | let permissions': Array[Permission] val =>
+            obj = obj.update("permissions", _Permissions.to_json(permissions'))
         end
 
         match communication_disabled_until
-        | let communication_disabled_until': ISO8601 => obj = obj.update("communication_disabled_until", communication_disabled_until')
+        | let communication_disabled_until': ISO8601 =>
+            obj =
+                obj.update(
+                    "communication_disabled_until",
+                    communication_disabled_until'
+                )
         end
 
         match avatar_decoration_data
-        | let avatar_decoration_data': AvatarDecorationData => obj = obj.update("avatar_decoration_data", avatar_decoration_data'.to_json())
+        | let avatar_decoration_data': AvatarDecorationData =>
+            obj =
+                obj.update(
+                    "avatar_decoration_data", avatar_decoration_data'.to_json()
+                )
         end
 
         obj
@@ -2078,13 +2454,19 @@ primitive _PartialGuildMembers
         let array = value as json.JsonArray
         recover val
             let members = Array[PartialGuildMember](array.size())
-            for member in array.values() do members.push(PartialGuildMember.from_json(member as json.JsonObject)?) end
+            for member in array.values() do
+                members.push(
+                    PartialGuildMember.from_json(member as json.JsonObject)?
+                )
+            end
             members
         end
 
     fun to_json(members: Array[PartialGuildMember] val): json.JsonArray =>
         var array = json.JsonArray
-        for member in members.values() do array = array.push(member.to_json()) end
+        for member in members.values() do
+            array = array.push(member.to_json())
+        end
         array
 
 trait val GuildMemberFlag is _Enum[GuildMemberFlag, U8]
@@ -2176,7 +2558,9 @@ primitive _GuildMemberFlags
 
     fun to_json(flags: Array[GuildMemberFlag] val): I64 =>
         var bits: U64 = 0
-        for flag in flags.values() do bits = bits or (U64(1) << flag.value().u64()) end
+        for flag in flags.values() do
+            bits = bits or (U64(1) << flag.value().u64())
+        end
         bits.i64()
 
 class val Integration is Jsonable
@@ -2218,7 +2602,8 @@ class val Integration is Jsonable
 
     let enable_emoticons: (Bool | None)
         """
-        whether emoticons should be synced for this integration (twitch only currently)
+        whether emoticons should be synced for this integration (twitch only
+        currently)
         """
 
     let expire_behavior: (IntegrationExpireBehavior | None)
@@ -2328,14 +2713,21 @@ class val Integration is Jsonable
             | "syncing" => syncing' = value as Bool
             | "role_id" => role_id' = Snowflake.from_json(value)?
             | "enable_emoticons" => enable_emoticons' = value as Bool
-            | "expire_behavior" => expire_behavior' = IntegrationExpireBehaviors.from((value as I64).u8())?
-            | "expire_grace_period" => expire_grace_period' = (value as I64).usize()
+            | "expire_behavior" =>
+                expire_behavior' =
+                    IntegrationExpireBehaviors.from((value as I64).u8())?
+            | "expire_grace_period" =>
+                expire_grace_period' = (value as I64).usize()
             | "user" => user' = User.from_json(value as json.JsonObject)?
-            | "account" => account' = IntegrationAccount.from_json(value as json.JsonObject)?
+            | "account" =>
+                account' =
+                    IntegrationAccount.from_json(value as json.JsonObject)?
             | "synced_at" => synced_at' = value as String
             | "subscriber_count" => subscriber_count' = (value as I64).usize()
             | "revoked" => revoked' = value as Bool
-            | "application" => application' = IntegrationApplication.from_json(value as json.JsonObject)?
+            | "application" =>
+                application' =
+                    IntegrationApplication.from_json(value as json.JsonObject)?
             | "scopes" => scopes' = _Strings(value)?
             end
         end
@@ -2370,19 +2762,23 @@ class val Integration is Jsonable
         end
 
         match role_id
-        | let role_id': Snowflake => obj = obj.update("role_id", role_id'.to_json())
+        | let role_id': Snowflake =>
+            obj = obj.update("role_id", role_id'.to_json())
         end
 
         match enable_emoticons
-        | let enable_emoticons': Bool => obj = obj.update("enable_emoticons", enable_emoticons')
+        | let enable_emoticons': Bool =>
+            obj = obj.update("enable_emoticons", enable_emoticons')
         end
 
         match expire_behavior
-        | let expire_behavior': IntegrationExpireBehavior => obj = obj.update("expire_behavior", expire_behavior'.value().i64())
+        | let expire_behavior': IntegrationExpireBehavior =>
+            obj = obj.update("expire_behavior", expire_behavior'.value().i64())
         end
 
         match expire_grace_period
-        | let expire_grace_period': USize => obj = obj.update("expire_grace_period", expire_grace_period'.i64())
+        | let expire_grace_period': USize =>
+            obj = obj.update("expire_grace_period", expire_grace_period'.i64())
         end
 
         match user
@@ -2394,7 +2790,8 @@ class val Integration is Jsonable
         end
 
         match subscriber_count
-        | let subscriber_count': USize => obj = obj.update("subscriber_count", subscriber_count'.i64())
+        | let subscriber_count': USize =>
+            obj = obj.update("subscriber_count", subscriber_count'.i64())
         end
 
         match revoked
@@ -2402,11 +2799,13 @@ class val Integration is Jsonable
         end
 
         match application
-        | let application': IntegrationApplication => obj = obj.update("application", application'.to_json())
+        | let application': IntegrationApplication =>
+            obj = obj.update("application", application'.to_json())
         end
 
         match scopes
-        | let scopes': Array[String] val => obj = obj.update("scopes", _Strings.to_json(scopes'))
+        | let scopes': Array[String] val =>
+            obj = obj.update("scopes", _Strings.to_json(scopes'))
         end
 
         obj
@@ -2420,13 +2819,19 @@ primitive _Integrations
         let array = value as json.JsonArray
         recover val
             let integrations = Array[Integration](array.size())
-            for integration in array.values() do integrations.push(Integration.from_json(integration as json.JsonObject)?) end
+            for integration in array.values() do
+                integrations.push(
+                    Integration.from_json(integration as json.JsonObject)?
+                )
+            end
             integrations
         end
 
     fun to_json(integrations: Array[Integration] val): json.JsonArray =>
         var array = json.JsonArray
-        for integration in integrations.values() do array = array.push(integration.to_json()) end
+        for integration in integrations.values() do
+            array = array.push(integration.to_json())
+        end
         array
 
 class val PartialIntegration is Jsonable
@@ -2435,7 +2840,8 @@ class val PartialIntegration is Jsonable
 
     An integration Discord sent as a *partial* object: the same structure as
     `Integration`, but carrying only some of its fields. An audit log sends only
-    `id`, `name`, `type` and `account`, so every field here but `id` is optional.
+    `id`, `name`, `type` and `account`, so every field here but `id` is
+    optional.
 
     The fields mean exactly what their `Integration` counterparts do, and are
     documented there. A field Discord omits is indistinguishable from a field
@@ -2521,14 +2927,21 @@ class val PartialIntegration is Jsonable
             | "syncing" => syncing' = value as Bool
             | "role_id" => role_id' = Snowflake.from_json(value)?
             | "enable_emoticons" => enable_emoticons' = value as Bool
-            | "expire_behavior" => expire_behavior' = IntegrationExpireBehaviors.from((value as I64).u8())?
-            | "expire_grace_period" => expire_grace_period' = (value as I64).usize()
+            | "expire_behavior" =>
+                expire_behavior' =
+                    IntegrationExpireBehaviors.from((value as I64).u8())?
+            | "expire_grace_period" =>
+                expire_grace_period' = (value as I64).usize()
             | "user" => user' = User.from_json(value as json.JsonObject)?
-            | "account" => account' = IntegrationAccount.from_json(value as json.JsonObject)?
+            | "account" =>
+                account' =
+                    IntegrationAccount.from_json(value as json.JsonObject)?
             | "synced_at" => synced_at' = value as String
             | "subscriber_count" => subscriber_count' = (value as I64).usize()
             | "revoked" => revoked' = value as Bool
-            | "application" => application' = IntegrationApplication.from_json(value as json.JsonObject)?
+            | "application" =>
+                application' =
+                    IntegrationApplication.from_json(value as json.JsonObject)?
             | "scopes" => scopes' = _Strings(value)?
             end
         end
@@ -2570,19 +2983,23 @@ class val PartialIntegration is Jsonable
         end
 
         match role_id
-        | let role_id': Snowflake => obj = obj.update("role_id", role_id'.to_json())
+        | let role_id': Snowflake =>
+            obj = obj.update("role_id", role_id'.to_json())
         end
 
         match enable_emoticons
-        | let enable_emoticons': Bool => obj = obj.update("enable_emoticons", enable_emoticons')
+        | let enable_emoticons': Bool =>
+            obj = obj.update("enable_emoticons", enable_emoticons')
         end
 
         match expire_behavior
-        | let expire_behavior': IntegrationExpireBehavior => obj = obj.update("expire_behavior", expire_behavior'.value().i64())
+        | let expire_behavior': IntegrationExpireBehavior =>
+            obj = obj.update("expire_behavior", expire_behavior'.value().i64())
         end
 
         match expire_grace_period
-        | let expire_grace_period': USize => obj = obj.update("expire_grace_period", expire_grace_period'.i64())
+        | let expire_grace_period': USize =>
+            obj = obj.update("expire_grace_period", expire_grace_period'.i64())
         end
 
         match user
@@ -2590,7 +3007,8 @@ class val PartialIntegration is Jsonable
         end
 
         match account
-        | let account': IntegrationAccount => obj = obj.update("account", account'.to_json())
+        | let account': IntegrationAccount =>
+            obj = obj.update("account", account'.to_json())
         end
 
         match synced_at
@@ -2598,7 +3016,8 @@ class val PartialIntegration is Jsonable
         end
 
         match subscriber_count
-        | let subscriber_count': USize => obj = obj.update("subscriber_count", subscriber_count'.i64())
+        | let subscriber_count': USize =>
+            obj = obj.update("subscriber_count", subscriber_count'.i64())
         end
 
         match revoked
@@ -2606,11 +3025,13 @@ class val PartialIntegration is Jsonable
         end
 
         match application
-        | let application': IntegrationApplication => obj = obj.update("application", application'.to_json())
+        | let application': IntegrationApplication =>
+            obj = obj.update("application", application'.to_json())
         end
 
         match scopes
-        | let scopes': Array[String] val => obj = obj.update("scopes", _Strings.to_json(scopes'))
+        | let scopes': Array[String] val =>
+            obj = obj.update("scopes", _Strings.to_json(scopes'))
         end
 
         obj
@@ -2624,13 +3045,21 @@ primitive _PartialIntegrations
         let array = value as json.JsonArray
         recover val
             let integrations = Array[PartialIntegration](array.size())
-            for integration in array.values() do integrations.push(PartialIntegration.from_json(integration as json.JsonObject)?) end
+            for integration in array.values() do
+                integrations.push(
+                    PartialIntegration.from_json(
+                        integration as json.JsonObject
+                    )?
+                )
+            end
             integrations
         end
 
     fun to_json(integrations: Array[PartialIntegration] val): json.JsonArray =>
         var array = json.JsonArray
-        for integration in integrations.values() do array = array.push(integration.to_json()) end
+        for integration in integrations.values() do
+            array = array.push(integration.to_json())
+        end
         array
 
 trait val IntegrationExpireBehavior is _Enum[IntegrationExpireBehavior, U8]
@@ -2815,7 +3244,9 @@ primitive _Bans
         let array = value as json.JsonArray
         recover val
             let bans = Array[Ban](array.size())
-            for ban in array.values() do bans.push(Ban.from_json(ban as json.JsonObject)?) end
+            for ban in array.values() do
+                bans.push(Ban.from_json(ban as json.JsonObject)?)
+            end
             bans
         end
 
@@ -2839,7 +3270,10 @@ class val WelcomeScreen is Jsonable
         the channels shown in the welcome screen, up to 5
         """
 
-    new val create(description': (String | None) = None, welcome_channels': Array[WelcomeScreenChannel] val) =>
+    new val create(
+        description': (String | None) = None,
+        welcome_channels': Array[WelcomeScreenChannel] val
+    ) =>
         description = description'
         welcome_channels = welcome_channels'
 
@@ -2851,7 +3285,8 @@ class val WelcomeScreen is Jsonable
             match key
             | "description" =>
                 match value | let string: String => description' = string end
-            | "welcome_channels" => welcome_channels' = _WelcomeScreenChannels(value)?
+            | "welcome_channels" =>
+                welcome_channels' = _WelcomeScreenChannels(value)?
             end
         end
 
@@ -2861,7 +3296,10 @@ class val WelcomeScreen is Jsonable
     fun to_json(): json.JsonObject =>
         json.JsonObject
             .update("description", description)
-            .update("welcome_channels", _WelcomeScreenChannels.to_json(welcome_channels))
+            .update(
+                "welcome_channels",
+                _WelcomeScreenChannels.to_json(welcome_channels)
+            )
 
 class val WelcomeScreenChannel is Jsonable
     """
@@ -2885,7 +3323,8 @@ class val WelcomeScreenChannel is Jsonable
 
     let emoji_name: (String | None)
         """
-        the emoji name if custom, the unicode character if standard, or null if no emoji is set
+        the emoji name if custom, the unicode character if standard, or null if
+        no emoji is set
         """
 
     new val create(
@@ -2910,7 +3349,9 @@ class val WelcomeScreenChannel is Jsonable
             | "channel_id" => channel_id' = Snowflake.from_json(value)?
             | "description" => description' = value as String
             | "emoji_id" =>
-                match value | let string: String => emoji_id' = Snowflake.from_json(string)? end
+                match value
+                | let string: String => emoji_id' = Snowflake.from_json(string)?
+                end
             | "emoji_name" =>
                 match value | let string: String => emoji_name' = string end
             end
@@ -2925,7 +3366,12 @@ class val WelcomeScreenChannel is Jsonable
         json.JsonObject
             .update("channel_id", channel_id.to_json())
             .update("description", description)
-            .update("emoji_id", match emoji_id | let emoji_id': Snowflake => emoji_id'.to_json() end)
+            .update(
+                "emoji_id",
+                match emoji_id
+                | let emoji_id': Snowflake => emoji_id'.to_json()
+                end
+            )
             .update("emoji_name", emoji_name)
 
 primitive _WelcomeScreenChannels
@@ -2937,13 +3383,19 @@ primitive _WelcomeScreenChannels
         let array = value as json.JsonArray
         recover val
             let channels = Array[WelcomeScreenChannel](array.size())
-            for channel in array.values() do channels.push(WelcomeScreenChannel.from_json(channel as json.JsonObject)?) end
+            for channel in array.values() do
+                channels.push(
+                    WelcomeScreenChannel.from_json(channel as json.JsonObject)?
+                )
+            end
             channels
         end
 
     fun to_json(channels: Array[WelcomeScreenChannel] val): json.JsonArray =>
         var array = json.JsonArray
-        for channel in channels.values() do array = array.push(channel.to_json()) end
+        for channel in channels.values() do
+            array = array.push(channel.to_json())
+        end
         array
 
 class val GuildOnboarding is Jsonable
@@ -3002,7 +3454,8 @@ class val GuildOnboarding is Jsonable
             match key
             | "guild_id" => guild_id' = Snowflake.from_json(value)?
             | "prompts" => prompts' = _OnboardingPrompts(value)?
-            | "default_channel_ids" => default_channel_ids' = _Snowflakes(value)?
+            | "default_channel_ids" =>
+                default_channel_ids' = _Snowflakes(value)?
             | "enabled" => enabled' = value as Bool
             | "mode" => mode' = OnboardingModes.from((value as I64).u8())?
             end
@@ -3018,7 +3471,9 @@ class val GuildOnboarding is Jsonable
         json.JsonObject
             .update("guild_id", guild_id.to_json())
             .update("prompts", _OnboardingPrompts.to_json(prompts))
-            .update("default_channel_ids", _Snowflakes.to_json(default_channel_ids))
+            .update(
+                "default_channel_ids", _Snowflakes.to_json(default_channel_ids)
+            )
             .update("enabled", enabled)
             .update("mode", mode.value().i64())
 
@@ -3026,7 +3481,8 @@ trait val OnboardingMode is _Enum[OnboardingMode, U8]
     """
     https://docs.discord.com/developers/resources/guild#guild-onboarding-object-onboarding-mode
 
-    Defines the criteria used to satisfy Onboarding constraints that are required for enabling.
+    Defines the criteria used to satisfy Onboarding constraints that are
+    required for enabling.
     """
 primitive DefaultOnboardingMode is OnboardingMode
     """
@@ -3075,17 +3531,20 @@ class val OnboardingPrompt is Jsonable
 
     let single_select: Bool
         """
-        Indicates whether users are limited to selecting one option for the prompt
+        Indicates whether users are limited to selecting one option for the
+        prompt
         """
 
     let required: Bool
         """
-        Indicates whether the prompt is required before a user completes the onboarding flow
+        Indicates whether the prompt is required before a user completes the
+        onboarding flow
         """
 
     let in_onboarding: Bool
         """
-        Indicates whether the prompt is present in the onboarding flow. If false, the prompt will only appear in the Channels & Roles tab
+        Indicates whether the prompt is present in the onboarding flow. If
+        false, the prompt will only appear in the Channels & Roles tab
         """
 
     new val create(
@@ -3117,7 +3576,8 @@ class val OnboardingPrompt is Jsonable
         for (key, value) in obj.pairs() do
             match key
             | "id" => id' = Snowflake.from_json(value)?
-            | "type" => type'' = OnboardingPromptTypes.from((value as I64).u8())?
+            | "type" =>
+                type'' = OnboardingPromptTypes.from((value as I64).u8())?
             | "options" => options' = _OnboardingPromptOptions(value)?
             | "title" => title' = value as String
             | "single_select" => single_select' = value as Bool
@@ -3153,13 +3613,19 @@ primitive _OnboardingPrompts
         let array = value as json.JsonArray
         recover val
             let prompts = Array[OnboardingPrompt](array.size())
-            for prompt in array.values() do prompts.push(OnboardingPrompt.from_json(prompt as json.JsonObject)?) end
+            for prompt in array.values() do
+                prompts.push(
+                    OnboardingPrompt.from_json(prompt as json.JsonObject)?
+                )
+            end
             prompts
         end
 
     fun to_json(prompts: Array[OnboardingPrompt] val): json.JsonArray =>
         var array = json.JsonArray
-        for prompt in prompts.values() do array = array.push(prompt.to_json()) end
+        for prompt in prompts.values() do
+            array = array.push(prompt.to_json())
+        end
         array
 
 trait val OnboardingPromptType is _Enum[OnboardingPromptType, U8]
@@ -3202,7 +3668,8 @@ class val OnboardingPromptOption is Jsonable
         """
         Emoji of the option
 
-        When creating or updating a prompt option, `emoji_id`, `emoji_name`, and `emoji_animated` should be used instead of this field.
+        When creating or updating a prompt option, `emoji_id`, `emoji_name`, and
+        `emoji_animated` should be used instead of this field.
         """
 
     let emoji_id: (Snowflake | None)
@@ -3300,7 +3767,8 @@ class val OnboardingPromptOption is Jsonable
         end
 
         match emoji_id
-        | let emoji_id': Snowflake => obj = obj.update("emoji_id", emoji_id'.to_json())
+        | let emoji_id': Snowflake =>
+            obj = obj.update("emoji_id", emoji_id'.to_json())
         end
 
         match emoji_name
@@ -3308,7 +3776,8 @@ class val OnboardingPromptOption is Jsonable
         end
 
         match emoji_animated
-        | let emoji_animated': Bool => obj = obj.update("emoji_animated", emoji_animated')
+        | let emoji_animated': Bool =>
+            obj = obj.update("emoji_animated", emoji_animated')
         end
 
         obj
@@ -3322,13 +3791,19 @@ primitive _OnboardingPromptOptions
         let array = value as json.JsonArray
         recover val
             let options = Array[OnboardingPromptOption](array.size())
-            for option in array.values() do options.push(OnboardingPromptOption.from_json(option as json.JsonObject)?) end
+            for option in array.values() do
+                options.push(
+                    OnboardingPromptOption.from_json(option as json.JsonObject)?
+                )
+            end
             options
         end
 
     fun to_json(options: Array[OnboardingPromptOption] val): json.JsonArray =>
         var array = json.JsonArray
-        for option in options.values() do array = array.push(option.to_json()) end
+        for option in options.values() do
+            array = array.push(option.to_json())
+        end
         array
 
 class val IncidentsData is Jsonable
@@ -3376,13 +3851,21 @@ class val IncidentsData is Jsonable
         for (key, value) in obj.pairs() do
             match key
             | "invites_disabled_until" =>
-                match value | let string: String => invites_disabled_until' = string end
+                match value
+                | let string: String => invites_disabled_until' = string
+                end
             | "dms_disabled_until" =>
-                match value | let string: String => dms_disabled_until' = string end
+                match value
+                | let string: String => dms_disabled_until' = string
+                end
             | "dm_spam_detected_at" =>
-                match value | let string: String => dm_spam_detected_at' = string end
+                match value
+                | let string: String => dm_spam_detected_at' = string
+                end
             | "raid_detected_at" =>
-                match value | let string: String => raid_detected_at' = string end
+                match value
+                | let string: String => raid_detected_at' = string
+                end
             end
         end
 
@@ -3397,11 +3880,13 @@ class val IncidentsData is Jsonable
             .update("dms_disabled_until", dms_disabled_until)
 
         match dm_spam_detected_at
-        | let dm_spam_detected_at': ISO8601 => obj = obj.update("dm_spam_detected_at", dm_spam_detected_at')
+        | let dm_spam_detected_at': ISO8601 =>
+            obj = obj.update("dm_spam_detected_at", dm_spam_detected_at')
         end
 
         match raid_detected_at
-        | let raid_detected_at': ISO8601 => obj = obj.update("raid_detected_at", raid_detected_at')
+        | let raid_detected_at': ISO8601 =>
+            obj = obj.update("raid_detected_at", raid_detected_at')
         end
 
         obj
@@ -3421,10 +3906,14 @@ class val ActiveThreads is Jsonable
 
     let members: Array[ThreadMember] val
         """
-        a thread member object for each returned thread the current user has joined
+        a thread member object for each returned thread the current user has
+        joined
         """
 
-    new val create(threads': Array[Channel] val, members': Array[ThreadMember] val) =>
+    new val create(
+        threads': Array[Channel] val,
+        members': Array[ThreadMember] val
+    ) =>
         threads = threads'
         members = members'
 
@@ -3472,7 +3961,8 @@ class val BulkBanResponse is Jsonable
     """
     https://docs.discord.com/developers/resources/guild#bulk-guild-ban-bulk-ban-response
 
-    If none of the users could be banned, an error response code `500000: Failed to ban users` is returned instead.
+    If none of the users could be banned, an error response code `500000: Failed
+    to ban users` is returned instead.
     """
 
     let banned_users: Array[Snowflake] val
@@ -3485,7 +3975,10 @@ class val BulkBanResponse is Jsonable
         list of user ids, that were not banned
         """
 
-    new val create(banned_users': Array[Snowflake] val, failed_users': Array[Snowflake] val) =>
+    new val create(
+        banned_users': Array[Snowflake] val,
+        failed_users': Array[Snowflake] val
+    ) =>
         banned_users = banned_users'
         failed_users = failed_users'
 
@@ -3512,7 +4005,8 @@ class val GuildRoleMemberCounts is Jsonable
     """
     https://docs.discord.com/developers/resources/guild#get-guild-role-member-counts
 
-    A map of role IDs to the number of members with the role. Does not include the @everyone role.
+    A map of role IDs to the number of members with the role. Does not include
+    the @everyone role.
     """
 
     let counts: collections.Map[Snowflake, USize] val
@@ -3542,7 +4036,9 @@ class val GuildRoleMemberCounts is Jsonable
 
     fun to_json(): json.JsonObject =>
         var obj = json.JsonObject
-        for (role_id, count) in counts.pairs() do obj = obj.update(role_id.string(), count.i64()) end
+        for (role_id, count) in counts.pairs() do
+            obj = obj.update(role_id.string(), count.i64())
+        end
         obj
 
 class val GuildPruneCount is Jsonable
@@ -3554,9 +4050,11 @@ class val GuildPruneCount is Jsonable
 
     let pruned: (USize | None)
         """
-        the number of members that would be, or were, removed in the prune operation
+        the number of members that would be, or were, removed in the prune
+        operation
 
-        `None` only for Begin Guild Prune called with `compute_prune_count` set to `false`.
+        `None` only for Begin Guild Prune called with `compute_prune_count` set
+        to `false`.
         """
 
     new val create(pruned': (USize | None) = None) =>
@@ -3566,7 +4064,9 @@ class val GuildPruneCount is Jsonable
         pruned = match obj("pruned")? | let integer: I64 => integer.usize() end
 
     fun to_json(): json.JsonObject =>
-        json.JsonObject.update("pruned", match pruned | let pruned': USize => pruned'.i64() end)
+        json.JsonObject.update(
+            "pruned", match pruned | let pruned': USize => pruned'.i64() end
+        )
 
 class val GuildVanityUrl is Jsonable
     """
@@ -3577,7 +4077,8 @@ class val GuildVanityUrl is Jsonable
 
     let code: (String | None)
         """
-        the vanity invite code, or `None` if a vanity url for the guild is not set
+        the vanity invite code, or `None` if a vanity url for the guild is not
+        set
         """
 
     let uses: USize
@@ -3616,7 +4117,8 @@ class val GetGuildParams
 
     let with_counts: (Bool | None)
         """
-        when true, will return approximate member and presence counts for the guild
+        when true, will return approximate member and presence counts for the
+        guild
         """
 
     new val create(with_counts': (Bool | None) = None) =>
@@ -3626,7 +4128,8 @@ class val GetGuildParams
         let query = recover iso Array[(String, String)] end
 
         match with_counts
-        | let with_counts': Bool => query.push(("with_counts", with_counts'.string()))
+        | let with_counts': Bool =>
+            query.push(("with_counts", with_counts'.string()))
         end
 
         consume query
@@ -3637,7 +4140,8 @@ class val UpdateGuildParams is ToJsonable
 
     All parameters to this endpoint are optional.
 
-    Attempting to add or remove the `COMMUNITY` guild feature requires the `ADMINISTRATOR` permission.
+    Attempting to add or remove the `COMMUNITY` guild feature requires the
+    `ADMINISTRATOR` permission.
     """
 
     let name: (String | None)
@@ -3672,7 +4176,8 @@ class val UpdateGuildParams is ToJsonable
 
     let icon: Nullable[ImageData]
         """
-        base64 1024x1024 png/jpeg/gif image for the guild icon (can be animated gif when the server has the `ANIMATED_ICON` feature)
+        base64 1024x1024 png/jpeg/gif image for the guild icon (can be animated
+        gif when the server has the `ANIMATED_ICON` feature)
         """
 
     let owner_id: (Snowflake | None)
@@ -3682,22 +4187,27 @@ class val UpdateGuildParams is ToJsonable
 
     let splash: Nullable[ImageData]
         """
-        base64 16:9 png/jpeg image for the guild splash (when the server has the `INVITE_SPLASH` feature)
+        base64 16:9 png/jpeg image for the guild splash (when the server has the
+        `INVITE_SPLASH` feature)
         """
 
     let discovery_splash: Nullable[ImageData]
         """
-        base64 16:9 png/jpeg image for the guild discovery splash (when the server has the `DISCOVERABLE` feature)
+        base64 16:9 png/jpeg image for the guild discovery splash (when the
+        server has the `DISCOVERABLE` feature)
         """
 
     let banner: Nullable[ImageData]
         """
-        base64 16:9 png/jpeg image for the guild banner (when the server has the `BANNER` feature; can be animated gif when the server has the `ANIMATED_BANNER` feature)
+        base64 16:9 png/jpeg image for the guild banner (when the server has the
+        `BANNER` feature; can be animated gif when the server has the
+        `ANIMATED_BANNER` feature)
         """
 
     let system_channel_id: Nullable[Snowflake]
         """
-        the id of the channel where guild notices such as welcome messages and boost events are posted
+        the id of the channel where guild notices such as welcome messages and
+        boost events are posted
         """
 
     let system_channel_flags: (Array[SystemChannelFlag] val | None)
@@ -3707,17 +4217,20 @@ class val UpdateGuildParams is ToJsonable
 
     let rules_channel_id: Nullable[Snowflake]
         """
-        the id of the channel where Community guilds display rules and/or guidelines
+        the id of the channel where Community guilds display rules and/or
+        guidelines
         """
 
     let public_updates_channel_id: Nullable[Snowflake]
         """
-        the id of the channel where admins and moderators of Community guilds receive notices from Discord
+        the id of the channel where admins and moderators of Community guilds
+        receive notices from Discord
         """
 
     let preferred_locale: Nullable[Locale]
         """
-        the preferred locale of a Community guild used in server discovery and notices from Discord; defaults to "en-US"
+        the preferred locale of a Community guild used in server discovery and
+        notices from Discord; defaults to "en-US"
         """
 
     let features: (Array[String] val | None)
@@ -3737,13 +4250,17 @@ class val UpdateGuildParams is ToJsonable
 
     let safety_alerts_channel_id: Nullable[Snowflake]
         """
-        the id of the channel where admins and moderators of Community guilds receive safety alerts from Discord
+        the id of the channel where admins and moderators of Community guilds
+        receive safety alerts from Discord
         """
 
     new val create(
         name': (String | None) = None,
         verification_level': Nullable[VerificationLevel] = None,
-        default_message_notifications': Nullable[DefaultMessageNotificationLevel] = None,
+        default_message_notifications': Nullable[
+            DefaultMessageNotificationLevel
+        ] =
+            None,
         explicit_content_filter': Nullable[ExplicitContentFilterLevel] = None,
         afk_channel_id': Nullable[Snowflake] = None,
         afk_timeout': (USize | None) = None,
@@ -3791,27 +4308,43 @@ class val UpdateGuildParams is ToJsonable
         end
 
         match verification_level
-        | let verification_level': VerificationLevel => obj = obj.update("verification_level", verification_level'.value().i64())
+        | let verification_level': VerificationLevel =>
+            obj =
+                obj.update(
+                    "verification_level", verification_level'.value().i64()
+                )
         | Null => obj = obj.update("verification_level", None)
         end
 
         match default_message_notifications
-        | let default_message_notifications': DefaultMessageNotificationLevel => obj = obj.update("default_message_notifications", default_message_notifications'.value().i64())
+        | let default_message_notifications': DefaultMessageNotificationLevel =>
+            obj =
+                obj.update(
+                    "default_message_notifications",
+                    default_message_notifications'.value().i64()
+                )
         | Null => obj = obj.update("default_message_notifications", None)
         end
 
         match explicit_content_filter
-        | let explicit_content_filter': ExplicitContentFilterLevel => obj = obj.update("explicit_content_filter", explicit_content_filter'.value().i64())
+        | let explicit_content_filter': ExplicitContentFilterLevel =>
+            obj =
+                obj.update(
+                    "explicit_content_filter",
+                    explicit_content_filter'.value().i64()
+                )
         | Null => obj = obj.update("explicit_content_filter", None)
         end
 
         match afk_channel_id
-        | let afk_channel_id': Snowflake => obj = obj.update("afk_channel_id", afk_channel_id'.to_json())
+        | let afk_channel_id': Snowflake =>
+            obj = obj.update("afk_channel_id", afk_channel_id'.to_json())
         | Null => obj = obj.update("afk_channel_id", None)
         end
 
         match afk_timeout
-        | let afk_timeout': USize => obj = obj.update("afk_timeout", afk_timeout'.i64())
+        | let afk_timeout': USize =>
+            obj = obj.update("afk_timeout", afk_timeout'.i64())
         end
 
         match icon
@@ -3820,7 +4353,8 @@ class val UpdateGuildParams is ToJsonable
         end
 
         match owner_id
-        | let owner_id': Snowflake => obj = obj.update("owner_id", owner_id'.to_json())
+        | let owner_id': Snowflake =>
+            obj = obj.update("owner_id", owner_id'.to_json())
         end
 
         match splash
@@ -3829,7 +4363,8 @@ class val UpdateGuildParams is ToJsonable
         end
 
         match discovery_splash
-        | let discovery_splash': ImageData => obj = obj.update("discovery_splash", discovery_splash')
+        | let discovery_splash': ImageData =>
+            obj = obj.update("discovery_splash", discovery_splash')
         | Null => obj = obj.update("discovery_splash", None)
         end
 
@@ -3839,44 +4374,69 @@ class val UpdateGuildParams is ToJsonable
         end
 
         match system_channel_id
-        | let system_channel_id': Snowflake => obj = obj.update("system_channel_id", system_channel_id'.to_json())
+        | let system_channel_id': Snowflake =>
+            obj = obj.update("system_channel_id", system_channel_id'.to_json())
         | Null => obj = obj.update("system_channel_id", None)
         end
 
         match system_channel_flags
-        | let system_channel_flags': Array[SystemChannelFlag] val => obj = obj.update("system_channel_flags", _SystemChannelFlags.to_json(system_channel_flags'))
+        | let system_channel_flags': Array[SystemChannelFlag] val =>
+            obj =
+                obj.update(
+                    "system_channel_flags",
+                    _SystemChannelFlags.to_json(system_channel_flags')
+                )
         end
 
         match rules_channel_id
-        | let rules_channel_id': Snowflake => obj = obj.update("rules_channel_id", rules_channel_id'.to_json())
+        | let rules_channel_id': Snowflake =>
+            obj = obj.update("rules_channel_id", rules_channel_id'.to_json())
         | Null => obj = obj.update("rules_channel_id", None)
         end
 
         match public_updates_channel_id
-        | let public_updates_channel_id': Snowflake => obj = obj.update("public_updates_channel_id", public_updates_channel_id'.to_json())
+        | let public_updates_channel_id': Snowflake =>
+            obj =
+                obj.update(
+                    "public_updates_channel_id",
+                    public_updates_channel_id'.to_json()
+                )
         | Null => obj = obj.update("public_updates_channel_id", None)
         end
 
         match preferred_locale
-        | let preferred_locale': Locale => obj = obj.update("preferred_locale", preferred_locale'.value())
+        | let preferred_locale': Locale =>
+            obj = obj.update("preferred_locale", preferred_locale'.value())
         | Null => obj = obj.update("preferred_locale", None)
         end
 
         match features
-        | let features': Array[String] val => obj = obj.update("features", _Strings.to_json(features'))
+        | let features': Array[String] val =>
+            obj = obj.update("features", _Strings.to_json(features'))
         end
 
         match description
-        | let description': String => obj = obj.update("description", description')
+        | let description': String =>
+            obj = obj.update("description", description')
         | Null => obj = obj.update("description", None)
         end
 
         match premium_progress_bar_enabled
-        | let premium_progress_bar_enabled': Bool => obj = obj.update("premium_progress_bar_enabled", premium_progress_bar_enabled')
+        | let premium_progress_bar_enabled': Bool =>
+            obj =
+                obj.update(
+                    "premium_progress_bar_enabled",
+                    premium_progress_bar_enabled'
+                )
         end
 
         match safety_alerts_channel_id
-        | let safety_alerts_channel_id': Snowflake => obj = obj.update("safety_alerts_channel_id", safety_alerts_channel_id'.to_json())
+        | let safety_alerts_channel_id': Snowflake =>
+            obj =
+                obj.update(
+                    "safety_alerts_channel_id",
+                    safety_alerts_channel_id'.to_json()
+                )
         | Null => obj = obj.update("safety_alerts_channel_id", None)
         end
 
@@ -3916,12 +4476,14 @@ class val CreateGuildChannelParams is ToJsonable
 
     let rate_limit_per_user: (USize | None)
         """
-        amount of seconds a user has to wait before sending another message (0-21600)
+        amount of seconds a user has to wait before sending another message
+        (0-21600)
         """
 
     let position: (USize | None)
         """
-        sorting position of the channel (channels with the same position are sorted by id)
+        sorting position of the channel (channels with the same position are
+        sorted by id)
         """
 
     let permission_overwrites: (Array[PermissionOverwrite] val | None)
@@ -3941,7 +4503,8 @@ class val CreateGuildChannelParams is ToJsonable
 
     let rtc_region: (String | None)
         """
-        channel voice region id of the voice or stage channel, automatic when set to null
+        channel voice region id of the voice or stage channel, automatic when
+        set to null
         """
 
     let video_quality_mode: (VideoQualityMode | None)
@@ -3951,12 +4514,15 @@ class val CreateGuildChannelParams is ToJsonable
 
     let default_auto_archive_duration: (USize | None)
         """
-        the default duration that the clients use (not the API) for newly created threads in the channel, in minutes, to automatically archive the thread after recent activity
+        the default duration that the clients use (not the API) for newly
+        created threads in the channel, in minutes, to automatically archive the
+        thread after recent activity
         """
 
     let default_reaction_emoji: (DefaultReaction | None)
         """
-        emoji to show in the add reaction button on a thread in a GUILD_FORUM or a GUILD_MEDIA channel
+        emoji to show in the add reaction button on a thread in a GUILD_FORUM or
+        a GUILD_MEDIA channel
         """
 
     let available_tags: (Array[ForumTagParams] val | None)
@@ -3966,17 +4532,21 @@ class val CreateGuildChannelParams is ToJsonable
 
     let default_sort_order: (SortOrderType | None)
         """
-        the default sort order type used to order posts in GUILD_FORUM and GUILD_MEDIA channels
+        the default sort order type used to order posts in GUILD_FORUM and
+        GUILD_MEDIA channels
         """
 
     let default_forum_layout: (ForumLayoutType | None)
         """
-        the default forum layout view used to display posts in GUILD_FORUM channels
+        the default forum layout view used to display posts in GUILD_FORUM
+        channels
         """
 
     let default_thread_rate_limit_per_user: (USize | None)
         """
-        the initial rate_limit_per_user to set on newly created threads in a channel. this field is copied to the thread at creation time and does not live update
+        the initial rate_limit_per_user to set on newly created threads in a
+        channel. this field is copied to the thread at creation time and does
+        not live update
         """
 
     new val create(
@@ -4022,7 +4592,8 @@ class val CreateGuildChannelParams is ToJsonable
         var obj = json.JsonObject.update("name", name)
 
         match type'
-        | let type'': ChannelType => obj = obj.update("type", type''.value().i64())
+        | let type'': ChannelType =>
+            obj = obj.update("type", type''.value().i64())
         end
 
         match topic
@@ -4034,11 +4605,13 @@ class val CreateGuildChannelParams is ToJsonable
         end
 
         match user_limit
-        | let user_limit': USize => obj = obj.update("user_limit", user_limit'.i64())
+        | let user_limit': USize =>
+            obj = obj.update("user_limit", user_limit'.i64())
         end
 
         match rate_limit_per_user
-        | let rate_limit_per_user': USize => obj = obj.update("rate_limit_per_user", rate_limit_per_user'.i64())
+        | let rate_limit_per_user': USize =>
+            obj = obj.update("rate_limit_per_user", rate_limit_per_user'.i64())
         end
 
         match position
@@ -4046,11 +4619,17 @@ class val CreateGuildChannelParams is ToJsonable
         end
 
         match permission_overwrites
-        | let permission_overwrites': Array[PermissionOverwrite] val => obj = obj.update("permission_overwrites", _PermissionOverwrites.to_json(permission_overwrites'))
+        | let permission_overwrites': Array[PermissionOverwrite] val =>
+            obj =
+                obj.update(
+                    "permission_overwrites",
+                    _PermissionOverwrites.to_json(permission_overwrites')
+                )
         end
 
         match parent_id
-        | let parent_id': Snowflake => obj = obj.update("parent_id", parent_id'.to_json())
+        | let parent_id': Snowflake =>
+            obj = obj.update("parent_id", parent_id'.to_json())
         end
 
         match nsfw
@@ -4062,31 +4641,61 @@ class val CreateGuildChannelParams is ToJsonable
         end
 
         match video_quality_mode
-        | let video_quality_mode': VideoQualityMode => obj = obj.update("video_quality_mode", video_quality_mode'.value().i64())
+        | let video_quality_mode': VideoQualityMode =>
+            obj =
+                obj.update(
+                    "video_quality_mode", video_quality_mode'.value().i64()
+                )
         end
 
         match default_auto_archive_duration
-        | let default_auto_archive_duration': USize => obj = obj.update("default_auto_archive_duration", default_auto_archive_duration'.i64())
+        | let default_auto_archive_duration': USize =>
+            obj =
+                obj.update(
+                    "default_auto_archive_duration",
+                    default_auto_archive_duration'.i64()
+                )
         end
 
         match default_reaction_emoji
-        | let default_reaction_emoji': DefaultReaction => obj = obj.update("default_reaction_emoji", default_reaction_emoji'.to_json())
+        | let default_reaction_emoji': DefaultReaction =>
+            obj =
+                obj.update(
+                    "default_reaction_emoji", default_reaction_emoji'.to_json()
+                )
         end
 
         match available_tags
-        | let available_tags': Array[ForumTagParams] val => obj = obj.update("available_tags", _ForumTagParams.to_json(available_tags'))
+        | let available_tags': Array[ForumTagParams] val =>
+            obj =
+                obj.update(
+                    "available_tags", _ForumTagParams.to_json(available_tags')
+                )
         end
 
         match default_sort_order
-        | let default_sort_order': SortOrderType => obj = obj.update("default_sort_order", default_sort_order'.value().i64())
+        | let default_sort_order': SortOrderType =>
+            obj =
+                obj.update(
+                    "default_sort_order", default_sort_order'.value().i64()
+                )
         end
 
         match default_forum_layout
-        | let default_forum_layout': ForumLayoutType => obj = obj.update("default_forum_layout", default_forum_layout'.value().i64())
+        | let default_forum_layout': ForumLayoutType =>
+            obj =
+                obj.update(
+                    "default_forum_layout", default_forum_layout'.value().i64()
+                )
         end
 
         match default_thread_rate_limit_per_user
-        | let default_thread_rate_limit_per_user': USize => obj = obj.update("default_thread_rate_limit_per_user", default_thread_rate_limit_per_user'.i64())
+        | let default_thread_rate_limit_per_user': USize =>
+            obj =
+                obj.update(
+                    "default_thread_rate_limit_per_user",
+                    default_thread_rate_limit_per_user'.i64()
+                )
         end
 
         obj
@@ -4105,12 +4714,14 @@ class val GuildChannelPosition is ToJsonable
 
     let position: Nullable[USize]
         """
-        sorting position of the channel (channels with the same position are sorted by id)
+        sorting position of the channel (channels with the same position are
+        sorted by id)
         """
 
     let lock_permissions: Nullable[Bool]
         """
-        syncs the permission overwrites with the new parent, if moving to a new category
+        syncs the permission overwrites with the new parent, if moving to a new
+        category
         """
 
     let parent_id: Nullable[Snowflake]
@@ -4138,12 +4749,14 @@ class val GuildChannelPosition is ToJsonable
         end
 
         match lock_permissions
-        | let lock_permissions': Bool => obj = obj.update("lock_permissions", lock_permissions')
+        | let lock_permissions': Bool =>
+            obj = obj.update("lock_permissions", lock_permissions')
         | Null => obj = obj.update("lock_permissions", None)
         end
 
         match parent_id
-        | let parent_id': Snowflake => obj = obj.update("parent_id", parent_id'.to_json())
+        | let parent_id': Snowflake =>
+            obj = obj.update("parent_id", parent_id'.to_json())
         | Null => obj = obj.update("parent_id", None)
         end
 
@@ -4166,14 +4779,17 @@ class val UpdateGuildChannelPositionsParams is ToJsonableArray
 
     fun to_json(): json.JsonArray =>
         var array = json.JsonArray
-        for position in positions.values() do array = array.push(position.to_json()) end
+        for position in positions.values() do
+            array = array.push(position.to_json())
+        end
         array
 
 class val GetGuildMembersParams
     """
     https://docs.discord.com/developers/resources/guild#list-guild-members-query-string-params
 
-    This endpoint is restricted according to whether the `GUILD_MEMBERS` Privileged Intent is enabled for your application.
+    This endpoint is restricted according to whether the `GUILD_MEMBERS`
+    Privileged Intent is enabled for your application.
     """
 
     let limit: (USize | None)
@@ -4186,7 +4802,10 @@ class val GetGuildMembersParams
         the highest user id in the previous page, defaults to 0
         """
 
-    new val create(limit': (USize | None) = None, after': (Snowflake | None) = None) =>
+    new val create(
+        limit': (USize | None) = None,
+        after': (Snowflake | None) = None
+    ) =>
         limit = limit'
         after = after'
 
@@ -4237,12 +4856,16 @@ class val AddGuildMemberParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/guild#add-guild-member-json-params
 
-    For guilds with Membership Screening enabled, this endpoint will default to adding new members as `pending` in the guild member object. Members that are `pending` will have to complete membership screening before they become full members that can talk.
+    For guilds with Membership Screening enabled, this endpoint will default to
+    adding new members as `pending` in the guild member object. Members that are
+    `pending` will have to complete membership screening before they become full
+    members that can talk.
     """
 
     let access_token: String
         """
-        an oauth2 access token granted with the `guilds.join` to the bot's application for the user you want to add to the guild
+        an oauth2 access token granted with the `guilds.join` to the bot's
+        application for the user you want to add to the guild
         """
 
     let nick: (String | None)
@@ -4286,7 +4909,8 @@ class val AddGuildMemberParams is ToJsonable
         end
 
         match roles
-        | let roles': Array[Snowflake] val => obj = obj.update("roles", _Snowflakes.to_json(roles'))
+        | let roles': Array[Snowflake] val =>
+            obj = obj.update("roles", _Snowflakes.to_json(roles'))
         end
 
         match mute
@@ -4303,7 +4927,9 @@ class val UpdateGuildMemberParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/guild#modify-guild-member-json-params
 
-    All parameters to this endpoint are optional and nullable. When moving members to channels, the API user must have permissions to both connect to the channel and have the `MOVE_MEMBERS` permission.
+    All parameters to this endpoint are optional and nullable. When moving
+    members to channels, the API user must have permissions to both connect to
+    the channel and have the `MOVE_MEMBERS` permission.
     """
 
     let nick: Nullable[String]
@@ -4322,14 +4948,16 @@ class val UpdateGuildMemberParams is ToJsonable
 
     let mute: Nullable[Bool]
         """
-        whether the user is muted in voice channels. Will throw a 400 error if the user is not in a voice channel
+        whether the user is muted in voice channels. Will throw a 400 error if
+        the user is not in a voice channel
 
         Requires the `MUTE_MEMBERS` permission.
         """
 
     let deaf: Nullable[Bool]
         """
-        whether the user is deafened in voice channels. Will throw a 400 error if the user is not in a voice channel
+        whether the user is deafened in voice channels. Will throw a 400 error
+        if the user is not in a voice channel
 
         Requires the `DEAFEN_MEMBERS` permission.
         """
@@ -4343,7 +4971,9 @@ class val UpdateGuildMemberParams is ToJsonable
 
     let communication_disabled_until: Nullable[ISO8601]
         """
-        when the user's timeout will expire and the user will be able to communicate in the guild again (up to 28 days in the future), set to null to remove timeout
+        when the user's timeout will expire and the user will be able to
+        communicate in the guild again (up to 28 days in the future), set to
+        null to remove timeout
 
         Requires the `MODERATE_MEMBERS` permission.
         """
@@ -4381,7 +5011,8 @@ class val UpdateGuildMemberParams is ToJsonable
         end
 
         match roles
-        | let roles': Array[Snowflake] val => obj = obj.update("roles", _Snowflakes.to_json(roles'))
+        | let roles': Array[Snowflake] val =>
+            obj = obj.update("roles", _Snowflakes.to_json(roles'))
         | Null => obj = obj.update("roles", None)
         end
 
@@ -4396,17 +5027,24 @@ class val UpdateGuildMemberParams is ToJsonable
         end
 
         match channel_id
-        | let channel_id': Snowflake => obj = obj.update("channel_id", channel_id'.to_json())
+        | let channel_id': Snowflake =>
+            obj = obj.update("channel_id", channel_id'.to_json())
         | Null => obj = obj.update("channel_id", None)
         end
 
         match communication_disabled_until
-        | let communication_disabled_until': ISO8601 => obj = obj.update("communication_disabled_until", communication_disabled_until')
+        | let communication_disabled_until': ISO8601 =>
+            obj =
+                obj.update(
+                    "communication_disabled_until",
+                    communication_disabled_until'
+                )
         | Null => obj = obj.update("communication_disabled_until", None)
         end
 
         match flags
-        | let flags': Array[GuildMemberFlag] val => obj = obj.update("flags", _GuildMemberFlags.to_json(flags'))
+        | let flags': Array[GuildMemberFlag] val =>
+            obj = obj.update("flags", _GuildMemberFlags.to_json(flags'))
         | Null => obj = obj.update("flags", None)
         end
 
@@ -4468,7 +5106,9 @@ class val GetGuildBansParams
     """
     https://docs.discord.com/developers/resources/guild#get-guild-bans-query-string-params
 
-    Provide a `before` and/or `after` to paginate. Users will always be returned in ascending order by `user.id`. If both `before` and `after` are provided, only `before` is respected.
+    Provide a `before` and/or `after` to paginate. Users will always be returned
+    in ascending order by `user.id`. If both `before` and `after` are provided,
+    only `before` is respected.
     """
 
     let limit: (USize | None)
@@ -4519,7 +5159,8 @@ class val CreateGuildBanParams is ToJsonable
 
     let delete_message_seconds: (USize | None)
         """
-        number of seconds to delete messages for, between 0 and 604800 (7 days), defaults to 0
+        number of seconds to delete messages for, between 0 and 604800 (7 days),
+        defaults to 0
         """
 
     new val create(delete_message_seconds': (USize | None) = None) =>
@@ -4529,7 +5170,11 @@ class val CreateGuildBanParams is ToJsonable
         var obj = json.JsonObject
 
         match delete_message_seconds
-        | let delete_message_seconds': USize => obj = obj.update("delete_message_seconds", delete_message_seconds'.i64())
+        | let delete_message_seconds': USize =>
+            obj =
+                obj.update(
+                    "delete_message_seconds", delete_message_seconds'.i64()
+                )
         end
 
         obj
@@ -4538,7 +5183,8 @@ class val BulkGuildBanParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/guild#bulk-guild-ban-json-params
 
-    If a user is already banned, or the bot lacks the permission to ban them, they will be listed in `failed_users`.
+    If a user is already banned, or the bot lacks the permission to ban them,
+    they will be listed in `failed_users`.
     """
 
     let user_ids: Array[Snowflake] val
@@ -4548,18 +5194,27 @@ class val BulkGuildBanParams is ToJsonable
 
     let delete_message_seconds: (USize | None)
         """
-        number of seconds to delete messages for, between 0 and 604800 (7 days), defaults to 0
+        number of seconds to delete messages for, between 0 and 604800 (7 days),
+        defaults to 0
         """
 
-    new val create(user_ids': Array[Snowflake] val, delete_message_seconds': (USize | None) = None) =>
+    new val create(
+        user_ids': Array[Snowflake] val,
+        delete_message_seconds': (USize | None) = None
+    ) =>
         user_ids = user_ids'
         delete_message_seconds = delete_message_seconds'
 
     fun to_json(): json.JsonObject =>
-        var obj = json.JsonObject.update("user_ids", _Snowflakes.to_json(user_ids))
+        var obj =
+            json.JsonObject.update("user_ids", _Snowflakes.to_json(user_ids))
 
         match delete_message_seconds
-        | let delete_message_seconds': USize => obj = obj.update("delete_message_seconds", delete_message_seconds'.i64())
+        | let delete_message_seconds': USize =>
+            obj =
+                obj.update(
+                    "delete_message_seconds", delete_message_seconds'.i64()
+                )
         end
 
         obj
@@ -4578,7 +5233,8 @@ class val CreateGuildRoleParams is ToJsonable
 
     let permissions: (Array[Permission] val | None)
         """
-        bitwise value of the enabled/disabled permissions. Default: @everyone permissions in guild
+        bitwise value of the enabled/disabled permissions. Default: @everyone
+        permissions in guild
         """
 
     let color: (I64 | None)
@@ -4595,17 +5251,20 @@ class val CreateGuildRoleParams is ToJsonable
 
     let hoist: (Bool | None)
         """
-        whether the role should be displayed separately in the sidebar. Default: false
+        whether the role should be displayed separately in the sidebar. Default:
+        false
         """
 
     let icon: Nullable[ImageData]
         """
-        the role's icon image (if the guild has the `ROLE_ICONS` feature). Default: null
+        the role's icon image (if the guild has the `ROLE_ICONS` feature).
+        Default: null
         """
 
     let unicode_emoji: Nullable[String]
         """
-        the role's unicode emoji as a standard emoji (if the guild has the `ROLE_ICONS` feature). Default: null
+        the role's unicode emoji as a standard emoji (if the guild has the
+        `ROLE_ICONS` feature). Default: null
         """
 
     let mentionable: (Bool | None)
@@ -4640,7 +5299,8 @@ class val CreateGuildRoleParams is ToJsonable
         end
 
         match permissions
-        | let permissions': Array[Permission] val => obj = obj.update("permissions", _Permissions.to_json(permissions'))
+        | let permissions': Array[Permission] val =>
+            obj = obj.update("permissions", _Permissions.to_json(permissions'))
         end
 
         match color
@@ -4648,7 +5308,8 @@ class val CreateGuildRoleParams is ToJsonable
         end
 
         match colors
-        | let colors': RoleColors => obj = obj.update("colors", colors'.to_json())
+        | let colors': RoleColors =>
+            obj = obj.update("colors", colors'.to_json())
         end
 
         match hoist
@@ -4661,12 +5322,14 @@ class val CreateGuildRoleParams is ToJsonable
         end
 
         match unicode_emoji
-        | let unicode_emoji': String => obj = obj.update("unicode_emoji", unicode_emoji')
+        | let unicode_emoji': String =>
+            obj = obj.update("unicode_emoji", unicode_emoji')
         | Null => obj = obj.update("unicode_emoji", None)
         end
 
         match mentionable
-        | let mentionable': Bool => obj = obj.update("mentionable", mentionable')
+        | let mentionable': Bool =>
+            obj = obj.update("mentionable", mentionable')
         end
 
         obj
@@ -4685,7 +5348,8 @@ class val GuildRolePosition is ToJsonable
 
     let position: Nullable[USize]
         """
-        sorting position of the role (roles with the same position are sorted by id)
+        sorting position of the role (roles with the same position are sorted by
+        id)
         """
 
     new val create(id': Snowflake, position': Nullable[USize] = None) =>
@@ -4719,7 +5383,9 @@ class val UpdateGuildRolePositionsParams is ToJsonableArray
 
     fun to_json(): json.JsonArray =>
         var array = json.JsonArray
-        for position in positions.values() do array = array.push(position.to_json()) end
+        for position in positions.values() do
+            array = array.push(position.to_json())
+        end
         array
 
 class val UpdateGuildRoleParams is ToJsonable
@@ -4763,7 +5429,8 @@ class val UpdateGuildRoleParams is ToJsonable
 
     let unicode_emoji: Nullable[String]
         """
-        the role's unicode emoji as a standard emoji (if the guild has the `ROLE_ICONS` feature)
+        the role's unicode emoji as a standard emoji (if the guild has the
+        `ROLE_ICONS` feature)
         """
 
     let mentionable: Nullable[Bool]
@@ -4799,7 +5466,8 @@ class val UpdateGuildRoleParams is ToJsonable
         end
 
         match permissions
-        | let permissions': Array[Permission] val => obj = obj.update("permissions", _Permissions.to_json(permissions'))
+        | let permissions': Array[Permission] val =>
+            obj = obj.update("permissions", _Permissions.to_json(permissions'))
         | Null => obj = obj.update("permissions", None)
         end
 
@@ -4809,7 +5477,8 @@ class val UpdateGuildRoleParams is ToJsonable
         end
 
         match colors
-        | let colors': RoleColors => obj = obj.update("colors", colors'.to_json())
+        | let colors': RoleColors =>
+            obj = obj.update("colors", colors'.to_json())
         | Null => obj = obj.update("colors", None)
         end
 
@@ -4824,12 +5493,14 @@ class val UpdateGuildRoleParams is ToJsonable
         end
 
         match unicode_emoji
-        | let unicode_emoji': String => obj = obj.update("unicode_emoji", unicode_emoji')
+        | let unicode_emoji': String =>
+            obj = obj.update("unicode_emoji", unicode_emoji')
         | Null => obj = obj.update("unicode_emoji", None)
         end
 
         match mentionable
-        | let mentionable': Bool => obj = obj.update("mentionable", mentionable')
+        | let mentionable': Bool =>
+            obj = obj.update("mentionable", mentionable')
         | Null => obj = obj.update("mentionable", None)
         end
 
@@ -4839,7 +5510,10 @@ class val GetGuildPruneCountParams
     """
     https://docs.discord.com/developers/resources/guild#get-guild-prune-count-query-string-params
 
-    By default, prune will not remove users with roles. You can optionally include specific roles in your prune by providing the `include_roles` parameter. Any inactive user that has a subset of the provided role(s) will be counted in the prune and users with additional roles will not.
+    By default, prune will not remove users with roles. You can optionally
+    include specific roles in your prune by providing the `include_roles`
+    parameter. Any inactive user that has a subset of the provided role(s) will
+    be counted in the prune and users with additional roles will not.
     """
 
     let days: (USize | None)
@@ -4852,7 +5526,10 @@ class val GetGuildPruneCountParams
         role(s) to include, comma-delimited array of snowflakes
         """
 
-    new val create(days': (USize | None) = None, include_roles': (Array[Snowflake] val | None) = None) =>
+    new val create(
+        days': (USize | None) = None,
+        include_roles': (Array[Snowflake] val | None) = None
+    ) =>
         days = days'
         include_roles = include_roles'
 
@@ -4864,7 +5541,8 @@ class val GetGuildPruneCountParams
         end
 
         match include_roles
-        | let include_roles': Array[Snowflake] val => query.push(("include_roles", _CommaSeparated(include_roles')))
+        | let include_roles': Array[Snowflake] val =>
+            query.push(("include_roles", _CommaSeparated(include_roles')))
         end
 
         consume query
@@ -4873,7 +5551,8 @@ class val BeginGuildPruneParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/guild#begin-guild-prune-json-params
 
-    For large guilds it's recommended to set the `compute_prune_count` option to false, forcing `pruned` to null.
+    For large guilds it's recommended to set the `compute_prune_count` option to
+    false, forcing `pruned` to null.
     """
 
     let days: (USize | None)
@@ -4883,7 +5562,8 @@ class val BeginGuildPruneParams is ToJsonable
 
     let compute_prune_count: (Bool | None)
         """
-        whether `pruned` is returned, discouraged for large guilds, defaults to true
+        whether `pruned` is returned, discouraged for large guilds, defaults to
+        true
         """
 
     let include_roles: (Array[Snowflake] val | None)
@@ -4908,11 +5588,14 @@ class val BeginGuildPruneParams is ToJsonable
         end
 
         match compute_prune_count
-        | let compute_prune_count': Bool => obj = obj.update("compute_prune_count", compute_prune_count')
+        | let compute_prune_count': Bool =>
+            obj = obj.update("compute_prune_count", compute_prune_count')
         end
 
         match include_roles
-        | let include_roles': Array[Snowflake] val => obj = obj.update("include_roles", _Snowflakes.to_json(include_roles'))
+        | let include_roles': Array[Snowflake] val =>
+            obj =
+                obj.update("include_roles", _Snowflakes.to_json(include_roles'))
         end
 
         obj
@@ -4934,7 +5617,10 @@ class val UpdateGuildWidgetParams is ToJsonable
         the widget channel id
         """
 
-    new val create(enabled': (Bool | None) = None, channel_id': Nullable[Snowflake] = None) =>
+    new val create(
+        enabled': (Bool | None) = None,
+        channel_id': Nullable[Snowflake] = None
+    ) =>
         enabled = enabled'
         channel_id = channel_id'
 
@@ -4946,7 +5632,8 @@ class val UpdateGuildWidgetParams is ToJsonable
         end
 
         match channel_id
-        | let channel_id': Snowflake => obj = obj.update("channel_id", channel_id'.to_json())
+        | let channel_id': Snowflake =>
+            obj = obj.update("channel_id", channel_id'.to_json())
         | Null => obj = obj.update("channel_id", None)
         end
 
@@ -4964,25 +5651,30 @@ primitive ShieldGuildWidgetStyle is GuildWidgetStyle
     fun value(): String => "shield"
 primitive Banner1GuildWidgetStyle is GuildWidgetStyle
     """
-    large image with guild icon, name and online count. "POWERED BY DISCORD" as the footer of the widget
+    large image with guild icon, name and online count. "POWERED BY DISCORD" as
+    the footer of the widget
     """
 
     fun value(): String => "banner1"
 primitive Banner2GuildWidgetStyle is GuildWidgetStyle
     """
-    smaller widget style with guild icon, name and online count. Split on the right with Discord logo
+    smaller widget style with guild icon, name and online count. Split on the
+    right with Discord logo
     """
 
     fun value(): String => "banner2"
 primitive Banner3GuildWidgetStyle is GuildWidgetStyle
     """
-    large image with guild icon, name and online count. In the footer, Discord logo on the left and "Chat Now" on the right
+    large image with guild icon, name and online count. In the footer, Discord
+    logo on the left and "Chat Now" on the right
     """
 
     fun value(): String => "banner3"
 primitive Banner4GuildWidgetStyle is GuildWidgetStyle
     """
-    large Discord logo at the top of the widget. Guild icon, name and online count in the middle portion of the widget and a "JOIN MY SERVER" button at the bottom
+    large Discord logo at the top of the widget. Guild icon, name and online
+    count in the middle portion of the widget and a "JOIN MY SERVER" button at
+    the bottom
     """
 
     fun value(): String => "banner4"
@@ -5061,12 +5753,18 @@ class val UpdateGuildWelcomeScreenParams is ToJsonable
         end
 
         match welcome_channels
-        | let welcome_channels': Array[WelcomeScreenChannel] val => obj = obj.update("welcome_channels", _WelcomeScreenChannels.to_json(welcome_channels'))
+        | let welcome_channels': Array[WelcomeScreenChannel] val =>
+            obj =
+                obj.update(
+                    "welcome_channels",
+                    _WelcomeScreenChannels.to_json(welcome_channels')
+                )
         | Null => obj = obj.update("welcome_channels", None)
         end
 
         match description
-        | let description': String => obj = obj.update("description", description')
+        | let description': String =>
+            obj = obj.update("description", description')
         | Null => obj = obj.update("description", None)
         end
 
@@ -5076,7 +5774,10 @@ class val UpdateGuildOnboardingParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/guild#modify-guild-onboarding-json-params
 
-    Onboarding enforces constraints when enabled. These constraints are that there must be at least 7 Default Channels and at least 5 of them must allow sending messages to the @everyone role. The `mode` field modifies what is considered when enforcing these constraints.
+    Onboarding enforces constraints when enabled. These constraints are that
+    there must be at least 7 Default Channels and at least 5 of them must allow
+    sending messages to the @everyone role. The `mode` field modifies what is
+    considered when enforcing these constraints.
     """
 
     let prompts: Array[OnboardingPrompt] val
@@ -5113,7 +5814,9 @@ class val UpdateGuildOnboardingParams is ToJsonable
     fun to_json(): json.JsonObject =>
         json.JsonObject
             .update("prompts", _OnboardingPrompts.to_json(prompts))
-            .update("default_channel_ids", _Snowflakes.to_json(default_channel_ids))
+            .update(
+                "default_channel_ids", _Snowflakes.to_json(default_channel_ids)
+            )
             .update("enabled", enabled)
             .update("mode", mode.value().i64())
 
@@ -5121,7 +5824,8 @@ class val UpdateGuildIncidentActionsParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/guild#modify-guild-incident-actions-json-params
 
-    Both fields are nullable and may be set to a timestamp up to 24 hours in the future.
+    Both fields are nullable and may be set to a timestamp up to 24 hours in the
+    future.
     """
 
     let invites_disabled_until: Nullable[ISO8601]
@@ -5145,12 +5849,14 @@ class val UpdateGuildIncidentActionsParams is ToJsonable
         var obj = json.JsonObject
 
         match invites_disabled_until
-        | let invites_disabled_until': ISO8601 => obj = obj.update("invites_disabled_until", invites_disabled_until')
+        | let invites_disabled_until': ISO8601 =>
+            obj = obj.update("invites_disabled_until", invites_disabled_until')
         | Null => obj = obj.update("invites_disabled_until", None)
         end
 
         match dms_disabled_until
-        | let dms_disabled_until': ISO8601 => obj = obj.update("dms_disabled_until", dms_disabled_until')
+        | let dms_disabled_until': ISO8601 =>
+            obj = obj.update("dms_disabled_until", dms_disabled_until')
         | Null => obj = obj.update("dms_disabled_until", None)
         end
 

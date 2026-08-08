@@ -27,10 +27,12 @@ class val _RateLimit
             end
         end
 
-        // A global rate limit only sends `X-RateLimit-Retry-After`, so a response is worth
-        // something as long as it tells us either how much is left or how long
-        // to wait for.
-        if (remaining' is None) and (reset_after_s' is None) and (retry_after_s' is None) then
+        // A global rate limit only sends `X-RateLimit-Retry-After`, so a
+        // response is worth something as long as it tells us either how much is
+        // left or how long to wait for.
+        if (remaining' is None) and (reset_after_s' is None) and (
+            retry_after_s' is None
+        ) then
             error
         end
 
@@ -71,7 +73,8 @@ class _RateLimitWindow
     fun blocked_until(now: U64): (U64 | None) =>
         if _sends < max_count then return None end
 
-        let frees_at = try _sent_at(_sends % max_count)? + duration_ns else return None end
+        let frees_at =
+            try _sent_at(_sends % max_count)? + duration_ns else return None end
         if frees_at > now then frees_at end
 
     fun ref spend(now: U64) =>
@@ -95,7 +98,8 @@ primitive _RateLimitConstants
         """
         How many requests the API takes, and in what span of time.
 
-        Going over the Cloudflare limit results in an hour-long ban, so it's extremely key we don't exceed that.
+        Going over the Cloudflare limit results in an hour-long ban, so it's
+        extremely key we don't exceed that.
         """
 
         [
@@ -113,8 +117,8 @@ primitive _RateLimitConstants
 
     fun minimum_pause_s(): F64 =>
         """
-        The least time the global bucket sits out a 429, however short a wait the
-        response asks for.
+        The least time the global bucket sits out a 429, however short a wait
+        the response asks for.
         """
 
         1
@@ -123,8 +127,8 @@ primitive _RateLimitConstants
         """
         How long the global bucket sits out a 429 that names no wait at all.
 
-        Long enough not to walk straight back into a Cloudflare ban, short enough
-        that taking a route's limit for a global one is not costly.
+        Long enough not to walk straight back into a Cloudflare ban, short
+        enough that taking a route's limit for a global one is not costly.
         """
 
         60

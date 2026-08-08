@@ -4,16 +4,21 @@ https://docs.discord.com/developers/reference#snowflakes
 use collections = "collections"
 use json = "json"
 
-class val Snowflake is (Stringable & collections.Hashable & Equatable[Snowflake])
+class val Snowflake is (
+    Stringable & collections.Hashable & Equatable[Snowflake]
+)
     let value: U64
 
     new val create(value': U64) => value = value'
 
-    new val from_timestamp(value': U64) => value = (value' - SnowflakeDefaults.discord_epoch_ms()) << 22
+    new val from_timestamp(
+        value': U64
+    ) => value = (value' - SnowflakeDefaults.discord_epoch_ms()) << 22
 
     new val from_json(value': json.JsonValue) ? =>
         """
-        Snowflakes are serialised as strings since they do not fit in the 53 bits of precision a JSON number is guaranteed to carry.
+        Snowflakes are serialised as strings since they do not fit in the 53
+        bits of precision a JSON number is guaranteed to carry.
         """
 
         value = (value' as String).u64()?

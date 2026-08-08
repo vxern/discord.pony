@@ -1,7 +1,9 @@
 use collections = "collections"
 use time = "time"
 
-trait val _Enum[A: _Enum[A, V] val, V: (collections.Hashable val & Equatable[V] val)] is (collections.Hashable & Equatable[A])
+trait val _Enum[
+    A: _Enum[A, V] val, V: (collections.Hashable val & Equatable[V] val)
+] is (collections.Hashable & Equatable[A])
     fun value(): V
 
     fun hash(): USize => value().hash()
@@ -10,7 +12,8 @@ trait val _Enum[A: _Enum[A, V] val, V: (collections.Hashable val & Equatable[V] 
 
 type _RequestQuery is Array[(String, String)] val
     """
-    Query parameters to append to a route, or `None` for a route called without any.
+    Query parameters to append to a route, or `None` for a route called without
+    any.
     """
 
 type _RequestBody is String

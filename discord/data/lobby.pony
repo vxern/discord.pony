@@ -59,7 +59,8 @@ class val Lobby is Jsonable
             | "application_id" => application_id' = Snowflake.from_json(value)?
             | "metadata" => metadata' = _Metadata(value)
             | "members" => members' = _LobbyMembers(value)?
-            | "linked_channel" => linked_channel' = Channel.from_json(value as json.JsonObject)?
+            | "linked_channel" =>
+                linked_channel' = Channel.from_json(value as json.JsonObject)?
             end
         end
 
@@ -76,11 +77,13 @@ class val Lobby is Jsonable
             .update("members", _LobbyMembers.to_json(members))
 
         match metadata
-        | let metadata': collections.Map[String, String] val => obj = obj.update("metadata", _Metadata.to_json(metadata'))
+        | let metadata': collections.Map[String, String] val =>
+            obj = obj.update("metadata", _Metadata.to_json(metadata'))
         end
 
         match linked_channel
-        | let linked_channel': Channel => obj = obj.update("linked_channel", linked_channel'.to_json())
+        | let linked_channel': Channel =>
+            obj = obj.update("linked_channel", linked_channel'.to_json())
         end
 
         obj
@@ -138,11 +141,13 @@ class val LobbyMember is Jsonable
             .update("id", id.to_json())
 
         match metadata
-        | let metadata': collections.Map[String, String] val => obj = obj.update("metadata", _Metadata.to_json(metadata'))
+        | let metadata': collections.Map[String, String] val =>
+            obj = obj.update("metadata", _Metadata.to_json(metadata'))
         end
 
         match flags
-        | let flags': Array[LobbyMemberFlag] val => obj = obj.update("flags", _LobbyMemberFlags.to_json(flags'))
+        | let flags': Array[LobbyMemberFlag] val =>
+            obj = obj.update("flags", _LobbyMemberFlags.to_json(flags'))
         end
 
         obj
@@ -156,13 +161,17 @@ primitive _LobbyMembers
         let array = value as json.JsonArray
         recover val
             let members = Array[LobbyMember](array.size())
-            for member in array.values() do members.push(LobbyMember.from_json(member as json.JsonObject)?) end
+            for member in array.values() do
+                members.push(LobbyMember.from_json(member as json.JsonObject)?)
+            end
             members
         end
 
     fun to_json(members: Array[LobbyMember] val): json.JsonArray =>
         var array = json.JsonArray
-        for member in members.values() do array = array.push(member.to_json()) end
+        for member in members.values() do
+            array = array.push(member.to_json())
+        end
         array
 
 trait val LobbyMemberFlag is _Enum[LobbyMemberFlag, U8]
@@ -198,11 +207,15 @@ primitive _LobbyMemberFlags
 
     fun to_json(flags: Array[LobbyMemberFlag] val): I64 =>
         var bits: U64 = 0
-        for flag in flags.values() do bits = bits or (U64(1) << flag.value().u64()) end
+        for flag in flags.values() do
+            bits = bits or (U64(1) << flag.value().u64())
+        end
         bits.i64()
 
 primitive _Metadata
-    fun apply(value: json.JsonValue): (collections.Map[String, String] val | None) =>
+    fun apply(
+        value: json.JsonValue
+    ): (collections.Map[String, String] val | None) =>
         """
         Decodes a dictionary of string key/value pairs.
         """
@@ -250,7 +263,8 @@ class val LobbyMessage is Jsonable
 
     let channel_id: Snowflake
         """
-        included for compatibility with the messages interface; equal to `lobby_id`
+        included for compatibility with the messages interface; equal to
+        `lobby_id`
         """
 
     let author: User
@@ -260,7 +274,8 @@ class val LobbyMessage is Jsonable
 
     let lobby_member: (LobbyMessageMember | None)
         """
-        the author's lobby member additional display name, captured when the message was sent
+        the author's lobby member additional display name, captured when the
+        message was sent
 
         Omitted if the author had no `additional_name` set.
         """
@@ -294,7 +309,8 @@ class val LobbyMessage is Jsonable
         author': User,
         lobby_member': (LobbyMessageMember | None) = None,
         metadata': (collections.Map[String, String] val | None) = None,
-        moderation_metadata': (collections.Map[String, String] val | None) = None,
+        moderation_metadata': (collections.Map[String, String] val | None) =
+            None,
         flags': Array[MessageFlag] val,
         application_id': Snowflake
     ) =>
@@ -319,7 +335,8 @@ class val LobbyMessage is Jsonable
         var author': (User | None) = None
         var lobby_member': (LobbyMessageMember | None) = None
         var metadata': (collections.Map[String, String] val | None) = None
-        var moderation_metadata': (collections.Map[String, String] val | None) = None
+        var moderation_metadata': (collections.Map[String, String] val | None) =
+            None
         var flags': (Array[MessageFlag] val | None) = None
         var application_id': (Snowflake | None) = None
 
@@ -331,7 +348,9 @@ class val LobbyMessage is Jsonable
             | "lobby_id" => lobby_id' = Snowflake.from_json(value)?
             | "channel_id" => channel_id' = Snowflake.from_json(value)?
             | "author" => author' = User.from_json(value as json.JsonObject)?
-            | "lobby_member" => lobby_member' = LobbyMessageMember.from_json(value as json.JsonObject)?
+            | "lobby_member" =>
+                lobby_member' =
+                    LobbyMessageMember.from_json(value as json.JsonObject)?
             | "metadata" => metadata' = _Metadata(value)
             | "moderation_metadata" => moderation_metadata' = _Metadata(value)
             | "flags" => flags' = _MessageFlags((value as I64).u64())
@@ -363,15 +382,22 @@ class val LobbyMessage is Jsonable
             .update("application_id", application_id.to_json())
 
         match lobby_member
-        | let lobby_member': LobbyMessageMember => obj = obj.update("lobby_member", lobby_member'.to_json())
+        | let lobby_member': LobbyMessageMember =>
+            obj = obj.update("lobby_member", lobby_member'.to_json())
         end
 
         match metadata
-        | let metadata': collections.Map[String, String] val => obj = obj.update("metadata", _Metadata.to_json(metadata'))
+        | let metadata': collections.Map[String, String] val =>
+            obj = obj.update("metadata", _Metadata.to_json(metadata'))
         end
 
         match moderation_metadata
-        | let moderation_metadata': collections.Map[String, String] val => obj = obj.update("moderation_metadata", _Metadata.to_json(moderation_metadata'))
+        | let moderation_metadata': collections.Map[String, String] val =>
+            obj =
+                obj.update(
+                    "moderation_metadata",
+                    _Metadata.to_json(moderation_metadata')
+                )
         end
 
         obj
@@ -385,7 +411,8 @@ class val LobbyMessageMember is Jsonable
 
     let additional_name: String
         """
-        the author's lobby member additional display name, captured when the message was sent
+        the author's lobby member additional display name, captured when the
+        message was sent
         """
 
     new val create(additional_name': String) =>
@@ -414,13 +441,19 @@ primitive _LobbyMessages
         let array = value as json.JsonArray
         recover val
             let messages = Array[LobbyMessage](array.size())
-            for message in array.values() do messages.push(LobbyMessage.from_json(message as json.JsonObject)?) end
+            for message in array.values() do
+                messages.push(
+                    LobbyMessage.from_json(message as json.JsonObject)?
+                )
+            end
             messages
         end
 
     fun to_json(messages: Array[LobbyMessage] val): json.JsonArray =>
         var array = json.JsonArray
-        for message in messages.values() do array = array.push(message.to_json()) end
+        for message in messages.values() do
+            array = array.push(message.to_json())
+        end
         array
 
 class val LobbyInvite is Jsonable
@@ -459,7 +492,8 @@ class val CreateLobbyParams is ToJsonable
 
     let metadata: (collections.Map[String, String] val | None)
         """
-        optional dictionary of string key/value pairs. The max total length is 1000.
+        optional dictionary of string key/value pairs. The max total length is
+        1000.
         """
 
     let members: (Array[LobbyMemberParams] val | None)
@@ -469,7 +503,8 @@ class val CreateLobbyParams is ToJsonable
 
     let idle_timeout_seconds: (USize | None)
         """
-        seconds to wait before shutting down a lobby after it becomes idle. Value can be between 5 and 604800 (7 days).
+        seconds to wait before shutting down a lobby after it becomes idle.
+        Value can be between 5 and 604800 (7 days).
         """
 
     new val create(
@@ -485,15 +520,19 @@ class val CreateLobbyParams is ToJsonable
         var obj = json.JsonObject
 
         match metadata
-        | let metadata': collections.Map[String, String] val => obj = obj.update("metadata", _Metadata.to_json(metadata'))
+        | let metadata': collections.Map[String, String] val =>
+            obj = obj.update("metadata", _Metadata.to_json(metadata'))
         end
 
         match members
-        | let members': Array[LobbyMemberParams] val => obj = obj.update("members", _LobbyMemberParams.to_json(members'))
+        | let members': Array[LobbyMemberParams] val =>
+            obj = obj.update("members", _LobbyMemberParams.to_json(members'))
         end
 
         match idle_timeout_seconds
-        | let idle_timeout_seconds': USize => obj = obj.update("idle_timeout_seconds", idle_timeout_seconds'.i64())
+        | let idle_timeout_seconds': USize =>
+            obj =
+                obj.update("idle_timeout_seconds", idle_timeout_seconds'.i64())
         end
 
         obj
@@ -512,7 +551,8 @@ class val LobbyMemberParams is ToJsonable
 
     let metadata: (collections.Map[String, String] val | None)
         """
-        optional dictionary of string key/value pairs. The max total length is 1000.
+        optional dictionary of string key/value pairs. The max total length is
+        1000.
         """
 
     let flags: (Array[LobbyMemberFlag] val | None)
@@ -533,11 +573,13 @@ class val LobbyMemberParams is ToJsonable
         var obj = json.JsonObject.update("id", id.to_json())
 
         match metadata
-        | let metadata': collections.Map[String, String] val => obj = obj.update("metadata", _Metadata.to_json(metadata'))
+        | let metadata': collections.Map[String, String] val =>
+            obj = obj.update("metadata", _Metadata.to_json(metadata'))
         end
 
         match flags
-        | let flags': Array[LobbyMemberFlag] val => obj = obj.update("flags", _LobbyMemberFlags.to_json(flags'))
+        | let flags': Array[LobbyMemberFlag] val =>
+            obj = obj.update("flags", _LobbyMemberFlags.to_json(flags'))
         end
 
         obj
@@ -545,14 +587,17 @@ class val LobbyMemberParams is ToJsonable
 primitive _LobbyMemberParams
     fun to_json(members: Array[LobbyMemberParams] val): json.JsonArray =>
         var array = json.JsonArray
-        for member in members.values() do array = array.push(member.to_json()) end
+        for member in members.values() do
+            array = array.push(member.to_json())
+        end
         array
 
 class val CreateOrJoinLobbyParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/lobby#create-or-join-lobby-json-params
 
-    Adds the current user to a lobby matching the given secret, creating the lobby if one does not already exist.
+    Adds the current user to a lobby matching the given secret, creating the
+    lobby if one does not already exist.
     """
 
     let secret: String
@@ -562,17 +607,20 @@ class val CreateOrJoinLobbyParams is ToJsonable
 
     let lobby_metadata: (collections.Map[String, String] val | None)
         """
-        optional dictionary of string key/value pairs. The max total length is 1000.
+        optional dictionary of string key/value pairs. The max total length is
+        1000.
         """
 
     let member_metadata: (collections.Map[String, String] val | None)
         """
-        optional dictionary of string key/value pairs. The max total length is 1000.
+        optional dictionary of string key/value pairs. The max total length is
+        1000.
         """
 
     let idle_timeout_seconds: (USize | None)
         """
-        seconds to wait before shutting down a lobby after it becomes idle. Value can be between 5 and 604800 (7 days).
+        seconds to wait before shutting down a lobby after it becomes idle.
+        Value can be between 5 and 604800 (7 days).
         """
 
     new val create(
@@ -590,15 +638,23 @@ class val CreateOrJoinLobbyParams is ToJsonable
         var obj = json.JsonObject.update("secret", secret)
 
         match lobby_metadata
-        | let lobby_metadata': collections.Map[String, String] val => obj = obj.update("lobby_metadata", _Metadata.to_json(lobby_metadata'))
+        | let lobby_metadata': collections.Map[String, String] val =>
+            obj =
+                obj.update("lobby_metadata", _Metadata.to_json(lobby_metadata'))
         end
 
         match member_metadata
-        | let member_metadata': collections.Map[String, String] val => obj = obj.update("member_metadata", _Metadata.to_json(member_metadata'))
+        | let member_metadata': collections.Map[String, String] val =>
+            obj =
+                obj.update(
+                    "member_metadata", _Metadata.to_json(member_metadata')
+                )
         end
 
         match idle_timeout_seconds
-        | let idle_timeout_seconds': USize => obj = obj.update("idle_timeout_seconds", idle_timeout_seconds'.i64())
+        | let idle_timeout_seconds': USize =>
+            obj =
+                obj.update("idle_timeout_seconds", idle_timeout_seconds'.i64())
         end
 
         obj
@@ -607,12 +663,14 @@ class val UpdateLobbyParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/lobby#modify-lobby-json-params
 
-    All parameters to this endpoint are optional. Any parameters that are not provided will be reset.
+    All parameters to this endpoint are optional. Any parameters that are not
+    provided will be reset.
     """
 
     let metadata: (collections.Map[String, String] val | None)
         """
-        optional dictionary of string key/value pairs. The max total length is 1000.
+        optional dictionary of string key/value pairs. The max total length is
+        1000.
         """
 
     let members: (Array[LobbyMemberParams] val | None)
@@ -622,7 +680,8 @@ class val UpdateLobbyParams is ToJsonable
 
     let idle_timeout_seconds: (USize | None)
         """
-        seconds to wait before shutting down a lobby after it becomes idle. Value can be between 5 and 604800 (7 days).
+        seconds to wait before shutting down a lobby after it becomes idle.
+        Value can be between 5 and 604800 (7 days).
         """
 
     new val create(
@@ -638,15 +697,19 @@ class val UpdateLobbyParams is ToJsonable
         var obj = json.JsonObject
 
         match metadata
-        | let metadata': collections.Map[String, String] val => obj = obj.update("metadata", _Metadata.to_json(metadata'))
+        | let metadata': collections.Map[String, String] val =>
+            obj = obj.update("metadata", _Metadata.to_json(metadata'))
         end
 
         match members
-        | let members': Array[LobbyMemberParams] val => obj = obj.update("members", _LobbyMemberParams.to_json(members'))
+        | let members': Array[LobbyMemberParams] val =>
+            obj = obj.update("members", _LobbyMemberParams.to_json(members'))
         end
 
         match idle_timeout_seconds
-        | let idle_timeout_seconds': USize => obj = obj.update("idle_timeout_seconds", idle_timeout_seconds'.i64())
+        | let idle_timeout_seconds': USize =>
+            obj =
+                obj.update("idle_timeout_seconds", idle_timeout_seconds'.i64())
         end
 
         obj
@@ -658,7 +721,8 @@ class val AddLobbyMemberParams is ToJsonable
 
     let metadata: (collections.Map[String, String] val | None)
         """
-        optional dictionary of string key/value pairs. The max total length is 1000.
+        optional dictionary of string key/value pairs. The max total length is
+        1000.
         """
 
     let flags: (Array[LobbyMemberFlag] val | None)
@@ -677,11 +741,13 @@ class val AddLobbyMemberParams is ToJsonable
         var obj = json.JsonObject
 
         match metadata
-        | let metadata': collections.Map[String, String] val => obj = obj.update("metadata", _Metadata.to_json(metadata'))
+        | let metadata': collections.Map[String, String] val =>
+            obj = obj.update("metadata", _Metadata.to_json(metadata'))
         end
 
         match flags
-        | let flags': Array[LobbyMemberFlag] val => obj = obj.update("flags", _LobbyMemberFlags.to_json(flags'))
+        | let flags': Array[LobbyMemberFlag] val =>
+            obj = obj.update("flags", _LobbyMemberFlags.to_json(flags'))
         end
 
         obj
@@ -690,7 +756,8 @@ class val BulkUpdateLobbyMembersParams is ToJsonableArray
     """
     https://docs.discord.com/developers/resources/lobby#bulk-update-lobby-members
 
-    This endpoint takes a JSON array of lobby member params, replacing the lobby's membership with the supplied set.
+    This endpoint takes a JSON array of lobby member params, replacing the
+    lobby's membership with the supplied set.
     """
 
     let members: Array[LobbyMemberParams] val
@@ -711,7 +778,8 @@ class val LinkChannelToLobbyParams is ToJsonable
 
     let channel_id: (Snowflake | None)
         """
-        the id of the channel to link to the lobby. If not provided, will unlink any currently linked channels from the lobby.
+        the id of the channel to link to the lobby. If not provided, will unlink
+        any currently linked channels from the lobby.
         """
 
     new val create(channel_id': (Snowflake | None) = None) =>
@@ -721,7 +789,8 @@ class val LinkChannelToLobbyParams is ToJsonable
         var obj = json.JsonObject
 
         match channel_id
-        | let channel_id': Snowflake => obj = obj.update("channel_id", channel_id'.to_json())
+        | let channel_id': Snowflake =>
+            obj = obj.update("channel_id", channel_id'.to_json())
         end
 
         obj
@@ -740,7 +809,8 @@ class val SendLobbyMessageParams is ToJsonable
 
     let metadata: (collections.Map[String, String] val | None)
         """
-        optional dictionary of string key/value pairs. The max total length is 1000.
+        optional dictionary of string key/value pairs. The max total length is
+        1000.
         """
 
     let allowed_mentions: (AllowedMentions | None)
@@ -772,15 +842,18 @@ class val SendLobbyMessageParams is ToJsonable
         end
 
         match metadata
-        | let metadata': collections.Map[String, String] val => obj = obj.update("metadata", _Metadata.to_json(metadata'))
+        | let metadata': collections.Map[String, String] val =>
+            obj = obj.update("metadata", _Metadata.to_json(metadata'))
         end
 
         match allowed_mentions
-        | let allowed_mentions': AllowedMentions => obj = obj.update("allowed_mentions", allowed_mentions'.to_json())
+        | let allowed_mentions': AllowedMentions =>
+            obj = obj.update("allowed_mentions", allowed_mentions'.to_json())
         end
 
         match flags
-        | let flags': Array[MessageFlag] val => obj = obj.update("flags", _MessageFlags.to_json(flags'))
+        | let flags': Array[MessageFlag] val =>
+            obj = obj.update("flags", _MessageFlags.to_json(flags'))
         end
 
         obj

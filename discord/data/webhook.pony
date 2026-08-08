@@ -4,7 +4,8 @@ class val Webhook is Jsonable
     """
     https://docs.discord.com/developers/resources/webhook#webhook-object-webhook-structure
 
-    Webhooks are a low-effort way to post messages to channels in Discord. They do not require a bot user or authentication to use.
+    Webhooks are a low-effort way to post messages to channels in Discord. They
+    do not require a bot user or authentication to use.
     """
 
     let id: Snowflake
@@ -29,7 +30,8 @@ class val Webhook is Jsonable
 
     let user: (User | None)
         """
-        the user this webhook was created by (not returned when getting a webhook with its token)
+        the user this webhook was created by (not returned when getting a
+        webhook with its token)
         """
 
     let name: (String | None)
@@ -56,7 +58,8 @@ class val Webhook is Jsonable
         """
         the guild of the channel that this webhook is following
 
-        This is a partial guild object: Discord sends only `id`, `name` and `icon`.
+        This is a partial guild object: Discord sends only `id`, `name` and
+        `icon`.
         """
 
     let source_channel: (PartialChannel | None)
@@ -68,7 +71,8 @@ class val Webhook is Jsonable
 
     let url: (String | None)
         """
-        the url used for executing the webhook (returned by the webhooks OAuth2 flow)
+        the url used for executing the webhook (returned by the webhooks OAuth2
+        flow)
         """
 
     new val create(
@@ -117,9 +121,14 @@ class val Webhook is Jsonable
             | "id" => id' = Snowflake.from_json(value)?
             | "type" => type'' = WebhookTypes.from((value as I64).u8())?
             | "guild_id" =>
-                match value | let string: String => guild_id' = Snowflake.from_json(string)? end
+                match value
+                | let string: String => guild_id' = Snowflake.from_json(string)?
+                end
             | "channel_id" =>
-                match value | let string: String => channel_id' = Snowflake.from_json(string)? end
+                match value
+                | let string: String =>
+                    channel_id' = Snowflake.from_json(string)?
+                end
             | "user" => user' = User.from_json(value as json.JsonObject)?
             | "name" =>
                 match value | let string: String => name' = string end
@@ -127,9 +136,16 @@ class val Webhook is Jsonable
                 match value | let string: String => avatar' = string end
             | "token" => token' = value as String
             | "application_id" =>
-                match value | let string: String => application_id' = Snowflake.from_json(string)? end
-            | "source_guild" => source_guild' = PartialGuild.from_json(value as json.JsonObject)?
-            | "source_channel" => source_channel' = PartialChannel.from_json(value as json.JsonObject)?
+                match value
+                | let string: String =>
+                    application_id' = Snowflake.from_json(string)?
+                end
+            | "source_guild" =>
+                source_guild' =
+                    PartialGuild.from_json(value as json.JsonObject)?
+            | "source_channel" =>
+                source_channel' =
+                    PartialChannel.from_json(value as json.JsonObject)?
             | "url" => url' = value as String
             end
         end
@@ -151,13 +167,24 @@ class val Webhook is Jsonable
         var obj = json.JsonObject
             .update("id", id.to_json())
             .update("type", type'.value().i64())
-            .update("channel_id", match channel_id | let channel_id': Snowflake => channel_id'.to_json() end)
+            .update(
+                "channel_id",
+                match channel_id
+                | let channel_id': Snowflake => channel_id'.to_json()
+                end
+            )
             .update("name", name)
             .update("avatar", avatar)
-            .update("application_id", match application_id | let application_id': Snowflake => application_id'.to_json() end)
+            .update(
+                "application_id",
+                match application_id
+                | let application_id': Snowflake => application_id'.to_json()
+                end
+            )
 
         match guild_id
-        | let guild_id': Snowflake => obj = obj.update("guild_id", guild_id'.to_json())
+        | let guild_id': Snowflake =>
+            obj = obj.update("guild_id", guild_id'.to_json())
         end
 
         match user
@@ -169,11 +196,13 @@ class val Webhook is Jsonable
         end
 
         match source_guild
-        | let source_guild': PartialGuild => obj = obj.update("source_guild", source_guild'.to_json())
+        | let source_guild': PartialGuild =>
+            obj = obj.update("source_guild", source_guild'.to_json())
         end
 
         match source_channel
-        | let source_channel': PartialChannel => obj = obj.update("source_channel", source_channel'.to_json())
+        | let source_channel': PartialChannel =>
+            obj = obj.update("source_channel", source_channel'.to_json())
         end
 
         match url
@@ -191,13 +220,17 @@ primitive _Webhooks
         let array = value as json.JsonArray
         recover val
             let webhooks = Array[Webhook](array.size())
-            for webhook in array.values() do webhooks.push(Webhook.from_json(webhook as json.JsonObject)?) end
+            for webhook in array.values() do
+                webhooks.push(Webhook.from_json(webhook as json.JsonObject)?)
+            end
             webhooks
         end
 
     fun to_json(webhooks: Array[Webhook] val): json.JsonArray =>
         var array = json.JsonArray
-        for webhook in webhooks.values() do array = array.push(webhook.to_json()) end
+        for webhook in webhooks.values() do
+            array = array.push(webhook.to_json())
+        end
         array
 
 trait val WebhookType is _Enum[WebhookType, U8]
@@ -212,7 +245,8 @@ primitive IncomingWebhookType is WebhookType
     fun value(): U8 => 1
 primitive ChannelFollowerWebhookType is WebhookType
     """
-    Channel Follower Webhooks are internal webhooks used with Channel Following to post new messages into channels
+    Channel Follower Webhooks are internal webhooks used with Channel Following
+    to post new messages into channels
     """
 
     fun value(): U8 => 2
@@ -235,7 +269,9 @@ class val CreateWebhookParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/webhook#create-webhook-json-params
 
-    Webhook names follow the naming restrictions that can be found in the Usernames and Nicknames documentation, with the following additional stipulations:
+    Webhook names follow the naming restrictions that can be found in the
+    Usernames and Nicknames documentation, with the following additional
+    stipulations:
 
     - Webhook names cannot be: `clyde`, `discord`
     """
@@ -307,7 +343,8 @@ class val UpdateWebhookParams is ToJsonable
         end
 
         match channel_id
-        | let channel_id': Snowflake => obj = obj.update("channel_id", channel_id'.to_json())
+        | let channel_id': Snowflake =>
+            obj = obj.update("channel_id", channel_id'.to_json())
         end
 
         obj
@@ -316,7 +353,9 @@ class val UpdateWebhookWithTokenParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/webhook#modify-webhook-with-token
 
-    Same as Modify Webhook, except this call does not require authentication, does not accept a `channel_id` parameter in the body, and does not return a user in the webhook object.
+    Same as Modify Webhook, except this call does not require authentication,
+    does not accept a `channel_id` parameter in the body, and does not return a
+    user in the webhook object.
     """
 
     let name: (String | None)
@@ -329,7 +368,10 @@ class val UpdateWebhookWithTokenParams is ToJsonable
         image for the default webhook avatar
         """
 
-    new val create(name': (String | None) = None, avatar': Nullable[ImageData] = None) =>
+    new val create(
+        name': (String | None) = None,
+        avatar': Nullable[ImageData] = None
+    ) =>
         name = name'
         avatar = avatar'
 
@@ -353,7 +395,8 @@ class val ExecuteWebhookParams is ToJsonable
 
     This endpoint takes both query string parameters and a JSON body.
 
-    Note that when sending a message, you must provide a value for at least one of `content`, `embeds`, `components`, `file` or `poll`.
+    Note that when sending a message, you must provide a value for at least one
+    of `content`, `embeds`, `components`, `file` or `poll`.
     """
 
     let content: (String | None)
@@ -400,17 +443,20 @@ class val ExecuteWebhookParams is ToJsonable
 
     let flags: (Array[MessageFlag] val | None)
         """
-        message flags combined as a bitfield (only `SUPPRESS_EMBEDS`, `SUPPRESS_NOTIFICATIONS` and `IS_COMPONENTS_V2` can be set)
+        message flags combined as a bitfield (only `SUPPRESS_EMBEDS`,
+        `SUPPRESS_NOTIFICATIONS` and `IS_COMPONENTS_V2` can be set)
         """
 
     let thread_name: (String | None)
         """
-        name of thread to create (requires the webhook channel to be a forum or media channel)
+        name of thread to create (requires the webhook channel to be a forum or
+        media channel)
         """
 
     let applied_tags: (Array[Snowflake] val | None)
         """
-        array of tag ids to apply to the thread (requires the webhook channel to be a forum or media channel)
+        array of tag ids to apply to the thread (requires the webhook channel to
+        be a forum or media channel)
         """
 
     let poll: (PollParams | None)
@@ -420,12 +466,14 @@ class val ExecuteWebhookParams is ToJsonable
 
     let thread_id: (Snowflake | None)
         """
-        Send a message to the specified thread within a webhook's channel. The thread will automatically be unarchived.
+        Send a message to the specified thread within a webhook's channel. The
+        thread will automatically be unarchived.
         """
 
     let with_components: (Bool | None)
         """
-        whether to respect the `components` field of the request (defaults to `false`; when `false`, only components without custom_id are allowed)
+        whether to respect the `components` field of the request (defaults to
+        `false`; when `false`, only components without custom_id are allowed)
         """
 
     new val create(
@@ -463,11 +511,13 @@ class val ExecuteWebhookParams is ToJsonable
         let query = recover iso Array[(String, String)] end
 
         match thread_id
-        | let thread_id': Snowflake => query.push(("thread_id", thread_id'.string()))
+        | let thread_id': Snowflake =>
+            query.push(("thread_id", thread_id'.string()))
         end
 
         match with_components
-        | let with_components': Bool => query.push(("with_components", with_components'.string()))
+        | let with_components': Bool =>
+            query.push(("with_components", with_components'.string()))
         end
 
         consume query
@@ -492,31 +542,42 @@ class val ExecuteWebhookParams is ToJsonable
         end
 
         match embeds
-        | let embeds': Array[MessageEmbed] val => obj = obj.update("embeds", _MessageEmbeds.to_json(embeds'))
+        | let embeds': Array[MessageEmbed] val =>
+            obj = obj.update("embeds", _MessageEmbeds.to_json(embeds'))
         end
 
         match allowed_mentions
-        | let allowed_mentions': AllowedMentions => obj = obj.update("allowed_mentions", allowed_mentions'.to_json())
+        | let allowed_mentions': AllowedMentions =>
+            obj = obj.update("allowed_mentions", allowed_mentions'.to_json())
         end
 
         match components
-        | let components': Array[Component] val => obj = obj.update("components", _Components.to_json(components'))
+        | let components': Array[Component] val =>
+            obj = obj.update("components", _Components.to_json(components'))
         end
 
         match attachments
-        | let attachments': Array[MessageAttachmentParams] val => obj = obj.update("attachments", _MessageAttachmentParams.to_json(attachments'))
+        | let attachments': Array[MessageAttachmentParams] val =>
+            obj =
+                obj.update(
+                    "attachments",
+                    _MessageAttachmentParams.to_json(attachments')
+                )
         end
 
         match flags
-        | let flags': Array[MessageFlag] val => obj = obj.update("flags", _MessageFlags.to_json(flags'))
+        | let flags': Array[MessageFlag] val =>
+            obj = obj.update("flags", _MessageFlags.to_json(flags'))
         end
 
         match thread_name
-        | let thread_name': String => obj = obj.update("thread_name", thread_name')
+        | let thread_name': String =>
+            obj = obj.update("thread_name", thread_name')
         end
 
         match applied_tags
-        | let applied_tags': Array[Snowflake] val => obj = obj.update("applied_tags", _Snowflakes.to_json(applied_tags'))
+        | let applied_tags': Array[Snowflake] val =>
+            obj = obj.update("applied_tags", _Snowflakes.to_json(applied_tags'))
         end
 
         match poll
@@ -529,7 +590,9 @@ class val ExecuteSlackCompatibleWebhookParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/webhook#execute-slackcompatible-webhook
 
-    Refer to Slack's documentation for more information. Discord does not support Slack's `channel`, `icon_emoji`, `mrkdwn`, or `mrkdwn_in` properties.
+    Refer to Slack's documentation for more information. Discord does not
+    support Slack's `channel`, `icon_emoji`, `mrkdwn`, or `mrkdwn_in`
+    properties.
 
     The Slack-shaped payload is passed through verbatim as `payload`.
     """
@@ -555,7 +618,8 @@ class val ExecuteSlackCompatibleWebhookParams is ToJsonable
         let query = recover iso Array[(String, String)] end
 
         match thread_id
-        | let thread_id': Snowflake => query.push(("thread_id", thread_id'.string()))
+        | let thread_id': Snowflake =>
+            query.push(("thread_id", thread_id'.string()))
         end
 
         consume query
@@ -566,7 +630,10 @@ class val ExecuteGithubCompatibleWebhookParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/webhook#execute-githubcompatible-webhook
 
-    Add a new webhook to your GitHub repo (in the repo's settings), and use this endpoint as the "Payload URL." You can choose what events your Discord channel receives by choosing the "Let me select individual events" option and selecting individual events for the new webhook you're configuring.
+    Add a new webhook to your GitHub repo (in the repo's settings), and use this
+    endpoint as the "Payload URL." You can choose what events your Discord
+    channel receives by choosing the "Let me select individual events" option
+    and selecting individual events for the new webhook you're configuring.
 
     The GitHub event payload is passed through verbatim as `payload`.
     """
@@ -592,7 +659,8 @@ class val ExecuteGithubCompatibleWebhookParams is ToJsonable
         let query = recover iso Array[(String, String)] end
 
         match thread_id
-        | let thread_id': Snowflake => query.push(("thread_id", thread_id'.string()))
+        | let thread_id': Snowflake =>
+            query.push(("thread_id", thread_id'.string()))
         end
 
         consume query
@@ -616,7 +684,8 @@ class val GetWebhookMessageParams
         let query = recover iso Array[(String, String)] end
 
         match thread_id
-        | let thread_id': Snowflake => query.push(("thread_id", thread_id'.string()))
+        | let thread_id': Snowflake =>
+            query.push(("thread_id", thread_id'.string()))
         end
 
         consume query
@@ -625,7 +694,8 @@ class val UpdateWebhookMessageParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/webhook#edit-webhook-message
 
-    This endpoint takes both query string parameters and a JSON body. All JSON parameters are optional and nullable.
+    This endpoint takes both query string parameters and a JSON body. All JSON
+    parameters are optional and nullable.
     """
 
     let content: Nullable[String]
@@ -657,7 +727,8 @@ class val UpdateWebhookMessageParams is ToJsonable
 
     let flags: (Array[MessageFlag] val | None)
         """
-        message flags combined as a bitfield (only `SUPPRESS_EMBEDS` and `IS_COMPONENTS_V2` can be set)
+        message flags combined as a bitfield (only `SUPPRESS_EMBEDS` and
+        `IS_COMPONENTS_V2` can be set)
         """
 
     let thread_id: (Snowflake | None)
@@ -667,7 +738,8 @@ class val UpdateWebhookMessageParams is ToJsonable
 
     let with_components: (Bool | None)
         """
-        whether to respect the `components` field of the request (defaults to `false`; when `false`, only components without custom_id are allowed)
+        whether to respect the `components` field of the request (defaults to
+        `false`; when `false`, only components without custom_id are allowed)
         """
 
     new val create(
@@ -693,11 +765,13 @@ class val UpdateWebhookMessageParams is ToJsonable
         let query = recover iso Array[(String, String)] end
 
         match thread_id
-        | let thread_id': Snowflake => query.push(("thread_id", thread_id'.string()))
+        | let thread_id': Snowflake =>
+            query.push(("thread_id", thread_id'.string()))
         end
 
         match with_components
-        | let with_components': Bool => query.push(("with_components", with_components'.string()))
+        | let with_components': Bool =>
+            query.push(("with_components", with_components'.string()))
         end
 
         consume query
@@ -711,27 +785,36 @@ class val UpdateWebhookMessageParams is ToJsonable
         end
 
         match embeds
-        | let embeds': Array[MessageEmbed] val => obj = obj.update("embeds", _MessageEmbeds.to_json(embeds'))
+        | let embeds': Array[MessageEmbed] val =>
+            obj = obj.update("embeds", _MessageEmbeds.to_json(embeds'))
         | Null => obj = obj.update("embeds", None)
         end
 
         match allowed_mentions
-        | let allowed_mentions': AllowedMentions => obj = obj.update("allowed_mentions", allowed_mentions'.to_json())
+        | let allowed_mentions': AllowedMentions =>
+            obj = obj.update("allowed_mentions", allowed_mentions'.to_json())
         | Null => obj = obj.update("allowed_mentions", None)
         end
 
         match components
-        | let components': Array[Component] val => obj = obj.update("components", _Components.to_json(components'))
+        | let components': Array[Component] val =>
+            obj = obj.update("components", _Components.to_json(components'))
         | Null => obj = obj.update("components", None)
         end
 
         match attachments
-        | let attachments': Array[MessageAttachmentParams] val => obj = obj.update("attachments", _MessageAttachmentParams.to_json(attachments'))
+        | let attachments': Array[MessageAttachmentParams] val =>
+            obj =
+                obj.update(
+                    "attachments",
+                    _MessageAttachmentParams.to_json(attachments')
+                )
         | Null => obj = obj.update("attachments", None)
         end
 
         match flags
-        | let flags': Array[MessageFlag] val => obj = obj.update("flags", _MessageFlags.to_json(flags'))
+        | let flags': Array[MessageFlag] val =>
+            obj = obj.update("flags", _MessageFlags.to_json(flags'))
         end
 
         obj
@@ -753,7 +836,8 @@ class val DeleteWebhookMessageParams
         let query = recover iso Array[(String, String)] end
 
         match thread_id
-        | let thread_id': Snowflake => query.push(("thread_id", thread_id'.string()))
+        | let thread_id': Snowflake =>
+            query.push(("thread_id", thread_id'.string()))
         end
 
         consume query

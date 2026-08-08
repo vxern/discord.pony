@@ -6,17 +6,33 @@ class val Emoji is Jsonable
 
     Premium Emoji
 
-        Roles with the integration_id tag being the guild’s guild_subscription integration are considered subscription roles. An emoji cannot have both subscription roles and non-subscription roles. Emojis with subscription roles are considered premium emoji, and count toward a separate limit of 25. Emojis cannot be converted between normal and premium after creation.
+        Roles with the integration_id tag being the guild’s guild_subscription
+        integration are considered subscription roles. An emoji cannot have both
+        subscription roles and non-subscription roles. Emojis with subscription
+        roles are considered premium emoji, and count toward a separate limit of
+        25. Emojis cannot be converted between normal and premium after
+        creation.
 
     Emoji Formats
 
-        Emoji can be uploaded as JPEG, PNG, GIF, WebP, and AVIF formats. All emoji (regardless of original format) can be served as WebP. We highly recommend that developers use the .webp extension when fetching emoji so they’re rendered as WebP for maximum performance and compatibility. The Discord client uses WebP for all emoji displayed in-app.
+        Emoji can be uploaded as JPEG, PNG, GIF, WebP, and AVIF formats. All
+        emoji (regardless of original format) can be served as WebP. We highly
+        recommend that developers use the .webp extension when fetching emoji so
+        they’re rendered as WebP for maximum performance and compatibility. The
+        Discord client uses WebP for all emoji displayed in-app.
 
-        Still WebP emoji can be requested using the .webp file extension. For animated WebP emoji, use the .webp extension with the ?animated=true query parameter.
+        Still WebP emoji can be requested using the .webp file extension. For
+        animated WebP emoji, use the .webp extension with the ?animated=true
+        query parameter.
 
     Application-Owned Emoji
 
-        An application can own up to 2000 emojis that can only be used by that app. App emojis can be managed using the API with a bot token, or using the app’s settings in the portal. The USE_EXTERNAL_EMOJIS permission is not required to use app emojis. The user field of an app emoji object represents the team member that uploaded the emoji from the app’s settings, or the bot user if uploaded using the API.
+        An application can own up to 2000 emojis that can only be used by that
+        app. App emojis can be managed using the API with a bot token, or using
+        the app’s settings in the portal. The USE_EXTERNAL_EMOJIS permission is
+        not required to use app emojis. The user field of an app emoji object
+        represents the team member that uploaded the emoji from the app’s
+        settings, or the bot user if uploaded using the API.
     """
 
     let id: (Snowflake | None)
@@ -56,7 +72,8 @@ class val Emoji is Jsonable
 
     let available: (Bool | None)
         """
-        whether this emoji can be used, may be false due to loss of Server Boosts
+        whether this emoji can be used, may be false due to loss of Server
+        Boosts
         """
 
     new val create(
@@ -118,7 +135,8 @@ class val Emoji is Jsonable
             .update("name", name)
 
         match roles
-        | let r: Array[Snowflake] val => obj = obj.update("roles", _Snowflakes.to_json(r))
+        | let r: Array[Snowflake] val =>
+            obj = obj.update("roles", _Snowflakes.to_json(r))
         end
 
         match user
@@ -152,7 +170,9 @@ primitive _Emojis
         let array = value as json.JsonArray
         recover val
             let emojis = Array[Emoji](array.size())
-            for emoji in array.values() do emojis.push(Emoji.from_json(emoji as json.JsonObject)?) end
+            for emoji in array.values() do
+                emojis.push(Emoji.from_json(emoji as json.JsonObject)?)
+            end
             emojis
         end
 
@@ -183,7 +203,11 @@ class val CreateGuildEmojiParams is ToJsonable
         roles allowed to use this emoji
         """
 
-    new val create(name': String, image': ImageData, roles': Array[Snowflake] val) =>
+    new val create(
+        name': String,
+        image': ImageData,
+        roles': Array[Snowflake] val
+    ) =>
         name = name'
         image = image'
         roles = roles'
@@ -211,7 +235,10 @@ class val UpdateGuildEmojiParams is ToJsonable
         roles allowed to use this emoji
         """
 
-    new val create(name': (String | None) = None, roles': Nullable[Array[Snowflake] val] = None) =>
+    new val create(
+        name': (String | None) = None,
+        roles': Nullable[Array[Snowflake] val] = None
+    ) =>
         name = name'
         roles = roles'
 
@@ -223,7 +250,8 @@ class val UpdateGuildEmojiParams is ToJsonable
         end
 
         match roles
-        | let roles': Array[Snowflake] val => obj = obj.update("roles", _Snowflakes.to_json(roles'))
+        | let roles': Array[Snowflake] val =>
+            obj = obj.update("roles", _Snowflakes.to_json(roles'))
         | Null => obj = obj.update("roles", None)
         end
 

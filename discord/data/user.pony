@@ -5,7 +5,12 @@ class val User is Jsonable
     """
     https://docs.discord.com/developers/resources/user#user-object-user-structure
 
-    Users in Discord are generally considered the base entity. Users can spawn across the entire platform, be members of guilds, participate in text and voice chat, and much more. Users are separated by a distinction of "bot" vs "normal." Although they are similar, bot users are automated users that are "owned" by another user. Unlike normal users, bot users do not have a limitation on the number of Guilds they can be a part of.
+    Users in Discord are generally considered the base entity. Users can spawn
+    across the entire platform, be members of guilds, participate in text and
+    voice chat, and much more. Users are separated by a distinction of "bot" vs
+    "normal." Although they are similar, bot users are automated users that are
+    "owned" by another user. Unlike normal users, bot users do not have a
+    limitation on the number of Guilds they can be a part of.
     """
 
     let id: Snowflake
@@ -25,7 +30,8 @@ class val User is Jsonable
 
     let global_name: (String | None)
         """
-        the user's display name, if it is set. For bots, this is the application name
+        the user's display name, if it is set. For bots, this is the application
+        name
         """
 
     let avatar: (String | None)
@@ -40,7 +46,8 @@ class val User is Jsonable
 
     let system: (Bool | None)
         """
-        whether the user is an Official Discord System user (part of the urgent message system)
+        whether the user is an Official Discord System user (part of the urgent
+        message system)
         """
 
     let mfa_enabled: (Bool | None)
@@ -55,7 +62,8 @@ class val User is Jsonable
 
     let accent_color: (I64 | None)
         """
-        the user's banner color encoded as an integer representation of hexadecimal color code
+        the user's banner color encoded as an integer representation of
+        hexadecimal color code
         """
 
     let locale: (Locale | None)
@@ -186,14 +194,25 @@ class val User is Jsonable
             | "email" =>
                 match value | let string: String => email' = string end
             | "flags" => flags' = _UserFlags((value as I64).u64())
-            | "premium_type" => premium_type' = PremiumTypes.from((value as I64).u8())?
+            | "premium_type" =>
+                premium_type' = PremiumTypes.from((value as I64).u8())?
             | "public_flags" => public_flags' = _UserFlags((value as I64).u64())
             | "avatar_decoration_data" =>
-                match value | let obj': json.JsonObject => avatar_decoration_data' = AvatarDecorationData.from_json(obj')? end
+                match value
+                | let obj': json.JsonObject =>
+                    avatar_decoration_data' =
+                        AvatarDecorationData.from_json(obj')?
+                end
             | "collectibles" =>
-                match value | let obj': json.JsonObject => collectibles' = Collectibles.from_json(obj')? end
+                match value
+                | let obj': json.JsonObject =>
+                    collectibles' = Collectibles.from_json(obj')?
+                end
             | "primary_guild" =>
-                match value | let obj': json.JsonObject => primary_guild' = UserPrimaryGuild.from_json(obj')? end
+                match value
+                | let obj': json.JsonObject =>
+                    primary_guild' = UserPrimaryGuild.from_json(obj')?
+                end
             end
         end
 
@@ -234,7 +253,8 @@ class val User is Jsonable
         end
 
         match mfa_enabled
-        | let mfa_enabled': Bool => obj = obj.update("mfa_enabled", mfa_enabled')
+        | let mfa_enabled': Bool =>
+            obj = obj.update("mfa_enabled", mfa_enabled')
         end
 
         match banner
@@ -242,7 +262,8 @@ class val User is Jsonable
         end
 
         match accent_color
-        | let accent_color': I64 => obj = obj.update("accent_color", accent_color')
+        | let accent_color': I64 =>
+            obj = obj.update("accent_color", accent_color')
         end
 
         match locale
@@ -258,27 +279,36 @@ class val User is Jsonable
         end
 
         match flags
-        | let flags': Array[UserFlag] val => obj = obj.update("flags", _UserFlags.to_json(flags'))
+        | let flags': Array[UserFlag] val =>
+            obj = obj.update("flags", _UserFlags.to_json(flags'))
         end
 
         match premium_type
-        | let premium_type': PremiumType => obj = obj.update("premium_type", premium_type'.value().i64())
+        | let premium_type': PremiumType =>
+            obj = obj.update("premium_type", premium_type'.value().i64())
         end
 
         match public_flags
-        | let public_flags': Array[UserFlag] val => obj = obj.update("public_flags", _UserFlags.to_json(public_flags'))
+        | let public_flags': Array[UserFlag] val =>
+            obj = obj.update("public_flags", _UserFlags.to_json(public_flags'))
         end
 
         match avatar_decoration_data
-        | let avatar_decoration_data': AvatarDecorationData => obj = obj.update("avatar_decoration_data", avatar_decoration_data'.to_json())
+        | let avatar_decoration_data': AvatarDecorationData =>
+            obj =
+                obj.update(
+                    "avatar_decoration_data", avatar_decoration_data'.to_json()
+                )
         end
 
         match collectibles
-        | let collectibles': Collectibles => obj = obj.update("collectibles", collectibles'.to_json())
+        | let collectibles': Collectibles =>
+            obj = obj.update("collectibles", collectibles'.to_json())
         end
 
         match primary_guild
-        | let primary_guild': UserPrimaryGuild => obj = obj.update("primary_guild", primary_guild'.to_json())
+        | let primary_guild': UserPrimaryGuild =>
+            obj = obj.update("primary_guild", primary_guild'.to_json())
         end
 
         obj
@@ -292,9 +322,9 @@ class val PartialUser is Jsonable
     only field guaranteed to be sent is `id`, so every field here but `id` is
     optional.
 
-    The fields mean exactly what their `User` counterparts do, and are documented
-    there. A field Discord omits is indistinguishable from a field Discord sent as
-    `null`.
+    The fields mean exactly what their `User` counterparts do, and are
+    documented there. A field Discord omits is indistinguishable from a field
+    Discord sent as `null`.
     """
 
     let id: Snowflake
@@ -402,14 +432,25 @@ class val PartialUser is Jsonable
             | "email" =>
                 match value | let string: String => email' = string end
             | "flags" => flags' = _UserFlags((value as I64).u64())
-            | "premium_type" => premium_type' = PremiumTypes.from((value as I64).u8())?
+            | "premium_type" =>
+                premium_type' = PremiumTypes.from((value as I64).u8())?
             | "public_flags" => public_flags' = _UserFlags((value as I64).u64())
             | "avatar_decoration_data" =>
-                match value | let obj': json.JsonObject => avatar_decoration_data' = AvatarDecorationData.from_json(obj')? end
+                match value
+                | let obj': json.JsonObject =>
+                    avatar_decoration_data' =
+                        AvatarDecorationData.from_json(obj')?
+                end
             | "collectibles" =>
-                match value | let obj': json.JsonObject => collectibles' = Collectibles.from_json(obj')? end
+                match value
+                | let obj': json.JsonObject =>
+                    collectibles' = Collectibles.from_json(obj')?
+                end
             | "primary_guild" =>
-                match value | let obj': json.JsonObject => primary_guild' = UserPrimaryGuild.from_json(obj')? end
+                match value
+                | let obj': json.JsonObject =>
+                    primary_guild' = UserPrimaryGuild.from_json(obj')?
+                end
             end
         end
 
@@ -441,11 +482,13 @@ class val PartialUser is Jsonable
         end
 
         match discriminator
-        | let discriminator': String => obj = obj.update("discriminator", discriminator')
+        | let discriminator': String =>
+            obj = obj.update("discriminator", discriminator')
         end
 
         match global_name
-        | let global_name': String => obj = obj.update("global_name", global_name')
+        | let global_name': String =>
+            obj = obj.update("global_name", global_name')
         end
 
         match avatar
@@ -461,7 +504,8 @@ class val PartialUser is Jsonable
         end
 
         match mfa_enabled
-        | let mfa_enabled': Bool => obj = obj.update("mfa_enabled", mfa_enabled')
+        | let mfa_enabled': Bool =>
+            obj = obj.update("mfa_enabled", mfa_enabled')
         end
 
         match banner
@@ -469,7 +513,8 @@ class val PartialUser is Jsonable
         end
 
         match accent_color
-        | let accent_color': I64 => obj = obj.update("accent_color", accent_color')
+        | let accent_color': I64 =>
+            obj = obj.update("accent_color", accent_color')
         end
 
         match locale
@@ -485,27 +530,36 @@ class val PartialUser is Jsonable
         end
 
         match flags
-        | let flags': Array[UserFlag] val => obj = obj.update("flags", _UserFlags.to_json(flags'))
+        | let flags': Array[UserFlag] val =>
+            obj = obj.update("flags", _UserFlags.to_json(flags'))
         end
 
         match premium_type
-        | let premium_type': PremiumType => obj = obj.update("premium_type", premium_type'.value().i64())
+        | let premium_type': PremiumType =>
+            obj = obj.update("premium_type", premium_type'.value().i64())
         end
 
         match public_flags
-        | let public_flags': Array[UserFlag] val => obj = obj.update("public_flags", _UserFlags.to_json(public_flags'))
+        | let public_flags': Array[UserFlag] val =>
+            obj = obj.update("public_flags", _UserFlags.to_json(public_flags'))
         end
 
         match avatar_decoration_data
-        | let avatar_decoration_data': AvatarDecorationData => obj = obj.update("avatar_decoration_data", avatar_decoration_data'.to_json())
+        | let avatar_decoration_data': AvatarDecorationData =>
+            obj =
+                obj.update(
+                    "avatar_decoration_data", avatar_decoration_data'.to_json()
+                )
         end
 
         match collectibles
-        | let collectibles': Collectibles => obj = obj.update("collectibles", collectibles'.to_json())
+        | let collectibles': Collectibles =>
+            obj = obj.update("collectibles", collectibles'.to_json())
         end
 
         match primary_guild
-        | let primary_guild': UserPrimaryGuild => obj = obj.update("primary_guild", primary_guild'.to_json())
+        | let primary_guild': UserPrimaryGuild =>
+            obj = obj.update("primary_guild", primary_guild'.to_json())
         end
 
         obj
@@ -519,7 +573,9 @@ primitive _Users
         let array = value as json.JsonArray
         recover val
             let users = Array[User](array.size())
-            for user in array.values() do users.push(User.from_json(user as json.JsonObject)?) end
+            for user in array.values() do
+                users.push(User.from_json(user as json.JsonObject)?)
+            end
             users
         end
 
@@ -659,14 +715,17 @@ primitive _UserFlags
 
     fun to_json(flags: Array[UserFlag] val): I64 =>
         var bits: U64 = 0
-        for flag in flags.values() do bits = bits or (U64(1) << flag.value().u64()) end
+        for flag in flags.values() do
+            bits = bits or (U64(1) << flag.value().u64())
+        end
         bits.i64()
 
 trait val PremiumType is _Enum[PremiumType, U8]
     """
     https://docs.discord.com/developers/resources/user#user-object-premium-types
 
-    Premium types denote the level of premium a user has. Visit the Nitro page to learn more about the premium plans we currently offer.
+    Premium types denote the level of premium a user has. Visit the Nitro page
+    to learn more about the premium plans we currently offer.
     """
 primitive NonePremiumType is PremiumType
     fun value(): U8 => 0
@@ -730,7 +789,8 @@ class val Collectibles is Jsonable
     """
     https://docs.discord.com/developers/resources/user#collectibles
 
-    The collectibles the user has, excluding Avatar Decorations and Profile Effects.
+    The collectibles the user has, excluding Avatar Decorations and Profile
+    Effects.
     """
 
     let nameplate: (Nameplate | None)
@@ -747,7 +807,10 @@ class val Collectibles is Jsonable
         for (key, value) in obj.pairs() do
             match key
             | "nameplate" =>
-                match value | let obj': json.JsonObject => nameplate' = Nameplate.from_json(obj')? end
+                match value
+                | let obj': json.JsonObject =>
+                    nameplate' = Nameplate.from_json(obj')?
+                end
             end
         end
 
@@ -757,7 +820,8 @@ class val Collectibles is Jsonable
         var obj = json.JsonObject
 
         match nameplate
-        | let nameplate': Nameplate => obj = obj.update("nameplate", nameplate'.to_json())
+        | let nameplate': Nameplate =>
+            obj = obj.update("nameplate", nameplate'.to_json())
         end
 
         obj
@@ -839,7 +903,9 @@ class val UserPrimaryGuild is Jsonable
 
     let identity_enabled: (Bool | None)
         """
-        whether the user is displaying the primary guild's server tag. This can be null if the system clears the identity, e.g. because the server no longer supports tags
+        whether the user is displaying the primary guild's server tag. This can
+        be null if the system clears the identity, e.g. because the server no
+        longer supports tags
         """
 
     let tag': (String | None)
@@ -872,7 +938,10 @@ class val UserPrimaryGuild is Jsonable
         for (key, value) in obj.pairs() do
             match key
             | "identity_guild_id" =>
-                match value | let string: String => identity_guild_id' = Snowflake.from_json(string)? end
+                match value
+                | let string: String =>
+                    identity_guild_id' = Snowflake.from_json(string)?
+                end
             | "identity_enabled" =>
                 match value | let bool: Bool => identity_enabled' = bool end
             | "tag" =>
@@ -889,7 +958,13 @@ class val UserPrimaryGuild is Jsonable
 
     fun to_json(): json.JsonObject =>
         json.JsonObject
-            .update("identity_guild_id", match identity_guild_id | let identity_guild_id': Snowflake => identity_guild_id'.to_json() end)
+            .update(
+                "identity_guild_id",
+                match identity_guild_id
+                | let identity_guild_id': Snowflake =>
+                    identity_guild_id'.to_json()
+                end
+            )
             .update("identity_enabled", identity_enabled)
             .update("tag", tag')
             .update("badge", badge)
@@ -938,7 +1013,8 @@ class val Connection is Jsonable
 
     let show_activity: Bool
         """
-        whether activities related to this connection will be shown in presence updates
+        whether activities related to this connection will be shown in presence
+        updates
         """
 
     let two_way_link: Bool
@@ -997,7 +1073,8 @@ class val Connection is Jsonable
             | "friend_sync" => friend_sync' = value as Bool
             | "show_activity" => show_activity' = value as Bool
             | "two_way_link" => two_way_link' = value as Bool
-            | "visibility" => visibility' = ConnectionVisibilities.from((value as I64).u8())?
+            | "visibility" =>
+                visibility' = ConnectionVisibilities.from((value as I64).u8())?
             end
         end
 
@@ -1028,7 +1105,9 @@ class val Connection is Jsonable
         end
 
         match integrations
-        | let integrations': Array[Integration] val => obj = obj.update("integrations", _Integrations.to_json(integrations'))
+        | let integrations': Array[Integration] val =>
+            obj =
+                obj.update("integrations", _Integrations.to_json(integrations'))
         end
 
         obj
@@ -1042,13 +1121,19 @@ primitive _Connections
         let array = value as json.JsonArray
         recover val
             let connections = Array[Connection](array.size())
-            for connection in array.values() do connections.push(Connection.from_json(connection as json.JsonObject)?) end
+            for connection in array.values() do
+                connections.push(
+                    Connection.from_json(connection as json.JsonObject)?
+                )
+            end
             connections
         end
 
     fun to_json(connections: Array[Connection] val): json.JsonArray =>
         var array = json.JsonArray
-        for connection in connections.values() do array = array.push(connection.to_json()) end
+        for connection in connections.values() do
+            array = array.push(connection.to_json())
+        end
         array
 
 trait val ConnectionVisibility is _Enum[ConnectionVisibility, U8]
@@ -1094,7 +1179,9 @@ class val ApplicationRoleConnection is Jsonable
 
     let metadata: (collections.Map[String, String] val | None)
         """
-        object mapping application role connection metadata keys to their string-ified value (max 100 characters) for the user on the platform a bot has connected
+        object mapping application role connection metadata keys to their
+        string-ified value (max 100 characters) for the user on the platform a
+        bot has connected
         """
 
     new val create(
@@ -1116,7 +1203,9 @@ class val ApplicationRoleConnection is Jsonable
             | "platform_name" =>
                 match value | let string: String => platform_name' = string end
             | "platform_username" =>
-                match value | let string: String => platform_username' = string end
+                match value
+                | let string: String => platform_username' = string
+                end
             | "metadata" => metadata' = _Metadata(value)
             end
         end
@@ -1131,7 +1220,8 @@ class val ApplicationRoleConnection is Jsonable
             .update("platform_username", platform_username)
 
         match metadata
-        | let metadata': collections.Map[String, String] val => obj = obj.update("metadata", _Metadata.to_json(metadata'))
+        | let metadata': collections.Map[String, String] val =>
+            obj = obj.update("metadata", _Metadata.to_json(metadata'))
         end
 
         obj
@@ -1145,7 +1235,8 @@ class val UpdateCurrentUserParams is ToJsonable
 
     let username: (String | None)
         """
-        user's username, if changed may cause the user's discriminator to be randomized
+        user's username, if changed may cause the user's discriminator to be
+        randomized
         """
 
     let avatar: Nullable[ImageData]
@@ -1190,9 +1281,12 @@ class val GetCurrentUserGuildsParams
     """
     https://docs.discord.com/developers/resources/user#get-current-user-guilds-query-string-params
 
-    This endpoint returns 200 guilds by default, which is the maximum number of guilds a non-bot user can join. Therefore, pagination is not needed for integrations that need to get a list of the users' guilds.
+    This endpoint returns 200 guilds by default, which is the maximum number of
+    guilds a non-bot user can join. Therefore, pagination is not needed for
+    integrations that need to get a list of the users' guilds.
 
-    The `before` and `after` parameters are mutually exclusive, only one may be passed at a time.
+    The `before` and `after` parameters are mutually exclusive, only one may be
+    passed at a time.
     """
 
     let before: (Snowflake | None)
@@ -1212,7 +1306,8 @@ class val GetCurrentUserGuildsParams
 
     let with_counts: (Bool | None)
         """
-        include approximate member and presence counts in response. Defaults to false.
+        include approximate member and presence counts in response. Defaults to
+        false.
         """
 
     new val create(
@@ -1242,7 +1337,8 @@ class val GetCurrentUserGuildsParams
         end
 
         match with_counts
-        | let with_counts': Bool => query.push(("with_counts", with_counts'.string()))
+        | let with_counts': Bool =>
+            query.push(("with_counts", with_counts'.string()))
         end
 
         consume query
@@ -1251,7 +1347,10 @@ class val CreateDMParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/user#create-dm-json-params
 
-    You should not use this endpoint to DM everyone in a server about something. DMs should generally be initiated by a user action. If you open a significant amount of DMs too quickly, your bot may be rate limited or blocked from opening new ones.
+    You should not use this endpoint to DM everyone in a server about something.
+    DMs should generally be initiated by a user action. If you open a
+    significant amount of DMs too quickly, your bot may be rate limited or
+    blocked from opening new ones.
     """
 
     let recipient_id: Snowflake
@@ -1282,13 +1381,18 @@ class val CreateGroupDMParams is ToJsonable
         a dictionary of user ids to their respective nicknames
         """
 
-    new val create(access_tokens': Array[String] val, nicks': collections.Map[Snowflake, String] val) =>
+    new val create(
+        access_tokens': Array[String] val,
+        nicks': collections.Map[Snowflake, String] val
+    ) =>
         access_tokens = access_tokens'
         nicks = nicks'
 
     fun to_json(): json.JsonObject =>
         var nicks' = json.JsonObject
-        for (id, nick) in nicks.pairs() do nicks' = nicks'.update(id.string(), nick) end
+        for (id, nick) in nicks.pairs() do
+            nicks' = nicks'.update(id.string(), nick)
+        end
 
         json.JsonObject
             .update("access_tokens", _Strings.to_json(access_tokens))
@@ -1313,7 +1417,9 @@ class val UpdateCurrentUserApplicationRoleConnectionParams is ToJsonable
 
     let metadata: (collections.Map[String, String] val | None)
         """
-        object mapping application role connection metadata keys to their string-ified value (max 100 characters) for the user on the platform a bot has connected
+        object mapping application role connection metadata keys to their
+        string-ified value (max 100 characters) for the user on the platform a
+        bot has connected
         """
 
     new val create(
@@ -1329,15 +1435,18 @@ class val UpdateCurrentUserApplicationRoleConnectionParams is ToJsonable
         var obj = json.JsonObject
 
         match platform_name
-        | let platform_name': String => obj = obj.update("platform_name", platform_name')
+        | let platform_name': String =>
+            obj = obj.update("platform_name", platform_name')
         end
 
         match platform_username
-        | let platform_username': String => obj = obj.update("platform_username", platform_username')
+        | let platform_username': String =>
+            obj = obj.update("platform_username", platform_username')
         end
 
         match metadata
-        | let metadata': collections.Map[String, String] val => obj = obj.update("metadata", _Metadata.to_json(metadata'))
+        | let metadata': collections.Map[String, String] val =>
+            obj = obj.update("metadata", _Metadata.to_json(metadata'))
         end
 
         obj

@@ -4,9 +4,12 @@ class val SoundboardSound is Jsonable
     """
     https://docs.discord.com/developers/resources/soundboard#soundboard-sound-object-soundboard-sound-structure
 
-    Users can play soundboard sounds in voice channels, triggering a Voice Channel Effect Send Gateway event for users connected to the voice channel.
+    Users can play soundboard sounds in voice channels, triggering a Voice
+    Channel Effect Send Gateway event for users connected to the voice channel.
 
-    There is a set of default sounds available to all users. Soundboard sounds can also be created in a guild; users will be able to use the sounds in the guild, and Nitro subscribers can use them in all guilds.
+    There is a set of default sounds available to all users. Soundboard sounds
+    can also be created in a guild; users will be able to use the sounds in the
+    guild, and Nitro subscribers can use them in all guilds.
     """
 
     let name: String
@@ -41,7 +44,8 @@ class val SoundboardSound is Jsonable
 
     let available: Bool
         """
-        whether this sound can be used, may be false due to loss of Server Boosts
+        whether this sound can be used, may be false due to loss of Server
+        Boosts
         """
 
     let user: (User | None)
@@ -83,13 +87,16 @@ class val SoundboardSound is Jsonable
             | "name" => name' = value as String
             | "sound_id" => sound_id' = Snowflake.from_json(value)?
             | "volume" =>
-                // A whole-numbered volume such as `1` arrives as an integer rather than as a float.
+                // A whole-numbered volume such as `1` arrives as an integer
+                // rather than as a float.
                 match value
                 | let float: F64 => volume' = float
                 | let integer: I64 => volume' = integer.f64()
                 end
             | "emoji_id" =>
-                match value | let string: String => emoji_id' = Snowflake.from_json(string)? end
+                match value
+                | let string: String => emoji_id' = Snowflake.from_json(string)?
+                end
             | "emoji_name" =>
                 match value | let string: String => emoji_name' = string end
             | "guild_id" => guild_id' = Snowflake.from_json(value)?
@@ -112,12 +119,18 @@ class val SoundboardSound is Jsonable
             .update("name", name)
             .update("sound_id", sound_id.to_json())
             .update("volume", volume)
-            .update("emoji_id", match emoji_id | let emoji_id': Snowflake => emoji_id'.to_json() end)
+            .update(
+                "emoji_id",
+                match emoji_id
+                | let emoji_id': Snowflake => emoji_id'.to_json()
+                end
+            )
             .update("emoji_name", emoji_name)
             .update("available", available)
 
         match guild_id
-        | let guild_id': Snowflake => obj = obj.update("guild_id", guild_id'.to_json())
+        | let guild_id': Snowflake =>
+            obj = obj.update("guild_id", guild_id'.to_json())
         end
 
         match user
@@ -135,7 +148,11 @@ primitive _SoundboardSounds
         let array = value as json.JsonArray
         recover val
             let sounds = Array[SoundboardSound](array.size())
-            for sound in array.values() do sounds.push(SoundboardSound.from_json(sound as json.JsonObject)?) end
+            for sound in array.values() do
+                sounds.push(
+                    SoundboardSound.from_json(sound as json.JsonObject)?
+                )
+            end
             sounds
         end
 
@@ -165,10 +182,14 @@ class val SendSoundboardSoundParams is ToJsonable
 
     let source_guild_id: (Snowflake | None)
         """
-        the id of the guild the soundboard sound is from, required to play sounds from different servers
+        the id of the guild the soundboard sound is from, required to play
+        sounds from different servers
         """
 
-    new val create(sound_id': Snowflake, source_guild_id': (Snowflake | None) = None) =>
+    new val create(
+        sound_id': Snowflake,
+        source_guild_id': (Snowflake | None) = None
+    ) =>
         sound_id = sound_id'
         source_guild_id = source_guild_id'
 
@@ -176,7 +197,8 @@ class val SendSoundboardSoundParams is ToJsonable
         var obj = json.JsonObject.update("sound_id", sound_id.to_json())
 
         match source_guild_id
-        | let source_guild_id': Snowflake => obj = obj.update("source_guild_id", source_guild_id'.to_json())
+        | let source_guild_id': Snowflake =>
+            obj = obj.update("source_guild_id", source_guild_id'.to_json())
         end
 
         obj
@@ -185,7 +207,8 @@ class val CreateGuildSoundboardSoundParams is ToJsonable
     """
     https://docs.discord.com/developers/resources/soundboard#create-guild-soundboard-sound-json-params
 
-    Soundboard sounds have a max file size of 512kb and a max duration of 5.2 seconds.
+    Soundboard sounds have a max file size of 512kb and a max duration of 5.2
+    seconds.
     """
 
     let name: String
@@ -237,7 +260,8 @@ class val CreateGuildSoundboardSoundParams is ToJsonable
         end
 
         match emoji_id
-        | let emoji_id': Snowflake => obj = obj.update("emoji_id", emoji_id'.to_json())
+        | let emoji_id': Snowflake =>
+            obj = obj.update("emoji_id", emoji_id'.to_json())
         | Null => obj = obj.update("emoji_id", None)
         end
 
@@ -300,7 +324,8 @@ class val UpdateGuildSoundboardSoundParams is ToJsonable
         end
 
         match emoji_id
-        | let emoji_id': Snowflake => obj = obj.update("emoji_id", emoji_id'.to_json())
+        | let emoji_id': Snowflake =>
+            obj = obj.update("emoji_id", emoji_id'.to_json())
         | Null => obj = obj.update("emoji_id", None)
         end
 

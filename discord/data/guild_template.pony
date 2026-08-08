@@ -4,7 +4,8 @@ class val GuildTemplate is Jsonable
     """
     https://docs.discord.com/developers/resources/guild-template#guild-template-object-guild-template-structure
 
-    Represents a code that when used, creates a guild based on a snapshot of an existing guild.
+    Represents a code that when used, creates a guild based on a snapshot of an
+    existing guild.
     """
 
     let code: String
@@ -56,7 +57,9 @@ class val GuildTemplate is Jsonable
         """
         the guild snapshot this template contains
 
-        The snapshot is a partial guild whose placeholder IDs are given as integers rather than as the strings a `Snowflake` decodes from, so it is left undecoded.
+        The snapshot is a partial guild whose placeholder IDs are given as
+        integers rather than as the strings a `Snowflake` decodes from, so it is
+        left undecoded.
         """
 
     let is_dirty: (Bool | None)
@@ -113,8 +116,10 @@ class val GuildTemplate is Jsonable
             | "creator" => creator' = User.from_json(value as json.JsonObject)?
             | "created_at" => created_at' = value as String
             | "updated_at" => updated_at' = value as String
-            | "source_guild_id" => source_guild_id' = Snowflake.from_json(value)?
-            | "serialized_source_guild" => serialized_source_guild' = value as json.JsonObject
+            | "source_guild_id" =>
+                source_guild_id' = Snowflake.from_json(value)?
+            | "serialized_source_guild" =>
+                serialized_source_guild' = value as json.JsonObject
             | "is_dirty" =>
                 match value | let bool: Bool => is_dirty' = bool end
             end
@@ -160,13 +165,19 @@ primitive _GuildTemplates
         let array = value as json.JsonArray
         recover val
             let templates = Array[GuildTemplate](array.size())
-            for template in array.values() do templates.push(GuildTemplate.from_json(template as json.JsonObject)?) end
+            for template in array.values() do
+                templates.push(
+                    GuildTemplate.from_json(template as json.JsonObject)?
+                )
+            end
             templates
         end
 
     fun to_json(templates: Array[GuildTemplate] val): json.JsonArray =>
         var array = json.JsonArray
-        for template in templates.values() do array = array.push(template.to_json()) end
+        for template in templates.values() do
+            array = array.push(template.to_json())
+        end
         array
 
 class val CreateGuildTemplateParams is ToJsonable
@@ -192,7 +203,8 @@ class val CreateGuildTemplateParams is ToJsonable
         var obj = json.JsonObject.update("name", name)
 
         match description
-        | let description': String => obj = obj.update("description", description')
+        | let description': String =>
+            obj = obj.update("description", description')
         end
 
         obj
@@ -214,7 +226,10 @@ class val UpdateGuildTemplateParams is ToJsonable
         description for the template (0-120 characters)
         """
 
-    new val create(name': (String | None) = None, description': Nullable[String] = None) =>
+    new val create(
+        name': (String | None) = None,
+        description': Nullable[String] = None
+    ) =>
         name = name'
         description = description'
 
@@ -226,7 +241,8 @@ class val UpdateGuildTemplateParams is ToJsonable
         end
 
         match description
-        | let description': String => obj = obj.update("description", description')
+        | let description': String =>
+            obj = obj.update("description", description')
         | Null => obj = obj.update("description", None)
         end
 

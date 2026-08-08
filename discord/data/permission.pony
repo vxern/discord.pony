@@ -4,9 +4,16 @@ trait val Permission is _Enum[Permission, U8]
     """
     https://docs.discord.com/developers/topics/permissions#permissions-bitwise-permission-flags
 
-    Permissions are a way to limit and grant certain abilities to users in Discord. A set of base permissions can be configured at the guild level for different roles. When these roles are attached to users, they grant or revoke specific privileges within the guild. Along with the guild-level permissions, Discord also supports permission overwrites that can be assigned to individual roles or members on a per-channel basis.
+    Permissions are a way to limit and grant certain abilities to users in
+    Discord. A set of base permissions can be configured at the guild level for
+    different roles. When these roles are attached to users, they grant or
+    revoke specific privileges within the guild. Along with the guild-level
+    permissions, Discord also supports permission overwrites that can be
+    assigned to individual roles or members on a per-channel basis.
 
-    Timed out members will temporarily lose all permissions except `ViewChannelPermission` and `ReadMessageHistoryPermission`. Owners and admin users with `AdministratorPermission` are exempt.
+    Timed out members will temporarily lose all permissions except
+    `ViewChannelPermission` and `ReadMessageHistoryPermission`. Owners and admin
+    users with `AdministratorPermission` are exempt.
     """
 primitive CreateInstantInvitePermission is Permission
     """
@@ -80,7 +87,8 @@ primitive StreamPermission is Permission
     fun value(): U8 => 9
 primitive ViewChannelPermission is Permission
     """
-    Allows guild members to view a channel, which includes reading messages in text channels and joining voice channels
+    Allows guild members to view a channel, which includes reading messages in
+    text channels and joining voice channels
 
     Applies to text, voice and stage channels.
     """
@@ -88,7 +96,8 @@ primitive ViewChannelPermission is Permission
     fun value(): U8 => 10
 primitive SendMessagesPermission is Permission
     """
-    Allows for sending messages in a channel and creating threads in a forum (does not allow sending messages in threads)
+    Allows for sending messages in a channel and creating threads in a forum
+    (does not allow sending messages in threads)
 
     Applies to text, voice and stage channels.
     """
@@ -136,7 +145,8 @@ primitive ReadMessageHistoryPermission is Permission
     fun value(): U8 => 16
 primitive MentionEveryonePermission is Permission
     """
-    Allows for using the `@everyone` tag to notify all users in a channel, and the `@here` tag to notify all online users in a channel
+    Allows for using the `@everyone` tag to notify all users in a channel, and
+    the `@here` tag to notify all online users in a channel
 
     Applies to text, voice and stage channels.
     """
@@ -234,13 +244,15 @@ primitive ManageWebhooksPermission is Permission
     fun value(): U8 => 29
 primitive ManageGuildExpressionsPermission is Permission
     """
-    Allows for editing and deleting emojis, stickers, and soundboard sounds created by all users
+    Allows for editing and deleting emojis, stickers, and soundboard sounds
+    created by all users
     """
 
     fun value(): U8 => 30
 primitive UseApplicationCommandsPermission is Permission
     """
-    Allows members to use application commands, including slash commands and context menu commands
+    Allows members to use application commands, including slash commands and
+    context menu commands
 
     Applies to text, voice and stage channels.
     """
@@ -304,7 +316,8 @@ primitive SendMessagesInThreadsPermission is Permission
     fun value(): U8 => 38
 primitive UseEmbeddedActivitiesPermission is Permission
     """
-    Allows for using Activities (applications with the `EmbeddedApplicationFlag` flag)
+    Allows for using Activities (applications with the `EmbeddedApplicationFlag`
+    flag)
 
     Applies to text and voice channels.
     """
@@ -312,7 +325,8 @@ primitive UseEmbeddedActivitiesPermission is Permission
     fun value(): U8 => 39
 primitive ModerateMembersPermission is Permission
     """
-    Allows for timing out users to prevent them from sending or reacting to messages in chat and threads, and from speaking in voice and stage channels
+    Allows for timing out users to prevent them from sending or reacting to
+    messages in chat and threads, and from speaking in voice and stage channels
     """
 
     fun value(): U8 => 40
@@ -332,13 +346,15 @@ primitive UseSoundboardPermission is Permission
     fun value(): U8 => 42
 primitive CreateGuildExpressionsPermission is Permission
     """
-    Allows for creating emojis, stickers, and soundboard sounds, and editing and deleting those created by the current user
+    Allows for creating emojis, stickers, and soundboard sounds, and editing and
+    deleting those created by the current user
     """
 
     fun value(): U8 => 43
 primitive CreateEventsPermission is Permission
     """
-    Allows for creating scheduled events, and editing and deleting those created by the current user
+    Allows for creating scheduled events, and editing and deleting those created
+    by the current user
 
     Applies to voice and stage channels.
     """
@@ -378,7 +394,9 @@ primitive SendPollsPermission is Permission
     fun value(): U8 => 49
 primitive UseExternalAppsPermission is Permission
     """
-    Allows user-installed apps to send public responses. When disabled, users will still be allowed to use their apps but the responses will be ephemeral. This only applies to apps not also installed to the server.
+    Allows user-installed apps to send public responses. When disabled, users
+    will still be allowed to use their apps but the responses will be ephemeral.
+    This only applies to apps not also installed to the server.
 
     Applies to text, voice and stage channels.
     """
@@ -463,7 +481,9 @@ primitive _Permissions
         """
         Decodes a permission bit set.
 
-        Permission bit sets are serialised as strings since they are variable-length and do not necessarily fit in the 53 bits of precision a JSON number is guaranteed to carry.
+        Permission bit sets are serialised as strings since they are
+        variable-length and do not necessarily fit in the 53 bits of precision a
+        JSON number is guaranteed to carry.
         """
 
         let bits = (value as String).u64()?
@@ -481,14 +501,20 @@ primitive _Permissions
 
     fun to_json(permissions: Array[Permission] val): String =>
         var bits: U64 = 0
-        for permission in permissions.values() do bits = bits or (U64(1) << permission.value().u64()) end
+        for permission in permissions.values() do
+            bits = bits or (U64(1) << permission.value().u64())
+        end
         bits.string()
 
 class val Role is Jsonable
     """
     https://docs.discord.com/developers/topics/permissions#role-object
 
-    Roles represent a set of permissions attached to a group of users. Roles have names, colors, and can be "pinned" to the side bar, causing their members to be listed separately. Roles can have separate permission profiles for the global context (guild) and channel context. The `@everyone` role has the same ID as the guild it belongs to.
+    Roles represent a set of permissions attached to a group of users. Roles
+    have names, colors, and can be "pinned" to the side bar, causing their
+    members to be listed separately. Roles can have separate permission profiles
+    for the global context (guild) and channel context. The `@everyone` role has
+    the same ID as the guild it belongs to.
     """
 
     let id: Snowflake
@@ -505,7 +531,8 @@ class val Role is Jsonable
         """
         integer representation of hexadecimal color code
 
-        Deprecated. This will still be returned by the API, but using the `colors` field is recommended when doing requests.
+        Deprecated. This will still be returned by the API, but using the
+        `colors` field is recommended when doing requests.
         """
 
     let colors: RoleColors
@@ -607,7 +634,8 @@ class val Role is Jsonable
             | "id" => id' = Snowflake.from_json(value)?
             | "name" => name' = value as String
             | "color" => color' = value as I64
-            | "colors" => colors' = RoleColors.from_json(value as json.JsonObject)?
+            | "colors" =>
+                colors' = RoleColors.from_json(value as json.JsonObject)?
             | "hoist" => hoist' = value as Bool
             | "icon" =>
                 match value | let string: String => icon' = string end
@@ -666,7 +694,9 @@ primitive _Roles
         let array = value as json.JsonArray
         recover val
             let roles = Array[Role](array.size())
-            for role in array.values() do roles.push(Role.from_json(role as json.JsonObject)?) end
+            for role in array.values() do
+                roles.push(Role.from_json(role as json.JsonObject)?)
+            end
             roles
         end
 
@@ -679,7 +709,9 @@ class val RoleTags is Jsonable
     """
     https://docs.discord.com/developers/topics/permissions#role-object-role-tags-structure
 
-    Tags with type `null` represent booleans. They will be present and set to `null` if they are "true", and will be not present if they are "false". Those tags are modelled here as plain booleans.
+    Tags with type `null` represent booleans. They will be present and set to
+    `null` if they are "true", and will be not present if they are "false".
+    Those tags are modelled here as plain booleans.
     """
 
     let bot_id: (Snowflake | None)
@@ -740,7 +772,8 @@ class val RoleTags is Jsonable
             | "bot_id" => bot_id' = Snowflake.from_json(value)?
             | "integration_id" => integration_id' = Snowflake.from_json(value)?
             | "premium_subscriber" => premium_subscriber' = true
-            | "subscription_listing_id" => subscription_listing_id' = Snowflake.from_json(value)?
+            | "subscription_listing_id" =>
+                subscription_listing_id' = Snowflake.from_json(value)?
             | "available_for_purchase" => available_for_purchase' = true
             | "guild_connections" => guild_connections' = true
             end
@@ -757,22 +790,35 @@ class val RoleTags is Jsonable
         var obj = json.JsonObject
 
         match bot_id
-        | let bot_id': Snowflake => obj = obj.update("bot_id", bot_id'.to_json())
+        | let bot_id': Snowflake =>
+            obj = obj.update("bot_id", bot_id'.to_json())
         end
 
         match integration_id
-        | let integration_id': Snowflake => obj = obj.update("integration_id", integration_id'.to_json())
+        | let integration_id': Snowflake =>
+            obj = obj.update("integration_id", integration_id'.to_json())
         end
 
-        if premium_subscriber then obj = obj.update("premium_subscriber", None) end
+        if premium_subscriber then
+            obj = obj.update("premium_subscriber", None)
+        end
 
         match subscription_listing_id
-        | let subscription_listing_id': Snowflake => obj = obj.update("subscription_listing_id", subscription_listing_id'.to_json())
+        | let subscription_listing_id': Snowflake =>
+            obj =
+                obj.update(
+                    "subscription_listing_id",
+                    subscription_listing_id'.to_json()
+                )
         end
 
-        if available_for_purchase then obj = obj.update("available_for_purchase", None) end
+        if available_for_purchase then
+            obj = obj.update("available_for_purchase", None)
+        end
 
-        if guild_connections then obj = obj.update("guild_connections", None) end
+        if guild_connections then
+            obj = obj.update("guild_connections", None)
+        end
 
         obj
 
@@ -780,7 +826,9 @@ class val RoleColors is Jsonable
     """
     https://docs.discord.com/developers/topics/permissions#role-object-role-colors-object
 
-    This object will always be filled with `primary_color` being the role's `color`. Other fields can only be set to a non-null value if the guild has the `ENHANCED_ROLE_COLORS` guild feature.
+    This object will always be filled with `primary_color` being the role's
+    `color`. Other fields can only be set to a non-null value if the guild has
+    the `ENHANCED_ROLE_COLORS` guild feature.
     """
 
     let primary_color: I64
@@ -790,15 +838,21 @@ class val RoleColors is Jsonable
 
     let secondary_color: (I64 | None)
         """
-        the secondary color for the role, this will make the role a gradient between the other provided colors
+        the secondary color for the role, this will make the role a gradient
+        between the other provided colors
         """
 
     let tertiary_color: (I64 | None)
         """
-        the tertiary color for the role, this will turn the gradient into a holographic style
+        the tertiary color for the role, this will turn the gradient into a
+        holographic style
         """
 
-    new val create(primary_color': I64, secondary_color': (I64 | None) = None, tertiary_color': (I64 | None) = None) =>
+    new val create(
+        primary_color': I64,
+        secondary_color': (I64 | None) = None,
+        tertiary_color': (I64 | None) = None
+    ) =>
         primary_color = primary_color'
         secondary_color = secondary_color'
         tertiary_color = tertiary_color'
@@ -861,5 +915,7 @@ primitive _RoleFlags
 
     fun to_json(flags: Array[RoleFlag] val): I64 =>
         var bits: U64 = 0
-        for flag in flags.values() do bits = bits or (U64(1) << flag.value().u64()) end
+        for flag in flags.values() do
+            bits = bits or (U64(1) << flag.value().u64())
+        end
         bits.i64()

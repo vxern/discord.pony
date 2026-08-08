@@ -105,7 +105,9 @@ primitive Locales
         end
 
 primitive _Localizations
-    fun apply(value: json.JsonValue): (collections.Map[Locale, String] val | None) ? =>
+    fun apply(
+        value: json.JsonValue
+    ): (collections.Map[Locale, String] val | None) ? =>
         """
         Decodes a localisation dictionary.
         """
@@ -116,7 +118,8 @@ primitive _Localizations
                 let map = collections.Map[Locale, String](obj.size())
                 for (key, value') in obj.pairs() do
                     match (Locales.from(key)?, value')
-                    | (let locale: Locale, let string: String) => map(locale) = string
+                    | (let locale: Locale, let string: String) =>
+                        map(locale) = string
                     end
                 end
                 map
@@ -125,5 +128,7 @@ primitive _Localizations
 
     fun to_json(map: collections.Map[Locale, String] box): json.JsonObject =>
         var obj = json.JsonObject
-        for (locale, string) in map.pairs() do obj = obj.update(locale.value(), string) end
+        for (locale, string) in map.pairs() do
+            obj = obj.update(locale.value(), string)
+        end
         obj

@@ -11,7 +11,9 @@ type ResponseHandler[A: Any val] is {(A)} val
 
 type EmptyResponseHandler is {()} val
 
-type RawResponseHandler is {(courier.HTTPRequest val, courier.HTTPResponse val)} val
+type RawResponseHandler is {
+    (courier.HTTPRequest val, courier.HTTPResponse val)
+} val
 
 type RawFailureHandler is {()} val
 
@@ -47,8 +49,10 @@ actor RestApi
     let _ssl_context: (ssl.SSLContext val | None)
     let _timers: time.Timers = time.Timers
 
-    embed _buckets: collections.Map[String, Bucket] = collections.Map[String, Bucket]
-    embed _senders: collections.SetIs[_RequestSender tag] = collections.SetIs[_RequestSender tag]
+    embed _buckets: collections.Map[String, Bucket] =
+        collections.Map[String, Bucket]
+    embed _senders: collections.SetIs[_RequestSender tag] =
+        collections.SetIs[_RequestSender tag]
     let _global_bucket: GlobalBucket
 
     new create(env: Env, options': RestOptions) =>
@@ -82,7 +86,10 @@ actor RestApi
             )
         end
 
-    be send_request(request: courier.HTTPRequest val, handler: RawResponseHandler) =>
+    be send_request(
+        request: courier.HTTPRequest val,
+        handler: RawResponseHandler
+    ) =>
         let id = _BucketId(request)
         let bucket =
             try
@@ -103,7 +110,8 @@ actor RestApi
 
     be dispose() =>
         Debug.out(
-            "[rest] disposing of " + _buckets.size().string() + " bucket(s) and "
+            "[rest] disposing of " + _buckets.size().string()
+            + " bucket(s) and "
             + _senders.size().string() + " in-flight request(s)"
         )
 
@@ -119,32 +127,50 @@ actor RestApi
     be _sender_settled(sender: _RequestSender tag) =>
         _senders.unset(sender)
         Debug.out(
-            "[rest] a request settled, " + _senders.size().string() + " still in flight"
+            "[rest] a request settled, " + _senders.size().string()
+            + " still in flight"
         )
 
-    be _raw_send_request(request: courier.HTTPRequest val, handler: RawResponseHandler, on_failure: RawFailureHandler) =>
+    be _raw_send_request(
+        request: courier.HTTPRequest val,
+        handler: RawResponseHandler,
+        on_failure: RawFailureHandler
+    ) =>
         match _ssl_context
         | let ssl_context: ssl.SSLContext val =>
             Debug.out(
                 "[rest] sending " + request.method.string() + " " + request.path
             )
-            _senders.set(_RequestSender(this, _auth, ssl_context, options, request, handler, on_failure))
+            _senders.set(
+                _RequestSender(
+                    this,
+                    _auth,
+                    ssl_context,
+                    options,
+                    request,
+                    handler,
+                    on_failure
+                )
+            )
         else
             Debug.out(
-                "[rest] cannot send " + request.method.string() + " " + request.path
+                "[rest] cannot send " + request.method.string() + " "
+                + request.path
                 + ": there is no SSL context"
             )
             options.on_error(
                 RestError(
                     request,
-                    "no certificate authority at " + options.ca_certificates_path
+                    "no certificate authority at "
+                    + options.ca_certificates_path
                 )
             )
             on_failure()
         end
 
 actor _RequestSender is courier.HTTPClientConnectionActor
-    var _http: courier.HTTPClientConnection = courier.HTTPClientConnection.none()
+    var _http: courier.HTTPClientConnection =
+        courier.HTTPClientConnection.none()
     var _collector: courier.ResponseCollector = courier.ResponseCollector
     let _api: RestApi
     let _options: RestOptions
@@ -194,7 +220,9 @@ actor _RequestSender is courier.HTTPClientConnectionActor
         _collector.set_response(response)
 
     fun ref on_body_chunk(chunk: Array[U8] val) =>
-        Debug.out("[rest] read a body chunk of " + chunk.size().string() + " bytes")
+        Debug.out(
+            "[rest] read a body chunk of " + chunk.size().string() + " bytes"
+        )
         _collector.add_chunk(chunk)
 
     fun ref on_response_complete() =>
@@ -231,7 +259,8 @@ actor _RequestSender is courier.HTTPClientConnectionActor
 
     fun ref _fail(reason: String) =>
         Debug.out(
-            "[rest] " + _request.method.string() + " " + _request.path + " failed: "
+            "[rest] " + _request.method.string() + " " + _request.path
+            + " failed: "
             + reason + (if _settled then " (already settled)" else "" end)
         )
 
@@ -287,22 +316,42 @@ class val RestOptions
 
     fun path(route: String): String =>
         """
-        Prefixes `route` with the API mount point and the configured API version.
+        Prefixes `route` with the API mount point and the configured API
+        version.
         """
 
         "/api/" + version.id() + route
 
-    fun build_request(method: courier.Method, route: String, query: (_RequestQuery | None) = None, body: (_RequestBody | None) = None, reason: (Reason | None) = None): courier.HTTPRequest val =>
-        courier.HTTPRequest(method, build_path(route, query), build_headers(body, reason), build_body(body))
-    
-    fun build_path(route: String, query: (_RequestQuery | None) = None): String => 
+    fun build_request(
+        method: courier.Method,
+        route: String,
+        query: (_RequestQuery | None) = None,
+        body: (_RequestBody | None) = None,
+        reason: (Reason | None) = None
+    ): courier.HTTPRequest val =>
+        courier.HTTPRequest(
+            method,
+            build_path(route, query),
+            build_headers(body, reason),
+            build_body(body)
+        )
+
+    fun build_path(
+        route: String,
+        query: (_RequestQuery | None) = None
+    ): String =>
         match query
-        | let query': _RequestQuery if query'.size() > 0 => path(route) + "?" + courier.QueryParams(query')
+        | let query': _RequestQuery if query'.size() > 0 => path(
+            route
+        ) + "?" + courier.QueryParams(query')
         else
             path(route)
         end
 
-    fun build_headers(body: (_RequestBody | None) = None, reason: (Reason | None) = None): courier.Headers val =>
+    fun build_headers(
+        body: (_RequestBody | None) = None,
+        reason: (Reason | None) = None
+    ): courier.Headers val =>
         recover val
             let headers' = courier.Headers
             headers'.set("User-Agent", user_agent)
@@ -319,8 +368,9 @@ class val RestOptions
             headers'
         end
 
-    fun build_body(body: (_RequestBody | None) = None): (Array[U8] val | None) =>
+    fun build_body(
+        body: (_RequestBody | None) = None
+    ): (Array[U8] val | None) =>
         match body
         | let body': String => body'.array()
         end
-
