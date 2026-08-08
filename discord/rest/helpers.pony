@@ -16,10 +16,22 @@ type _RequestQuery is Array[(String, String)] val
     any.
     """
 
-type _RequestBody is String
+type _RequestBody is (String | _Multipart)
     """
     A serialised request body, or `None` for a route called without one.
     """
+
+primitive _WithFiles
+    fun apply(
+        payload: String,
+        files: (Array[FileUpload] val | None)
+    ): _RequestBody =>
+        match files
+        | let files': Array[FileUpload] val if files'.size() > 0 =>
+            _Multipart.payload(payload, files')
+        else
+            payload
+        end
 
 primitive _WithQueryParam
     """

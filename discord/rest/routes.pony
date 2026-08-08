@@ -601,7 +601,8 @@ actor Routes
         channel_id: Snowflake,
         params: StartThreadInForumOrMediaChannelParams,
         handler: ResponseHandler[Channel],
-        reason: (Reason | None) = None
+        reason: (Reason | None) = None,
+        files: (Array[FileUpload] val | None) = None
     ) =>
         """
         https://docs.discord.com/developers/resources/channel#start-thread-in-forum-or-media-channel
@@ -630,7 +631,9 @@ actor Routes
             options.build_request(
                 courier.POST,
                 "/channels/" + channel_id.string() + "/threads" where body =
-                    json.JsonPrinter.print(params.to_json()),
+                    _WithFiles(
+                        json.JsonPrinter.print(params.to_json()), files
+                    ),
                 reason = reason
             ),
             _Decode.entity[Channel](handler, options.on_error)
@@ -3158,7 +3161,8 @@ actor Routes
     be create_message(
         channel_id: Snowflake,
         params: CreateMessageParams,
-        handler: ResponseHandler[Message]
+        handler: ResponseHandler[Message],
+        files: (Array[FileUpload] val | None) = None
     ) =>
         """
         https://docs.discord.com/developers/resources/message#create-message
@@ -3185,7 +3189,7 @@ actor Routes
             options.build_request(
                 courier.POST,
                 "/channels/" + channel_id.string() + "/messages" where body =
-                    json.JsonPrinter.print(params.to_json())
+                    _WithFiles(json.JsonPrinter.print(params.to_json()), files)
             ),
             _Decode.entity[Message](handler, options.on_error)
         )
@@ -3374,7 +3378,8 @@ actor Routes
         channel_id: Snowflake,
         message_id: Snowflake,
         params: UpdateMessageParams,
-        handler: ResponseHandler[Message]
+        handler: ResponseHandler[Message],
+        files: (Array[FileUpload] val | None) = None
     ) =>
         """
         https://docs.discord.com/developers/resources/message#edit-message
@@ -3418,7 +3423,7 @@ actor Routes
                 courier.PATCH,
                 "/channels/" + channel_id.string() + "/messages/"
                 + message_id.string() where body =
-                    json.JsonPrinter.print(params.to_json())
+                    _WithFiles(json.JsonPrinter.print(params.to_json()), files)
             ),
             _Decode.entity[Message](handler, options.on_error)
         )
@@ -4045,6 +4050,7 @@ actor Routes
     be create_guild_sticker(
         guild_id: Snowflake,
         params: CreateGuildStickerParams,
+        file: FileUpload,
         handler: ResponseHandler[Sticker],
         reason: (Reason | None) = None
     ) =>
@@ -4071,7 +4077,15 @@ actor Routes
             options.build_request(
                 courier.POST,
                 "/guilds/" + guild_id.string() + "/stickers" where body =
-                    json.JsonPrinter.print(params.to_json()),
+                    _Multipart.fields(
+                        [
+                            ("name", params.name)
+                            ("description", params.description)
+                            ("tags", params.tags)
+                        ],
+                        _MultipartConstants.sticker_file_field_name(),
+                        file
+                    ),
                 reason = reason
             ),
             _Decode.entity[Sticker](handler, options.on_error)
@@ -4709,7 +4723,8 @@ actor Routes
         webhook_id: Snowflake,
         webhook_token: String,
         params: ExecuteWebhookParams,
-        handler: EmptyResponseHandler
+        handler: EmptyResponseHandler,
+        files: (Array[FileUpload] val | None) = None
     ) =>
         """
         https://docs.discord.com/developers/resources/webhook#execute-webhook
@@ -4740,7 +4755,9 @@ actor Routes
                 "/webhooks/" + webhook_id.string() + "/"
                 + webhook_token where query =
                     _WithQueryParam(params.to_query(), "wait", false),
-                body = json.JsonPrinter.print(params.to_json())
+                body = _WithFiles(
+                    json.JsonPrinter.print(params.to_json()), files
+                )
             ),
             _Decode.empty(handler, options.on_error)
         )
@@ -4749,7 +4766,8 @@ actor Routes
         webhook_id: Snowflake,
         webhook_token: String,
         params: ExecuteWebhookParams,
-        handler: ResponseHandler[Message]
+        handler: ResponseHandler[Message],
+        files: (Array[FileUpload] val | None) = None
     ) =>
         """
         https://docs.discord.com/developers/resources/webhook#execute-webhook
@@ -4780,7 +4798,9 @@ actor Routes
                 "/webhooks/" + webhook_id.string() + "/"
                 + webhook_token where query =
                     _WithQueryParam(params.to_query(), "wait", true),
-                body = json.JsonPrinter.print(params.to_json())
+                body = _WithFiles(
+                    json.JsonPrinter.print(params.to_json()), files
+                )
             ),
             _Decode.entity[Message](handler, options.on_error)
         )
@@ -4938,7 +4958,8 @@ actor Routes
         webhook_token: String,
         message_id: Snowflake,
         params: UpdateWebhookMessageParams,
-        handler: ResponseHandler[Message]
+        handler: ResponseHandler[Message],
+        files: (Array[FileUpload] val | None) = None
     ) =>
         """
         https://docs.discord.com/developers/resources/webhook#edit-webhook-message
@@ -4976,7 +4997,9 @@ actor Routes
                 "/webhooks/" + webhook_id.string() + "/" + webhook_token
                 + "/messages/" + message_id.string() where query =
                     params.to_query(),
-                body = json.JsonPrinter.print(params.to_json())
+                body = _WithFiles(
+                    json.JsonPrinter.print(params.to_json()), files
+                )
             ),
             _Decode.entity[Message](handler, options.on_error)
         )
@@ -5009,7 +5032,8 @@ actor Routes
         interaction_id: Snowflake,
         interaction_token: String,
         params: CreateInteractionResponseParams,
-        handler: EmptyResponseHandler
+        handler: EmptyResponseHandler,
+        files: (Array[FileUpload] val | None) = None
     ) =>
         """
         https://docs.discord.com/developers/interactions/receiving-and-responding#create-interaction-response
@@ -5029,7 +5053,9 @@ actor Routes
                 "/interactions/" + interaction_id.string() + "/"
                 + interaction_token + "/callback" where query =
                     _WithQueryParam.only("with_response", false),
-                body = json.JsonPrinter.print(params.to_json())
+                body = _WithFiles(
+                    json.JsonPrinter.print(params.to_json()), files
+                )
             ),
             _Decode.empty(handler, options.on_error)
         )
@@ -5038,7 +5064,8 @@ actor Routes
         interaction_id: Snowflake,
         interaction_token: String,
         params: CreateInteractionResponseParams,
-        handler: ResponseHandler[InteractionCallbackResponse]
+        handler: ResponseHandler[InteractionCallbackResponse],
+        files: (Array[FileUpload] val | None) = None
     ) =>
         """
         https://docs.discord.com/developers/interactions/receiving-and-responding#create-interaction-response
@@ -5057,7 +5084,9 @@ actor Routes
                 "/interactions/" + interaction_id.string() + "/"
                 + interaction_token + "/callback" where query =
                     _WithQueryParam.only("with_response", true),
-                body = json.JsonPrinter.print(params.to_json())
+                body = _WithFiles(
+                    json.JsonPrinter.print(params.to_json()), files
+                )
             ),
             _Decode.entity[InteractionCallbackResponse](
                 handler, options.on_error
@@ -5091,7 +5120,8 @@ actor Routes
         application_id: Snowflake,
         interaction_token: String,
         params: UpdateOriginalInteractionResponseParams,
-        handler: ResponseHandler[Message]
+        handler: ResponseHandler[Message],
+        files: (Array[FileUpload] val | None) = None
     ) =>
         """
         https://docs.discord.com/developers/interactions/receiving-and-responding#edit-original-interaction-response
@@ -5106,7 +5136,9 @@ actor Routes
                 "/webhooks/" + application_id.string() + "/"
                 + interaction_token + "/messages/@original" where query =
                     params.to_query(),
-                body = json.JsonPrinter.print(params.to_json())
+                body = _WithFiles(
+                    json.JsonPrinter.print(params.to_json()), files
+                )
             ),
             _Decode.entity[Message](handler, options.on_error)
         )
@@ -5136,7 +5168,8 @@ actor Routes
         application_id: Snowflake,
         interaction_token: String,
         params: CreateFollowupMessageParams,
-        handler: ResponseHandler[Message]
+        handler: ResponseHandler[Message],
+        files: (Array[FileUpload] val | None) = None
     ) =>
         """
         https://docs.discord.com/developers/interactions/receiving-and-responding#create-followup-message
@@ -5171,7 +5204,9 @@ actor Routes
                 "/webhooks/" + application_id.string() + "/"
                 + interaction_token where query =
                     params.to_query(),
-                body = json.JsonPrinter.print(params.to_json())
+                body = _WithFiles(
+                    json.JsonPrinter.print(params.to_json()), files
+                )
             ),
             _Decode.entity[Message](handler, options.on_error)
         )
@@ -5206,7 +5241,8 @@ actor Routes
         interaction_token: String,
         message_id: Snowflake,
         params: UpdateFollowupMessageParams,
-        handler: ResponseHandler[Message]
+        handler: ResponseHandler[Message],
+        files: (Array[FileUpload] val | None) = None
     ) =>
         """
         https://docs.discord.com/developers/interactions/receiving-and-responding#edit-followup-message
@@ -5222,7 +5258,9 @@ actor Routes
                 + interaction_token + "/messages/"
                 + message_id.string() where query =
                     params.to_query(),
-                body = json.JsonPrinter.print(params.to_json())
+                body = _WithFiles(
+                    json.JsonPrinter.print(params.to_json()), files
+                )
             ),
             _Decode.entity[Message](handler, options.on_error)
         )

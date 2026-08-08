@@ -359,6 +359,8 @@ class val RestOptions
 
             match body
             | let _: String => headers'.set("Content-Type", "application/json")
+            | let multipart: _Multipart =>
+                headers'.set("Content-Type", multipart.content_type)
             end
 
             match reason
@@ -373,4 +375,5 @@ class val RestOptions
     ): (Array[U8] val | None) =>
         match body
         | let body': String => body'.array()
+        | let multipart: _Multipart => multipart.body
         end
