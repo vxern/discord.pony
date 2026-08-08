@@ -8,11 +8,11 @@
   "deps": [
     {
       "locator": "github.com/ponylang/ssl.git",
-      "version": "2.0.1"
+      "version": "4.0.0"
     },
     {
       "locator": "github.com/ponylang/lori.git",
-      "version": "0.16.1"
+      "version": "0.18.1"
     },
     {
       "locator": "github.com/vxern/mare.git",
@@ -20,7 +20,7 @@
     },
     {
       "locator": "github.com/ponylang/courier.git",
-      "version": "0.4.0"
+      "version": "0.5.0"
     }
   ],
   "info": {
