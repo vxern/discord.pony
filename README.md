@@ -270,13 +270,142 @@
     - ✅ Get Gateway
     - ✅ Get Gateway Bot
 
-## Gateway Endpoints
+## Gateway
 
-- ❌ Presence Update
-- ❌ Voice State Update
-- ❌ Request Guild Members
-- ❌ Request Soundboard Sounds
-- ❌ Request Channel Info
+### Connection
+
+- ✅ Identify
+- ✅ Resume
+- ✅ Heartbeat
+    - ✅ Jittered first beat
+    - ✅ Acknowledgement tracking, with a reconnect when a beat goes unacknowledged
+    - ✅ Out-of-band beats on request (opcode 1)
+- ✅ Automatic reconnect
+    - ✅ Exponential backoff with jitter, reset once the session settles
+    - ✅ Close code handling, staying down on the codes that cannot be recovered from
+    - ✅ Session invalidation handling (opcode 9), resuming or re-identifying as instructed
+    - ✅ Stage timeouts, so a connect, hello, ready or close that never arrives cannot hang the gateway
+- ✅ Send rate limits
+    - ✅ 120 commands per 60s, with slots held back for heartbeats
+    - ✅ 5 presence updates per 20s
+    - ✅ Identify concurrency, taken from `max_concurrency`
+- ✅ 4096-byte payload limit, enforced before the wire
+- ✅ Bounded send queue, retained across reconnects
+- ✅ Backpressure
+- ✅ Session start limit, checked before identifying
+- ❌ Sharding — a single shard can be identified manually through `shard`, but only one connection is run
+- ❌ Transport compression (`zlib-stream`, `zstd-stream`)
+- ❌ Payload compression
+- ❌ ETF encoding
+
+### Send Events
+
+- ✅ Presence Update
+- ✅ Voice State Update
+- ✅ Request Guild Members
+- ✅ Request Soundboard Sounds
+- ✅ Request Channel Info
+
+### Receive Events
+
+- Lifecycle
+  - ✅ Ready
+  - ✅ Resumed
+  - ✅ Rate Limited
+- Application Commands
+  - ✅ Application Command Permissions Update
+- Auto Moderation
+  - ✅ Auto Moderation Rule Create
+  - ✅ Auto Moderation Rule Update
+  - ✅ Auto Moderation Rule Delete
+  - ✅ Auto Moderation Action Execution
+- Channel
+  - ✅ Channel Create
+  - ✅ Channel Update
+  - ✅ Channel Delete
+  - ✅ Channel Info
+  - ✅ Channel Pins Update
+- Thread
+  - ✅ Thread Create
+  - ✅ Thread Update
+  - ✅ Thread Delete
+  - ✅ Thread List Sync
+  - ✅ Thread Member Update
+  - ✅ Thread Members Update
+- Entitlement
+  - ✅ Entitlement Create
+  - ✅ Entitlement Update
+  - ✅ Entitlement Delete
+- Guild
+  - ✅ Guild Create
+  - ✅ Guild Update
+  - ✅ Guild Delete
+  - ✅ Guild Audit Log Entry Create
+  - ✅ Guild Ban Add
+  - ✅ Guild Ban Remove
+  - ✅ Guild Emojis Update
+  - ✅ Guild Stickers Update
+  - ✅ Guild Integrations Update
+  - ✅ Guild Member Add
+  - ✅ Guild Member Remove
+  - ✅ Guild Member Update
+  - ✅ Guild Members Chunk
+  - ✅ Guild Role Create
+  - ✅ Guild Role Update
+  - ✅ Guild Role Delete
+- Guild Scheduled Event
+  - ✅ Guild Scheduled Event Create
+  - ✅ Guild Scheduled Event Update
+  - ✅ Guild Scheduled Event Delete
+  - ✅ Guild Scheduled Event User Add
+  - ✅ Guild Scheduled Event User Remove
+- Soundboard
+  - ✅ Guild Soundboard Sound Create
+  - ✅ Guild Soundboard Sound Update
+  - ✅ Guild Soundboard Sound Delete
+  - ✅ Guild Soundboard Sounds Update
+  - ✅ Soundboard Sounds
+- Integration
+  - ✅ Integration Create
+  - ✅ Integration Update
+  - ✅ Integration Delete
+- Interaction
+  - ✅ Interaction Create
+- Invite
+  - ✅ Invite Create
+  - ✅ Invite Delete
+- Message
+  - ✅ Message Create
+  - ✅ Message Update
+  - ✅ Message Delete
+  - ✅ Message Delete Bulk
+  - ✅ Message Reaction Add
+  - ✅ Message Reaction Remove
+  - ✅ Message Reaction Remove All
+  - ✅ Message Reaction Remove Emoji
+- Poll
+  - ✅ Message Poll Vote Add
+  - ✅ Message Poll Vote Remove
+- Presence
+  - ✅ Presence Update
+  - ✅ Typing Start
+  - ✅ User Update
+- Stage Instance
+  - ✅ Stage Instance Create
+  - ✅ Stage Instance Update
+  - ✅ Stage Instance Delete
+- Subscription
+  - ✅ Subscription Create
+  - ✅ Subscription Update
+  - ✅ Subscription Delete
+- Voice
+  - ✅ Voice Channel Effect Send
+  - ✅ Voice Channel Status Update
+  - ✅ Voice Channel Start Time Update
+  - ✅ Voice State Update
+  - ✅ Voice Server Update
+- Webhook
+  - ✅ Webhooks Update
 
 ## Objects
 
