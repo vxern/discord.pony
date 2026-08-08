@@ -31,6 +31,26 @@ class _RateLimitWindow
         try _sent_at(_sends % max_count)? = now end
         _sends = _sends + 1
 
+    fun recent(now: U64): Array[U64] =>
+        let kept = Array[U64](max_count)
+        let held = _sends.min(max_count)
+
+        var index = _sends - held
+
+        while index < _sends do
+            try
+                let at = _sent_at(index % max_count)?
+                if (at + duration_ns) > now then kept.push(at) end
+            end
+
+            index = index + 1
+        end
+
+        kept
+
+    fun ref replay(timestamps: Array[U64] box) =>
+        for at in timestamps.values() do spend(at) end
+
 primitive _IsPresenceUpdate
     fun apply(event: GatewaySendableEvent): Bool =>
         match event.opcode()
@@ -55,4 +75,12 @@ primitive _RateLimitConstants
     fun identify_window(max_concurrency: USize = 1): _RateLimitWindow =>
         _RateLimitWindow(max_concurrency.max(1), 5 * 1000)
 
-    fun heartbeat_reserve(): USize => 5
+    fun heartbeat_window(reserve: USize): _RateLimitWindow =>
+        _RateLimitWindow(reserve, 60 * 1000)
+
+    fun heartbeat_reserve(interval_ms: U64 = 0): USize =>
+        if interval_ms == 0 then return 5 end
+
+        let per_window = ((60 * 1000) + (interval_ms - 1)) / interval_ms
+
+        (per_window * 2).usize().min(20)

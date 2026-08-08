@@ -92,7 +92,11 @@ primitive GatewayConstants
 
     fun max_send_message_size_bytes(): USize => 4096
 
-    fun max_receive_message_size_bytes(): USize => 16_777_216
+    fun max_receive_message_size_bytes(): USize => 4_194_304
+
+    fun max_receive_nesting_depth(): USize => 64
+
+    fun min_heartbeat_interval_ms(): U64 => 1_000
 
     fun max_queued_events(): USize => 1_000
 
@@ -312,6 +316,28 @@ actor _GatewayConnection is mare.WebSocketClientActor
     fun ref on_text_message(text: String val) =>
         Debug.out("[gateway] <- " + text.size().string() + " bytes")
 
+        if
+            not _GatewayNesting.within(
+                text,
+                GatewayConstants.max_receive_nesting_depth()
+            )
+        then
+            Debug.out(
+                "[gateway] dropping a message that nests deeper than "
+                + GatewayConstants.max_receive_nesting_depth().string()
+                + " levels"
+            )
+            options.on_error(
+                GatewayError(
+                    "an incoming message of " + text.size().string()
+                    + " bytes nests deeper than the gateway reads, so it was "
+                    + "dropped unparsed"
+                )
+            )
+
+            return
+        end
+
         let payload =
         try
             match json.JsonParser.parse(text)
@@ -333,16 +359,35 @@ actor _GatewayConnection is mare.WebSocketClientActor
 
         match payload.op
         | GatewayOpcodeHello =>
+            if _open then
+                Debug.out(
+                    "[gateway] ignoring a second hello on a connection that is "
+                    + "already open"
+                )
+                return
+            end
+
             try
                 let hello = GatewayHello.from_json(payload.d as json.JsonObject)?
+                let asked = hello.heartbeat_interval.u64()
+                let interval =
+                    asked.max(GatewayConstants.min_heartbeat_interval_ms())
+
+                if interval != asked then
+                    Debug.out(
+                        "[gateway] the gateway asked for a heartbeat every "
+                        + asked.string() + "ms, which is too often, so holding "
+                        + "it to " + interval.string() + "ms"
+                    )
+                end
 
                 Debug.out(
-                    "[gateway] hello: heartbeat every "
-                    + hello.heartbeat_interval.string() + "ms"
+                    "[gateway] hello: heartbeat every " + interval.string() + "ms"
                 )
 
                 _open = true
-                _start_heartbeat(hello.heartbeat_interval.u64())
+                _bucket.set_heartbeat_interval(interval)
+                _start_heartbeat(interval)
                 _identify_or_resume()
                 _arm_watchdog(
                     "a ready or a resumed",
@@ -589,6 +634,17 @@ actor _GatewayConnection is mare.WebSocketClientActor
             GatewayError(
                 "the gateway send queue has caught up, having dropped "
                 + dropped.string() + " event(s)"
+            )
+        )
+
+    be _heartbeat_dropped(reserve: USize) =>
+        Debug.out(
+            "[gateway] a heartbeat was dropped to keep inside the command budget"
+        )
+        options.on_error(
+            GatewayError(
+                "a heartbeat was dropped: " + reserve.string()
+                + " have already gone out inside the command window"
             )
         )
 
@@ -880,10 +936,11 @@ actor _GatewayConnection is mare.WebSocketClientActor
 actor _GatewayHeartbeat
     let _connection: _GatewayConnection
     let _timers: time.Timers
-    let _interval_ms: U64
+    let _interval_ns: U64
     let _timer: time.Timer tag
 
-    var _acknowledged: Bool = true
+    var _awaiting_since: (U64 | None) = None
+    var _last_beat_at: U64 = 0
     var _disposed: Bool = false
 
     new create(
@@ -893,13 +950,11 @@ actor _GatewayHeartbeat
     ) =>
         _connection = connection
         _timers = timers
-        _interval_ms = interval_ms
-
-        let interval = time.Nanos.from_millis(_interval_ms)
+        _interval_ns = time.Nanos.from_millis(interval_ms)
 
         (let seconds, let nanoseconds) = time.Time.now()
         let rand = random.Rand(seconds.u64(), nanoseconds.u64())
-        let initial_delay = (interval.f64() * rand.real()).u64()
+        let initial_delay = (_interval_ns.f64() * rand.real()).u64()
 
         Debug.out(
             "[gateway] the first heartbeat is jittered to "
@@ -910,7 +965,7 @@ actor _GatewayHeartbeat
         let timer = time.Timer(
             _RepeatedlyElapsed({() => self._beat()}),
             initial_delay,
-            interval
+            _interval_ns
         )
         _timer = timer
         _timers(consume timer)
@@ -921,18 +976,23 @@ actor _GatewayHeartbeat
             return
         end
 
-        if not _acknowledged then
-            Debug.out(
-                "[gateway] the previous heartbeat was never acknowledged in "
-                + _interval_ms.string() + "ms"
-            )
-            _connection._heartbeat_timed_out()
-            _dispose()
-            return
+        match _awaiting_since
+        | let since: U64 =>
+            let outstanding = time.Time.nanos() - since
+
+            if outstanding >= _interval_ns then
+                Debug.out(
+                    "[gateway] the heartbeat sent "
+                    + (outstanding / 1_000_000).string()
+                    + "ms ago was never acknowledged"
+                )
+                _connection._heartbeat_timed_out()
+                _dispose()
+                return
+            end
         end
 
-        _acknowledged = false
-        _connection._send_heartbeat()
+        _send()
 
     be _beat_now() =>
         if _disposed then
@@ -940,14 +1000,31 @@ actor _GatewayHeartbeat
             return
         end
 
+        let since = time.Time.nanos() - _last_beat_at
+
+        if since < _interval_ns then
+            Debug.out(
+                "[gateway] ignoring an out-of-band beat: one went out "
+                + (since / 1_000_000).string() + "ms ago"
+            )
+            return
+        end
+
         Debug.out("[gateway] beating out of band")
 
-        _acknowledged = false
-        _connection._send_heartbeat()
+        _send()
 
-    be _acknowledge() => _acknowledged = true
+    be _acknowledge() => _awaiting_since = None
 
     be dispose() => _dispose()
+
+    fun ref _send() =>
+        let now = time.Time.nanos()
+
+        if _awaiting_since is None then _awaiting_since = now end
+
+        _last_beat_at = now
+        _connection._send_heartbeat()
 
     fun ref _dispose() =>
         if _disposed then return end

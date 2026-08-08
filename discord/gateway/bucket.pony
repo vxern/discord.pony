@@ -10,6 +10,11 @@ actor _GatewayBucket
     let _commands: _RateLimitWindow = _RateLimitConstants.command_window()
     let _presences: _RateLimitWindow = _RateLimitConstants.presence_window()
     var _identifies: _RateLimitWindow = _RateLimitConstants.identify_window()
+    var _reserve: USize = _RateLimitConstants.heartbeat_reserve()
+    var _heartbeats: _RateLimitWindow =
+        _RateLimitConstants.heartbeat_window(
+            _RateLimitConstants.heartbeat_reserve()
+        )
 
     var _open: Bool = false
     var _throttled: Bool = false
@@ -74,10 +79,42 @@ actor _GatewayBucket
             return
         end
 
+        let now = time.Time.nanos()
+
+        match _heartbeats.blocked_until(now)
+        | let at: U64 =>
+            Debug.out(
+                "[gateway/bucket] dropping a heartbeat: " + _reserve.string()
+                + " have gone out inside the command window, the next may go "
+                + "in " + ((at - now) / 1_000_000).string() + "ms"
+            )
+            _connection._heartbeat_dropped(_reserve)
+
+            return
+        end
+
         Debug.out("[gateway/bucket] letting a heartbeat past the queue")
 
-        _commands.spend(time.Time.nanos())
+        _heartbeats.spend(now)
+        _commands.spend(now)
         _connection._raw_send(event)
+
+    be set_heartbeat_interval(interval_ms: U64) =>
+        let reserve = _RateLimitConstants.heartbeat_reserve(interval_ms)
+
+        if reserve == _reserve then return end
+
+        Debug.out(
+            "[gateway/bucket] a heartbeat every " + interval_ms.string()
+            + "ms needs " + reserve.string() + " reserved slot(s), was "
+            + _reserve.string()
+        )
+
+        let spent = _heartbeats.recent(time.Time.nanos())
+
+        _reserve = reserve
+        _heartbeats = _RateLimitConstants.heartbeat_window(reserve)
+        _heartbeats.replay(spent)
 
     be set_identify_concurrency(max_concurrency: USize) =>
         if max_concurrency == _identifies.max_count then return end
@@ -88,7 +125,10 @@ actor _GatewayBucket
             + _identifies.max_count.string()
         )
 
+        let spent = _identifies.recent(time.Time.nanos())
+
         _identifies = _RateLimitConstants.identify_window(max_concurrency)
+        _identifies.replay(spent)
 
     be throttle() =>
         Debug.out(
@@ -259,10 +299,7 @@ actor _GatewayBucket
     fun _blocked_until(event: GatewaySendableEvent, now: U64): (U64 | None) =>
         var at: U64 = 0
 
-        match _commands.blocked_until(
-            now,
-            _RateLimitConstants.heartbeat_reserve()
-        )
+        match _commands.blocked_until(now, _reserve)
         | let commands_at: U64 => at = at.max(commands_at)
         end
 

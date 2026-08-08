@@ -14,6 +14,38 @@ class _Queue[A: Any #send]
 
     fun ref clear(): None => _queue.clear()
 
+primitive _GatewayNesting
+    fun within(text: String, limit: USize): Bool =>
+        var depth: USize = 0
+        var in_string = false
+        var escaped = false
+
+        for byte in text.values() do
+            if escaped then
+                escaped = false
+                continue
+            end
+
+            if in_string then
+                match byte
+                | '\\' => escaped = true
+                | '"' => in_string = false
+                end
+
+                continue
+            end
+
+            match byte
+            | '"' => in_string = true
+            | '[' | '{' =>
+                depth = depth + 1
+                if depth > limit then return false end
+            | ']' | '}' => if depth > 0 then depth = depth - 1 end
+            end
+        end
+
+        true
+
 class iso _OnceElapsed is time.TimerNotify
     let _action: {()} val
 
