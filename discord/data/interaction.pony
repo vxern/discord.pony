@@ -1495,8 +1495,6 @@ class val InteractionCallbackModalParams is ToJsonable
 class val CreateInteractionResponseParams is ToJsonable
     """
     https://docs.discord.com/developers/interactions/receiving-and-responding#create-interaction-response
-
-    This endpoint takes both a query string parameter and a JSON body.
     """
 
     let type': InteractionCallbackType
@@ -1511,28 +1509,12 @@ class val CreateInteractionResponseParams is ToJsonable
         The shape expected depends on `type`.
         """
 
-    let with_response: (Bool | None)
-        """
-        whether to include an interaction callback response object as the response (defaults to `false`)
-        """
-
     new val create(
         type'': InteractionCallbackType,
-        data': (InteractionCallbackData | None) = None,
-        with_response': (Bool | None) = None
+        data': (InteractionCallbackData | None) = None
     ) =>
         type' = type''
         data = data'
-        with_response = with_response'
-
-    fun to_query(): _RequestQuery =>
-        let query = recover iso Array[(String, String)] end
-
-        match with_response
-        | let with_response': Bool => query.push(("with_response", with_response'.string()))
-        end
-
-        consume query
 
     fun to_json(): json.JsonObject =>
         var obj = json.JsonObject.update("type", type'.value().i64())

@@ -9,9 +9,6 @@ use mare = "mare"
 use json = "json"
 use ssl = "ssl/net"
 
-// TODO(vxern): (Maybe) add RPC error codes
-// TODO(vxern): (Maybe) add RPC close event codes
-
 class Gateway
     let api: GatewayApi
     let events: Events

@@ -18,6 +18,26 @@ type _RequestBody is String
     A serialised request body, or `None` for a route called without one.
     """
 
+primitive _WithQueryParam
+    """
+    Appends a parameter a route sets itself, rather than one the caller chose.
+    """
+
+    fun apply(query: _RequestQuery, name: String, value: Bool): _RequestQuery =>
+        recover val
+            let query' = Array[(String, String)](query.size() + 1)
+            for parameter in query.values() do query'.push(parameter) end
+            query'.push((name, value.string()))
+            query'
+        end
+
+    fun only(name: String, value: Bool): _RequestQuery =>
+        recover val
+            let query = Array[(String, String)](1)
+            query.push((name, value.string()))
+            query
+        end
+
 class Queue[A: Any #send]
     embed _queue: collections.List[A] = collections.List[A]
 

@@ -2116,11 +2116,11 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/webhooks/" + webhook_id.string() + "/" + webhook_token), _Decode.empty(handler, options.on_error))
 
-    be execute_webhook(webhook_id: Snowflake, webhook_token: String, params: ExecuteWebhookParams, handler: ResponseHandler[Message]) =>
+    be execute_webhook(webhook_id: Snowflake, webhook_token: String, params: ExecuteWebhookParams, handler: EmptyResponseHandler) =>
         """
         https://docs.discord.com/developers/resources/webhook#execute-webhook
 
-        Refer to Uploading Files for details on attachments and multipart/form-data requests. Returns a message or 204 No Content depending on the wait query parameter.
+        Refer to Uploading Files for details on attachments and multipart/form-data requests. Returns 204 No Content; `execute_webhook_and_wait` is the form that waits for the message.
 
         Note that when sending a message, you must provide a value for at least one of content, embeds, components, file, or poll.
 
@@ -2129,25 +2129,66 @@ actor Routes
         Discord may strip certain characters from message content, like invalid unicode characters or characters which cause unexpected message formatting. If you are passing user-generated strings into message content, consider sanitizing the data to prevent unexpected behavior and using allowed_mentions to prevent unexpected mentions.
         """
 
-        api.send_request(options.build_request(courier.POST, "/webhooks/" + webhook_id.string() + "/" + webhook_token where query = params.to_query(), body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Message](handler, options.on_error))
+        api.send_request(options.build_request(courier.POST, "/webhooks/" + webhook_id.string() + "/" + webhook_token where query = _WithQueryParam(params.to_query(), "wait", false), body = json.JsonPrinter.print(params.to_json())), _Decode.empty(handler, options.on_error))
+
+    be execute_webhook_and_wait(webhook_id: Snowflake, webhook_token: String, params: ExecuteWebhookParams, handler: ResponseHandler[Message]) =>
+        """
+        https://docs.discord.com/developers/resources/webhook#execute-webhook
+
+        Refer to Uploading Files for details on attachments and multipart/form-data requests. Waits for server confirmation of message send before response, and returns the created message.
+
+        Note that when sending a message, you must provide a value for at least one of content, embeds, components, file, or poll.
+
+        If the webhook channel is a forum or media channel, you must provide either thread_id in the query string params, or thread_name in the JSON/form params. If thread_id is provided, the message will send in that thread. If thread_name is provided, a thread with that name will be created in the channel.
+
+        Discord may strip certain characters from message content, like invalid unicode characters or characters which cause unexpected message formatting. If you are passing user-generated strings into message content, consider sanitizing the data to prevent unexpected behavior and using allowed_mentions to prevent unexpected mentions.
+        """
+
+        api.send_request(options.build_request(courier.POST, "/webhooks/" + webhook_id.string() + "/" + webhook_token where query = _WithQueryParam(params.to_query(), "wait", true), body = json.JsonPrinter.print(params.to_json())), _Decode.entity[Message](handler, options.on_error))
 
     be execute_slack_compatible_webhook(webhook_id: Snowflake, webhook_token: String, params: ExecuteSlackCompatibleWebhookParams, handler: EmptyResponseHandler) =>
         """
         https://docs.discord.com/developers/resources/webhook#execute-slack-compatible-webhook
 
         Refer to Slack's documentation for more information. We do not support Slack's channel, icon_emoji, mrkdwn, or mrkdwn_in properties.
+
+        Answers as soon as the message is accepted, so a message that is not saved does not return an error; `execute_slack_compatible_webhook_and_wait` is the form that waits for server confirmation.
         """
 
-        api.send_request(options.build_request(courier.POST, "/webhooks/" + webhook_id.string() + "/" + webhook_token + "/slack" where query = params.to_query(), body = json.JsonPrinter.print(params.to_json())), _Decode.empty(handler, options.on_error))
+        api.send_request(options.build_request(courier.POST, "/webhooks/" + webhook_id.string() + "/" + webhook_token + "/slack" where query = _WithQueryParam(params.to_query(), "wait", false), body = json.JsonPrinter.print(params.to_json())), _Decode.empty(handler, options.on_error))
+
+    be execute_slack_compatible_webhook_and_wait(webhook_id: Snowflake, webhook_token: String, params: ExecuteSlackCompatibleWebhookParams, handler: EmptyResponseHandler) =>
+        """
+        https://docs.discord.com/developers/resources/webhook#execute-slack-compatible-webhook
+
+        Refer to Slack's documentation for more information. We do not support Slack's channel, icon_emoji, mrkdwn, or mrkdwn_in properties.
+
+        Waits for server confirmation of message send before response, so a message that is not saved comes back as an error.
+        """
+
+        api.send_request(options.build_request(courier.POST, "/webhooks/" + webhook_id.string() + "/" + webhook_token + "/slack" where query = _WithQueryParam(params.to_query(), "wait", true), body = json.JsonPrinter.print(params.to_json())), _Decode.empty(handler, options.on_error))
 
     be execute_github_compatible_webhook(webhook_id: Snowflake, webhook_token: String, params: ExecuteGithubCompatibleWebhookParams, handler: EmptyResponseHandler) =>
         """
         https://docs.discord.com/developers/resources/webhook#execute-github-compatible-webhook
 
         Add a new webhook to your GitHub repo (in the repo's settings), and use this endpoint as the "Payload URL." You can choose what events your Discord channel receives by choosing the "Let me select individual events" option and selecting individual events for the new webhook you're configuring. The supported events are commit_comment, create, delete, fork, issue_comment, issues, member, public, pull_request, pull_request_review, pull_request_review_comment, push, release, watch, check_run, check_suite, discussion, and discussion_comment.
+
+        Answers as soon as the message is accepted, so a message that is not saved does not return an error; `execute_github_compatible_webhook_and_wait` is the form that waits for server confirmation.
         """
 
-        api.send_request(options.build_request(courier.POST, "/webhooks/" + webhook_id.string() + "/" + webhook_token + "/github" where query = params.to_query(), body = json.JsonPrinter.print(params.to_json())), _Decode.empty(handler, options.on_error))
+        api.send_request(options.build_request(courier.POST, "/webhooks/" + webhook_id.string() + "/" + webhook_token + "/github" where query = _WithQueryParam(params.to_query(), "wait", false), body = json.JsonPrinter.print(params.to_json())), _Decode.empty(handler, options.on_error))
+
+    be execute_github_compatible_webhook_and_wait(webhook_id: Snowflake, webhook_token: String, params: ExecuteGithubCompatibleWebhookParams, handler: EmptyResponseHandler) =>
+        """
+        https://docs.discord.com/developers/resources/webhook#execute-github-compatible-webhook
+
+        Add a new webhook to your GitHub repo (in the repo's settings), and use this endpoint as the "Payload URL." You can choose what events your Discord channel receives by choosing the "Let me select individual events" option and selecting individual events for the new webhook you're configuring. The supported events are commit_comment, create, delete, fork, issue_comment, issues, member, public, pull_request, pull_request_review, pull_request_review_comment, push, release, watch, check_run, check_suite, discussion, and discussion_comment.
+
+        Waits for server confirmation of message send before response, so a message that is not saved comes back as an error.
+        """
+
+        api.send_request(options.build_request(courier.POST, "/webhooks/" + webhook_id.string() + "/" + webhook_token + "/github" where query = _WithQueryParam(params.to_query(), "wait", true), body = json.JsonPrinter.print(params.to_json())), _Decode.empty(handler, options.on_error))
 
     be get_webhook_message(webhook_id: Snowflake, webhook_token: String, message_id: Snowflake, params: GetWebhookMessageParams, handler: ResponseHandler[Message]) =>
         """
@@ -2185,16 +2226,27 @@ actor Routes
 
         api.send_request(options.build_request(courier.DELETE, "/webhooks/" + webhook_id.string() + "/" + webhook_token + "/messages/" + message_id.string() where query = params.to_query()), _Decode.empty(handler, options.on_error))
 
-    be create_interaction_response(interaction_id: Snowflake, interaction_token: String, params: CreateInteractionResponseParams, handler: ResponseHandler[InteractionCallbackResponse]) =>
+    be create_interaction_response(interaction_id: Snowflake, interaction_token: String, params: CreateInteractionResponseParams, handler: EmptyResponseHandler) =>
         """
         https://docs.discord.com/developers/interactions/receiving-and-responding#create-interaction-response
 
-        Create a response to an Interaction. Body is an interaction response. Returns 204 unless with_response is set to true which returns 200 with the body as interaction callback response.
+        Create a response to an Interaction. Body is an interaction response. Returns 204; `create_interaction_response_with_response` is the form that returns the interaction callback response.
 
         This endpoint also supports file attachments similar to the webhook endpoints. Refer to Uploading Files for details on uploading files and multipart/form-data requests.
         """
 
-        api.send_request(options.build_request(courier.POST, "/interactions/" + interaction_id.string() + "/" + interaction_token + "/callback" where query = params.to_query(), body = json.JsonPrinter.print(params.to_json())), _Decode.entity[InteractionCallbackResponse](handler, options.on_error))
+        api.send_request(options.build_request(courier.POST, "/interactions/" + interaction_id.string() + "/" + interaction_token + "/callback" where query = _WithQueryParam.only("with_response", false), body = json.JsonPrinter.print(params.to_json())), _Decode.empty(handler, options.on_error))
+
+    be create_interaction_response_with_response(interaction_id: Snowflake, interaction_token: String, params: CreateInteractionResponseParams, handler: ResponseHandler[InteractionCallbackResponse]) =>
+        """
+        https://docs.discord.com/developers/interactions/receiving-and-responding#create-interaction-response
+
+        Create a response to an Interaction. Body is an interaction response. Returns 200 with the body as interaction callback response.
+
+        This endpoint also supports file attachments similar to the webhook endpoints. Refer to Uploading Files for details on uploading files and multipart/form-data requests.
+        """
+
+        api.send_request(options.build_request(courier.POST, "/interactions/" + interaction_id.string() + "/" + interaction_token + "/callback" where query = _WithQueryParam.only("with_response", true), body = json.JsonPrinter.print(params.to_json())), _Decode.entity[InteractionCallbackResponse](handler, options.on_error))
 
     be get_original_interaction_response(application_id: Snowflake, interaction_token: String, params: GetOriginalInteractionResponseParams, handler: ResponseHandler[Message]) =>
         """

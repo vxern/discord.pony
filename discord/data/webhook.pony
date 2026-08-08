@@ -418,11 +418,6 @@ class val ExecuteWebhookParams is ToJsonable
         A poll!
         """
 
-    let wait: (Bool | None)
-        """
-        waits for server confirmation of message send before response, and returns the created message body (defaults to `false`; when `false` a message that is not saved does not return an error)
-        """
-
     let thread_id: (Snowflake | None)
         """
         Send a message to the specified thread within a webhook's channel. The thread will automatically be unarchived.
@@ -446,7 +441,6 @@ class val ExecuteWebhookParams is ToJsonable
         thread_name': (String | None) = None,
         applied_tags': (Array[Snowflake] val | None) = None,
         poll': (PollParams | None) = None,
-        wait': (Bool | None) = None,
         thread_id': (Snowflake | None) = None,
         with_components': (Bool | None) = None
     ) =>
@@ -462,16 +456,11 @@ class val ExecuteWebhookParams is ToJsonable
         thread_name = thread_name'
         applied_tags = applied_tags'
         poll = poll'
-        wait = wait'
         thread_id = thread_id'
         with_components = with_components'
 
     fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
-
-        match wait
-        | let wait': Bool => query.push(("wait", wait'.string()))
-        end
 
         match thread_id
         | let thread_id': Snowflake => query.push(("thread_id", thread_id'.string()))
@@ -555,29 +544,18 @@ class val ExecuteSlackCompatibleWebhookParams is ToJsonable
         id of the thread to send the message in
         """
 
-    let wait: (Bool | None)
-        """
-        waits for server confirmation of message send before response (defaults to `true`; when `false` a message that is not saved does not return an error)
-        """
-
     new val create(
         payload': json.JsonObject,
-        thread_id': (Snowflake | None) = None,
-        wait': (Bool | None) = None
+        thread_id': (Snowflake | None) = None
     ) =>
         payload = payload'
         thread_id = thread_id'
-        wait = wait'
 
     fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match thread_id
         | let thread_id': Snowflake => query.push(("thread_id", thread_id'.string()))
-        end
-
-        match wait
-        | let wait': Bool => query.push(("wait", wait'.string()))
         end
 
         consume query
@@ -603,29 +581,18 @@ class val ExecuteGithubCompatibleWebhookParams is ToJsonable
         id of the thread to send the message in
         """
 
-    let wait: (Bool | None)
-        """
-        waits for server confirmation of message send before response (defaults to `true`; when `false` a message that is not saved does not return an error)
-        """
-
     new val create(
         payload': json.JsonObject,
-        thread_id': (Snowflake | None) = None,
-        wait': (Bool | None) = None
+        thread_id': (Snowflake | None) = None
     ) =>
         payload = payload'
         thread_id = thread_id'
-        wait = wait'
 
     fun to_query(): _RequestQuery =>
         let query = recover iso Array[(String, String)] end
 
         match thread_id
         | let thread_id': Snowflake => query.push(("thread_id", thread_id'.string()))
-        end
-
-        match wait
-        | let wait': Bool => query.push(("wait", wait'.string()))
         end
 
         consume query
