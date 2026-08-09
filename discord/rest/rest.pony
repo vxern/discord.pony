@@ -171,6 +171,11 @@ actor RestApi
         for sender in _senders.values() do sender.dispose() end
         _senders.clear()
         _idle_senders.clear()
+
+        while _pending.size() > 0 do
+            try _pending.dequeue()?.on_failure() else break end
+        end
+
         _pending.clear()
 
         _global_bucket.dispose()

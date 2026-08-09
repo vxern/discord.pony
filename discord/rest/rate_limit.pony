@@ -136,6 +136,18 @@ primitive _RateLimitConstants
 
         1
 
+    fun minimum_rest_s(): F64 =>
+        """
+        The least time a bucket sits out before probing again once it has run
+        out of slots.
+
+        Without a floor, a bucket whose rate limit headers could not be read
+        rests for no time at all, so a 429 that names no wait sends it straight
+        back for another one.
+        """
+
+        1
+
     fun blind_pause_s(): F64 =>
         """
         How long the global bucket sits out a 429 that names no wait at all.

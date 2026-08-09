@@ -124,11 +124,21 @@ actor GlobalBucket
 
     be dispose() =>
         Debug.out(
-            "[rest/global] disposing, dropping " + _queue.size().string()
+            "[rest/global] disposing, failing " + _queue.size().string()
             + " queued request(s)"
         )
 
         _disposed = true
+
+        while _queue.size() > 0 do
+            try
+                (let request, let handler, let on_failure) = _queue.dequeue()?
+                on_failure()
+            else
+                break
+            end
+        end
+
         _queue.clear()
 
     be _wake() =>
@@ -242,6 +252,11 @@ actor Bucket
                 "[rest/" + _id
                 + "] dropping a request: the bucket was disposed of"
             )
+
+            _options.on_error(
+                RestError(request, "the bucket was disposed of")
+            )
+
             return
         end
 
@@ -272,11 +287,25 @@ actor Bucket
 
     be dispose() =>
         Debug.out(
-            "[rest/" + _id + "] disposing, dropping " + _queue.size().string()
+            "[rest/" + _id + "] disposing, failing " + _queue.size().string()
             + " queued request(s)"
         )
 
         _disposed = true
+
+        while _queue.size() > 0 do
+            try
+                (let request, let handler, let route, let attempts) =
+                    _queue.dequeue()?
+
+                _options.on_error(
+                    RestError(request, "the bucket was disposed of")
+                )
+            else
+                break
+            end
+        end
+
         _queue.clear()
 
     be _drain() =>
@@ -337,14 +366,16 @@ actor Bucket
             _queue.size() > 0
         ) then
             _restarting = true
-            let delay =
+            let rest_s =
                 try
-                    time.Nanos.from_seconds_f(
-                        (_rate_limit as _RateLimit).reset_after_s
-                    )
+                    (_rate_limit as _RateLimit).reset_after_s
                 else
                     0
                 end
+            let delay =
+                time.Nanos.from_seconds_f(
+                    rest_s.max(_RateLimitConstants.minimum_rest_s())
+                )
 
             Debug.out(
                 "[rest/" + _id + "] out of slots with " + _queue.size().string()
