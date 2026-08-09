@@ -83,17 +83,11 @@ actor GatewayApi
 
             let self: GatewayApi tag = this
 
-            _routes.get_gateway_bot(
-                { (info: GatewayBotInfo) => self._recommended(info) }
-            )
-
-            _timers(
-                time.Timer(
-                    _OnceElapsed({() => self._recommendation_timed_out()}),
-                    time.Nanos.from_millis(
-                        GatewayConstants.session_limit_timeout_ms()
-                    )
-                )
+            _GatewayBotProbe(
+                _routes,
+                _timers,
+                { (info: GatewayBotInfo) => self._recommended(info) },
+                {() => self._recommendation_timed_out()}
             )
         end
 
@@ -343,6 +337,23 @@ primitive _GatewayUrl
 
         url.substring(start, finish)
 
+primitive _GatewayBotProbe
+    fun apply(
+        routes: rest.Routes,
+        timers: time.Timers,
+        got: rest.ResponseHandler[GatewayBotInfo],
+        expired: {()} val
+    ) =>
+        routes.get_gateway_bot(got)
+        timers(
+            time.Timer(
+                _OnceElapsed(expired),
+                time.Nanos.from_millis(
+                    GatewayConstants.session_limit_timeout_ms()
+                )
+            )
+        )
+
 primitive _GatewayFailure
     fun reason(reason': lori.ConnectionFailureReason): String =>
         match reason'
@@ -376,7 +387,6 @@ actor _GatewayConnection is (mare.WebSocketClientActor & _WantsIdentify)
     var _reconnect_attempts: USize = 0
     var _connect_scheduled: Bool = false
     var _watchdog_generation: USize = 0
-    var _watchdog_armed: Bool = false
     var _fatal: Bool = false
     var _limit_check_generation: USize = 0
     var _awaiting_identify: Bool = false
@@ -477,19 +487,11 @@ actor _GatewayConnection is (mare.WebSocketClientActor & _WantsIdentify)
         let generation = _limit_check_generation
         let self: _GatewayConnection tag = this
 
-        _routes.get_gateway_bot(
-            { (info: GatewayBotInfo) => self._session_limits(generation, info) }
-        )
-
-        _timers(
-            time.Timer(
-                _OnceElapsed(
-                    {() => self._session_limits_timed_out(generation)}
-                ),
-                time.Nanos.from_millis(
-                    GatewayConstants.session_limit_timeout_ms()
-                )
-            )
+        _GatewayBotProbe(
+            _routes,
+            _timers,
+            { (info: GatewayBotInfo) => self._session_limits(generation, info) },
+            {() => self._session_limits_timed_out(generation)}
         )
 
     fun ref _dial(url: String) =>
@@ -728,11 +730,7 @@ actor _GatewayConnection is (mare.WebSocketClientActor & _WantsIdentify)
             + " (" + status.string() + "): " + reason
         )
 
-        _open = false
-        _awaiting_identify = false
-        _disarm_watchdog()
-        _bucket.close()
-        _stop_heartbeat()
+        _teardown(false)
 
         let code =
             try
@@ -956,15 +954,11 @@ actor _GatewayConnection is (mare.WebSocketClientActor & _WantsIdentify)
             "[gateway] gave up waiting for " + stage + ", dropping the socket"
         )
 
-        _watchdog_armed = false
-        _open = false
         options.on_error(
             GatewayError("the gateway timed out waiting for " + stage)
         )
 
-        _bucket.close()
-        _stop_heartbeat()
-        _connection().hard_close()
+        _teardown(true)
         _schedule_connect()
 
     be dispose() =>
@@ -1023,16 +1017,20 @@ actor _GatewayConnection is (mare.WebSocketClientActor & _WantsIdentify)
 
         _ws.send_text(text)
 
-    fun ref _give_up(reason: String) =>
-        Debug.out("[gateway] giving up: " + reason)
-
-        _fatal = true
+    fun ref _teardown(hard: Bool) =>
         _open = false
         _awaiting_identify = false
         _disarm_watchdog()
         _bucket.close()
         _stop_heartbeat()
-        _connection().hard_close()
+
+        if hard then _connection().hard_close() end
+
+    fun ref _give_up(reason: String) =>
+        Debug.out("[gateway] giving up: " + reason)
+
+        _fatal = true
+        _teardown(true)
 
     fun ref _identify_or_resume() =>
         match (_session_id, _sequence_number)
@@ -1138,21 +1136,15 @@ actor _GatewayConnection is (mare.WebSocketClientActor & _WantsIdentify)
             _forget_session()
         end
 
-        _bucket.close()
-        _stop_heartbeat()
-
-        _awaiting_identify = false
-
         if resume then
             Debug.out(
                 "[gateway] dropping the socket instead of closing it, so that "
                 + "the gateway holds the session open to resume into"
             )
-            _open = false
-            _connection().hard_close()
+            _teardown(true)
             _schedule_connect()
         elseif _open then
-            _open = false
+            _teardown(false)
             _ws.close(mare.CloseGoingAway, "reconnecting")
             _arm_watchdog(
                 "the close handshake",
@@ -1163,7 +1155,7 @@ actor _GatewayConnection is (mare.WebSocketClientActor & _WantsIdentify)
                 "[gateway] there is no open websocket to close, so dropping "
                 + "the socket"
             )
-            _connection().hard_close()
+            _teardown(true)
             _schedule_connect()
         end
 
@@ -1225,7 +1217,6 @@ actor _GatewayConnection is (mare.WebSocketClientActor & _WantsIdentify)
         if _disposed then return end
 
         _watchdog_generation = _watchdog_generation + 1
-        _watchdog_armed = true
 
         let generation = _watchdog_generation
 
@@ -1243,12 +1234,9 @@ actor _GatewayConnection is (mare.WebSocketClientActor & _WantsIdentify)
         )
 
     fun ref _disarm_watchdog() =>
-        if not _watchdog_armed then return end
-
         Debug.out("[gateway] the watchdog is standing down")
 
         _watchdog_generation = _watchdog_generation + 1
-        _watchdog_armed = false
 
     fun ref _backoff(): U64 =>
         let exponent =
