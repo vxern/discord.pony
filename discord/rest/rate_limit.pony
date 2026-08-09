@@ -93,6 +93,19 @@ primitive _IsGlobalRateLimit
 
         headers.get(_RateLimitConstants.bucket_header_name()) is None
 
+primitive _IsRetriable
+    fun apply(status: U16): Bool =>
+        """
+        The statuses Discord hands back for a hiccup on their side, rather
+        than for anything wrong with the request.
+        """
+
+        match status
+        | 500 | 502 | 503 | 504 => true
+        else
+            false
+        end
+
 primitive _RateLimitConstants
     fun windows(): Array[_RateLimitWindow] =>
         """

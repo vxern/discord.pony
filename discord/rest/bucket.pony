@@ -4,6 +4,7 @@ use courier = "courier"
 
 actor GlobalBucket
     let _api: RestApi
+    let _options: RestOptions
     let _timers: time.Timers
     embed _queue: Queue[
         (courier.HTTPRequest, RawResponseHandler, RawFailureHandler)
@@ -19,8 +20,9 @@ actor GlobalBucket
     var _pause_generation: USize = 0
     var _drain_scheduled: Bool = false
 
-    new create(api: RestApi, timers: time.Timers) =>
+    new create(api: RestApi, options: RestOptions, timers: time.Timers) =>
         _api = api
+        _options = options
         _timers = timers
 
     be enqueue(
@@ -33,6 +35,23 @@ actor GlobalBucket
                 "[rest/global] dropping a request: the global bucket was "
                 + "disposed of"
             )
+            on_failure()
+            return
+        end
+
+        let cap = RestConstants.max_queued_requests()
+        if _queue.size() >= cap then
+            Debug.out(
+                "[rest/global] the queue is full at " + cap.string()
+                + ", refusing " + request.method.string() + " " + request.path
+            )
+
+            _options.on_error(
+                RestError(
+                    request, "the global queue is full at " + cap.string()
+                )
+            )
+            on_failure()
             return
         end
 
@@ -182,13 +201,16 @@ actor GlobalBucket
 
         if at > now then at end
 
+type _QueuedRequest is
+    (courier.HTTPRequest, RawResponseHandler, String, USize)
+
 actor Bucket
-    let _env: Env
+    let _api: RestApi
+    let _options: RestOptions
     let _global_bucket: GlobalBucket
     let _id: String
     let _timers: time.Timers
-    embed _queue: Queue[(courier.HTTPRequest, RawResponseHandler)] =
-        Queue[(courier.HTTPRequest, RawResponseHandler)]
+    embed _queue: Queue[_QueuedRequest] = Queue[_QueuedRequest]
 
     var _rate_limit: (_RateLimit | None) = None
     var _requests_in_flight: USize = 0
@@ -198,17 +220,23 @@ actor Bucket
     var _restarting: Bool = false
 
     new create(
-        env: Env,
+        api: RestApi,
+        options: RestOptions,
         global_bucket: GlobalBucket,
         id: String,
         timers: time.Timers
     ) =>
-        _env = env
+        _api = api
+        _options = options
         _global_bucket = global_bucket
         _id = id
         _timers = timers
 
-    be enqueue(request: courier.HTTPRequest, handler: RawResponseHandler) =>
+    be enqueue(
+        request: courier.HTTPRequest,
+        handler: RawResponseHandler,
+        route: String
+    ) =>
         if _disposed then
             Debug.out(
                 "[rest/" + _id
@@ -217,7 +245,23 @@ actor Bucket
             return
         end
 
-        _queue.enqueue((request, handler))
+        let cap = RestConstants.max_queued_requests_per_bucket()
+        if _queue.size() >= cap then
+            Debug.out(
+                "[rest/" + _id + "] the queue is full at " + cap.string()
+                + ", refusing " + request.method.string() + " " + request.path
+            )
+
+            _options.on_error(
+                RestError(
+                    request, "the bucket queue is full at " + cap.string()
+                )
+            )
+
+            return
+        end
+
+        _queue.enqueue((request, handler, route, 0))
 
         Debug.out(
             "[rest/" + _id + "] queued a request, " + _queue.size().string()
@@ -255,7 +299,8 @@ actor Bucket
 
         while (_requests_remaining > 0) and (_queue.size() > 0) do
             try
-                (let request, let handler) = _queue.dequeue()?
+                (let request, let handler, let route, let attempts) =
+                    _queue.dequeue()?
 
                 _requests_in_flight = _requests_in_flight + 1
                 _requests_remaining = _requests_remaining - 1
@@ -273,9 +318,15 @@ actor Bucket
                         request': courier.HTTPRequest val,
                         response': courier.HTTPResponse val
                     ) =>
-                        self.on_response_received(request', response', handler)
+                        self.on_response_received(
+                            request', response', handler, route, attempts
+                        )
                     },
-                    {() => self.on_request_failed()}
+                    {() =>
+                        self.on_request_failed(
+                            request, handler, route, attempts
+                        )
+                    }
                 )
             else
                 break
@@ -314,16 +365,56 @@ actor Bucket
         _requests_remaining = 1
         _drain()
 
-    be on_request_failed() =>
+    be on_request_failed(
+        request: courier.HTTPRequest,
+        handler: RawResponseHandler,
+        route: String,
+        attempts: USize
+    ) =>
+        if _disposed then
+            Debug.out(
+                "[rest/" + _id
+                + "] dropping a failure: the bucket was disposed of"
+            )
+            return
+        end
+
         Debug.out("[rest/" + _id + "] a request never came back")
 
         _requests_in_flight = _requests_in_flight - 1
+
+        _retry(request, handler, route, attempts, "it never came back")
+
+        _drain()
+
+    be _requeue(
+        request: courier.HTTPRequest,
+        handler: RawResponseHandler,
+        route: String,
+        attempts: USize
+    ) =>
+        if _disposed then
+            Debug.out(
+                "[rest/" + _id
+                + "] abandoning a retry: the bucket was disposed of"
+            )
+            return
+        end
+
+        Debug.out(
+            "[rest/" + _id + "] retrying " + request.method.string() + " "
+            + request.path
+        )
+
+        _queue.enqueue_at_beginning((request, handler, route, attempts))
         _drain()
 
     be on_response_received(
         request: courier.HTTPRequest,
         response: courier.HTTPResponse,
-        handler: RawResponseHandler
+        handler: RawResponseHandler,
+        route: String,
+        attempts: USize
     ) =>
         if _disposed then
             Debug.out(
@@ -336,6 +427,13 @@ actor Bucket
         _requests_in_flight = _requests_in_flight - 1
 
         let rate_limit = try _RateLimit.from_headers(response.headers)? end
+
+        match rate_limit
+        | let rate_limit': _RateLimit =>
+            match rate_limit'.bucket
+            | let hash: String => _api._bucket_hash_learned(route, hash)
+            end
+        end
 
         match rate_limit
         | let rate_limit': _RateLimit if rate_limit'.is_newer_than(
@@ -374,7 +472,7 @@ actor Bucket
                 + request.path + ", putting it back at the front of the queue"
             )
 
-            _queue.enqueue_at_beginning((request, handler))
+            _queue.enqueue_at_beginning((request, handler, route, attempts))
             _requests_remaining = 0
 
             if _IsGlobalRateLimit(response.headers) then
@@ -395,16 +493,69 @@ actor Bucket
                 )
             end
         else
-            Debug.out(
-                "[rest/" + _id + "] handing " + response.status.string()
-                + " on "
-                + request.method.string() + " " + request.path
-                + " to the caller"
-            )
-            handler(request, response)
+            let retrying =
+                _IsRetriable(response.status)
+                    and _retry(
+                        request,
+                        handler,
+                        route,
+                        attempts,
+                        "Discord answered " + response.status.string() + " "
+                        + response.reason
+                    )
+
+            if not retrying then
+                Debug.out(
+                    "[rest/" + _id + "] handing " + response.status.string()
+                    + " on "
+                    + request.method.string() + " " + request.path
+                    + " to the caller"
+                )
+                handler(request, response)
+            end
         end
 
         _drain()
+
+    fun ref _retry(
+        request: courier.HTTPRequest,
+        handler: RawResponseHandler,
+        route: String,
+        attempts: USize,
+        reason: String
+    ): Bool =>
+        let attempts' = attempts + 1
+
+        if attempts' >= RestConstants.max_attempts() then
+            Debug.out(
+                "[rest/" + _id + "] giving up on " + request.method.string()
+                + " " + request.path + " after " + attempts'.string()
+                + " attempt(s): " + reason
+            )
+
+            return false
+        end
+
+        let delay = _Backoff(attempts', time.Time.nanos())
+
+        Debug.out(
+            "[rest/" + _id + "] " + request.method.string() + " "
+            + request.path + " goes again in " + (delay / 1_000_000).string()
+            + "ms, attempt " + (attempts' + 1).string() + " of "
+            + RestConstants.max_attempts().string() + ": " + reason
+        )
+
+        let self: Bucket tag = this
+        _timers(
+            time.Timer(
+                _OnceElapsed(
+                    {() => self._requeue(request, handler, route, attempts')}
+                ),
+                delay
+            )
+        )
+
+        true
 
 primitive _BucketId
     fun apply(request: courier.HTTPRequest val): String =>
@@ -433,6 +584,29 @@ primitive _BucketId
         end
 
         true
+
+primitive _MajorParameter
+    fun apply(request: courier.HTTPRequest val): String =>
+        """
+        The `collection/id` pair a request is scoped to, which Discord counts
+        separately even when two routes share a bucket.
+        """
+
+        let path = try request.path.split_by("?")(0)? else request.path end
+        let segments: Array[String] ref = path.split_by("/")
+
+        for (index, segment) in segments.pairs() do
+            if
+                _BucketConstants.major_parameters().contains(
+                    segment, {(a, b) => a == b}
+                )
+            then
+                return
+                    try segment + "/" + segments(index + 1)? else segment end
+            end
+        end
+
+        ""
 
 primitive _BucketConstants
     fun major_parameters(): Array[String] val =>
