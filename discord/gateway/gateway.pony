@@ -1,5 +1,6 @@
 use "../data"
 use "debug"
+use collections = "collections"
 use rest = "../rest"
 use files = "files"
 use random = "random"
@@ -21,18 +22,194 @@ class Gateway
     fun dispose() => api.dispose()
 
 actor GatewayApi
-    let _connection: _GatewayConnection
+    let _env: Env
+    let _options: GatewayOptions
+    let _routes: rest.Routes
+    let _timers: time.Timers = time.Timers
+    let _gate: _GatewayIdentifyGate
+
+    embed _shards: collections.Map[USize, _GatewayConnection] =
+        collections.Map[USize, _GatewayConnection]
+    embed _pending: Array[GatewaySendableEvent] = Array[GatewaySendableEvent]
+
+    var _events: (Events | None) = None
+    var _count: USize = 1
+    var _started: Bool = false
+    var _planned: Bool = false
+    var _disposed: Bool = false
 
     new create(env: Env, options: GatewayOptions, routes: rest.Routes) =>
-        _connection = _GatewayConnection(env, options, routes)
+        _env = env
+        _options = options
+        _routes = routes
+        _gate = _GatewayIdentifyGate(_timers)
 
     be send_message(event: GatewaySendableEvent) =>
-        _connection._send_message(event)
+        if _disposed then return end
+
+        if _shards.size() == 0 then
+            if _pending.size() < GatewayConstants.max_queued_events() then
+                _pending.push(event)
+            else
+                Debug.out(
+                    "[gateway/shards] dropping an event: the shards are not up "
+                    + "yet and the holding queue is full"
+                )
+            end
+
+            return
+        end
+
+        _deliver(event)
 
     be _listen(events: Events) =>
-        _connection._listen(events)
+        if _started then return end
 
-    be dispose() => _connection.dispose()
+        _started = true
+        _events = events
+
+        match _options.sharding
+        | None =>
+            let connection = _GatewayConnection(_env, _options, _routes)
+            _shards(0) = connection
+            _count = 1
+            connection._listen(events)
+            _flush()
+        else
+            Debug.out(
+                "[gateway/shards] asking discord how many shards to run and "
+                + "how many may identify at a time"
+            )
+
+            let self: GatewayApi tag = this
+
+            _routes.get_gateway_bot(
+                { (info: GatewayBotInfo) => self._recommended(info) }
+            )
+
+            _timers(
+                time.Timer(
+                    _OnceElapsed({() => self._recommendation_timed_out()}),
+                    time.Nanos.from_millis(
+                        GatewayConstants.session_limit_timeout_ms()
+                    )
+                )
+            )
+        end
+
+    be _recommended(info: GatewayBotInfo) =>
+        if _disposed or _planned then return end
+
+        let limit = info.session_start_limit
+        let set = _wanted(info.shards)
+
+        Debug.out(
+            "[gateway/shards] discord recommends " + info.shards.string()
+            + " shard(s), " + limit.remaining.string() + " session start(s) "
+            + "left, " + limit.max_concurrency.string() + " identify(s) at a "
+            + "time"
+        )
+
+        if limit.remaining < set.ids.size() then
+            _options.on_error(
+                GatewayError(
+                    set.ids.size().string() + " shard(s) are starting but only "
+                    + limit.remaining.string() + " session start(s) are left, "
+                    + "so some shards will not come up"
+                )
+            )
+        end
+
+        _spawn(set, limit.max_concurrency)
+
+    be _recommendation_timed_out() =>
+        if _disposed or _planned then return end
+
+        Debug.out(
+            "[gateway/shards] the recommended shard count did not come back in "
+            + "time, so running a single shard"
+        )
+        _options.on_error(
+            GatewayError(
+                "the recommended shard count could not be read, so one shard "
+                + "is running"
+            )
+        )
+
+        _spawn(_wanted(1), 1)
+
+    be dispose() =>
+        if _disposed then return end
+
+        _disposed = true
+
+        for connection in _shards.values() do connection.dispose() end
+
+        _timers.dispose()
+
+    fun _wanted(recommended: USize): GatewayShardSet =>
+        match _options.sharding
+        | let explicit: GatewayShardSet => explicit
+        else
+            GatewayShardSet(recommended)
+        end
+
+    fun ref _spawn(set: GatewayShardSet, concurrency: USize) =>
+        if _planned then return end
+
+        _planned = true
+        _count = set.count
+
+        _gate.set_concurrency(concurrency)
+
+        Debug.out(
+            "[gateway/shards] running " + set.ids.size().string() + " of "
+            + set.count.string() + " shard(s), " + concurrency.string()
+            + " identify(s) at a time"
+        )
+
+        for id in set.ids.values() do
+            let connection = _GatewayConnection(
+                _env, _options.with_shard(id, set.count), _routes, _gate
+            )
+
+            _shards(id) = connection
+
+            match _events
+            | let events: Events => connection._listen(events)
+            end
+        end
+
+        _flush()
+
+    fun ref _flush() =>
+        while _pending.size() > 0 do
+            try _deliver(_pending.shift()?) else break end
+        end
+
+    fun ref _deliver(event: GatewaySendableEvent) =>
+        var missed: USize = 0
+
+        for (id, routed) in _GatewayRoute(event, _count).values() do
+            try
+                _shards(id)?._send_message(routed)
+            else
+                missed = missed + 1
+                Debug.out(
+                    "[gateway/shards] dropping an event for shard "
+                    + id.string() + ": it is not running here"
+                )
+            end
+        end
+
+        if missed > 0 then
+            _options.on_error(
+                GatewayError(
+                    "an event was meant for " + missed.string()
+                    + " shard(s) that are not running in this process"
+                )
+            )
+        end
 
 class val GatewayError
     let reason: String
@@ -55,6 +232,7 @@ class val GatewayOptions
     let shard: ((USize, USize) | None)
     let presence: (GatewayPresenceUpdate | None)
     let on_error: GatewayErrorHandler
+    let sharding: GatewaySharding
 
     new val create(
         token': String,
@@ -67,7 +245,8 @@ class val GatewayOptions
         large_threshold': (USize | None) = None,
         shard': ((USize, USize) | None) = None,
         presence': (GatewayPresenceUpdate | None) = None,
-        on_error': GatewayErrorHandler = GatewayDefaults.on_error()
+        on_error': GatewayErrorHandler = GatewayDefaults.on_error(),
+        sharding': GatewaySharding = None
     ) =>
         token = token'
         intents = intents'
@@ -79,6 +258,21 @@ class val GatewayOptions
         shard = shard'
         presence = presence'
         on_error = on_error'
+        sharding = sharding'
+
+    fun val with_shard(id: USize, count: USize): GatewayOptions =>
+        GatewayOptions(
+            token,
+            intents,
+            properties,
+            version,
+            user_agent,
+            ca_certificates_path,
+            large_threshold,
+            (id, count),
+            presence,
+            on_error
+        )
 
     fun path(): String =>
         "/?v=" + version.value().string() + "&encoding=json"
@@ -111,6 +305,8 @@ primitive GatewayConstants
     fun close_timeout_ms(): U64 => 10_000
 
     fun session_limit_timeout_ms(): U64 => 10_000
+
+    fun identify_interval_ms(): U64 => 5_000
 
 primitive GatewayDefaults
     fun version(): ApiVersion val => ApiVersion10
@@ -160,7 +356,7 @@ primitive _GatewayFailure
             "the connection timer could not be created"
         end
 
-actor _GatewayConnection is mare.WebSocketClientActor
+actor _GatewayConnection is (mare.WebSocketClientActor & _WantsIdentify)
     let options: GatewayOptions
     let _auth: lori.TCPConnectAuth
     let _ssl_context: (ssl.SSLContext val | None)
@@ -168,6 +364,7 @@ actor _GatewayConnection is mare.WebSocketClientActor
     let _rand: random.Rand
     let _bucket: _GatewayBucket
     let _routes: rest.Routes
+    let _gate: (_GatewayIdentifyGate | None)
 
     var _ws: mare.WebSocketClient = mare.WebSocketClient.none()
     var _events: (Events | None) = None
@@ -182,11 +379,18 @@ actor _GatewayConnection is mare.WebSocketClientActor
     var _watchdog_armed: Bool = false
     var _fatal: Bool = false
     var _limit_check_generation: USize = 0
+    var _awaiting_identify: Bool = false
     var _disposed: Bool = false
 
-    new create(env: Env, options': GatewayOptions, routes: rest.Routes) =>
+    new create(
+        env: Env,
+        options': GatewayOptions,
+        routes: rest.Routes,
+        gate: (_GatewayIdentifyGate | None) = None
+    ) =>
         options = options'
         _routes = routes
+        _gate = gate
         _auth = lori.TCPConnectAuth(env.root)
         _ssl_context =
             try
@@ -248,6 +452,16 @@ actor _GatewayConnection is mare.WebSocketClientActor
                 "[gateway] a session is in hand, resuming through " + url'
             )
             _dial(url')
+            return
+        end
+
+        match _gate
+        | let _: _GatewayIdentifyGate =>
+            Debug.out(
+                "[gateway] the shard manager owns the session start limit, so "
+                + "dialling straight out"
+            )
+            _dial(GatewayConstants.base_url())
         else
             Debug.out(
                 "[gateway] no session in hand, so checking the session start "
@@ -299,6 +513,7 @@ actor _GatewayConnection is mare.WebSocketClientActor
         )
 
         _open = false
+        _awaiting_identify = false
         _bucket.close()
         _ws = mare.WebSocketClient.ssl(
             _auth,
@@ -409,10 +624,6 @@ actor _GatewayConnection is mare.WebSocketClientActor
                 _bucket.set_heartbeat_interval(interval)
                 _start_heartbeat(interval)
                 _identify_or_resume()
-                _arm_watchdog(
-                    "a ready or a resumed",
-                    GatewayConstants.ready_timeout_ms()
-                )
             else
                 Debug.out(
                     "[gateway] the hello could not be read, so no heartbeat "
@@ -518,6 +729,7 @@ actor _GatewayConnection is mare.WebSocketClientActor
         )
 
         _open = false
+        _awaiting_identify = false
         _disarm_watchdog()
         _bucket.close()
         _stop_heartbeat()
@@ -683,6 +895,29 @@ actor _GatewayConnection is mare.WebSocketClientActor
             )
         )
 
+    be _identify_granted() =>
+        if _disposed or _fatal then return end
+
+        if not _awaiting_identify then
+            Debug.out(
+                "[gateway] an identify slot arrived but this shard no longer "
+                + "needs one"
+            )
+            return
+        end
+
+        _awaiting_identify = false
+
+        if not _open then
+            Debug.out(
+                "[gateway] an identify slot arrived but the connection is not "
+                + "open, so waiting for the next hello"
+            )
+            return
+        end
+
+        _send_identify()
+
     be _heartbeat_dropped(reserve: USize) =>
         Debug.out(
             "[gateway] a heartbeat was dropped to keep inside the command "
@@ -738,6 +973,7 @@ actor _GatewayConnection is mare.WebSocketClientActor
         Debug.out("[gateway] disposing of the connection")
 
         _disposed = true
+        _awaiting_identify = false
         _disarm_watchdog()
         _bucket.dispose()
         _stop_heartbeat()
@@ -792,6 +1028,7 @@ actor _GatewayConnection is mare.WebSocketClientActor
 
         _fatal = true
         _open = false
+        _awaiting_identify = false
         _disarm_watchdog()
         _bucket.close()
         _stop_heartbeat()
@@ -807,20 +1044,47 @@ actor _GatewayConnection is mare.WebSocketClientActor
             _bucket.handshake(
                 GatewayResumeEvent(options.token, session_id, sequence_number)
             )
-        else
-            Debug.out("[gateway] identifying as a new session")
-            _bucket.handshake(
-                GatewayIdentifyEvent(
-                    options.token,
-                    options.properties
-                    where
-                    large_threshold' = options.large_threshold,
-                    shard' = options.shard,
-                    presence' = options.presence,
-                    intents' = options.intents
-                )
+            _arm_watchdog(
+                "a ready or a resumed",
+                GatewayConstants.ready_timeout_ms()
             )
+            return
         end
+
+        match _gate
+        | let gate: _GatewayIdentifyGate =>
+            Debug.out("[gateway] waiting for an identify slot")
+            _awaiting_identify = true
+            gate.request(_shard_id(), this)
+        else
+            _send_identify()
+        end
+
+    fun ref _shard_id(): USize =>
+        match options.shard
+        | (let id: USize, let _: USize) => id
+        else
+            0
+        end
+
+    fun ref _send_identify() =>
+        Debug.out("[gateway] identifying as a new session")
+
+        _bucket.handshake(
+            GatewayIdentifyEvent(
+                options.token,
+                options.properties
+                where
+                large_threshold' = options.large_threshold,
+                shard' = options.shard,
+                presence' = options.presence,
+                intents' = options.intents
+            )
+        )
+        _arm_watchdog(
+            "a ready or a resumed",
+            GatewayConstants.ready_timeout_ms()
+        )
 
     fun ref _on_dispatch(name: String, event: GatewayDispatchEventData) =>
         match event
@@ -876,6 +1140,8 @@ actor _GatewayConnection is mare.WebSocketClientActor
 
         _bucket.close()
         _stop_heartbeat()
+
+        _awaiting_identify = false
 
         if resume then
             Debug.out(
