@@ -5861,3 +5861,268 @@ class val UpdateGuildIncidentActionsParams is ToJsonable
         end
 
         obj
+
+class val SettingsEmoji is Jsonable
+    """
+    The trimmed-down emoji Discord attaches to server guide entries.
+    """
+
+    let id: (Snowflake | None)
+    let name: (String | None)
+    let animated: Bool
+
+    new val create(
+        id': (Snowflake | None) = None,
+        name': (String | None) = None,
+        animated': Bool = false
+    ) =>
+        id = id'
+        name = name'
+        animated = animated'
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var id': (Snowflake | None) = None
+        var name': (String | None) = None
+        var animated': Bool = false
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "id" =>
+                match value
+                | let string: String => id' = Snowflake.from_json(string)?
+                end
+            | "name" =>
+                match value | let string: String => name' = string end
+            | "animated" => animated' = value as Bool
+            end
+        end
+
+        id = id'
+        name = name'
+        animated = animated'
+
+    fun to_json(): json.JsonObject =>
+        json.JsonObject
+            .update(
+                "id",
+                match id
+                | let id': Snowflake => id'.to_json()
+                end
+            )
+            .update(
+                "name",
+                match name
+                | let name': String => name'
+                end
+            )
+            .update("animated", animated)
+
+trait val NewMemberActionType is _Enum[NewMemberActionType, U8]
+    """
+    https://docs.discord.com/developers/resources/guild#new-member-action-object-new-member-action-type
+    """
+primitive ViewNewMemberActionType is NewMemberActionType
+    """
+    the new member is pointed at a channel to read
+    """
+
+    fun value(): U8 => 0
+primitive TalkNewMemberActionType is NewMemberActionType
+    """
+    the new member is pointed at a channel to post in
+    """
+
+    fun value(): U8 => 1
+primitive NewMemberActionTypes
+    fun from(value: U8): NewMemberActionType ? =>
+        match value
+        | 0 => ViewNewMemberActionType
+        | 1 => TalkNewMemberActionType
+        else error
+        end
+
+class val NewMemberAction is FromJsonable
+    """
+    https://docs.discord.com/developers/resources/guild#new-member-action-object
+
+    One of the things the server guide suggests a new member does first.
+    """
+
+    let channel_id: Snowflake
+    let action_type: NewMemberActionType
+    let title: String
+    let description: String
+    let emoji: (SettingsEmoji | None)
+    let icon: (String | None)
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var channel_id': (Snowflake | None) = None
+        var action_type': (NewMemberActionType | None) = None
+        var title': (String | None) = None
+        var description': (String | None) = None
+        var emoji': (SettingsEmoji | None) = None
+        var icon': (String | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "channel_id" => channel_id' = Snowflake.from_json(value)?
+            | "action_type" =>
+                action_type' = NewMemberActionTypes.from((value as I64).u8())?
+            | "title" => title' = value as String
+            | "description" => description' = value as String
+            | "emoji" =>
+                match value
+                | let obj': json.JsonObject =>
+                    emoji' = SettingsEmoji.from_json(obj')?
+                end
+            | "icon" =>
+                match value | let string: String => icon' = string end
+            end
+        end
+
+        channel_id = channel_id' as Snowflake
+        action_type = action_type' as NewMemberActionType
+        title = title' as String
+        description = description' as String
+        emoji = emoji'
+        icon = icon'
+
+primitive _NewMemberActions
+    fun apply(value: json.JsonValue): Array[NewMemberAction] val ? =>
+        """
+        Decodes an array of new member actions.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let actions = Array[NewMemberAction](array.size())
+            for action in array.values() do
+                actions.push(
+                    NewMemberAction.from_json(action as json.JsonObject)?
+                )
+            end
+            actions
+        end
+
+class val ResourceChannel is FromJsonable
+    """
+    https://docs.discord.com/developers/resources/guild#resource-channel-object
+
+    A channel the server guide points new members at.
+    """
+
+    let channel_id: Snowflake
+    let title: String
+    let description: String
+    let emoji: (SettingsEmoji | None)
+    let icon: (String | None)
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var channel_id': (Snowflake | None) = None
+        var title': (String | None) = None
+        var description': (String | None) = None
+        var emoji': (SettingsEmoji | None) = None
+        var icon': (String | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "channel_id" => channel_id' = Snowflake.from_json(value)?
+            | "title" => title' = value as String
+            | "description" => description' = value as String
+            | "emoji" =>
+                match value
+                | let obj': json.JsonObject =>
+                    emoji' = SettingsEmoji.from_json(obj')?
+                end
+            | "icon" =>
+                match value | let string: String => icon' = string end
+            end
+        end
+
+        channel_id = channel_id' as Snowflake
+        title = title' as String
+        description = description' as String
+        emoji = emoji'
+        icon = icon'
+
+primitive _ResourceChannels
+    fun apply(value: json.JsonValue): Array[ResourceChannel] val ? =>
+        """
+        Decodes an array of resource channels.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let channels = Array[ResourceChannel](array.size())
+            for channel in array.values() do
+                channels.push(
+                    ResourceChannel.from_json(channel as json.JsonObject)?
+                )
+            end
+            channels
+        end
+
+class val WelcomeMessage is FromJsonable
+    """
+    https://docs.discord.com/developers/resources/guild#welcome-message-object
+    """
+
+    let author_ids: Array[Snowflake] val
+    let message: String
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var author_ids': (Array[Snowflake] val | None) = None
+        var message': (String | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "author_ids" => author_ids' = _Snowflakes(value)?
+            | "message" => message' = value as String
+            end
+        end
+
+        author_ids = author_ids' as Array[Snowflake] val
+        message = message' as String
+
+class val GuildNewMemberWelcome is FromJsonable
+    """
+    https://docs.discord.com/developers/resources/guild#get-guild-new-member-welcome
+
+    The server guide shown to members who have just joined.
+    """
+
+    let guild_id: Snowflake
+    let enabled: Bool
+    let welcome_message: (WelcomeMessage | None)
+    let new_member_actions: Array[NewMemberAction] val
+    let resource_channels: Array[ResourceChannel] val
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var guild_id': (Snowflake | None) = None
+        var enabled': (Bool | None) = None
+        var welcome_message': (WelcomeMessage | None) = None
+        var new_member_actions': (Array[NewMemberAction] val | None) = None
+        var resource_channels': (Array[ResourceChannel] val | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "guild_id" => guild_id' = Snowflake.from_json(value)?
+            | "enabled" => enabled' = value as Bool
+            | "welcome_message" =>
+                match value
+                | let obj': json.JsonObject =>
+                    welcome_message' = WelcomeMessage.from_json(obj')?
+                end
+            | "new_member_actions" =>
+                new_member_actions' = _NewMemberActions(value)?
+            | "resource_channels" =>
+                resource_channels' = _ResourceChannels(value)?
+            end
+        end
+
+        guild_id = guild_id' as Snowflake
+        enabled = enabled' as Bool
+        welcome_message = welcome_message'
+        new_member_actions =
+            new_member_actions' as Array[NewMemberAction] val
+        resource_channels = resource_channels' as Array[ResourceChannel] val

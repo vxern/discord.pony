@@ -846,6 +846,31 @@ actor Routes
             _Decode.entity[ArchivedThreads](handler, options.on_error)
         )
 
+    be search_threads(
+        channel_id: Snowflake,
+        params: SearchThreadsParams,
+        handler: ResponseHandler[ThreadSearchResult]
+    ) =>
+        """
+        https://docs.discord.com/developers/resources/channel#search-threads
+
+        Search the threads of a forum or media channel. Returns the threads
+        that matched, the caller's membership of each, and how many matched in
+        total.
+
+        A channel whose threads Discord has not finished indexing answers 202
+        with a retry_after rather than results.
+        """
+
+        api.send_request(
+            options.build_request(
+                courier.GET,
+                "/channels/" + channel_id.string() + "/threads/search" where
+                    query = params.to_query()
+            ),
+            _Decode.entity[ThreadSearchResult](handler, options.on_error)
+        )
+
     be get_guild_emojis(
         guild_id: Snowflake,
         handler: ResponseHandler[Array[Emoji] val]
@@ -2279,6 +2304,30 @@ actor Routes
             _Decode.entity[IncidentsData](handler, options.on_error)
         )
 
+    be get_guild_new_member_welcome(
+        guild_id: Snowflake,
+        handler: ResponseHandler[(GuildNewMemberWelcome | None)]
+    ) =>
+        """
+        https://docs.discord.com/developers/resources/guild#get-guild-new-member-welcome
+
+        Returns the server guide shown to members who have just joined the
+        guild, listing the channels they are pointed at first.
+
+        A guild that has never set a server guide up answers 204 with no body,
+        which arrives as `None`.
+        """
+
+        api.send_request(
+            options.build_request(
+                courier.GET,
+                "/guilds/" + guild_id.string() + "/new-member-welcome"
+            ),
+            _Decode.optional_entity[GuildNewMemberWelcome](
+                handler, options.on_error
+            )
+        )
+
     be get_guild_scheduled_events(
         guild_id: Snowflake,
         params: GetGuildScheduledEventsParams,
@@ -2429,6 +2478,141 @@ actor Routes
                 courier.GET,
                 "/guilds/" + guild_id.string() + "/scheduled-events/"
                 + guild_scheduled_event_id.string() + "/users" where query =
+                    params.to_query()
+            ),
+            _Decode.list[GuildScheduledEventUser](handler, options.on_error)
+        )
+
+    be create_guild_scheduled_event_exception(
+        guild_id: Snowflake,
+        guild_scheduled_event_id: Snowflake,
+        params: CreateGuildScheduledEventExceptionParams,
+        handler: ResponseHandler[GuildScheduledEventException]
+    ) =>
+        """
+        https://docs.discord.com/developers/resources/guild-scheduled-event#create-guild-scheduled-event-exception
+
+        Override a single occurrence of a recurring guild scheduled event,
+        either moving it or cancelling it. Returns the created guild scheduled
+        event exception object on success.
+
+        The event named by `guild_scheduled_event_id` must carry a recurrence
+        rule, and `original_scheduled_start_time` must line up with an
+        occurrence that rule produces.
+        """
+
+        api.send_request(
+            options.build_request(
+                courier.POST,
+                "/guilds/" + guild_id.string() + "/scheduled-events/"
+                + guild_scheduled_event_id.string() + "/exceptions" where body =
+                    json.JsonPrinter.print(params.to_json())
+            ),
+            _Decode.entity[GuildScheduledEventException](
+                handler, options.on_error
+            )
+        )
+
+    be update_guild_scheduled_event_exception(
+        guild_id: Snowflake,
+        guild_scheduled_event_id: Snowflake,
+        exception_id: Snowflake,
+        params: UpdateGuildScheduledEventExceptionParams,
+        handler: ResponseHandler[GuildScheduledEventException]
+    ) =>
+        """
+        https://docs.discord.com/developers/resources/guild-scheduled-event#modify-guild-scheduled-event-exception
+
+        Modify an override of a single occurrence of a recurring guild
+        scheduled event. Returns the modified guild scheduled event exception
+        object on success.
+
+        All parameters to this endpoint are optional.
+        """
+
+        api.send_request(
+            options.build_request(
+                courier.PATCH,
+                "/guilds/" + guild_id.string() + "/scheduled-events/"
+                + guild_scheduled_event_id.string() + "/exceptions/"
+                + exception_id.string() where body =
+                    json.JsonPrinter.print(params.to_json())
+            ),
+            _Decode.entity[GuildScheduledEventException](
+                handler, options.on_error
+            )
+        )
+
+    be delete_guild_scheduled_event_exception(
+        guild_id: Snowflake,
+        guild_scheduled_event_id: Snowflake,
+        exception_id: Snowflake,
+        handler: EmptyResponseHandler
+    ) =>
+        """
+        https://docs.discord.com/developers/resources/guild-scheduled-event#delete-guild-scheduled-event-exception
+
+        Delete an override of a single occurrence of a recurring guild
+        scheduled event, restoring the occurrence to the time its recurrence
+        rule gives it. Returns a 204 on success.
+        """
+
+        api.send_request(
+            options.build_request(
+                courier.DELETE,
+                "/guilds/" + guild_id.string() + "/scheduled-events/"
+                + guild_scheduled_event_id.string() + "/exceptions/"
+                + exception_id.string()
+            ),
+            _Decode.empty(handler, options.on_error)
+        )
+
+    be get_guild_scheduled_event_user_counts(
+        guild_id: Snowflake,
+        guild_scheduled_event_id: Snowflake,
+        params: GetGuildScheduledEventUserCountsParams,
+        handler: ResponseHandler[GuildScheduledEventUserCounts]
+    ) =>
+        """
+        https://docs.discord.com/developers/resources/guild-scheduled-event#get-guild-scheduled-event-user-counts
+
+        Get how many users are subscribed to a guild scheduled event, split out
+        per overridden occurrence.
+        """
+
+        api.send_request(
+            options.build_request(
+                courier.GET,
+                "/guilds/" + guild_id.string() + "/scheduled-events/"
+                + guild_scheduled_event_id.string() + "/users/counts" where
+                    query = params.to_query()
+            ),
+            _Decode.entity[GuildScheduledEventUserCounts](
+                handler, options.on_error
+            )
+        )
+
+    be get_guild_scheduled_event_exception_users(
+        guild_id: Snowflake,
+        guild_scheduled_event_id: Snowflake,
+        exception_id: Snowflake,
+        params: GetGuildScheduledEventUsersParams,
+        handler: ResponseHandler[Array[GuildScheduledEventUser] val]
+    ) =>
+        """
+        https://docs.discord.com/developers/resources/guild-scheduled-event#get-guild-scheduled-event-exception-users
+
+        Get a list of users subscribed to one overridden occurrence of a
+        recurring guild scheduled event. Guild member data, if it exists, is
+        included if the with_member query parameter is set.
+        """
+
+        api.send_request(
+            options.build_request(
+                courier.GET,
+                "/guilds/" + guild_id.string() + "/scheduled-events/"
+                + guild_scheduled_event_id.string() + "/"
+                + exception_id.string() + "/users" where query =
                     params.to_query()
             ),
             _Decode.list[GuildScheduledEventUser](handler, options.on_error)
@@ -5800,6 +5984,38 @@ primitive _Decode
                     )
                 else
                     on_error(_Decode.undecodable(request, response))
+                end
+            end
+        }
+
+    fun optional_entity[A: FromJsonable val](
+        handler: ResponseHandler[(A | None)],
+        on_error: RestErrorHandler
+    ): RawResponseHandler =>
+        """
+        Decodes a lone object for a route that answers 204 with no body at all
+        when the thing being asked for has never been set up.
+        """
+
+        {(
+            request: courier.HTTPRequest val,
+            response: courier.HTTPResponse val
+        ) =>
+            match _Decode.rejected(request, response)
+            | let rejection: RestError => on_error(rejection)
+            else
+                if response.body.size() == 0 then
+                    handler(None)
+                else
+                    try
+                        handler(
+                            A.from_json(
+                                _Decode.parse(response)? as json.JsonObject
+                            )?
+                        )
+                    else
+                        on_error(_Decode.undecodable(request, response))
+                    end
                 end
             end
         }

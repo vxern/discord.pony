@@ -3062,3 +3062,242 @@ class val GetJoinedPrivateArchivedThreadsParams
         end
 
         consume query
+
+trait val ThreadSortingMode is _Enum[ThreadSortingMode, String]
+    """
+    https://docs.discord.com/developers/resources/channel#search-threads-thread-sorting-mode
+    """
+primitive RelevanceThreadSortingMode is ThreadSortingMode
+    fun value(): String => "relevance"
+primitive CreationTimeThreadSortingMode is ThreadSortingMode
+    fun value(): String => "creation_time"
+primitive LastMessageTimeThreadSortingMode is ThreadSortingMode
+    fun value(): String => "last_message_time"
+primitive ArchiveTimeThreadSortingMode is ThreadSortingMode
+    fun value(): String => "archive_time"
+primitive ThreadSortingModes
+    fun from(value: String): ThreadSortingMode ? =>
+        match value
+        | "relevance" => RelevanceThreadSortingMode
+        | "creation_time" => CreationTimeThreadSortingMode
+        | "last_message_time" => LastMessageTimeThreadSortingMode
+        | "archive_time" => ArchiveTimeThreadSortingMode
+        else error
+        end
+
+trait val SortingOrder is _Enum[SortingOrder, String]
+    """
+    https://docs.discord.com/developers/resources/channel#search-threads-sorting-order
+    """
+primitive AscendingSortingOrder is SortingOrder
+    fun value(): String => "asc"
+primitive DescendingSortingOrder is SortingOrder
+    fun value(): String => "desc"
+primitive SortingOrders
+    fun from(value: String): SortingOrder ? =>
+        match value
+        | "asc" => AscendingSortingOrder
+        | "desc" => DescendingSortingOrder
+        else error
+        end
+
+trait val ThreadSearchTagSetting is _Enum[ThreadSearchTagSetting, String]
+    """
+    https://docs.discord.com/developers/resources/channel#search-threads-thread-search-tag-setting
+    """
+primitive MatchAllThreadSearchTagSetting is ThreadSearchTagSetting
+    """
+    the thread must carry every tag in the search query
+    """
+
+    fun value(): String => "match_all"
+primitive MatchSomeThreadSearchTagSetting is ThreadSearchTagSetting
+    """
+    the thread must carry at least one of the tags in the search query
+    """
+
+    fun value(): String => "match_some"
+primitive ThreadSearchTagSettings
+    fun from(value: String): ThreadSearchTagSetting ? =>
+        match value
+        | "match_all" => MatchAllThreadSearchTagSetting
+        | "match_some" => MatchSomeThreadSearchTagSetting
+        else error
+        end
+
+class val ThreadSearchResult is FromJsonable
+    """
+    https://docs.discord.com/developers/resources/channel#search-threads
+
+    A page of threads matching a search, alongside the caller's membership of
+    each and, optionally, the message that opened each one.
+    """
+
+    let threads: Array[Channel] val
+    let members: Array[ThreadMember] val
+    let has_more: Bool
+    let first_messages: (Array[Message] val | None)
+    let total_results: USize
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var threads': (Array[Channel] val | None) = None
+        var members': (Array[ThreadMember] val | None) = None
+        var has_more': (Bool | None) = None
+        var first_messages': (Array[Message] val | None) = None
+        var total_results': (USize | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "threads" => threads' = _Channels(value)?
+            | "members" => members' = _ThreadMembers(value)?
+            | "has_more" => has_more' = value as Bool
+            | "first_messages" => first_messages' = _Messages(value)?
+            | "total_results" => total_results' = (value as I64).usize()
+            end
+        end
+
+        threads = threads' as Array[Channel] val
+        members = members' as Array[ThreadMember] val
+        has_more = has_more' as Bool
+        first_messages = first_messages'
+        total_results = total_results' as USize
+
+class val SearchThreadsParams
+    """
+    https://docs.discord.com/developers/resources/channel#search-threads-query-string-params
+    """
+
+    let name: (String | None)
+        """
+        text to match against thread names (up to 100 characters)
+        """
+
+    let slop: (USize | None)
+        """
+        how far apart matched terms may sit (0-100)
+        """
+
+    let min_id: (Snowflake | None)
+        """
+        consider only threads after this id
+        """
+
+    let max_id: (Snowflake | None)
+        """
+        consider only threads before this id
+        """
+
+    let tags: (Array[Snowflake] val | None)
+        """
+        consider only threads carrying these forum tags (up to 20)
+
+        Serialised as repeated `tag` parameters.
+        """
+
+    let tag_setting: (ThreadSearchTagSetting | None)
+        """
+        whether a thread must carry every tag or just one of them
+        """
+
+    let archived: (Bool | None)
+        """
+        whether to consider archived threads
+        """
+
+    let sort_by: (ThreadSortingMode | None)
+        """
+        what to order the results by
+        """
+
+    let sort_order: (SortingOrder | None)
+        """
+        which way round to order the results
+        """
+
+    let limit: (USize | None)
+        """
+        number of threads to return (1-25)
+        """
+
+    let offset: (USize | None)
+        """
+        how many threads to skip (0-9975)
+        """
+
+    new val create(
+        name': (String | None) = None,
+        slop': (USize | None) = None,
+        min_id': (Snowflake | None) = None,
+        max_id': (Snowflake | None) = None,
+        tags': (Array[Snowflake] val | None) = None,
+        tag_setting': (ThreadSearchTagSetting | None) = None,
+        archived': (Bool | None) = None,
+        sort_by': (ThreadSortingMode | None) = None,
+        sort_order': (SortingOrder | None) = None,
+        limit': (USize | None) = None,
+        offset': (USize | None) = None
+    ) =>
+        name = name'
+        slop = slop'
+        min_id = min_id'
+        max_id = max_id'
+        tags = tags'
+        tag_setting = tag_setting'
+        archived = archived'
+        sort_by = sort_by'
+        sort_order = sort_order'
+        limit = limit'
+        offset = offset'
+
+    fun to_query(): _RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match name
+        | let name': String => query.push(("name", name'))
+        end
+
+        match slop
+        | let slop': USize => query.push(("slop", slop'.string()))
+        end
+
+        match min_id
+        | let min_id': Snowflake => query.push(("min_id", min_id'.string()))
+        end
+
+        match max_id
+        | let max_id': Snowflake => query.push(("max_id", max_id'.string()))
+        end
+
+        match tags
+        | let tags': Array[Snowflake] val =>
+            for id in tags'.values() do query.push(("tag", id.string())) end
+        end
+
+        match tag_setting
+        | let tag_setting': ThreadSearchTagSetting =>
+            query.push(("tag_setting", tag_setting'.value()))
+        end
+
+        match archived
+        | let archived': Bool => query.push(("archived", archived'.string()))
+        end
+
+        match sort_by
+        | let sort_by': ThreadSortingMode =>
+            query.push(("sort_by", sort_by'.value()))
+        end
+
+        match sort_order
+        | let sort_order': SortingOrder =>
+            query.push(("sort_order", sort_order'.value()))
+        end
+
+        match limit
+        | let limit': USize => query.push(("limit", limit'.string()))
+        end
+
+        match offset
+        | let offset': USize => query.push(("offset", offset'.string()))
+        end
+
+        consume query

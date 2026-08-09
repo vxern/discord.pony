@@ -1,4 +1,5 @@
 use json = "json"
+use collections = "collections"
 
 class val GuildScheduledEvent is Jsonable
     """
@@ -1419,6 +1420,320 @@ class val GetGuildScheduledEventUsersParams
 
         match after
         | let after': Snowflake => query.push(("after", after'.string()))
+        end
+
+        consume query
+
+class val GuildScheduledEventException is Jsonable
+    """
+    https://docs.discord.com/developers/resources/guild-scheduled-event#guild-scheduled-event-exception-object
+
+    An override of a single occurrence of a recurring scheduled event, either
+    moving it to a different time or cancelling it outright.
+    """
+
+    let event_id: Snowflake
+        """
+        the id of the recurring scheduled event this exception belongs to
+        """
+
+    let event_exception_id: Snowflake
+        """
+        the id of this exception
+        """
+
+    let scheduled_start_time: (ISO8601 | None)
+        """
+        the time this occurrence starts, or null to keep the recurring time
+        """
+
+    let scheduled_end_time: (ISO8601 | None)
+        """
+        the time this occurrence ends, or null to keep the recurring time
+        """
+
+    let is_canceled: Bool
+        """
+        whether this occurrence has been cancelled
+        """
+
+    new val create(
+        event_id': Snowflake,
+        event_exception_id': Snowflake,
+        scheduled_start_time': (ISO8601 | None) = None,
+        scheduled_end_time': (ISO8601 | None) = None,
+        is_canceled': Bool = false
+    ) =>
+        event_id = event_id'
+        event_exception_id = event_exception_id'
+        scheduled_start_time = scheduled_start_time'
+        scheduled_end_time = scheduled_end_time'
+        is_canceled = is_canceled'
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var event_id': (Snowflake | None) = None
+        var event_exception_id': (Snowflake | None) = None
+        var scheduled_start_time': (ISO8601 | None) = None
+        var scheduled_end_time': (ISO8601 | None) = None
+        var is_canceled': (Bool | None) = None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "event_id" => event_id' = Snowflake.from_json(value)?
+            | "event_exception_id" =>
+                event_exception_id' = Snowflake.from_json(value)?
+            | "scheduled_start_time" =>
+                match value
+                | let string: String => scheduled_start_time' = string
+                end
+            | "scheduled_end_time" =>
+                match value
+                | let string: String => scheduled_end_time' = string
+                end
+            | "is_canceled" => is_canceled' = value as Bool
+            end
+        end
+
+        event_id = event_id' as Snowflake
+        event_exception_id = event_exception_id' as Snowflake
+        scheduled_start_time = scheduled_start_time'
+        scheduled_end_time = scheduled_end_time'
+        is_canceled = is_canceled' as Bool
+
+    fun to_json(): json.JsonObject =>
+        json.JsonObject
+            .update("event_id", event_id.to_json())
+            .update("event_exception_id", event_exception_id.to_json())
+            .update(
+                "scheduled_start_time",
+                match scheduled_start_time
+                | let scheduled_start_time': ISO8601 => scheduled_start_time'
+                end
+            )
+            .update(
+                "scheduled_end_time",
+                match scheduled_end_time
+                | let scheduled_end_time': ISO8601 => scheduled_end_time'
+                end
+            )
+            .update("is_canceled", is_canceled)
+
+primitive _GuildScheduledEventExceptions
+    fun apply(value: json.JsonValue): Array[GuildScheduledEventException] val ? =>
+        """
+        Decodes an array of guild scheduled event exceptions.
+        """
+
+        let array = value as json.JsonArray
+        recover val
+            let exceptions = Array[GuildScheduledEventException](array.size())
+            for exception' in array.values() do
+                exceptions.push(
+                    GuildScheduledEventException.from_json(
+                        exception' as json.JsonObject
+                    )?
+                )
+            end
+            exceptions
+        end
+
+class val CreateGuildScheduledEventExceptionParams is ToJsonable
+    """
+    https://docs.discord.com/developers/resources/guild-scheduled-event#create-guild-scheduled-event-exception-json-params
+
+    The occurrence being overridden is named by
+    `original_scheduled_start_time`, which must line up with a start time the
+    event's recurrence rule actually produces.
+    """
+
+    let original_scheduled_start_time: ISO8601
+        """
+        the start time of the occurrence being overridden
+        """
+
+    let scheduled_start_time: Nullable[ISO8601]
+        """
+        the time this occurrence should start instead
+        """
+
+    let scheduled_end_time: Nullable[ISO8601]
+        """
+        the time this occurrence should end instead
+        """
+
+    let is_canceled: Nullable[Bool]
+        """
+        whether this occurrence should be cancelled
+        """
+
+    new val create(
+        original_scheduled_start_time': ISO8601,
+        scheduled_start_time': Nullable[ISO8601] = None,
+        scheduled_end_time': Nullable[ISO8601] = None,
+        is_canceled': Nullable[Bool] = None
+    ) =>
+        original_scheduled_start_time = original_scheduled_start_time'
+        scheduled_start_time = scheduled_start_time'
+        scheduled_end_time = scheduled_end_time'
+        is_canceled = is_canceled'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+            .update(
+                "original_scheduled_start_time", original_scheduled_start_time
+            )
+
+        match scheduled_start_time
+        | let scheduled_start_time': ISO8601 =>
+            obj = obj.update("scheduled_start_time", scheduled_start_time')
+        | Null => obj = obj.update("scheduled_start_time", None)
+        end
+
+        match scheduled_end_time
+        | let scheduled_end_time': ISO8601 =>
+            obj = obj.update("scheduled_end_time", scheduled_end_time')
+        | Null => obj = obj.update("scheduled_end_time", None)
+        end
+
+        match is_canceled
+        | let is_canceled': Bool =>
+            obj = obj.update("is_canceled", is_canceled')
+        | Null => obj = obj.update("is_canceled", None)
+        end
+
+        obj
+
+class val UpdateGuildScheduledEventExceptionParams is ToJsonable
+    """
+    https://docs.discord.com/developers/resources/guild-scheduled-event#modify-guild-scheduled-event-exception-json-params
+
+    All parameters to this endpoint are optional.
+    """
+
+    let scheduled_start_time: Nullable[ISO8601]
+        """
+        the time this occurrence should start instead
+        """
+
+    let scheduled_end_time: Nullable[ISO8601]
+        """
+        the time this occurrence should end instead
+        """
+
+    let is_canceled: Nullable[Bool]
+        """
+        whether this occurrence should be cancelled
+        """
+
+    new val create(
+        scheduled_start_time': Nullable[ISO8601] = None,
+        scheduled_end_time': Nullable[ISO8601] = None,
+        is_canceled': Nullable[Bool] = None
+    ) =>
+        scheduled_start_time = scheduled_start_time'
+        scheduled_end_time = scheduled_end_time'
+        is_canceled = is_canceled'
+
+    fun to_json(): json.JsonObject =>
+        var obj = json.JsonObject
+
+        match scheduled_start_time
+        | let scheduled_start_time': ISO8601 =>
+            obj = obj.update("scheduled_start_time", scheduled_start_time')
+        | Null => obj = obj.update("scheduled_start_time", None)
+        end
+
+        match scheduled_end_time
+        | let scheduled_end_time': ISO8601 =>
+            obj = obj.update("scheduled_end_time", scheduled_end_time')
+        | Null => obj = obj.update("scheduled_end_time", None)
+        end
+
+        match is_canceled
+        | let is_canceled': Bool =>
+            obj = obj.update("is_canceled", is_canceled')
+        | Null => obj = obj.update("is_canceled", None)
+        end
+
+        obj
+
+class val GuildScheduledEventUserCounts is FromJsonable
+    """
+    https://docs.discord.com/developers/resources/guild-scheduled-event#get-guild-scheduled-event-user-counts
+
+    How many users are subscribed to a recurring event, split out per
+    overridden occurrence.
+    """
+
+    let guild_scheduled_event_count: USize
+        """
+        the number of users subscribed to the event as a whole
+        """
+
+    let guild_scheduled_event_exception_counts:
+        collections.Map[Snowflake, USize] val
+        """
+        the number of users subscribed to each overridden occurrence, keyed by
+        exception id
+        """
+
+    new val from_json(obj: json.JsonObject) ? =>
+        var guild_scheduled_event_count': (USize | None) = None
+        var guild_scheduled_event_exception_counts': (
+            collections.Map[Snowflake, USize] val | None
+        ) =
+            None
+
+        for (key, value) in obj.pairs() do
+            match key
+            | "guild_scheduled_event_count" =>
+                guild_scheduled_event_count' = (value as I64).usize()
+            | "guild_scheduled_event_exception_counts" =>
+                let counts = value as json.JsonObject
+                guild_scheduled_event_exception_counts' =
+                    recover val
+                        let counts' =
+                            collections.Map[Snowflake, USize](counts.size())
+                        for (id, count) in counts.pairs() do
+                            counts'(Snowflake(id.u64()?)) = (count as I64).usize()
+                        end
+                        counts'
+                    end
+            end
+        end
+
+        guild_scheduled_event_count = guild_scheduled_event_count' as USize
+        guild_scheduled_event_exception_counts =
+            guild_scheduled_event_exception_counts' as
+                collections.Map[Snowflake, USize] val
+
+class val GetGuildScheduledEventUserCountsParams
+    """
+    https://docs.discord.com/developers/resources/guild-scheduled-event#get-guild-scheduled-event-user-counts-query-string-params
+    """
+
+    let guild_scheduled_event_exception_ids: (Array[Snowflake] val | None)
+        """
+        the overridden occurrences to count subscribers for (up to 10)
+        """
+
+    new val create(
+        guild_scheduled_event_exception_ids': (Array[Snowflake] val | None) =
+            None
+    ) =>
+        guild_scheduled_event_exception_ids =
+            guild_scheduled_event_exception_ids'
+
+    fun to_query(): _RequestQuery =>
+        let query = recover iso Array[(String, String)] end
+
+        match guild_scheduled_event_exception_ids
+        | let ids: Array[Snowflake] val =>
+            for id in ids.values() do
+                query.push(
+                    ("guild_scheduled_event_exception_ids", id.string())
+                )
+            end
         end
 
         consume query
