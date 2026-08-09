@@ -337,6 +337,12 @@ primitive _GatewayUrl
 
         url.substring(start, finish)
 
+primitive _GatewayRunning
+primitive _GatewayGaveUp
+primitive _GatewayDisposed
+
+type _GatewayState is (_GatewayRunning | _GatewayGaveUp | _GatewayDisposed)
+
 primitive _GatewayBotProbe
     fun apply(
         routes: rest.Routes,
@@ -387,10 +393,9 @@ actor _GatewayConnection is (mare.WebSocketClientActor & _WantsIdentify)
     var _reconnect_attempts: USize = 0
     var _connect_scheduled: Bool = false
     var _watchdog_generation: USize = 0
-    var _fatal: Bool = false
     var _limit_check_generation: USize = 0
     var _awaiting_identify: Bool = false
-    var _disposed: Bool = false
+    var _state: _GatewayState = _GatewayRunning
 
     new create(
         env: Env,
@@ -444,14 +449,13 @@ actor _GatewayConnection is (mare.WebSocketClientActor & _WantsIdentify)
     fun ref _websocket(): mare.WebSocketClient => _ws
 
     fun ref _connect() =>
-        if _disposed then
+        match _state
+        | _GatewayDisposed =>
             Debug.out(
                 "[gateway] not connecting: the connection was disposed of"
             )
             return
-        end
-
-        if _fatal then
+        | _GatewayGaveUp =>
             Debug.out("[gateway] not connecting: the gateway gave up")
             return
         end
@@ -802,7 +806,7 @@ actor _GatewayConnection is (mare.WebSocketClientActor & _WantsIdentify)
         _send(event)
 
     be _session_limits(generation: USize, info: GatewayBotInfo) =>
-        if _disposed or _fatal then return end
+        if _state isnt _GatewayRunning then return end
 
         if generation != _limit_check_generation then
             Debug.out("[gateway] ignoring a stale session start limit")
@@ -850,7 +854,7 @@ actor _GatewayConnection is (mare.WebSocketClientActor & _WantsIdentify)
         _dial(GatewayConstants.base_url())
 
     be _session_limits_timed_out(generation: USize) =>
-        if _disposed or _fatal then return end
+        if _state isnt _GatewayRunning then return end
 
         if generation != _limit_check_generation then return end
 
@@ -894,7 +898,7 @@ actor _GatewayConnection is (mare.WebSocketClientActor & _WantsIdentify)
         )
 
     be _identify_granted() =>
-        if _disposed or _fatal then return end
+        if _state isnt _GatewayRunning then return end
 
         if not _awaiting_identify then
             Debug.out(
@@ -941,7 +945,7 @@ actor _GatewayConnection is (mare.WebSocketClientActor & _WantsIdentify)
         _connect()
 
     be _watchdog_expired(generation: USize, stage: String) =>
-        if _disposed then return end
+        if _state is _GatewayDisposed then return end
 
         if generation != _watchdog_generation then
             Debug.out(
@@ -962,11 +966,11 @@ actor _GatewayConnection is (mare.WebSocketClientActor & _WantsIdentify)
         _schedule_connect()
 
     be dispose() =>
-        if _disposed then return end
+        if _state is _GatewayDisposed then return end
 
         Debug.out("[gateway] disposing of the connection")
 
-        _disposed = true
+        _state = _GatewayDisposed
         _awaiting_identify = false
         _disarm_watchdog()
         _bucket.dispose()
@@ -1027,9 +1031,11 @@ actor _GatewayConnection is (mare.WebSocketClientActor & _WantsIdentify)
         if hard then _connection().hard_close() end
 
     fun ref _give_up(reason: String) =>
+        if _state is _GatewayDisposed then return end
+
         Debug.out("[gateway] giving up: " + reason)
 
-        _fatal = true
+        _state = _GatewayGaveUp
         _teardown(true)
 
     fun ref _identify_or_resume() =>
@@ -1114,7 +1120,7 @@ actor _GatewayConnection is (mare.WebSocketClientActor & _WantsIdentify)
         end
 
     fun ref _reconnect(resume: Bool) =>
-        if _disposed then
+        if _state is _GatewayDisposed then
             Debug.out(
                 "[gateway] not reconnecting: the connection was disposed of"
             )
@@ -1167,15 +1173,14 @@ actor _GatewayConnection is (mare.WebSocketClientActor & _WantsIdentify)
         _resume_url = None
 
     fun ref _schedule_connect(delay_ms: (U64 | None) = None) =>
-        if _disposed then
+        match _state
+        | _GatewayDisposed =>
             Debug.out(
                 "[gateway] not scheduling a connect: the connection was "
                 + "disposed of"
             )
             return
-        end
-
-        if _fatal then
+        | _GatewayGaveUp =>
             Debug.out("[gateway] not scheduling a connect: the gateway gave up")
             return
         end
@@ -1214,7 +1219,7 @@ actor _GatewayConnection is (mare.WebSocketClientActor & _WantsIdentify)
         )
 
     fun ref _arm_watchdog(stage: String, timeout_ms: U64) =>
-        if _disposed then return end
+        if _state is _GatewayDisposed then return end
 
         _watchdog_generation = _watchdog_generation + 1
 

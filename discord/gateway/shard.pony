@@ -44,97 +44,96 @@ primitive GatewayShardFor
 trait tag _WantsIdentify
     be _identify_granted()
 
+class _IdentifyBucket
+    embed queue: Array[_WantsIdentify] = Array[_WantsIdentify]
+
+    var last: U64 = 0
+    var scheduled: Bool = false
+
+    new create() => None
+
 actor _GatewayIdentifyGate
     let _timers: time.Timers
 
-    embed _last: Array[U64] = Array[U64]
-    embed _queues: Array[Array[_WantsIdentify]] =
-        Array[Array[_WantsIdentify]]
-    embed _scheduled: Array[Bool] = Array[Bool]
-
-    var _concurrency: USize = 0
+    embed _buckets: Array[_IdentifyBucket] = Array[_IdentifyBucket]
 
     new create(timers: time.Timers, concurrency: USize = 1) =>
         _timers = timers
         _widen(concurrency)
 
     be set_concurrency(concurrency: USize) =>
-        if concurrency <= _concurrency then return end
+        if concurrency <= _buckets.size() then return end
 
         Debug.out(
             "[gateway/shards] the identify limit is now " + concurrency.string()
-            + " at a time, was " + _concurrency.string()
+            + " at a time, was " + _buckets.size().string()
         )
 
         _widen(concurrency)
 
     be request(shard_id: USize, connection: _WantsIdentify) =>
-        let bucket = shard_id % _concurrency
+        let index = shard_id % _buckets.size()
 
         try
-            _queues(bucket)?.push(connection)
+            let bucket = _buckets(index)?
+            bucket.queue.push(connection)
 
             Debug.out(
                 "[gateway/shards] shard " + shard_id.string()
-                + " wants an identify slot, " + _queues(bucket)?.size().string()
-                + " waiting on bucket " + bucket.string()
+                + " wants an identify slot, " + bucket.queue.size().string()
+                + " waiting on bucket " + index.string()
             )
         end
 
-        _pump(bucket)
+        _pump(index)
 
-    be _wake(bucket: USize) =>
-        try _scheduled(bucket)? = false end
+    be _wake(index: USize) =>
+        try _buckets(index)?.scheduled = false end
 
-        _pump(bucket)
+        _pump(index)
 
     fun ref _widen(concurrency: USize) =>
-        let wanted = concurrency.max(1)
-
-        while _concurrency < wanted do
-            _last.push(0)
-            _queues.push(Array[_WantsIdentify])
-            _scheduled.push(false)
-            _concurrency = _concurrency + 1
+        while _buckets.size() < concurrency.max(1) do
+            _buckets.push(_IdentifyBucket)
         end
 
-    fun ref _pump(bucket: USize) =>
+    fun ref _pump(index: USize) =>
         let interval =
             time.Nanos.from_millis(GatewayConstants.identify_interval_ms())
 
         try
-            let queue = _queues(bucket)?
-            let last = _last(bucket)?
+            let bucket = _buckets(index)?
             let now = time.Time.nanos()
 
             if
-                (queue.size() > 0)
-                    and ((last == 0) or ((now - last) >= interval))
+                (bucket.queue.size() > 0)
+                    and (
+                        (bucket.last == 0)
+                            or ((now - bucket.last) >= interval)
+                    )
             then
-                let connection = queue.shift()?
-                _last(bucket)? = now
+                let connection = bucket.queue.shift()?
+                bucket.last = now
 
                 Debug.out(
-                    "[gateway/shards] bucket " + bucket.string()
+                    "[gateway/shards] bucket " + index.string()
                     + " is handing out an identify slot, "
-                    + queue.size().string() + " still waiting"
+                    + bucket.queue.size().string() + " still waiting"
                 )
 
                 connection._identify_granted()
             end
 
-            if (_queues(bucket)?.size() == 0) or _scheduled(bucket)? then
-                return
-            end
+            if (bucket.queue.size() == 0) or bucket.scheduled then return end
 
-            let since = time.Time.nanos() - _last(bucket)?
+            let since = time.Time.nanos() - bucket.last
             let wait = if since >= interval then 0 else interval - since end
 
-            _scheduled(bucket)? = true
+            bucket.scheduled = true
 
             let self: _GatewayIdentifyGate tag = this
             _timers(
-                time.Timer(_Elapsed({() => self._wake(bucket)}), wait)
+                time.Timer(_Elapsed({() => self._wake(index)}), wait)
             )
         end
 
@@ -185,43 +184,45 @@ primitive _GatewayRoute
         guild_ids: Array[Snowflake] val,
         count: USize
     ): Array[(USize, GatewaySendableEvent)] val =>
-        let owners: Array[USize] val =
-            recover val
-                let found = Array[USize]
+        recover val
+            let owners = Array[USize]
 
-                for guild_id in guild_ids.values() do
-                    let id = GatewayShardFor(guild_id, count)
-                    var known = false
+            for guild_id in guild_ids.values() do
+                let id = GatewayShardFor(guild_id, count)
+                var known = false
 
-                    for owner in found.values() do
-                        if owner == id then
-                            known = true
-                            break
-                        end
+                for owner in owners.values() do
+                    if owner == id then
+                        known = true
+                        break
                     end
-
-                    if not known then found.push(id) end
                 end
 
-                found
+                if not known then owners.push(id) end
             end
 
-        recover val
             let routed = Array[(USize, GatewaySendableEvent)](owners.size())
 
             for owner in owners.values() do
-                var mine = recover iso Array[Snowflake] end
-
-                for guild_id in guild_ids.values() do
-                    if GatewayShardFor(guild_id, count) == owner then
-                        mine.push(guild_id)
-                    end
-                end
-
                 routed.push(
                     (
                         owner,
-                        GatewayRequestSoundboardSoundsEvent(consume mine)
+                        GatewayRequestSoundboardSoundsEvent(
+                            recover val
+                                let mine = Array[Snowflake]
+
+                                for guild_id in guild_ids.values() do
+                                    if
+                                        GatewayShardFor(guild_id, count)
+                                            == owner
+                                    then
+                                        mine.push(guild_id)
+                                    end
+                                end
+
+                                mine
+                            end
+                        )
                     )
                 )
             end
