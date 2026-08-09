@@ -1,4 +1,5 @@
 use "debug"
+use random = "random"
 use time = "time"
 use courier = "courier"
 
@@ -6,10 +7,10 @@ actor GlobalBucket
     let _api: RestApi
     let _options: RestOptions
     let _timers: time.Timers
-    embed _queue: Queue[
+    embed _queue: _Queue[
         (courier.HTTPRequest, RawResponseHandler, RawFailureHandler)
     ] =
-        Queue[(courier.HTTPRequest, RawResponseHandler, RawFailureHandler)]
+        _Queue[(courier.HTTPRequest, RawResponseHandler, RawFailureHandler)]
 
     // A request only goes out if every window has room for it.
     let _windows: Array[_RateLimitWindow] = _RateLimitConstants.windows()
@@ -100,7 +101,7 @@ actor GlobalBucket
         let self: GlobalBucket tag = this
         _timers(
             time.Timer(
-                _OnceElapsed({() => self._resume(generation)}),
+                _Elapsed({() => self._resume(generation)}),
                 duration
             )
         )
@@ -181,7 +182,7 @@ actor GlobalBucket
                     _drain_scheduled = true
                     let self: GlobalBucket tag = this
                     _timers(
-                        time.Timer(_OnceElapsed({() => self._wake()}), at - now)
+                        time.Timer(_Elapsed({() => self._wake()}), at - now)
                     )
                 end
 
@@ -227,7 +228,8 @@ actor Bucket
     let _global_bucket: GlobalBucket
     let _id: String
     let _timers: time.Timers
-    embed _queue: Queue[_QueuedRequest] = Queue[_QueuedRequest]
+    let _rand: random.Rand
+    embed _queue: _Queue[_QueuedRequest] = _Queue[_QueuedRequest]
 
     var _rate_limit: (_RateLimit | None) = None
     var _requests_outstanding: USize = 0
@@ -248,6 +250,9 @@ actor Bucket
         _global_bucket = global_bucket
         _id = id
         _timers = timers
+
+        (let seconds, let nanoseconds) = time.Time.now()
+        _rand = random.Rand(seconds.u64(), nanoseconds.u64())
 
     be enqueue(
         request: courier.HTTPRequest,
@@ -291,6 +296,28 @@ actor Bucket
         )
 
         _drain()
+
+    be sweep_if_idle() =>
+        if _disposed then return end
+
+        if
+            (_queue.size() > 0) or (_requests_outstanding > 0) or _restarting
+        then
+            Debug.out(
+                "[rest/" + _id + "] not sweeping: " + _queue.size().string()
+                + " queued, " + _requests_outstanding.string()
+                + " outstanding"
+            )
+
+            _api._bucket_busy(_id)
+
+            return
+        end
+
+        Debug.out("[rest/" + _id + "] idle, letting the bucket go")
+
+        _disposed = true
+        _api._bucket_swept(_id)
 
     be dispose() =>
         Debug.out(
@@ -390,7 +417,7 @@ actor Bucket
                 + (delay / 1_000_000).string() + "ms"
             )
 
-            _timers(time.Timer(_OnceElapsed({() => self._restart()}), delay))
+            _timers(time.Timer(_Elapsed({() => self._restart()}), delay))
         end
 
     be _restart() =>
@@ -469,7 +496,10 @@ actor Bucket
         match rate_limit
         | let rate_limit': _RateLimit =>
             match rate_limit'.bucket
-            | let hash: String => _api._bucket_hash_learned(route, hash)
+            | let hash: String =>
+                _api._bucket_hash_learned(
+                    route, hash, hash + "|" + _MajorParameter(request), _id
+                )
             end
         end
 
@@ -574,7 +604,7 @@ actor Bucket
             return false
         end
 
-        let delay = _Backoff(attempts', time.Time.nanos())
+        let delay = _Backoff(attempts', _rand.real())
 
         Debug.out(
             "[rest/" + _id + "] " + request.method.string() + " "
@@ -586,7 +616,7 @@ actor Bucket
         let self: Bucket tag = this
         _timers(
             time.Timer(
-                _OnceElapsed(
+                _Elapsed(
                     {() => self._requeue(request, handler, route, attempts')}
                 ),
                 delay

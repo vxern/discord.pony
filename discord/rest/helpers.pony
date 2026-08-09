@@ -53,7 +53,7 @@ primitive _WithQueryParam
             query
         end
 
-class Queue[A: Any #send]
+class _Queue[A: Any #send]
     embed _queue: collections.List[A] = collections.List[A]
 
     fun size(): USize => _queue.size()
@@ -66,40 +66,28 @@ class Queue[A: Any #send]
 
     fun ref clear(): None => _queue.clear()
 
-class iso _OnceElapsed is time.TimerNotify
+class iso _Elapsed is time.TimerNotify
     """
-    Runs `action` when the timer elapses, and does not run again.
-    """
-
-    let _action: {()} val
-
-    new iso create(action: {()} val) =>
-        _action = action
-
-    fun ref apply(timer: time.Timer, count: U64): Bool =>
-        _action()
-        false
-
-class iso _RepeatedlyElapsed is time.TimerNotify
-    """
-    Runs `action` every time the timer elapses.
+    Runs `action` when the timer elapses, again on every later tick if
+    `repeat'` is set.
     """
 
     let _action: {()} val
+    let _repeat: Bool
 
-    new iso create(action: {()} val) =>
+    new iso create(action: {()} val, repeat': Bool = false) =>
         _action = action
+        _repeat = repeat'
 
     fun ref apply(timer: time.Timer, count: U64): Bool =>
         _action()
-        true
+        _repeat
 
 primitive _Backoff
-    fun apply(attempts: USize, now: U64): U64 =>
+    fun apply(attempts: USize, jitter: F64): U64 =>
         let exponent =
             (attempts - 1).min(RestConstants.max_backoff_exponent())
         let delay_ms =
             RestConstants.base_backoff_ms() * (U64(1) << exponent.u64())
-        let jitter = 0.5 + ((now % 1000).f64() / 1000.0)
 
-        time.Nanos.from_millis((delay_ms.f64() * jitter).u64())
+        time.Nanos.from_millis((delay_ms.f64() * (0.5 + jitter)).u64())

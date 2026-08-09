@@ -18,12 +18,13 @@ class val _RateLimit
 
         for (key, value) in headers.values() do
             match key
-            | "x-ratelimit-limit" => limit' = value.usize()?
-            | "x-ratelimit-remaining" => remaining' = value.usize()?
-            | "x-ratelimit-reset" => reset_s' = value.f64()?
-            | "x-ratelimit-reset-after" => reset_after_s' = value.f64()?
+            | "x-ratelimit-limit" => limit' = try value.usize()? end
+            | "x-ratelimit-remaining" => remaining' = try value.usize()? end
+            | "x-ratelimit-reset" => reset_s' = try value.f64()? end
+            | "x-ratelimit-reset-after" =>
+                reset_after_s' = try value.f64()? end
             | "x-ratelimit-bucket" => bucket' = value
-            | "retry-after" => retry_after_s' = value.f64()?
+            | "retry-after" => retry_after_s' = try value.f64()? end
             end
         end
 

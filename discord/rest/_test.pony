@@ -308,7 +308,7 @@ class iso _TestBackoffGrowsAndStaysBounded is UnitTest
 
         var far: USize = 1
         while far <= 32 do
-            h.assert_true(_Backoff(far, 999) <= ceiling)
+            h.assert_true(_Backoff(far, 1) <= ceiling)
             far = far + 1
         end
 
@@ -316,7 +316,7 @@ class iso _TestQueueOrdering is UnitTest
     fun name(): String => "rest/queue ordering"
 
     fun apply(h: TestHelper) ? =>
-        let queue = Queue[String]
+        let queue = _Queue[String]
 
         queue.enqueue("a")
         queue.enqueue("b")

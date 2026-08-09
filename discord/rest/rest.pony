@@ -75,7 +75,7 @@ actor RestApi
         collections.SetIs[_RequestSender tag]
     embed _idle_senders: collections.SetIs[_RequestSender tag] =
         collections.SetIs[_RequestSender tag]
-    embed _pending: Queue[_RequestJob] = Queue[_RequestJob]
+    embed _pending: _Queue[_RequestJob] = _Queue[_RequestJob]
 
     let _global_bucket: GlobalBucket
     var _disposed: Bool = false
@@ -113,7 +113,7 @@ actor RestApi
         let self: RestApi tag = this
         let sweep = time.Nanos.from_millis(RestConstants.bucket_sweep_ms())
         _timers(
-            time.Timer(_RepeatedlyElapsed({() => self._sweep()}), sweep, sweep)
+            time.Timer(_Elapsed({() => self._sweep()}, true), sweep, sweep)
         )
 
     be send_request(
@@ -181,7 +181,12 @@ actor RestApi
         _global_bucket.dispose()
         _timers.dispose()
 
-    be _bucket_hash_learned(route: String, hash: String) =>
+    be _bucket_hash_learned(
+        route: String,
+        hash: String,
+        key: String,
+        from_id: String
+    ) =>
         if _disposed then return end
 
         if try _hashes(route)? == hash else false end then return end
@@ -189,6 +194,22 @@ actor RestApi
         Debug.out("[rest] " + route + " is served by bucket " + hash)
 
         _hashes(route) = hash
+
+        if (from_id == key) or _buckets.contains(key) then return end
+
+        match try _buckets(from_id)? end
+        | let bucket: Bucket =>
+            Debug.out(
+                "[rest] moving bucket " + from_id + " to " + key
+                + " rather than opening a second one for the same limit"
+            )
+
+            _buckets(key) = bucket
+            _bucket_used(key) = time.Time.nanos()
+
+            try _buckets.remove(from_id)? end
+            try _bucket_used.remove(from_id)? end
+        end
 
     be _sender_idle(sender: _RequestSender tag) =>
         if _disposed then return end
@@ -236,8 +257,7 @@ actor RestApi
         end
 
         for id in buckets.values() do
-            try _buckets.remove(id)? end
-            try _bucket_used.remove(id)? end
+            try _buckets(id)?.sweep_if_idle() end
         end
 
         let routes = Array[String]
@@ -252,12 +272,27 @@ actor RestApi
 
         if (buckets.size() > 0) or (routes.size() > 0) then
             Debug.out(
-                "[rest] swept " + buckets.size().string()
-                + " idle bucket(s) and " + routes.size().string()
+                "[rest] asked " + buckets.size().string()
+                + " idle bucket(s) to go and dropped " + routes.size().string()
                 + " route mapping(s), " + _buckets.size().string()
                 + " bucket(s) left"
             )
         end
+
+    be _bucket_busy(id: String) =>
+        if _disposed then return end
+
+        _bucket_used(id) = time.Time.nanos()
+
+    be _bucket_swept(id: String) =>
+        if _disposed then return end
+
+        try _buckets.remove(id)? end
+        try _bucket_used.remove(id)? end
+
+        Debug.out(
+            "[rest] a bucket went away, " + _buckets.size().string() + " left"
+        )
 
     be _raw_send_request(
         request: courier.HTTPRequest val,

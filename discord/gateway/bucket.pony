@@ -165,7 +165,14 @@ actor _GatewayBucket
 
         _open = false
         _throttled = false
+        _drain_scheduled = false
         _generation = _generation + 1
+
+        if _overflowing then
+            _overflowing = false
+            _connection._queue_recovered(_dropped)
+            _dropped = 0
+        end
 
     be dispose() =>
         Debug.out(
