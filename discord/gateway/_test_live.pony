@@ -183,7 +183,7 @@ actor _LiveSession
             }
         )
 
-        events.on_resumed({ () => self.resumed() })
+        events.on_resumed({ (data: None) => self.resumed() })
 
         events.on_guild_create(
             { (guild: (GuildCreate | UnavailableGuild)) =>

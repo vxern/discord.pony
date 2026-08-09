@@ -4,8 +4,6 @@ use "debug"
 
 type GatewayEventHandler[A: Any val] is {(A): (Bool | None)} val
 
-type GatewayEmptyEventHandler is {(): (Bool | None)} val
-
 trait _Removable
     fun ref remove(handler: Any val)
 
@@ -53,53 +51,11 @@ class _Listeners[A: Any val] is _Removable
         end
         for handler in spent.values() do remove(handler) end
 
-class _EmptyListeners is _Removable
-    embed _order: List[GatewayEmptyEventHandler] =
-        List[GatewayEmptyEventHandler]
-    embed _index: MapIs[Any val, ListNode[GatewayEmptyEventHandler]] =
-        MapIs[Any val, ListNode[GatewayEmptyEventHandler]]
-
-    fun ref add(handler: GatewayEmptyEventHandler) =>
-        if _index.contains(handler) then return end
-        let node = ListNode[GatewayEmptyEventHandler](handler)
-        _order.append_node(node)
-        _index(handler) = node
-        Debug.out(
-            "[gateway/events] a listener was added, " + _order.size().string()
-            + " now on this event"
-        )
-
-    fun ref remove(handler: Any val) =>
-        try
-            (_index.remove(handler)?._2).remove()
-            Debug.out(
-                "[gateway/events] a listener was removed, "
-                + _order.size().string()
-                + " now on this event"
-            )
-        end
-
-    fun ref clear() =>
-        _index.clear()
-        _order.clear()
-
-    fun ref apply() =>
-        Debug.out(
-            "[gateway/events] running " + _order.size().string()
-            + " listener(s)"
-        )
-        let spent = Array[GatewayEmptyEventHandler]
-        for handler in _order.values() do
-            let keep = match handler() | let keep': Bool => keep' else true end
-            if not keep then spent.push(handler) end
-        end
-        for handler in spent.values() do remove(handler) end
-
 actor Events
     let _api: GatewayApi
 
     embed _ready: _Listeners[GatewayReady] = _Listeners[GatewayReady]
-    embed _resumed: _EmptyListeners = _EmptyListeners
+    embed _resumed: _Listeners[None] = _Listeners[None]
     embed _rate_limited: _Listeners[GatewayRateLimited] =
         _Listeners[GatewayRateLimited]
     embed _application_command_permissions_update: _Listeners[
@@ -363,7 +319,7 @@ actor Events
     be on_ready(handler: GatewayEventHandler[GatewayReady]) =>
         _ready.add(handler)
 
-    be on_resumed(handler: GatewayEmptyEventHandler) =>
+    be on_resumed(handler: GatewayEventHandler[None]) =>
         _resumed.add(handler)
 
     be on_rate_limited(handler: GatewayEventHandler[GatewayRateLimited]) =>
@@ -675,7 +631,7 @@ actor Events
         try
             match name
             | "READY" => _ready(data as GatewayReady)
-            | "RESUMED" => _resumed()
+            | "RESUMED" => _resumed(None)
             | "RATE_LIMITED" => _rate_limited(data as GatewayRateLimited)
             | "APPLICATION_COMMAND_PERMISSIONS_UPDATE" =>
                 _application_command_permissions_update(
