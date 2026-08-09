@@ -51,22 +51,6 @@ class _RateLimitWindow
     fun ref replay(timestamps: Array[U64] box) =>
         for at in timestamps.values() do spend(at) end
 
-primitive _IsPresenceUpdate
-    fun apply(event: GatewaySendableEvent): Bool =>
-        match event.opcode()
-        | GatewayOpcodePresenceUpdate => true
-        else
-            false
-        end
-
-primitive _IsIdentify
-    fun apply(event: GatewaySendableEvent): Bool =>
-        match event.opcode()
-        | GatewayOpcodeIdentify => true
-        else
-            false
-        end
-
 primitive _RateLimitConstants
     fun command_window(): _RateLimitWindow => _RateLimitWindow(120, 60 * 1000)
 

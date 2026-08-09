@@ -347,7 +347,7 @@ primitive _GatewayBotProbe
         routes.get_gateway_bot(got)
         timers(
             time.Timer(
-                _OnceElapsed(expired),
+                _Elapsed(expired),
                 time.Nanos.from_millis(
                     GatewayConstants.session_limit_timeout_ms()
                 )
@@ -1208,7 +1208,7 @@ actor _GatewayConnection is (mare.WebSocketClientActor & _WantsIdentify)
         let self: _GatewayConnection tag = this
         _timers(
             time.Timer(
-                _OnceElapsed({() => self._reconnect_now()}),
+                _Elapsed({() => self._reconnect_now()}),
                 delay
             )
         )
@@ -1228,7 +1228,7 @@ actor _GatewayConnection is (mare.WebSocketClientActor & _WantsIdentify)
         let self: _GatewayConnection tag = this
         _timers(
             time.Timer(
-                _OnceElapsed({() => self._watchdog_expired(generation, stage)}),
+                _Elapsed({() => self._watchdog_expired(generation, stage)}),
                 time.Nanos.from_millis(timeout_ms)
             )
         )
@@ -1257,7 +1257,8 @@ actor _GatewayConnection is (mare.WebSocketClientActor & _WantsIdentify)
         )
 
         let self: _GatewayConnection tag = this
-        _heartbeat = _GatewayHeartbeat(self, _timers, interval_ms)
+        let jitter = _rand.real()
+        _heartbeat = _GatewayHeartbeat(self, _timers, interval_ms, jitter)
 
     fun ref _stop_heartbeat() =>
         match _heartbeat
@@ -1281,15 +1282,14 @@ actor _GatewayHeartbeat
     new create(
         connection: _GatewayConnection,
         timers: time.Timers,
-        interval_ms: U64
+        interval_ms: U64,
+        jitter: F64
     ) =>
         _connection = connection
         _timers = timers
         _interval_ns = time.Nanos.from_millis(interval_ms)
 
-        (let seconds, let nanoseconds) = time.Time.now()
-        let rand = random.Rand(seconds.u64(), nanoseconds.u64())
-        let initial_delay = (_interval_ns.f64() * rand.real()).u64()
+        let initial_delay = (_interval_ns.f64() * jitter).u64()
 
         Debug.out(
             "[gateway] the first heartbeat is jittered to "
@@ -1298,7 +1298,7 @@ actor _GatewayHeartbeat
 
         let self: _GatewayHeartbeat tag = this
         let timer = time.Timer(
-            _RepeatedlyElapsed({() => self._beat()}),
+            _Elapsed({() => self._beat()}, true),
             initial_delay,
             _interval_ns
         )

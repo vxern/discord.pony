@@ -252,7 +252,7 @@ actor _Grants
 
             _timers(
                 time.Timer(
-                    _OnceElapsed({() => self._poll()}),
+                    _Elapsed({() => self._poll()}),
                     time.Nanos.from_millis(250)
                 )
             )
@@ -494,7 +494,7 @@ actor _LiveShards
 
         _timers(
             time.Timer(
-                _OnceElapsed({() => self.tick()}),
+                _Elapsed({() => self.tick()}),
                 time.Nanos.from_seconds(1)
             )
         )

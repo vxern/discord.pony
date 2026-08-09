@@ -371,7 +371,7 @@ actor _LiveSession
 
         _timers(
             time.Timer(
-                _OnceElapsed({() => self.tick()}),
+                _Elapsed({() => self.tick()}),
                 time.Nanos.from_seconds(1)
             )
         )

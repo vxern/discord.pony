@@ -1,11 +1,13 @@
 use "../data"
 use "debug"
+use collections = "collections"
 use time = "time"
 
 actor _GatewayBucket
     let _connection: _GatewayConnection
     let _timers: time.Timers
-    embed _queue: _Queue[GatewaySendableEvent] = _Queue[GatewaySendableEvent]
+    embed _queue: collections.List[GatewaySendableEvent] =
+        collections.List[GatewaySendableEvent]
 
     let _commands: _RateLimitWindow = _RateLimitConstants.command_window()
     let _presences: _RateLimitWindow = _RateLimitConstants.presence_window()
@@ -36,11 +38,11 @@ actor _GatewayBucket
             return
         end
 
-        _queue.enqueue(event)
+        _queue.push(event)
 
         let cap = GatewayConstants.max_queued_events()
         if _queue.size() > cap then
-            try _queue.dequeue()? end
+            try _queue.shift()? end
             _dropped = _dropped + 1
 
             Debug.out(
@@ -206,7 +208,7 @@ actor _GatewayBucket
     fun ref _handshake(event: GatewaySendableEvent, generation: USize) =>
         let now = time.Time.nanos()
 
-        if _IsIdentify(event) then
+        if (event.opcode() is GatewayOpcodeIdentify) then
             match _identifies.blocked_until(now)
             | let at: U64 =>
                 Debug.out(
@@ -218,7 +220,7 @@ actor _GatewayBucket
                 let self: _GatewayBucket tag = this
                 _timers(
                     time.Timer(
-                        _OnceElapsed(
+                        _Elapsed(
                             {() => self._retry_handshake(event, generation)}
                         ),
                         at - now
@@ -269,7 +271,7 @@ actor _GatewayBucket
 
         while _queue.size() > 0 do
             let now = time.Time.nanos()
-            let event = try _queue.dequeue()? else return end
+            let event = try _queue.shift()? else return end
 
             match _blocked_until(event, now)
             | let at: U64 =>
@@ -279,13 +281,13 @@ actor _GatewayBucket
                     + ((at - now) / 1_000_000).string() + "ms"
                 )
 
-                _queue.enqueue_at_beginning(event)
+                _queue.unshift(event)
 
                 if not _drain_scheduled then
                     _drain_scheduled = true
                     let self: _GatewayBucket tag = this
                     _timers(
-                        time.Timer(_OnceElapsed({() => self._wake()}), at - now)
+                        time.Timer(_Elapsed({() => self._wake()}), at - now)
                     )
                 end
 
@@ -293,7 +295,7 @@ actor _GatewayBucket
             end
 
             _commands.spend(now)
-            if _IsPresenceUpdate(event) then _presences.spend(now) end
+            if (event.opcode() is GatewayOpcodePresenceUpdate) then _presences.spend(now) end
 
             Debug.out(
                 "[gateway/bucket] releasing opcode "
@@ -321,7 +323,7 @@ actor _GatewayBucket
         | let commands_at: U64 => at = at.max(commands_at)
         end
 
-        if _IsPresenceUpdate(event) then
+        if (event.opcode() is GatewayOpcodePresenceUpdate) then
             match _presences.blocked_until(now)
             | let presences_at: U64 => at = at.max(presences_at)
             end

@@ -134,7 +134,7 @@ actor _GatewayIdentifyGate
 
             let self: _GatewayIdentifyGate tag = this
             _timers(
-                time.Timer(_OnceElapsed({() => self._wake(bucket)}), wait)
+                time.Timer(_Elapsed({() => self._wake(bucket)}), wait)
             )
         end
 

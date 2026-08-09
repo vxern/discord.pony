@@ -1,5 +1,6 @@
 use "../data"
 use "pony_test"
+use collections = "collections"
 use json = "json"
 use random = "random"
 use rest = "../rest"
@@ -239,7 +240,7 @@ class iso _StressQueue is UnitTest
     fun name(): String => "stress/queue"
 
     fun apply(h: TestHelper) ? =>
-        let queue = _Queue[GatewaySendableEvent]
+        let queue = collections.List[GatewaySendableEvent]
         let rand = random.Rand(0xfeed, 0xbeef)
 
         var pushed: USize = 0
@@ -251,7 +252,7 @@ class iso _StressQueue is UnitTest
             var index: USize = 0
 
             while index < batch do
-                queue.enqueue(GatewayHeartbeatEvent(pushed))
+                queue.push(GatewayHeartbeatEvent(pushed))
                 pushed = pushed + 1
                 index = index + 1
             end
@@ -262,10 +263,10 @@ class iso _StressQueue is UnitTest
             index = 0
 
             while (index < take) and (queue.size() > 0) do
-                let event = queue.dequeue()?
+                let event = queue.shift()?
 
                 if (rand.int(4) == 0) and (queue.size() > 0) then
-                    queue.enqueue_at_beginning(consume event)
+                    queue.unshift(consume event)
                 else
                     popped = popped + 1
                 end
@@ -722,7 +723,7 @@ actor _Releases
 
             timers(
                 time.Timer(
-                    _OnceElapsed({() => self.settle(bucket, timers)}),
+                    _Elapsed({() => self.settle(bucket, timers)}),
                     time.Nanos.from_millis(250)
                 )
             )
