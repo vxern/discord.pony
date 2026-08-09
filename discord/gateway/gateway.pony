@@ -877,7 +877,15 @@ actor _GatewayConnection is mare.WebSocketClientActor
         _bucket.close()
         _stop_heartbeat()
 
-        if _open then
+        if resume then
+            Debug.out(
+                "[gateway] dropping the socket instead of closing it, so that "
+                + "the gateway holds the session open to resume into"
+            )
+            _open = false
+            _connection().hard_close()
+            _schedule_connect()
+        elseif _open then
             _open = false
             _ws.close(mare.CloseGoingAway, "reconnecting")
             _arm_watchdog(
