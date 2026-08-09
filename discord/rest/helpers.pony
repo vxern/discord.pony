@@ -83,6 +83,69 @@ class iso _Elapsed is time.TimerNotify
         _action()
         _repeat
 
+primitive _HeaderValue
+    """
+    Strips the control characters a header value may not carry, so caller text
+    put into a header cannot inject one of its own.
+    """
+
+    fun apply(value: String val): String val =>
+        var carries_control = false
+
+        for byte in value.values() do
+            if (byte < ' ') or (byte == 0x7f) then
+                carries_control = true
+                break
+            end
+        end
+
+        if not carries_control then return value end
+
+        recover val
+            let stripped = String(value.size())
+
+            for byte in value.values() do
+                if (byte >= ' ') and (byte != 0x7f) then stripped.push(byte) end
+            end
+
+            stripped
+        end
+
+primitive _PathSegment
+    """
+    Percent-encodes a caller-supplied path segment, so its content cannot
+    change which route the request lands on.
+    """
+
+    fun apply(segment: String val): String val =>
+        recover val
+            let encoded = String(segment.size())
+
+            for byte in segment.values() do
+                if _unreserved(byte) then
+                    encoded.push(byte)
+                else
+                    encoded.push('%')
+                    encoded.push(_hex(byte >> 4))
+                    encoded.push(_hex(byte and 0x0f))
+                end
+            end
+
+            encoded
+        end
+
+    fun _unreserved(byte: U8): Bool =>
+        ((byte >= 'a') and (byte <= 'z'))
+            or ((byte >= 'A') and (byte <= 'Z'))
+            or ((byte >= '0') and (byte <= '9'))
+            or (byte == '-')
+            or (byte == '.')
+            or (byte == '_')
+            or (byte == '~')
+
+    fun _hex(nibble: U8): U8 =>
+        if nibble < 10 then '0' + nibble else 'A' + (nibble - 10) end
+
 primitive _Backoff
     fun apply(attempts: USize, jitter: F64): U64 =>
         let exponent =

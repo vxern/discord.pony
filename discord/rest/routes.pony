@@ -2630,7 +2630,7 @@ actor Routes
 
         api.send_request(
             options.build_request(
-                courier.GET, "/guilds/templates/" + template_code
+                courier.GET, "/guilds/templates/" + _PathSegment(template_code)
             ),
             _Decode.entity[GuildTemplate](handler, options.on_error)
         )
@@ -2689,7 +2689,7 @@ actor Routes
         api.send_request(
             options.build_request(
                 courier.PUT,
-                "/guilds/" + guild_id.string() + "/templates/" + template_code
+                "/guilds/" + guild_id.string() + "/templates/" + _PathSegment(template_code)
             ),
             _Decode.entity[GuildTemplate](handler, options.on_error)
         )
@@ -2711,7 +2711,7 @@ actor Routes
             options.build_request(
                 courier.PATCH,
                 "/guilds/" + guild_id.string() + "/templates/"
-                + template_code where body =
+                + _PathSegment(template_code) where body =
                     json.JsonPrinter.print(params.to_json())
             ),
             _Decode.entity[GuildTemplate](handler, options.on_error)
@@ -2732,7 +2732,7 @@ actor Routes
         api.send_request(
             options.build_request(
                 courier.DELETE,
-                "/guilds/" + guild_id.string() + "/templates/" + template_code
+                "/guilds/" + guild_id.string() + "/templates/" + _PathSegment(template_code)
             ),
             _Decode.entity[GuildTemplate](handler, options.on_error)
         )
@@ -2751,7 +2751,7 @@ actor Routes
         api.send_request(
             options.build_request(
                 courier.GET,
-                "/invites/" + invite_code where query = params.to_query()
+                "/invites/" + _PathSegment(invite_code) where query = params.to_query()
             ),
             _Decode.entity[Invite](handler, options.on_error)
         )
@@ -2774,7 +2774,7 @@ actor Routes
 
         api.send_request(
             options.build_request(
-                courier.DELETE, "/invites/" + invite_code where reason = reason
+                courier.DELETE, "/invites/" + _PathSegment(invite_code) where reason = reason
             ),
             _Decode.entity[Invite](handler, options.on_error)
         )
@@ -2795,7 +2795,7 @@ actor Routes
 
         api.send_request(
             options.build_request(
-                courier.GET, "/invites/" + invite_code + "/target-users"
+                courier.GET, "/invites/" + _PathSegment(invite_code) + "/target-users"
             ),
             _Decode.text(handler, options.on_error)
         )
@@ -2822,7 +2822,7 @@ actor Routes
         api.send_request(
             options.build_request(
                 courier.PUT,
-                "/invites/" + invite_code + "/target-users" where body =
+                "/invites/" + _PathSegment(invite_code) + "/target-users" where body =
                     json.JsonPrinter.print(params.to_json())
             ),
             _Decode.payload(handler, options.on_error)
@@ -2844,7 +2844,7 @@ actor Routes
         api.send_request(
             options.build_request(
                 courier.GET,
-                "/invites/" + invite_code + "/target-users/job-status"
+                "/invites/" + _PathSegment(invite_code) + "/target-users/job-status"
             ),
             _Decode.entity[TargetUsersJobStatus](handler, options.on_error)
         )
@@ -3426,7 +3426,7 @@ actor Routes
             options.build_request(
                 courier.PUT,
                 "/channels/" + channel_id.string() + "/messages/"
-                + message_id.string() + "/reactions/" + emoji + "/@me"
+                + message_id.string() + "/reactions/" + _PathSegment(emoji) + "/@me"
             ),
             _Decode.empty(handler, options.on_error)
         )
@@ -3451,7 +3451,7 @@ actor Routes
             options.build_request(
                 courier.DELETE,
                 "/channels/" + channel_id.string() + "/messages/"
-                + message_id.string() + "/reactions/" + emoji + "/@me"
+                + message_id.string() + "/reactions/" + _PathSegment(emoji) + "/@me"
             ),
             _Decode.empty(handler, options.on_error)
         )
@@ -3478,7 +3478,7 @@ actor Routes
             options.build_request(
                 courier.DELETE,
                 "/channels/" + channel_id.string() + "/messages/"
-                + message_id.string() + "/reactions/" + emoji + "/"
+                + message_id.string() + "/reactions/" + _PathSegment(emoji) + "/"
                 + user_id.string()
             ),
             _Decode.empty(handler, options.on_error)
@@ -3504,7 +3504,7 @@ actor Routes
             options.build_request(
                 courier.GET,
                 "/channels/" + channel_id.string() + "/messages/"
-                + message_id.string() + "/reactions/" + emoji where query =
+                + message_id.string() + "/reactions/" + _PathSegment(emoji) where query =
                     params.to_query()
             ),
             _Decode.list[User](handler, options.on_error)
@@ -3553,7 +3553,7 @@ actor Routes
             options.build_request(
                 courier.DELETE,
                 "/channels/" + channel_id.string() + "/messages/"
-                + message_id.string() + "/reactions/" + emoji
+                + message_id.string() + "/reactions/" + _PathSegment(emoji)
             ),
             _Decode.empty(handler, options.on_error)
         )
@@ -4804,7 +4804,7 @@ actor Routes
         api.send_request(
             options.build_request(
                 courier.GET,
-                "/webhooks/" + webhook_id.string() + "/" + webhook_token
+                "/webhooks/" + webhook_id.string() + "/" + _PathSegment(webhook_token)
             ),
             _Decode.entity[Webhook](handler, options.on_error)
         )
@@ -4855,7 +4855,7 @@ actor Routes
             options.build_request(
                 courier.PATCH,
                 "/webhooks/" + webhook_id.string() + "/"
-                + webhook_token where body =
+                + _PathSegment(webhook_token) where body =
                     json.JsonPrinter.print(params.to_json())
             ),
             _Decode.entity[Webhook](handler, options.on_error)
@@ -4898,7 +4898,7 @@ actor Routes
         api.send_request(
             options.build_request(
                 courier.DELETE,
-                "/webhooks/" + webhook_id.string() + "/" + webhook_token
+                "/webhooks/" + webhook_id.string() + "/" + _PathSegment(webhook_token)
             ),
             _Decode.empty(handler, options.on_error)
         )
@@ -4937,7 +4937,7 @@ actor Routes
             options.build_request(
                 courier.POST,
                 "/webhooks/" + webhook_id.string() + "/"
-                + webhook_token where query =
+                + _PathSegment(webhook_token) where query =
                     _WithQueryParam(params.to_query(), "wait", false),
                 body = _WithFiles(
                     json.JsonPrinter.print(params.to_json()), files
@@ -4980,7 +4980,7 @@ actor Routes
             options.build_request(
                 courier.POST,
                 "/webhooks/" + webhook_id.string() + "/"
-                + webhook_token where query =
+                + _PathSegment(webhook_token) where query =
                     _WithQueryParam(params.to_query(), "wait", true),
                 body = _WithFiles(
                     json.JsonPrinter.print(params.to_json()), files
@@ -5010,7 +5010,7 @@ actor Routes
         api.send_request(
             options.build_request(
                 courier.POST,
-                "/webhooks/" + webhook_id.string() + "/" + webhook_token
+                "/webhooks/" + webhook_id.string() + "/" + _PathSegment(webhook_token)
                 + "/slack" where query =
                     _WithQueryParam(params.to_query(), "wait", false),
                 body = json.JsonPrinter.print(params.to_json())
@@ -5037,7 +5037,7 @@ actor Routes
         api.send_request(
             options.build_request(
                 courier.POST,
-                "/webhooks/" + webhook_id.string() + "/" + webhook_token
+                "/webhooks/" + webhook_id.string() + "/" + _PathSegment(webhook_token)
                 + "/slack" where query =
                     _WithQueryParam(params.to_query(), "wait", true),
                 body = json.JsonPrinter.print(params.to_json())
@@ -5072,7 +5072,7 @@ actor Routes
         api.send_request(
             options.build_request(
                 courier.POST,
-                "/webhooks/" + webhook_id.string() + "/" + webhook_token
+                "/webhooks/" + webhook_id.string() + "/" + _PathSegment(webhook_token)
                 + "/github" where query =
                     _WithQueryParam(params.to_query(), "wait", false),
                 body = json.JsonPrinter.print(params.to_json())
@@ -5105,7 +5105,7 @@ actor Routes
         api.send_request(
             options.build_request(
                 courier.POST,
-                "/webhooks/" + webhook_id.string() + "/" + webhook_token
+                "/webhooks/" + webhook_id.string() + "/" + _PathSegment(webhook_token)
                 + "/github" where query =
                     _WithQueryParam(params.to_query(), "wait", true),
                 body = json.JsonPrinter.print(params.to_json())
@@ -5130,7 +5130,7 @@ actor Routes
         api.send_request(
             options.build_request(
                 courier.GET,
-                "/webhooks/" + webhook_id.string() + "/" + webhook_token
+                "/webhooks/" + webhook_id.string() + "/" + _PathSegment(webhook_token)
                 + "/messages/" + message_id.string() where query =
                     params.to_query()
             ),
@@ -5178,7 +5178,7 @@ actor Routes
         api.send_request(
             options.build_request(
                 courier.PATCH,
-                "/webhooks/" + webhook_id.string() + "/" + webhook_token
+                "/webhooks/" + webhook_id.string() + "/" + _PathSegment(webhook_token)
                 + "/messages/" + message_id.string() where query =
                     params.to_query(),
                 body = _WithFiles(
@@ -5205,7 +5205,7 @@ actor Routes
         api.send_request(
             options.build_request(
                 courier.DELETE,
-                "/webhooks/" + webhook_id.string() + "/" + webhook_token
+                "/webhooks/" + webhook_id.string() + "/" + _PathSegment(webhook_token)
                 + "/messages/" + message_id.string() where query =
                     params.to_query()
             ),

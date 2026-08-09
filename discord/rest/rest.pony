@@ -17,12 +17,34 @@ type RawResponseHandler is {
 
 type RawFailureHandler is {()} val
 
+primitive _Redacted
+    """
+    Drops the credential from a copy of the headers, so an error handed to the
+    caller cannot carry the bot token into a log.
+    """
+
+    fun apply(headers: courier.Headers val): courier.Headers val =>
+        recover val
+            let safe = courier.Headers
+
+            for (name, value) in headers.values() do
+                if name != "authorization" then safe.set(name, value) end
+            end
+
+            safe
+        end
+
 class val RestError
     let request: courier.HTTPRequest val
     let reason: String
 
     new val create(request': courier.HTTPRequest val, reason': String) =>
-        request = request'
+        request = courier.HTTPRequest(
+            request'.method,
+            request'.path,
+            _Redacted(request'.headers),
+            request'.body
+        )
         reason = reason'
 
     fun string(): String =>
@@ -713,8 +735,8 @@ class val RestOptions
     ): courier.Headers val =>
         recover val
             let headers' = courier.Headers
-            headers'.set("User-Agent", user_agent)
-            headers'.set("Authorization", "Bot " + token)
+            headers'.set("User-Agent", _HeaderValue(user_agent))
+            headers'.set("Authorization", _HeaderValue("Bot " + token))
 
             match body
             | let _: String => headers'.set("Content-Type", "application/json")
@@ -723,7 +745,8 @@ class val RestOptions
             end
 
             match reason
-            | let reason': String => headers'.set("X-Audit-Log-Reason", reason')
+            | let reason': String =>
+                headers'.set("X-Audit-Log-Reason", _HeaderValue(reason'))
             end
 
             headers'
