@@ -23,6 +23,13 @@ actor Main is TestList
         test(_StressDispatchNameScan)
         test(_StressReceiveNesting)
         test(_StressReceiveStall)
+        test(_StressShardFormula)
+        test(_StressShardSet)
+        test(_StressIdentifyGateConcurrent)
+        test(_StressIdentifyGateSerial)
+        test(_StressRouteGuild)
+        test(_StressRouteBroadcast)
+        test(_StressRouteSoundboard)
         test(_LiveConnect)
         test(_LiveHeartbeat)
         test(_LiveResume)
@@ -33,6 +40,10 @@ actor Main is TestList
         test(_LiveResumeChurn)
         test(_LivePresenceChurn)
         test(_LiveQueueOverflow)
+        test(_LiveSharding)
+        test(_LiveUnsharded)
+        test(_LiveShardsAutomatic)
+        test(_LiveShardSubset)
 
 class val _Fat is GatewaySendableEvent
     let _opcode: GatewayOpcode
