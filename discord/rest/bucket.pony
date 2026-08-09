@@ -148,6 +148,13 @@ actor GlobalBucket
         _drain()
 
     fun ref _drain() =>
+        if _disposed then
+            Debug.out(
+                "[rest/global] not draining: the global bucket was disposed of"
+            )
+            return
+        end
+
         if _paused then
             Debug.out(
                 "[rest/global] not draining: paused with "
@@ -223,7 +230,7 @@ actor Bucket
     embed _queue: Queue[_QueuedRequest] = Queue[_QueuedRequest]
 
     var _rate_limit: (_RateLimit | None) = None
-    var _requests_in_flight: USize = 0
+    var _requests_outstanding: USize = 0
     var _requests_remaining: USize = 1
 
     var _disposed: Bool = false
@@ -331,13 +338,13 @@ actor Bucket
                 (let request, let handler, let route, let attempts) =
                     _queue.dequeue()?
 
-                _requests_in_flight = _requests_in_flight + 1
+                _requests_outstanding = _requests_outstanding + 1
                 _requests_remaining = _requests_remaining - 1
 
                 Debug.out(
                     "[rest/" + _id
                     + "] handing a request to the global bucket, "
-                    + _requests_in_flight.string() + " in flight, "
+                    + _requests_outstanding.string() + " outstanding, "
                     + _requests_remaining.string() + " slot(s) left"
                 )
 
@@ -362,7 +369,7 @@ actor Bucket
             end
         end
 
-        if (_requests_in_flight == 0) and (_requests_remaining == 0) and (
+        if (_requests_outstanding == 0) and (_requests_remaining == 0) and (
             _queue.size() > 0
         ) then
             _restarting = true
@@ -412,7 +419,7 @@ actor Bucket
 
         Debug.out("[rest/" + _id + "] a request never came back")
 
-        _requests_in_flight = _requests_in_flight - 1
+        _requests_outstanding = _requests_outstanding - 1
 
         _retry(request, handler, route, attempts, "it never came back")
 
@@ -455,7 +462,7 @@ actor Bucket
             return
         end
 
-        _requests_in_flight = _requests_in_flight - 1
+        _requests_outstanding = _requests_outstanding - 1
 
         let rate_limit = try _RateLimit.from_headers(response.headers)? end
 
@@ -472,7 +479,7 @@ actor Bucket
         ) =>
             _rate_limit = rate_limit'
             _requests_remaining =
-                rate_limit'.remaining - _requests_in_flight.min(
+                rate_limit'.remaining - _requests_outstanding.min(
                     rate_limit'.remaining
                 )
 
@@ -481,8 +488,8 @@ actor Bucket
                 + rate_limit'.remaining.string()
                 + " left, resetting in " + rate_limit'.reset_after_s.string()
                 + "s, so " + _requests_remaining.string()
-                + " slot(s) after the " + _requests_in_flight.string()
-                + " in flight"
+                + " slot(s) after the " + _requests_outstanding.string()
+                + " outstanding"
             )
         | let _: _RateLimit =>
             Debug.out(
@@ -592,20 +599,26 @@ primitive _BucketId
     fun apply(request: courier.HTTPRequest val): String =>
         let path = try request.path.split_by("?")(0)? else request.path end
         let segments: Array[String] ref = path.split_by("/")
+        let normalised = Array[String](segments.size())
 
         for (index, segment) in segments.pairs() do
-            let previous = try segments(index - 1)? else "" end
+            let previous =
+                if index == 0 then
+                    ""
+                else
+                    try segments(index - 1)? else "" end
+                end
             let major =
                 _BucketConstants.major_parameters().contains(
                     previous, {(a, b) => a == b}
                 )
 
-            if _is_id(segment) and not major then
-                try segments(index)? = "*" end
-            end
+            normalised.push(
+                if _is_id(segment) and not major then "*" else segment end
+            )
         end
 
-        request.method.string() + "/".join(segments.values())
+        request.method.string() + "/".join(normalised.values())
 
     fun _is_id(segment: String box): Bool =>
         if segment.size() == 0 then return false end

@@ -4,7 +4,7 @@ use time = "time"
 class val _RateLimit
     let limit: (USize | None)
     let remaining: USize
-    let reset_s: F64
+    let reset_s: (F64 | None)
     let reset_after_s: F64
     let bucket: (String | None)
 
@@ -39,7 +39,7 @@ class val _RateLimit
         limit = limit'
         bucket = bucket'
         remaining = try remaining' as USize else 0 end
-        reset_s = try reset_s' as F64 else 0 end
+        reset_s = reset_s'
         reset_after_s =
             match (reset_after_s', retry_after_s')
             | (let seconds: F64, _) => seconds
@@ -49,13 +49,27 @@ class val _RateLimit
             end
 
     fun is_newer_than(other: (_RateLimit | None)): Bool =>
-        match other
-        | let other': _RateLimit =>
-            (reset_s > other'.reset_s)
-            or (reset_after_s < other'.reset_after_s)
-            or (remaining < other'.remaining)
+        let held =
+            match other
+            | let held': _RateLimit => held'
+            else
+                return true
+            end
+
+        match (reset_s, held.reset_s)
+        | (let mine: F64, let theirs: F64) =>
+            if mine != theirs then
+                mine > theirs
+            else
+                remaining < held.remaining
+            end
         else
-            true
+            (reset_after_s < held.reset_after_s)
+                or (remaining < held.remaining)
+                or (
+                    (reset_after_s > held.reset_after_s)
+                        and (remaining > held.remaining)
+                )
         end
 
 class _RateLimitWindow
