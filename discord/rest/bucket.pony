@@ -219,8 +219,43 @@ actor GlobalBucket
 
         if at > now then at end
 
-type _QueuedRequest is
-    (courier.HTTPRequest, RawResponseHandler, String, USize)
+class val _QueuedRequest
+    let request: courier.HTTPRequest val
+    let handler: RawResponseHandler
+    let route: String
+    let attempts: USize
+        """
+        How many times the request has been sent and come back as a hiccup on
+        Discord's side, rather than as an answer.
+        """
+    let rate_limit_attempts: USize
+        """
+        How many times the request has come back 429. Counted apart from
+        `attempts`, since being told to wait is not the request failing.
+        """
+
+    new val create(
+        request': courier.HTTPRequest val,
+        handler': RawResponseHandler,
+        route': String,
+        attempts': USize = 0,
+        rate_limit_attempts': USize = 0
+    ) =>
+        request = request'
+        handler = handler'
+        route = route'
+        attempts = attempts'
+        rate_limit_attempts = rate_limit_attempts'
+
+    fun val retried(): _QueuedRequest =>
+        _QueuedRequest(
+            request, handler, route, attempts + 1, rate_limit_attempts
+        )
+
+    fun val throttled(): _QueuedRequest =>
+        _QueuedRequest(
+            request, handler, route, attempts, rate_limit_attempts + 1
+        )
 
 actor Bucket
     let _api: RestApi
@@ -255,10 +290,38 @@ actor Bucket
         _rand = random.Rand(seconds.u64(), nanoseconds.u64())
 
     be enqueue(
-        request: courier.HTTPRequest,
+        request: courier.HTTPRequest val,
         handler: RawResponseHandler,
         route: String
     ) =>
+        _admit(_QueuedRequest(request, handler, route))
+
+    be adopt(job: _QueuedRequest) =>
+        """
+        Takes on a request another bucket was holding for the same limit,
+        keeping the counts it has already run up.
+        """
+
+        _admit(job)
+
+    be migrate_to(target: Bucket) =>
+        """
+        Hands everything still queued to the bucket that already serves this
+        limit, so two of them do not spend the same budget.
+        """
+
+        if _disposed then return end
+
+        Debug.out(
+            "[rest/" + _id + "] handing " + _queue.size().string()
+            + " queued request(s) to the bucket that already serves its limit"
+        )
+
+        while _queue.size() > 0 do
+            try target.adopt(_queue.dequeue()?) else break end
+        end
+
+    fun ref _admit(job: _QueuedRequest) =>
         if _disposed then
             Debug.out(
                 "[rest/" + _id
@@ -266,7 +329,7 @@ actor Bucket
             )
 
             _options.on_error(
-                RestError(request, "the bucket was disposed of")
+                RestError(job.request, "the bucket was disposed of")
             )
 
             return
@@ -276,19 +339,20 @@ actor Bucket
         if _queue.size() >= cap then
             Debug.out(
                 "[rest/" + _id + "] the queue is full at " + cap.string()
-                + ", refusing " + request.method.string() + " " + request.path
+                + ", refusing " + job.request.method.string() + " "
+                + job.request.path
             )
 
             _options.on_error(
                 RestError(
-                    request, "the bucket queue is full at " + cap.string()
+                    job.request, "the bucket queue is full at " + cap.string()
                 )
             )
 
             return
         end
 
-        _queue.enqueue((request, handler, route, 0))
+        _queue.enqueue(job)
 
         Debug.out(
             "[rest/" + _id + "] queued a request, " + _queue.size().string()
@@ -329,11 +393,10 @@ actor Bucket
 
         while _queue.size() > 0 do
             try
-                (let request, let handler, let route, let attempts) =
-                    _queue.dequeue()?
-
                 _options.on_error(
-                    RestError(request, "the bucket was disposed of")
+                    RestError(
+                        _queue.dequeue()?.request, "the bucket was disposed of"
+                    )
                 )
             else
                 break
@@ -362,8 +425,7 @@ actor Bucket
 
         while (_requests_remaining > 0) and (_queue.size() > 0) do
             try
-                (let request, let handler, let route, let attempts) =
-                    _queue.dequeue()?
+                let job = _queue.dequeue()?
 
                 _requests_outstanding = _requests_outstanding + 1
                 _requests_remaining = _requests_remaining - 1
@@ -376,20 +438,14 @@ actor Bucket
                 )
 
                 _global_bucket.enqueue(
-                    request,
+                    job.request,
                     {(
                         request': courier.HTTPRequest val,
                         response': courier.HTTPResponse val
                     ) =>
-                        self.on_response_received(
-                            request', response', handler, route, attempts
-                        )
+                        self.on_response_received(response', job)
                     },
-                    {() =>
-                        self.on_request_failed(
-                            request, handler, route, attempts
-                        )
-                    }
+                    {() => self.on_request_failed(job)}
                 )
             else
                 break
@@ -430,17 +486,17 @@ actor Bucket
         _requests_remaining = 1
         _drain()
 
-    be on_request_failed(
-        request: courier.HTTPRequest,
-        handler: RawResponseHandler,
-        route: String,
-        attempts: USize
-    ) =>
+    be on_request_failed(job: _QueuedRequest) =>
         if _disposed then
             Debug.out(
                 "[rest/" + _id
                 + "] dropping a failure: the bucket was disposed of"
             )
+
+            _options.on_error(
+                RestError(job.request, "the bucket was disposed of")
+            )
+
             return
         end
 
@@ -448,38 +504,43 @@ actor Bucket
 
         _requests_outstanding = _requests_outstanding - 1
 
-        _retry(request, handler, route, attempts, "it never came back")
+        if not _retry(job, "it never came back") then
+            _options.on_error(
+                RestError(
+                    job.request,
+                    "it never came back, and gave up after "
+                    + RestConstants.max_attempts().string() + " attempt(s)"
+                )
+            )
+        end
 
         _drain()
 
-    be _requeue(
-        request: courier.HTTPRequest,
-        handler: RawResponseHandler,
-        route: String,
-        attempts: USize
-    ) =>
+    be _requeue(job: _QueuedRequest) =>
         if _disposed then
             Debug.out(
                 "[rest/" + _id
                 + "] abandoning a retry: the bucket was disposed of"
             )
+
+            _options.on_error(
+                RestError(job.request, "the bucket was disposed of")
+            )
+
             return
         end
 
         Debug.out(
-            "[rest/" + _id + "] retrying " + request.method.string() + " "
-            + request.path
+            "[rest/" + _id + "] retrying " + job.request.method.string() + " "
+            + job.request.path
         )
 
-        _queue.enqueue_at_beginning((request, handler, route, attempts))
+        _queue.enqueue_at_beginning(job)
         _drain()
 
     be on_response_received(
-        request: courier.HTTPRequest,
-        response: courier.HTTPResponse,
-        handler: RawResponseHandler,
-        route: String,
-        attempts: USize
+        response: courier.HTTPResponse val,
+        job: _QueuedRequest
     ) =>
         if _disposed then
             Debug.out(
@@ -498,7 +559,10 @@ actor Bucket
             match rate_limit'.bucket
             | let hash: String =>
                 _api._bucket_hash_learned(
-                    route, hash, hash + "|" + _MajorParameter(request), _id
+                    job.route,
+                    hash,
+                    hash + "|" + _MajorParameter(job.request),
+                    _id
                 )
             end
         end
@@ -535,13 +599,28 @@ actor Bucket
         end
 
         if response.status == 429 then
-            Debug.out(
-                "[rest/" + _id + "] 429 on " + request.method.string() + " "
-                + request.path + ", putting it back at the front of the queue"
-            )
+            let throttled = job.rate_limit_attempts + 1
+            let giving_up =
+                throttled >= RestConstants.max_rate_limit_attempts()
 
-            _queue.enqueue_at_beginning((request, handler, route, attempts))
             _requests_remaining = 0
+
+            if giving_up then
+                Debug.out(
+                    "[rest/" + _id + "] 429 on " + job.request.method.string()
+                    + " " + job.request.path + " for the " + throttled.string()
+                    + " time, handing it to the caller rather than waiting on "
+                    + "a limit that is not lifting"
+                )
+            else
+                Debug.out(
+                    "[rest/" + _id + "] 429 on " + job.request.method.string()
+                    + " " + job.request.path
+                    + ", putting it back at the front of the queue"
+                )
+
+                _queue.enqueue_at_beginning(job.throttled())
+            end
 
             if _IsGlobalRateLimit(response.headers) then
                 Debug.out(
@@ -560,14 +639,13 @@ actor Bucket
                     + "] the 429 is route-scoped, only this bucket rests"
                 )
             end
+
+            if giving_up then job.handler(job.request, response) end
         else
             let retrying =
                 _IsRetriable(response.status)
                     and _retry(
-                        request,
-                        handler,
-                        route,
-                        attempts,
+                        job,
                         "Discord answered " + response.status.string() + " "
                         + response.reason
                     )
@@ -575,52 +653,42 @@ actor Bucket
             if not retrying then
                 Debug.out(
                     "[rest/" + _id + "] handing " + response.status.string()
-                    + " on "
-                    + request.method.string() + " " + request.path
-                    + " to the caller"
+                    + " on " + job.request.method.string() + " "
+                    + job.request.path + " to the caller"
                 )
-                handler(request, response)
+                job.handler(job.request, response)
             end
         end
 
         _drain()
 
-    fun ref _retry(
-        request: courier.HTTPRequest,
-        handler: RawResponseHandler,
-        route: String,
-        attempts: USize,
-        reason: String
-    ): Bool =>
-        let attempts' = attempts + 1
+    fun ref _retry(job: _QueuedRequest, reason: String): Bool =>
+        let retried = job.retried()
 
-        if attempts' >= RestConstants.max_attempts() then
+        if retried.attempts >= RestConstants.max_attempts() then
             Debug.out(
-                "[rest/" + _id + "] giving up on " + request.method.string()
-                + " " + request.path + " after " + attempts'.string()
-                + " attempt(s): " + reason
+                "[rest/" + _id + "] giving up on "
+                + job.request.method.string() + " " + job.request.path
+                + " after " + retried.attempts.string() + " attempt(s): "
+                + reason
             )
 
             return false
         end
 
-        let delay = _Backoff(attempts', _rand.real())
+        let delay = _Backoff(retried.attempts, _rand.real())
 
         Debug.out(
-            "[rest/" + _id + "] " + request.method.string() + " "
-            + request.path + " goes again in " + (delay / 1_000_000).string()
-            + "ms, attempt " + (attempts' + 1).string() + " of "
+            "[rest/" + _id + "] " + job.request.method.string() + " "
+            + job.request.path + " goes again in "
+            + (delay / 1_000_000).string() + "ms, attempt "
+            + (retried.attempts + 1).string() + " of "
             + RestConstants.max_attempts().string() + ": " + reason
         )
 
         let self: Bucket tag = this
         _timers(
-            time.Timer(
-                _Elapsed(
-                    {() => self._requeue(request, handler, route, attempts')}
-                ),
-                delay
-            )
+            time.Timer(_Elapsed({() => self._requeue(retried)}), delay)
         )
 
         true

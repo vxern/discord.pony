@@ -34,6 +34,31 @@ primitive _Redacted
             safe
         end
 
+primitive _RedactedPath
+    """
+    Masks the webhook and interaction tokens a path carries, which stand in for
+    the credential just as the header does.
+    """
+
+    fun apply(path: String val): String val =>
+        let segments: Array[String] ref = path.split_by("/")
+        var redacted = false
+
+        for (index, segment) in segments.pairs() do
+            if
+                (segment == "webhooks") or (segment == "interactions")
+            then
+                try
+                    segments(index + 2)? = "*"
+                    redacted = true
+                end
+            end
+        end
+
+        if not redacted then return path end
+
+        "/".join(segments.values())
+
 class val RestError
     let request: courier.HTTPRequest val
     let reason: String
@@ -41,7 +66,7 @@ class val RestError
     new val create(request': courier.HTTPRequest val, reason': String) =>
         request = courier.HTTPRequest(
             request'.method,
-            request'.path,
+            _RedactedPath(request'.path),
             _Redacted(request'.headers),
             request'.body
         )
@@ -217,21 +242,36 @@ actor RestApi
 
         _hashes(route) = hash
 
-        if (from_id == key) or _buckets.contains(key) then return end
+        if from_id == key then return end
 
-        match try _buckets(from_id)? end
-        | let bucket: Bucket =>
+        let source =
+            match try _buckets(from_id)? end
+            | let bucket: Bucket => bucket
+            else
+                return
+            end
+
+        match try _buckets(key)? end
+        | let target: Bucket =>
+            Debug.out(
+                "[rest] bucket " + from_id + " shares a limit with " + key
+                + ", handing its queue over rather than running both"
+            )
+
+            source.migrate_to(target)
+        else
             Debug.out(
                 "[rest] moving bucket " + from_id + " to " + key
                 + " rather than opening a second one for the same limit"
             )
 
-            _buckets(key) = bucket
-            _bucket_used(key) = time.Time.nanos()
-
-            try _buckets.remove(from_id)? end
-            try _bucket_used.remove(from_id)? end
+            _buckets(key) = source
         end
+
+        _bucket_used(key) = time.Time.nanos()
+
+        try _buckets.remove(from_id)? end
+        try _bucket_used.remove(from_id)? end
 
     be _sender_idle(sender: _RequestSender tag) =>
         if _disposed then return end
@@ -476,6 +516,17 @@ actor _RequestSender is courier.HTTPClientConnectionActor
             return
         end
 
+        if _job isnt None then
+            Debug.out(
+                "[rest] " + job.request.method.string() + " "
+                + job.request.path
+                + " landed on a connection already working on one, handing it "
+                + "back"
+            )
+            job.on_failure()
+            return
+        end
+
         _job = job
 
         if _connected then _write() end
@@ -629,6 +680,18 @@ primitive RestConstants
     fun max_queued_requests_per_bucket(): USize => 1_000
 
     fun max_attempts(): USize => 3
+
+    fun max_rate_limit_attempts(): USize =>
+        """
+        How many times a request is put back after a 429 before the status is
+        handed to the caller instead.
+
+        A 429 is not the request failing, so it is counted apart from
+        `max_attempts`, but a route that keeps answering 429 however long the
+        bucket rests is not going to start answering anything else.
+        """
+
+        5
 
     fun base_backoff_ms(): U64 => 500
 

@@ -5235,7 +5235,7 @@ actor Routes
             options.build_request(
                 courier.POST,
                 "/interactions/" + interaction_id.string() + "/"
-                + interaction_token + "/callback" where query =
+                + _PathSegment(interaction_token) + "/callback" where query =
                     _WithQueryParam.only("with_response", false),
                 body = _WithFiles(
                     json.JsonPrinter.print(params.to_json()), files
@@ -5266,7 +5266,7 @@ actor Routes
             options.build_request(
                 courier.POST,
                 "/interactions/" + interaction_id.string() + "/"
-                + interaction_token + "/callback" where query =
+                + _PathSegment(interaction_token) + "/callback" where query =
                     _WithQueryParam.only("with_response", true),
                 body = _WithFiles(
                     json.JsonPrinter.print(params.to_json()), files
@@ -5294,7 +5294,7 @@ actor Routes
             options.build_request(
                 courier.GET,
                 "/webhooks/" + application_id.string() + "/"
-                + interaction_token + "/messages/@original" where query =
+                + _PathSegment(interaction_token) + "/messages/@original" where query =
                     params.to_query()
             ),
             _Decode.entity[Message](handler, options.on_error)
@@ -5318,7 +5318,7 @@ actor Routes
             options.build_request(
                 courier.PATCH,
                 "/webhooks/" + application_id.string() + "/"
-                + interaction_token + "/messages/@original" where query =
+                + _PathSegment(interaction_token) + "/messages/@original" where query =
                     params.to_query(),
                 body = _WithFiles(
                     json.JsonPrinter.print(params.to_json()), files
@@ -5343,7 +5343,7 @@ actor Routes
             options.build_request(
                 courier.DELETE,
                 "/webhooks/" + application_id.string() + "/"
-                + interaction_token + "/messages/@original"
+                + _PathSegment(interaction_token) + "/messages/@original"
             ),
             _Decode.empty(handler, options.on_error)
         )
@@ -5386,7 +5386,7 @@ actor Routes
             options.build_request(
                 courier.POST,
                 "/webhooks/" + application_id.string() + "/"
-                + interaction_token where query =
+                + _PathSegment(interaction_token) where query =
                     params.to_query(),
                 body = _WithFiles(
                     json.JsonPrinter.print(params.to_json()), files
@@ -5413,7 +5413,7 @@ actor Routes
             options.build_request(
                 courier.GET,
                 "/webhooks/" + application_id.string() + "/"
-                + interaction_token + "/messages/"
+                + _PathSegment(interaction_token) + "/messages/"
                 + message_id.string() where query =
                     params.to_query()
             ),
@@ -5439,7 +5439,7 @@ actor Routes
             options.build_request(
                 courier.PATCH,
                 "/webhooks/" + application_id.string() + "/"
-                + interaction_token + "/messages/"
+                + _PathSegment(interaction_token) + "/messages/"
                 + message_id.string() where query =
                     params.to_query(),
                 body = _WithFiles(
@@ -5466,7 +5466,7 @@ actor Routes
             options.build_request(
                 courier.DELETE,
                 "/webhooks/" + application_id.string() + "/"
-                + interaction_token + "/messages/" + message_id.string()
+                + _PathSegment(interaction_token) + "/messages/" + message_id.string()
             ),
             _Decode.empty(handler, options.on_error)
         )
