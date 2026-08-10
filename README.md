@@ -8,7 +8,29 @@
 - Gateway - v10
 - Voice - Unsupported!
 
-## REST Endpoints
+## REST
+
+### Transport
+
+- ✅ Connection reuse, with a pool of up to 20 keep-alive connections
+    - ✅ Requests held back when every connection is busy, and handed on as one comes free
+- ✅ Timeouts
+    - ✅ 15s on the connect and the TLS handshake
+    - ✅ 30s on the response, so a connection that goes quiet cannot stall a bucket
+- ✅ Rate limits
+    - ✅ Per-bucket windows, taken from `X-RateLimit-Remaining` and `X-RateLimit-Reset-After`
+    - ✅ Buckets keyed by Discord's own `X-RateLimit-Bucket` hash, scoped by major parameter
+    - ✅ Global 429 handling, pausing every bucket for as long as the response asks for
+    - ✅ 50 requests a second, and the Cloudflare limit of 10,000 in 10 minutes
+- ✅ Retries
+    - ✅ 3 attempts on 500, 502, 503 and 504, and on a request that never comes back
+    - ✅ Exponential backoff with jitter
+- ✅ Bounded queues, 1,000 to a bucket and 10,000 across the client
+- ✅ Idle buckets swept after 10 minutes, so a long-lived client holds no more than it uses
+- ✅ Audit log reasons, on every route that takes one
+- ✅ File uploads, as `multipart/form-data`
+
+### Endpoints
 
 - Application Role Connection Metadata
     - ✅ Get Application Role Connection Metadata Records
@@ -288,10 +310,15 @@
     - ✅ 5 presence updates per 20s
     - ✅ Identify concurrency, taken from `max_concurrency`
 - ✅ 4096-byte payload limit, enforced before the wire
+- ✅ 4 MiB receive limit, and a nesting depth limit checked before a frame is parsed
 - ✅ Bounded send queue, retained across reconnects
 - ✅ Backpressure
 - ✅ Session start limit, checked before identifying
-- ❌ Sharding — a single shard can be identified manually through `shard`, but only one connection is run
+- ✅ Sharding
+    - ✅ Automatic shard count, taken from `Get Gateway Bot`
+    - ✅ Explicit shard count, and running only a subset so the rest can live in other processes
+    - ✅ Identify concurrency shared across shards, bucketed by `shard_id % max_concurrency`
+    - ✅ Guild events routed to the shard that owns the guild
 - ❌ Transport compression (`zlib-stream`, `zstd-stream`)
 - ❌ Payload compression
 - ❌ ETF encoding
