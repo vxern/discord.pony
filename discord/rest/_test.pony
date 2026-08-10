@@ -14,6 +14,9 @@ actor Main is TestList
         test(_TestBucketIdIgnoresQuery)
         test(_TestBucketIdSeparatesMethods)
         test(_TestMajorParameter)
+        test(_TestRedactedPath)
+        test(_TestRestErrorRedacts)
+        test(_TestQueuedRequestCounters)
         test(_TestRateLimitNeedsSomething)
         test(_TestRateLimitFromHeaders)
         test(_TestRateLimitFallsBackToRetryAfter)
@@ -136,6 +139,84 @@ class iso _TestMajorParameter is UnitTest
                 _Fixtures.request(courier.GET, "/api/v10/users/@me")
             )
         )
+
+class iso _TestRedactedPath is UnitTest
+    fun name(): String => "rest/redacted path"
+
+    fun apply(h: TestHelper) =>
+        h.assert_eq[String](
+            "/api/v10/webhooks/123/*",
+            _RedactedPath("/api/v10/webhooks/123/tokenish")
+        )
+
+        h.assert_eq[String](
+            "/api/v10/webhooks/123/*/messages/@original",
+            _RedactedPath("/api/v10/webhooks/123/tokenish/messages/@original")
+        )
+
+        h.assert_eq[String](
+            "/api/v10/interactions/123/*/callback",
+            _RedactedPath("/api/v10/interactions/123/tokenish/callback")
+        )
+
+        h.assert_eq[String](
+            "/api/v10/channels/123/webhooks",
+            _RedactedPath("/api/v10/channels/123/webhooks")
+        )
+
+        h.assert_eq[String](
+            "/api/v10/users/@me", _RedactedPath("/api/v10/users/@me")
+        )
+
+class iso _TestRestErrorRedacts is UnitTest
+    fun name(): String => "rest/error redacts the credentials"
+
+    fun apply(h: TestHelper) =>
+        let error' = RestError(
+            courier.HTTPRequest(
+                courier.POST,
+                "/api/v10/interactions/123/tokenish/callback",
+                _Fixtures.headers(
+                    [
+                        ("Authorization", "Bot secret")
+                        ("User-Agent", "discord.pony")
+                    ]
+                )
+            ),
+            "nope"
+        )
+
+        h.assert_is[(String | None)](
+            None, error'.request.headers.get("Authorization")
+        )
+        h.assert_eq[USize](1, error'.request.headers.size())
+        h.assert_false(error'.string().contains("secret"))
+        h.assert_false(error'.string().contains("tokenish"))
+
+class iso _TestQueuedRequestCounters is UnitTest
+    fun name(): String => "rest/queued request counts retries apart from 429s"
+
+    fun apply(h: TestHelper) =>
+        let job = _QueuedRequest(
+            _Fixtures.request(courier.GET, "/api/v10/users/@me"),
+            {(
+                request: courier.HTTPRequest val,
+                response: courier.HTTPResponse val
+            ) => None},
+            "GET/api/v10/users/@me"
+        )
+
+        h.assert_eq[USize](0, job.attempts)
+        h.assert_eq[USize](0, job.rate_limit_attempts)
+
+        let retried = job.retried()
+        h.assert_eq[USize](1, retried.attempts)
+        h.assert_eq[USize](0, retried.rate_limit_attempts)
+
+        let throttled = retried.throttled()
+        h.assert_eq[USize](1, throttled.attempts)
+        h.assert_eq[USize](1, throttled.rate_limit_attempts)
+        h.assert_eq[String]("GET/api/v10/users/@me", throttled.route)
 
 class iso _TestRateLimitNeedsSomething is UnitTest
     fun name(): String => "rest/rate_limit/needs a usable header"
