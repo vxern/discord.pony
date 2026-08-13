@@ -70,13 +70,19 @@ class val _Fat is GatewaySendableEvent
 type _Judge is {(TestHelper, Array[USize] val)} val
 
 primitive _Stress
-    fun connection(h: TestHelper, on_error: GatewayErrorHandler): _GatewayConnection =>
-        let routes = rest.Rest(h.env, rest.RestOptions("stress")).routes
+    fun connection(
+        h: TestHelper,
+        on_error: GatewayErrorHandler
+    ): (_GatewayConnection, rest.RestApi) =>
+        let client = rest.Rest(h.env, rest.RestOptions("stress"))
 
-        _GatewayConnection(
-            h.env,
-            GatewayOptions("stress", [] where on_error' = on_error),
-            routes
+        (
+            _GatewayConnection(
+                h.env,
+                GatewayOptions("stress", [] where on_error' = on_error),
+                client.routes
+            ),
+            client.api
         )
 
     fun open(bucket: _GatewayBucket) =>
@@ -317,7 +323,7 @@ class iso _StressBucketBurst is UnitTest
             }
         )
 
-        let connection = _Stress.connection(
+        (let connection, let api) = _Stress.connection(
             h, { (err: GatewayError) => observer.saw(err) }
         )
         let timers = time.Timers
@@ -332,7 +338,7 @@ class iso _StressBucketBurst is UnitTest
 
         _Stress.open(bucket)
 
-        observer.settle(bucket, timers)
+        observer.settle(bucket, timers, api)
 
     fun timed_out(h: TestHelper) => h.fail("the bucket never went quiet")
 
@@ -362,7 +368,7 @@ class iso _StressBucketOrdering is UnitTest
             }
         )
 
-        let connection = _Stress.connection(
+        (let connection, let api) = _Stress.connection(
             h, { (err: GatewayError) => observer.saw(err) }
         )
         let timers = time.Timers
@@ -383,7 +389,7 @@ class iso _StressBucketOrdering is UnitTest
 
         bucket.unthrottle()
 
-        observer.settle(bucket, timers)
+        observer.settle(bucket, timers, api)
 
     fun timed_out(h: TestHelper) => h.fail("the bucket never went quiet")
 
@@ -413,7 +419,7 @@ class iso _StressBucketPresences is UnitTest
             }
         )
 
-        let connection = _Stress.connection(
+        (let connection, let api) = _Stress.connection(
             h, { (err: GatewayError) => observer.saw(err) }
         )
         let timers = time.Timers
@@ -428,7 +434,7 @@ class iso _StressBucketPresences is UnitTest
             index = index + 1
         end
 
-        observer.settle(bucket, timers)
+        observer.settle(bucket, timers, api)
 
     fun timed_out(h: TestHelper) => h.fail("the bucket never went quiet")
 
@@ -475,7 +481,7 @@ class iso _StressBucketHeartbeatBypass is UnitTest
             }
         )
 
-        let connection = _Stress.connection(
+        (let connection, let api) = _Stress.connection(
             h, { (err: GatewayError) => observer.saw(err) }
         )
         let timers = time.Timers
@@ -492,7 +498,7 @@ class iso _StressBucketHeartbeatBypass is UnitTest
 
         bucket.enqueue(_Fat(GatewayOpcodeRequestGuildMembers, marker))
 
-        observer.settle(bucket, timers)
+        observer.settle(bucket, timers, api)
 
     fun timed_out(h: TestHelper) => h.fail("the bucket never went quiet")
 
@@ -522,7 +528,7 @@ class iso _StressBucketIdentifyConcurrency is UnitTest
             }
         )
 
-        let connection = _Stress.connection(
+        (let connection, let api) = _Stress.connection(
             h, { (err: GatewayError) => observer.saw(err) }
         )
         let timers = time.Timers
@@ -534,7 +540,7 @@ class iso _StressBucketIdentifyConcurrency is UnitTest
         bucket.set_identify_concurrency(1)
         bucket.handshake(_Fat(GatewayOpcodeIdentify, 2))
 
-        observer.settle(bucket, timers)
+        observer.settle(bucket, timers, api)
 
     fun timed_out(h: TestHelper) => h.fail("the bucket never went quiet")
 
@@ -546,7 +552,7 @@ class iso _StressConnectionQueueCap is UnitTest
 
         let flood: USize = 200_000
         let counter = _Overflows(h, flood)
-        let connection = _Stress.connection(
+        (let connection, let api) = _Stress.connection(
             h, { (err: GatewayError) => counter.saw(err) }
         )
 
@@ -557,7 +563,7 @@ class iso _StressConnectionQueueCap is UnitTest
             index = index + 1
         end
 
-        counter.settle(connection)
+        counter.settle(connection, api)
 
     fun timed_out(h: TestHelper) => h.fail("the connection never went quiet")
 
@@ -711,7 +717,11 @@ actor _Releases
         | let index: USize => _seen.push(index)
         end
 
-    be settle(bucket: _GatewayBucket, timers: time.Timers) =>
+    be settle(
+        bucket: _GatewayBucket,
+        timers: time.Timers,
+        api: rest.RestApi
+    ) =>
         if _done then return end
 
         _rounds = _rounds + 1
@@ -723,7 +733,7 @@ actor _Releases
 
             timers(
                 time.Timer(
-                    _Elapsed({() => self.settle(bucket, timers)}),
+                    _Elapsed({() => self.settle(bucket, timers, api)}),
                     time.Nanos.from_millis(250)
                 )
             )
@@ -740,6 +750,7 @@ actor _Releases
 
         bucket.dispose()
         timers.dispose()
+        api.dispose()
 
         _h.complete(true)
 
@@ -762,7 +773,7 @@ actor _Overflows
             _recoveries = _recoveries + 1
         end
 
-    be settle(connection: _GatewayConnection) =>
+    be settle(connection: _GatewayConnection, api: rest.RestApi) =>
         if _done then return end
 
         _done = true
@@ -780,5 +791,6 @@ actor _Overflows
         )
 
         connection.dispose()
+        api.dispose()
 
         _h.complete(true)
