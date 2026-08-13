@@ -11,5 +11,8 @@ actor Main
         let bot = discord.Bot(env, discord.RestOptions(token))
 
         bot.rest.routes.get_application(
-            { (application: discord.Application) => env.out.print(application.string()) }
+            {
+                (application: discord.Application) =>
+                    env.out.print(application.string())
+            }
         )
