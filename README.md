@@ -8,6 +8,45 @@ A Pony library for working with Discord's API.
 - Gateway - v10
 - Voice - Unsupported!
 
+## Installation
+
+* Requires ponyc 0.68.0 or later.
+* Install [corral](https://github.com/ponylang/corral)
+* `corral add github.com/vxern/discord.pony.git --version 1.0.0`
+* `corral fetch` to fetch your dependencies
+* `corral run -- ponyc -Dopenssl_3.0.x` to compile your application
+
+discord.pony depends on [ponylang/ssl](https://github.com/ponylang/ssl). It
+requires a C SSL library to be installed. Please see the [ssl installation
+instructions](https://github.com/ponylang/ssl?tab=readme-ov-file#installation)
+for more information.
+
+An SSL version must be selected at compile time, or the build fails with `You
+must select an SSL version to use.` Pass `-Dopenssl_3.0.x`, `-Dopenssl_4.0.x`,
+`-Dopenssl_1.1.x` or `-Dlibressl` to match the library you have installed.
+
+### Packages
+
+The library is split across four packages, and Pony does not re-export across
+package boundaries, so pull in whichever ones you use:
+
+* `use "discord"` for `Bot`, which pairs a REST client with a gateway
+  connection, along with the CDN and message formatting helpers
+* `use "discord/rest"` for `Rest`, `Routes` and `RestOptions`
+* `use "discord/gateway"` for `Gateway`, `Events` and `GatewayOptions`
+* `use "discord/data"` for the Discord objects themselves, such as `Snowflake`,
+  `Message` and `GatewayIntent`
+
+Note that constructing a `Bot` opens a gateway connection straight away. For
+REST-only work, construct a `Rest` on its own.
+
+Working examples live in [examples/](examples/):
+
+```bash
+corral run -- ponyc -Dopenssl_3.0.x -o build ./examples/polls
+./build/polls <bot-token> <channel-id>
+```
+
 ## REST
 
 ### Transport
