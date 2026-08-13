@@ -142,7 +142,7 @@ primitive _Languages
         Discord shows at most 25 choices, and does no filtering of its own.
         """
 
-        let lowered = prefix.lower()
+        let lowered: String val = prefix.lower()
 
         recover val
             let choices = Array[data.ApplicationCommandOptionChoice](25)

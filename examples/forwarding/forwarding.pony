@@ -70,7 +70,7 @@ primitive _Snapshot
         match message.message_snapshots
         | let snapshots: Array[data.MessageSnapshot] val =>
             try
-                let forwarded = snapshots(0)?.message
+                let forwarded = snapshots(0)?
 
                 "it snapshots " + forwarded.content.size().string()
                     + " character(s) and "
