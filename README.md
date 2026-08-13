@@ -1,6 +1,6 @@
 # discord.pony
 
-(WIP) A complete, documented and battle-tested Pony library for working with Discord's API.
+A complete, documented and battle-tested Pony library for working with Discord's API.
 
 ## Features
 
