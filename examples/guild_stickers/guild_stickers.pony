@@ -45,8 +45,8 @@ actor Main
                     where
                         token' = token,
                         on_error' =
-                            {(error: rest.RestError)(err) =>
-                                err.print(error.string())
+                            {(error': rest.RestError)(err) =>
+                                err.print(error'.string())
                             }
                 )
             )
@@ -90,7 +90,13 @@ primitive _Upload
         alongside the json body, so the raw bytes go over the wire as they are.
         """
 
-        let file = files.File.open(files.FilePath(files.FileAuth(auth), path))
+        let file =
+            match files.OpenFile(files.FilePath(files.FileAuth(auth), path))
+            | let opened: files.File => opened
+            else
+                error
+            end
+
         let bytes: Array[U8] val = file.read(file.size())
         let filename =
             try

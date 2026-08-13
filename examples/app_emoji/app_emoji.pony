@@ -33,8 +33,8 @@ actor Main
                     where
                         token' = token,
                         on_error' =
-                            {(error: rest.RestError)(err) =>
-                                err.print(error.string())
+                            {(error': rest.RestError)(err) =>
+                                err.print(error'.string())
                             }
                 )
             )
@@ -84,7 +84,13 @@ primitive _Image
         multipart upload. App emoji are capped at 256 KiB.
         """
 
-        let file = files.File.open(files.FilePath(files.FileAuth(auth), path))
+        let file =
+            match files.OpenFile(files.FilePath(files.FileAuth(auth), path))
+            | let opened: files.File => opened
+            else
+                error
+            end
+
         let bytes = file.read(file.size())
 
         "data:image/png;base64," + base64.Base64.encode(consume bytes)

@@ -22,8 +22,8 @@ actor Main
                     where
                         token' = token,
                         on_error' =
-                            {(error: rest.RestError)(err) =>
-                                err.print(error.string())
+                            {(error': rest.RestError)(err) =>
+                                err.print(error'.string())
                             }
                 )
             )

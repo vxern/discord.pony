@@ -21,8 +21,8 @@ actor Main
                     where
                         token' = token,
                         on_error' =
-                            {(error: rest.RestError)(err) =>
-                                err.print(error.string())
+                            {(error': rest.RestError)(err) =>
+                                err.print(error'.string())
                             }
                 )
             )
@@ -98,8 +98,8 @@ primitive _Tags
 
             match forum.available_tags
             | let tags: Array[data.ForumTag] val =>
-                for tag in tags.values() do
-                    if tag.name == name then ids.push(tag.id) end
+                for available in tags.values() do
+                    if available.name == name then ids.push(available.id) end
                 end
             end
 

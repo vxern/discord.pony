@@ -35,13 +35,13 @@ actor Main
                     where
                         token' = token,
                         on_error' =
-                            {(error: rest.RestError)(err) =>
-                                err.print(error.string())
+                            {(error': rest.RestError)(err) =>
+                                err.print(error'.string())
                             }
                 )
             )
 
-        let until =
+        let deadline =
             if minutes == 0 then
                 data.Null
             else
@@ -58,11 +58,11 @@ actor Main
             guild_id,
             user_id,
             data.UpdateGuildMemberParams(
-                where communication_disabled_until' = until
+                where communication_disabled_until' = deadline
             ),
             {(member: data.GuildMember)(out) =>
                 match member.communication_disabled_until
-                | let until': data.ISO8601 => out.print("timed out until " + until')
+                | let at: data.ISO8601 => out.print("timed out until " + at)
                 else
                     out.print("timeout lifted")
                 end
