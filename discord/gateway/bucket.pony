@@ -109,6 +109,7 @@ actor _GatewayBucket
         _heartbeats.spend(now)
         _commands.spend(now)
         _connection._raw_send(event)
+        _connection._heartbeat_sent()
 
     be set_heartbeat_interval(interval_ms: U64) =>
         let reserve = _RateLimitConstants.heartbeat_reserve(interval_ms)

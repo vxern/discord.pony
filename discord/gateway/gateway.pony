@@ -285,7 +285,8 @@ primitive GatewayConstants
 
     fun max_receive_nesting_depth(): USize => 64
 
-    fun min_heartbeat_interval_ms(): U64 => 1_000
+    fun min_heartbeat_interval_ms(): U64 =>
+        _RateLimitConstants.min_heartbeat_interval_ms()
 
     fun max_queued_events(): USize => 1_000
 
@@ -925,6 +926,11 @@ actor _GatewayConnection is (mare.WebSocketClientActor & _WantsIdentify)
 
         _send_identify()
 
+    be _heartbeat_sent() =>
+        match _heartbeat
+        | let heartbeat: _GatewayHeartbeat => heartbeat._confirm_send()
+        end
+
     be _heartbeat_dropped(reserve: USize) =>
         Debug.out(
             "[gateway] a heartbeat was dropped to keep inside the command "
@@ -1366,14 +1372,15 @@ actor _GatewayHeartbeat
 
     be _acknowledge() => _awaiting_since = None
 
+    be _confirm_send() =>
+        if _disposed then return end
+
+        if _awaiting_since is None then _awaiting_since = time.Time.nanos() end
+
     be dispose() => _dispose()
 
     fun ref _send() =>
-        let now = time.Time.nanos()
-
-        if _awaiting_since is None then _awaiting_since = now end
-
-        _last_beat_at = now
+        _last_beat_at = time.Time.nanos()
         _connection._send_heartbeat()
 
     fun ref _dispose() =>

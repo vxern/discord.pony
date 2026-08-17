@@ -59,12 +59,24 @@ primitive _RateLimitConstants
     fun identify_window(max_concurrency: USize = 1): _RateLimitWindow =>
         _RateLimitWindow(max_concurrency.max(1), 5 * 1000)
 
+    fun heartbeat_window_ms(): U64 => 60 * 1000
+
+    fun max_heartbeat_reserve(): USize => 20
+
     fun heartbeat_window(reserve: USize): _RateLimitWindow =>
-        _RateLimitWindow(reserve, 60 * 1000)
+        _RateLimitWindow(reserve, heartbeat_window_ms().usize())
+
+    fun heartbeats_per_window(interval_ms: U64): U64 =>
+        (heartbeat_window_ms() + (interval_ms - 1)) / interval_ms
 
     fun heartbeat_reserve(interval_ms: U64 = 0): USize =>
         if interval_ms == 0 then return 5 end
 
-        let per_window = ((60 * 1000) + (interval_ms - 1)) / interval_ms
+        (heartbeats_per_window(interval_ms) * 2)
+            .usize()
+            .min(max_heartbeat_reserve())
 
-        (per_window * 2).usize().min(20)
+    fun min_heartbeat_interval_ms(): U64 =>
+        let reserve = max_heartbeat_reserve().u64()
+
+        (heartbeat_window_ms() + (reserve - 1)) / reserve
