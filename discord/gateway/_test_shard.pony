@@ -93,6 +93,12 @@ class iso _StressShardSet is UnitTest
 
         h.assert_eq[USize](1, GatewayShardSet(0).count, "a set is never empty")
 
+        h.assert_eq[USize](
+            GatewayConstants.max_shards(),
+            GatewayShardSet(USize.max_value()).count,
+            "a set never grows past the cap"
+        )
+
 class iso _StressIdentifyGateConcurrent is UnitTest
     fun name(): String => "stress/shard/identify_gate_concurrent"
 

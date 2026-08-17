@@ -13,6 +13,7 @@ actor Main is TestList
         test(_TestFormattingTimestamp)
         test(_TestFormattingGuildNavigation)
         test(_TestPermissionRoundTrip)
+        test(_TestGatewayBotInfoBounds)
 
 class iso _TestFormattingMentions is UnitTest
     fun name(): String => "formatting/mentions"
@@ -101,4 +102,51 @@ class iso _TestPermissionRoundTrip is UnitTest
             let obj = overwrite.to_json()
             h.assert_eq[String](bits, obj("allow")? as String)
             h.assert_eq[String](bits, obj("deny")? as String)
+        end
+
+class iso _TestGatewayBotInfoBounds is UnitTest
+    fun name(): String => "data/gateway_bot_info_bounds"
+
+    fun apply(h: TestHelper) ? =>
+        let limit = json.JsonObject
+            .update("total", I64(1000))
+            .update("remaining", I64(999))
+            .update("reset_after", I64(64_800_000))
+            .update("max_concurrency", I64(16))
+
+        let info =
+            data.GatewayBotInfo.from_json(
+                json.JsonObject
+                    .update("url", "wss://gateway.discord.gg")
+                    .update("shards", I64(9))
+                    .update("session_start_limit", limit)
+            )?
+
+        h.assert_eq[USize](9, info.shards)
+        h.assert_eq[USize](999, info.session_start_limit.remaining)
+        h.assert_eq[USize](16, info.session_start_limit.max_concurrency)
+
+        h.assert_error(
+            {() ? =>
+                data.GatewayBotInfo.from_json(
+                    json.JsonObject
+                        .update("url", "wss://gateway.discord.gg")
+                        .update("shards", I64(-1))
+                        .update("session_start_limit", limit)
+                )?
+            },
+            "a negative shard count must not decode"
+        )
+
+        for key in ["total"; "remaining"; "reset_after"; "max_concurrency"]
+            .values()
+        do
+            h.assert_error(
+                {() ? =>
+                    data.SessionStartLimit.from_json(
+                        limit.update(key, I64(-1))
+                    )?
+                },
+                "a negative " + key + " must not decode"
+            )
         end

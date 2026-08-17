@@ -290,6 +290,11 @@ primitive GatewayConstants
 
     fun max_queued_events(): USize => 1_000
 
+    fun max_shards(): USize => 16_384
+
+    fun max_identify_concurrency(): USize =>
+        _RateLimitConstants.max_identify_concurrency()
+
     fun base_backoff_ms(): U64 => 2_000
 
     fun max_backoff_exponent(): USize => 5

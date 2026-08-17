@@ -8,7 +8,7 @@ class val GatewayShardSet
     let ids: Array[USize] val
 
     new val create(count': USize, ids': (Array[USize] val | None) = None) =>
-        let total = count'.max(1)
+        let total = count'.max(1).min(GatewayConstants.max_shards())
 
         count = total
         ids =
@@ -73,14 +73,17 @@ actor _GatewayIdentifyGate
         _widen(concurrency)
 
     be set_concurrency(concurrency: USize) =>
-        if concurrency <= _buckets.size() then return end
+        let wanted =
+            concurrency.max(1).min(GatewayConstants.max_identify_concurrency())
+
+        if wanted <= _buckets.size() then return end
 
         Debug.out(
-            "[gateway/shards] the identify limit is now " + concurrency.string()
+            "[gateway/shards] the identify limit is now " + wanted.string()
             + " at a time, was " + _buckets.size().string()
         )
 
-        _widen(concurrency)
+        _widen(wanted)
 
     be set_session_limit(remaining: USize, total: USize, reset_after: U64) =>
         _budget = remaining
@@ -191,7 +194,10 @@ actor _GatewayIdentifyGate
         )
 
     fun ref _widen(concurrency: USize) =>
-        while _buckets.size() < concurrency.max(1) do
+        let wanted =
+            concurrency.max(1).min(GatewayConstants.max_identify_concurrency())
+
+        while _buckets.size() < wanted do
             _buckets.push(_IdentifyBucket)
         end
 

@@ -39,6 +39,27 @@ trait val ToJsonableArray is Stringable
 
 trait val Jsonable is (ToJsonable & FromJsonable)
 
+primitive _Unsigned
+    fun usize(value: json.JsonValue): USize ? =>
+        """
+        Decodes a non-negative integer that fits in a `USize`.
+        """
+
+        let integer = value as I64
+        if (integer < 0) or (integer.u64() > USize.max_value().u64()) then
+            error
+        end
+        integer.usize()
+
+    fun u64(value: json.JsonValue): U64 ? =>
+        """
+        Decodes a non-negative integer that fits in a `U64`.
+        """
+
+        let integer = value as I64
+        if integer < 0 then error end
+        integer.u64()
+
 primitive _CommaSeparated
     fun apply(ids: Array[Snowflake] val): String =>
         var buffer = recover iso String end

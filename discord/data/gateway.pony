@@ -71,7 +71,7 @@ class val GatewayBotInfo is Jsonable
         for (key, value) in obj.pairs() do
             match key
             | "url" => url' = value as String
-            | "shards" => shards' = (value as I64).usize()
+            | "shards" => shards' = _Unsigned.usize(value)?
             | "session_start_limit" =>
                 session_start_limit' =
                     SessionStartLimit.from_json(value as json.JsonObject)?
@@ -132,10 +132,10 @@ class val SessionStartLimit is Jsonable
 
         for (key, value) in obj.pairs() do
             match key
-            | "total" => total' = (value as I64).usize()
-            | "remaining" => remaining' = (value as I64).usize()
-            | "reset_after" => reset_after' = (value as I64).u64()
-            | "max_concurrency" => max_concurrency' = (value as I64).usize()
+            | "total" => total' = _Unsigned.usize(value)?
+            | "remaining" => remaining' = _Unsigned.usize(value)?
+            | "reset_after" => reset_after' = _Unsigned.u64(value)?
+            | "max_concurrency" => max_concurrency' = _Unsigned.usize(value)?
             end
         end
 

@@ -56,8 +56,12 @@ primitive _RateLimitConstants
 
     fun presence_window(): _RateLimitWindow => _RateLimitWindow(5, 20 * 1000)
 
+    fun max_identify_concurrency(): USize => 64
+
     fun identify_window(max_concurrency: USize = 1): _RateLimitWindow =>
-        _RateLimitWindow(max_concurrency.max(1), 5 * 1000)
+        _RateLimitWindow(
+            max_concurrency.max(1).min(max_identify_concurrency()), 5 * 1000
+        )
 
     fun heartbeat_window_ms(): U64 => 60 * 1000
 
