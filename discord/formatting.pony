@@ -7,7 +7,7 @@ primitive Formatting
     mentioning users and channels.
     """
 
-    fun user(id: data.Snowflake): String => "<@" + id.string() + ">"
+    fun user(id: data.Snowflake): String =>
         """
         Using the markdown for users or roles will mention the target(s), and
         notify them depending on the sender’s permissions as well as the value
@@ -15,8 +15,9 @@ primitive Formatting
 
         Example: <@80351110224678912>
         """
+        "<@" + id.string() + ">"
 
-    fun member(id: data.Snowflake): String => "<@!" + id.string() + ">"
+    fun member(id: data.Snowflake): String =>
         """
         Deprecated: Discord no longer distinguishes `<@!id>` from `<@id>`. Use
         `user` instead.
@@ -27,13 +28,15 @@ primitive Formatting
 
         Example: <@!80351110224678912>
         """
+        "<@!" + id.string() + ">"
 
-    fun channel(id: data.Snowflake): String => "<#" + id.string() + ">"
+    fun channel(id: data.Snowflake): String =>
         """
         Example: <#103735883630395392>
         """
+        "<#" + id.string() + ">"
 
-    fun role(id: data.Snowflake): String => "<@&" + id.string() + ">"
+    fun role(id: data.Snowflake): String =>
         """
         Using the markdown for users or roles will mention the target(s), and
         notify them depending on the sender’s permissions as well as the value
@@ -41,11 +44,12 @@ primitive Formatting
 
         Example: <@&165511591545143296>
         """
+        "<@&" + id.string() + ">"
 
     fun slash_command(
         command: String,
         id: data.Snowflake
-    ): String => "</" + command + ":" + id.string() + ">"
+    ): String =>
         """
         Example: </airhorn:816437322781949972>
 
@@ -53,36 +57,40 @@ primitive Formatting
 
         Example: </foo group bar:123456789012345678>
         """
+        "</" + command + ":" + id.string() + ">"
 
     fun emoji(
         name: String,
         id: data.Snowflake
-    ): String => "<:" + name + ":" + id.string() + ">"
+    ): String =>
         """
         Standard emoji are currently rendered using Twemoji for Desktop and
         Android while iOS devices use Apple’s native emoji set.
 
         Example: <:mmLol:216154654256398347>
         """
+        "<:" + name + ":" + id.string() + ">"
 
     fun animated_emoji(
         name: String,
         id: data.Snowflake
-    ): String => "<a:" + name + ":" + id.string() + ">"
+    ): String =>
         """
         Example: <a:b1nzy:392938283556143104>
         """
+        "<a:" + name + ":" + id.string() + ">"
 
     fun timestamp(
         timestamp_s: U64,
         style: TimestampStyle val = FormattingDefaults.timestamp_style()
-    ): String => "<t:" + timestamp_s.string() + ":" + style.value() + ">"
+    ): String =>
         """
         Timestamps are expressed in seconds and display the given timestamp in
         the user’s timezone and locale.
 
         Example: <t:1618953630:d>
         """
+        "<t:" + timestamp_s.string() + ":" + style.value() + ">"
 
     fun guild_navigation(
         id: data.Snowflake,
