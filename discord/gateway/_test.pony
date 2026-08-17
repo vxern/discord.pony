@@ -28,6 +28,7 @@ actor Main is TestList
         test(_StressShardSet)
         test(_StressIdentifyGateConcurrent)
         test(_StressIdentifyGateSerial)
+        test(_StressIdentifyGateBudget)
         test(_StressRouteGuild)
         test(_StressRouteBroadcast)
         test(_StressRouteSoundboard)

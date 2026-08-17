@@ -54,11 +54,22 @@ class _IdentifyBucket
 
 actor _GatewayIdentifyGate
     let _timers: time.Timers
+    let _on_error: GatewayErrorHandler
 
     embed _buckets: Array[_IdentifyBucket] = Array[_IdentifyBucket]
 
-    new create(timers: time.Timers, concurrency: USize = 1) =>
+    var _budget: (USize | None) = None
+    var _total: USize = 0
+    var _resets_at: U64 = 0
+    var _reset_scheduled: Bool = false
+
+    new create(
+        timers: time.Timers,
+        concurrency: USize = 1,
+        on_error: GatewayErrorHandler = GatewayDefaults.on_error()
+    ) =>
         _timers = timers
+        _on_error = on_error
         _widen(concurrency)
 
     be set_concurrency(concurrency: USize) =>
@@ -70,6 +81,19 @@ actor _GatewayIdentifyGate
         )
 
         _widen(concurrency)
+
+    be set_session_limit(remaining: USize, total: USize, reset_after: U64) =>
+        _budget = remaining
+        _total = total
+        _resets_at = time.Time.nanos() + time.Nanos.from_millis(reset_after)
+
+        Debug.out(
+            "[gateway/shards] " + remaining.string() + " of " + total.string()
+            + " session start(s) are left, the limit resets in "
+            + reset_after.string() + "ms"
+        )
+
+        _pump_all()
 
     be request(shard_id: USize, connection: _WantsIdentify) =>
         let index = shard_id % _buckets.size()
@@ -92,6 +116,80 @@ actor _GatewayIdentifyGate
 
         _pump(index)
 
+    be _reset() =>
+        _reset_scheduled = false
+
+        _pump_all()
+
+    fun ref _pump_all() =>
+        var index: USize = 0
+
+        while index < _buckets.size() do
+            _pump(index)
+            index = index + 1
+        end
+
+    fun ref _spend(now: U64): Bool =>
+        let left =
+            match _budget
+            | let left': USize => left'
+            else
+                return true
+            end
+
+        if left > 0 then
+            _budget = left - 1
+            return true
+        end
+
+        if now >= _resets_at then
+            Debug.out(
+                "[gateway/shards] the session start limit has reset, so "
+                + "identifies can go out again"
+            )
+
+            if _total > 0 then
+                _budget = _total - 1
+                _resets_at = now
+                    + time.Nanos.from_millis(
+                        GatewayConstants.session_limit_window_ms()
+                    )
+            else
+                _budget = None
+                _resets_at = 0
+            end
+
+            return true
+        end
+
+        _hold(now)
+
+        false
+
+    fun ref _hold(now: U64) =>
+        if _reset_scheduled then return end
+
+        _reset_scheduled = true
+
+        let wait = if _resets_at > now then _resets_at - now else 0 end
+        let left: String = (wait / 1_000_000).string()
+
+        Debug.out(
+            "[gateway/shards] the session start limit of " + _total.string()
+            + " is spent, so identifies are held for " + left + "ms"
+        )
+        _on_error(
+            GatewayError(
+                "the session start limit of " + _total.string()
+                + " is spent, so identifies are held for " + left + "ms"
+            )
+        )
+
+        let self: _GatewayIdentifyGate tag = this
+        _timers(
+            time.Timer(_Elapsed({() => self._reset()}), wait)
+        )
+
     fun ref _widen(concurrency: USize) =>
         while _buckets.size() < concurrency.max(1) do
             _buckets.push(_IdentifyBucket)
@@ -112,6 +210,8 @@ actor _GatewayIdentifyGate
                             or ((now - bucket.last) >= interval)
                     )
             then
+                if not _spend(now) then return end
+
                 let connection = bucket.queue.shift()?
                 bucket.last = now
 

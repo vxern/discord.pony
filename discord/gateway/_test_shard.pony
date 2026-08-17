@@ -206,6 +206,72 @@ class iso _StressIdentifyGateSerial is UnitTest
 
     fun timed_out(h: TestHelper) => h.fail("the gate never handed out its slots")
 
+class iso _StressIdentifyGateBudget is UnitTest
+    fun name(): String => "stress/shard/identify_gate_budget"
+
+    fun exclusion_group(): String => "gate"
+
+    fun apply(h: TestHelper) =>
+        h.long_test(time.Nanos.from_seconds(30))
+
+        let shards: USize = 4
+        let timers = time.Timers
+        let gate = _GatewayIdentifyGate(timers, shards)
+        let watch = _Grants(h, shards, timers)
+
+        gate.set_session_limit(2, 4, 3_000)
+
+        var index: USize = 0
+
+        while index < shards do
+            gate.request(index, _Applicant(index, watch))
+            index = index + 1
+        end
+
+        watch.settle(
+            { (h': TestHelper, at: Array[(USize, U64)] val) =>
+                h'.assert_eq[USize](
+                    4,
+                    at.size(),
+                    "every shard should identify once the limit resets"
+                )
+
+                try
+                    var index': USize = 0
+
+                    while index' < at.size() do
+                        (let shard, let when) = at(index')?
+
+                        h'.log(
+                            "shard " + shard.string() + " identified at "
+                            + when.string() + "ms"
+                        )
+
+                        if index' < 2 then
+                            h'.assert_true(
+                                when < 1_000,
+                                "shard " + shard.string() + " waited "
+                                + when.string() + "ms even though the limit "
+                                + "had a session start to spare"
+                            )
+                        else
+                            h'.assert_true(
+                                when >= 2_800,
+                                "shard " + shard.string() + " identified at "
+                                + when.string() + "ms, spending a session "
+                                + "start the limit did not have"
+                            )
+                        end
+
+                        index' = index' + 1
+                    end
+                end
+            }
+        )
+
+    fun timed_out(h: TestHelper) =>
+        h.fail("the gate never handed out its slots")
+
 type _Verdict is {(TestHelper, Array[(USize, U64)] val)} val
 
 actor _Applicant is _WantsIdentify

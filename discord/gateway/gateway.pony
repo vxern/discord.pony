@@ -42,7 +42,7 @@ actor GatewayApi
         _env = env
         _options = options
         _routes = routes
-        _gate = _GatewayIdentifyGate(_timers)
+        _gate = _GatewayIdentifyGate(_timers where on_error = options.on_error)
 
     be send_message(event: GatewaySendableEvent) =>
         if _disposed then return end
@@ -104,12 +104,15 @@ actor GatewayApi
             + "time"
         )
 
+        _gate.set_session_limit(limit.remaining, limit.total, limit.reset_after)
+
         if limit.remaining < set.ids.size() then
             _options.on_error(
                 GatewayError(
                     set.ids.size().string() + " shard(s) are starting but only "
                     + limit.remaining.string() + " session start(s) are left, "
-                    + "so some shards will not come up"
+                    + "so the rest will wait out the "
+                    + limit.reset_after.string() + "ms until the limit resets"
                 )
             )
         end
@@ -302,6 +305,8 @@ primitive GatewayConstants
 
     fun identify_interval_ms(): U64 => 5_000
 
+    fun session_limit_window_ms(): U64 => 86_400_000
+
 primitive GatewayDefaults
     fun version(): ApiVersion val => ApiVersion10
 
@@ -472,7 +477,7 @@ actor _GatewayConnection is (mare.WebSocketClientActor & _WantsIdentify)
         match _gate
         | let _: _GatewayIdentifyGate =>
             Debug.out(
-                "[gateway] the shard manager owns the session start limit, so "
+                "[gateway] the identify gate holds the session start limit, so "
                 + "dialling straight out"
             )
             _dial(GatewayConstants.base_url())
