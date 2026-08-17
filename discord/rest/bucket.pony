@@ -373,7 +373,7 @@ actor Bucket
                 + " outstanding"
             )
 
-            _api._bucket_busy(_id)
+            _api._bucket_busy(this)
 
             return
         end
@@ -381,7 +381,7 @@ actor Bucket
         Debug.out("[rest/" + _id + "] idle, letting the bucket go")
 
         _disposed = true
-        _api._bucket_swept(_id)
+        _api._bucket_swept(this)
 
     be dispose() =>
         Debug.out(

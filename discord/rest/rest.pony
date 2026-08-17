@@ -341,20 +341,26 @@ actor RestApi
             )
         end
 
-    be _bucket_busy(id: String) =>
+    be _bucket_busy(bucket: Bucket tag) =>
         if _disposed then return end
 
-        _bucket_used(id) = time.Time.nanos()
+        match _key_of(bucket)
+        | let id: String => _bucket_used(id) = time.Time.nanos()
+        end
 
-    be _bucket_swept(id: String) =>
+    be _bucket_swept(bucket: Bucket tag) =>
         if _disposed then return end
 
-        try _buckets.remove(id)? end
-        try _bucket_used.remove(id)? end
+        match _key_of(bucket)
+        | let id: String =>
+            try _buckets.remove(id)? end
+            try _bucket_used.remove(id)? end
 
-        Debug.out(
-            "[rest] a bucket went away, " + _buckets.size().string() + " left"
-        )
+            Debug.out(
+                "[rest] a bucket went away, " + _buckets.size().string()
+                + " left"
+            )
+        end
 
     be _raw_send_request(
         request: courier.HTTPRequest val,
@@ -391,6 +397,13 @@ actor RestApi
             )
             on_failure()
         end
+
+    fun _key_of(bucket: Bucket tag): (String | None) =>
+        for (id, bucket') in _buckets.pairs() do
+            if bucket' is bucket then return id end
+        end
+
+        None
 
     fun _bucket_key(route: String, request: courier.HTTPRequest val): String =>
         try
