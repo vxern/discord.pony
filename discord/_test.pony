@@ -1,4 +1,5 @@
 use "pony_test"
+use json = "json"
 use data = "./data"
 
 actor Main is TestList
@@ -11,6 +12,7 @@ actor Main is TestList
         test(_TestFormattingCommandsAndEmoji)
         test(_TestFormattingTimestamp)
         test(_TestFormattingGuildNavigation)
+        test(_TestPermissionRoundTrip)
 
 class iso _TestFormattingMentions is UnitTest
     fun name(): String => "formatting/mentions"
@@ -73,3 +75,30 @@ class iso _TestFormattingGuildNavigation is UnitTest
                 GuildNavigationTypeLinkedRolesWithId(id)
             )
         )
+
+class iso _TestPermissionRoundTrip is UnitTest
+    fun name(): String => "data/permission_round_trip"
+
+    fun apply(h: TestHelper) ? =>
+        let bit_sets =
+            [
+                "0"
+                "8"
+                "140737488355328"
+                "9223372036854775808"
+                "18446744073709551615"
+            ]
+
+        for bits in bit_sets.values() do
+            let overwrite =
+                data.PermissionOverwrite.from_json(
+                    json.JsonObject
+                        .update("id", "80351110224678912")
+                        .update("type", I64(0))
+                        .update("allow", bits)
+                        .update("deny", bits)
+                )?
+            let obj = overwrite.to_json()
+            h.assert_eq[String](bits, obj("allow")? as String)
+            h.assert_eq[String](bits, obj("deny")? as String)
+        end

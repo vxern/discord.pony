@@ -418,6 +418,13 @@ primitive BypassSlowmodePermission is Permission
     """
 
     fun value(): U8 => 52
+class val UnknownPermission is Permission
+    let _value: U8
+
+    new val create(value': U8) =>
+        _value = value'
+
+    fun value(): U8 => _value
 primitive Permissions
     fun from(value: U8): Permission ? =>
         match value
@@ -492,7 +499,13 @@ primitive _Permissions
             var shift: U8 = 0
             while shift < 64 do
                 if (bits and (U64(1) << shift.u64())) != 0 then
-                    try permissions.push(Permissions.from(shift)?) end
+                    permissions.push(
+                        try
+                            Permissions.from(shift)?
+                        else
+                            UnknownPermission(shift)
+                        end
+                    )
                 end
                 shift = shift + 1
             end
@@ -892,6 +905,13 @@ primitive InPromptRoleFlag is RoleFlag
     """
 
     fun value(): U8 => 0
+class val UnknownRoleFlag is RoleFlag
+    let _value: U8
+
+    new val create(value': U8) =>
+        _value = value'
+
+    fun value(): U8 => _value
 primitive RoleFlags
     fun from(value: U8): RoleFlag ? =>
         match value
@@ -906,7 +926,13 @@ primitive _RoleFlags
             var shift: U8 = 0
             while shift < 64 do
                 if (bits and (U64(1) << shift.u64())) != 0 then
-                    try flags.push(RoleFlags.from(shift)?) end
+                    flags.push(
+                        try
+                            RoleFlags.from(shift)?
+                        else
+                            UnknownRoleFlag(shift)
+                        end
+                    )
                 end
                 shift = shift + 1
             end

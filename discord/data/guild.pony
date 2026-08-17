@@ -1665,6 +1665,13 @@ primitive SuppressRoleSubscriptionPurchaseNotificationRepliesSystemChannelFlag
     """
 
     fun value(): U8 => 5
+class val UnknownSystemChannelFlag is SystemChannelFlag
+    let _value: U8
+
+    new val create(value': U8) =>
+        _value = value'
+
+    fun value(): U8 => _value
 primitive SystemChannelFlags
     fun from(value: U8): SystemChannelFlag ? =>
         match value
@@ -1685,7 +1692,13 @@ primitive _SystemChannelFlags
             var shift: U8 = 0
             while shift < 64 do
                 if (bits and (U64(1) << shift.u64())) != 0 then
-                    try flags.push(SystemChannelFlags.from(shift)?) end
+                    flags.push(
+                        try
+                            SystemChannelFlags.from(shift)?
+                        else
+                            UnknownSystemChannelFlag(shift)
+                        end
+                    )
                 end
                 shift = shift + 1
             end
@@ -2527,6 +2540,13 @@ primitive DMSettingsUpsellAcknowledgedGuildMemberFlag is GuildMemberFlag
     """
 
     fun value(): U8 => 9
+class val UnknownGuildMemberFlag is GuildMemberFlag
+    let _value: U8
+
+    new val create(value': U8) =>
+        _value = value'
+
+    fun value(): U8 => _value
 primitive GuildMemberFlags
     fun from(value: U8): GuildMemberFlag ? =>
         match value
@@ -2549,7 +2569,13 @@ primitive _GuildMemberFlags
             var shift: U8 = 0
             while shift < 64 do
                 if (bits and (U64(1) << shift.u64())) != 0 then
-                    try flags.push(GuildMemberFlags.from(shift)?) end
+                    flags.push(
+                        try
+                            GuildMemberFlags.from(shift)?
+                        else
+                            UnknownGuildMemberFlag(shift)
+                        end
+                    )
                 end
                 shift = shift + 1
             end

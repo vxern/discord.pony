@@ -2068,6 +2068,13 @@ primitive PartyPrivacyVoiceChannelActivityFlag is ActivityFlag
     fun value(): U8 => 7
 primitive EmbeddedActivityFlag is ActivityFlag
     fun value(): U8 => 8
+class val UnknownActivityFlag is ActivityFlag
+    let _value: U8
+
+    new val create(value': U8) =>
+        _value = value'
+
+    fun value(): U8 => _value
 primitive ActivityFlags
     fun from(value: U8): ActivityFlag ? =>
         match value
@@ -2090,7 +2097,13 @@ primitive _ActivityFlags
             var shift: U8 = 0
             while shift < 64 do
                 if (bits and (U64(1) << shift.u64())) != 0 then
-                    try flags.push(ActivityFlags.from(shift)?) end
+                    flags.push(
+                        try
+                            ActivityFlags.from(shift)?
+                        else
+                            UnknownActivityFlag(shift)
+                        end
+                    )
                 end
                 shift = shift + 1
             end

@@ -184,6 +184,13 @@ primitive CanLinkLobbyLobbyMemberFlag is LobbyMemberFlag
     """
 
     fun value(): U8 => 0
+class val UnknownLobbyMemberFlag is LobbyMemberFlag
+    let _value: U8
+
+    new val create(value': U8) =>
+        _value = value'
+
+    fun value(): U8 => _value
 primitive LobbyMemberFlags
     fun from(value: U8): LobbyMemberFlag ? =>
         match value
@@ -198,7 +205,13 @@ primitive _LobbyMemberFlags
             var shift: U8 = 0
             while shift < 64 do
                 if (bits and (U64(1) << shift.u64())) != 0 then
-                    try flags.push(LobbyMemberFlags.from(shift)?) end
+                    flags.push(
+                        try
+                            LobbyMemberFlags.from(shift)?
+                        else
+                            UnknownLobbyMemberFlag(shift)
+                        end
+                    )
                 end
                 shift = shift + 1
             end

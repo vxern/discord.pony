@@ -3182,6 +3182,13 @@ primitive IsAnimatedUnfurledMediaItemFlag is UnfurledMediaItemFlag
     """
 
     fun value(): U8 => 0
+class val UnknownUnfurledMediaItemFlag is UnfurledMediaItemFlag
+    let _value: U8
+
+    new val create(value': U8) =>
+        _value = value'
+
+    fun value(): U8 => _value
 primitive UnfurledMediaItemFlags
     fun from(value: U8): UnfurledMediaItemFlag ? =>
         match value
@@ -3196,7 +3203,13 @@ primitive _UnfurledMediaItemFlags
             var shift: U8 = 0
             while shift < 64 do
                 if (bits and (U64(1) << shift.u64())) != 0 then
-                    try flags.push(UnfurledMediaItemFlags.from(shift)?) end
+                    flags.push(
+                        try
+                            UnfurledMediaItemFlags.from(shift)?
+                        else
+                            UnknownUnfurledMediaItemFlag(shift)
+                        end
+                    )
                 end
                 shift = shift + 1
             end

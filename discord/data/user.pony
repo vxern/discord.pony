@@ -678,6 +678,13 @@ primitive ActiveDeveloperUserFlag is UserFlag
     """
 
     fun value(): U8 => 22
+class val UnknownUserFlag is UserFlag
+    let _value: U8
+
+    new val create(value': U8) =>
+        _value = value'
+
+    fun value(): U8 => _value
 primitive UserFlags
     fun from(value: U8): UserFlag ? =>
         match value
@@ -706,7 +713,13 @@ primitive _UserFlags
             var shift: U8 = 0
             while shift < 64 do
                 if (bits and (U64(1) << shift.u64())) != 0 then
-                    try flags.push(UserFlags.from(shift)?) end
+                    flags.push(
+                        try
+                            UserFlags.from(shift)?
+                        else
+                            UnknownUserFlag(shift)
+                        end
+                    )
                 end
                 shift = shift + 1
             end

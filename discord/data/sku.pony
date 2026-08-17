@@ -185,6 +185,13 @@ primitive UserSubscriptionSKUFlag is SKUFlag
     """
 
     fun value(): U8 => 8
+class val UnknownSKUFlag is SKUFlag
+    let _value: U8
+
+    new val create(value': U8) =>
+        _value = value'
+
+    fun value(): U8 => _value
 primitive SKUFlags
     fun from(value: U8): SKUFlag ? =>
         match value
@@ -201,7 +208,13 @@ primitive _SKUFlags
             var shift: U8 = 0
             while shift < 64 do
                 if (bits and (U64(1) << shift.u64())) != 0 then
-                    try flags.push(SKUFlags.from(shift)?) end
+                    flags.push(
+                        try
+                            SKUFlags.from(shift)?
+                        else
+                            UnknownSKUFlag(shift)
+                        end
+                    )
                 end
                 shift = shift + 1
             end

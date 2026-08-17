@@ -320,6 +320,13 @@ primitive IsApplicationBypassInviteFlag is InviteFlag
     """
 
     fun value(): U8 => 6
+class val UnknownInviteFlag is InviteFlag
+    let _value: U8
+
+    new val create(value': U8) =>
+        _value = value'
+
+    fun value(): U8 => _value
 primitive InviteFlags
     fun from(value: U8): InviteFlag ? =>
         match value
@@ -335,7 +342,13 @@ primitive _InviteFlags
             var shift: U8 = 0
             while shift < 64 do
                 if (bits and (U64(1) << shift.u64())) != 0 then
-                    try flags.push(InviteFlags.from(shift)?) end
+                    flags.push(
+                        try
+                            InviteFlags.from(shift)?
+                        else
+                            UnknownInviteFlag(shift)
+                        end
+                    )
                 end
                 shift = shift + 1
             end

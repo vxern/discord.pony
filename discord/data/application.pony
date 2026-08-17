@@ -1253,6 +1253,13 @@ primitive ApplicationCommandBadgeApplicationFlag is ApplicationFlag
     """
 
     fun value(): U8 => 23
+class val UnknownApplicationFlag is ApplicationFlag
+    let _value: U8
+
+    new val create(value': U8) =>
+        _value = value'
+
+    fun value(): U8 => _value
 primitive ApplicationFlags
     fun from(value: U8): ApplicationFlag ? =>
         match value
@@ -1276,7 +1283,13 @@ primitive _ApplicationFlags
             var shift: U8 = 0
             while shift < 64 do
                 if (bits and (U64(1) << shift.u64())) != 0 then
-                    try flags.push(ApplicationFlags.from(shift)?) end
+                    flags.push(
+                        try
+                            ApplicationFlags.from(shift)?
+                        else
+                            UnknownApplicationFlag(shift)
+                        end
+                    )
                 end
                 shift = shift + 1
             end

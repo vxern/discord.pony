@@ -990,6 +990,13 @@ primitive IsComponentsV2MessageFlag is MessageFlag
     """
 
     fun value(): U8 => 15
+class val UnknownMessageFlag is MessageFlag
+    let _value: U8
+
+    new val create(value': U8) =>
+        _value = value'
+
+    fun value(): U8 => _value
 primitive MessageFlags
     fun from(value: U8): MessageFlag ? =>
         match value
@@ -1016,7 +1023,13 @@ primitive _MessageFlags
             var shift: U8 = 0
             while shift < 64 do
                 if (bits and (U64(1) << shift.u64())) != 0 then
-                    try flags.push(MessageFlags.from(shift)?) end
+                    flags.push(
+                        try
+                            MessageFlags.from(shift)?
+                        else
+                            UnknownMessageFlag(shift)
+                        end
+                    )
                 end
                 shift = shift + 1
             end
@@ -2446,6 +2459,13 @@ primitive IsContentInventoryEntryMessageEmbedFlag is MessageEmbedFlag
     """
 
     fun value(): U8 => 5
+class val UnknownMessageEmbedFlag is MessageEmbedFlag
+    let _value: U8
+
+    new val create(value': U8) =>
+        _value = value'
+
+    fun value(): U8 => _value
 primitive MessageEmbedFlags
     fun from(value: U8): MessageEmbedFlag ? =>
         match value
@@ -2460,7 +2480,13 @@ primitive _MessageEmbedFlags
             var shift: U8 = 0
             while shift < 64 do
                 if (bits and (U64(1) << shift.u64())) != 0 then
-                    try flags.push(MessageEmbedFlags.from(shift)?) end
+                    flags.push(
+                        try
+                            MessageEmbedFlags.from(shift)?
+                        else
+                            UnknownMessageEmbedFlag(shift)
+                        end
+                    )
                 end
                 shift = shift + 1
             end
@@ -2789,6 +2815,13 @@ primitive IsAnimatedMessageEmbedMediaFlag is MessageEmbedMediaFlag
     """
 
     fun value(): U8 => 5
+class val UnknownMessageEmbedMediaFlag is MessageEmbedMediaFlag
+    let _value: U8
+
+    new val create(value': U8) =>
+        _value = value'
+
+    fun value(): U8 => _value
 primitive MessageEmbedMediaFlags
     fun from(value: U8): MessageEmbedMediaFlag ? =>
         match value
@@ -2803,7 +2836,13 @@ primitive _MessageEmbedMediaFlags
             var shift: U8 = 0
             while shift < 64 do
                 if (bits and (U64(1) << shift.u64())) != 0 then
-                    try flags.push(MessageEmbedMediaFlags.from(shift)?) end
+                    flags.push(
+                        try
+                            MessageEmbedMediaFlags.from(shift)?
+                        else
+                            UnknownMessageEmbedMediaFlag(shift)
+                        end
+                    )
                 end
                 shift = shift + 1
             end
@@ -3437,6 +3476,13 @@ primitive IsAnimatedMessageAttachmentFlag is MessageAttachmentFlag
     """
 
     fun value(): U8 => 5
+class val UnknownMessageAttachmentFlag is MessageAttachmentFlag
+    let _value: U8
+
+    new val create(value': U8) =>
+        _value = value'
+
+    fun value(): U8 => _value
 primitive MessageAttachmentFlags
     fun from(value: U8): MessageAttachmentFlag ? =>
         match value
@@ -3455,7 +3501,13 @@ primitive _MessageAttachmentFlags
             var shift: U8 = 0
             while shift < 64 do
                 if (bits and (U64(1) << shift.u64())) != 0 then
-                    try flags.push(MessageAttachmentFlags.from(shift)?) end
+                    flags.push(
+                        try
+                            MessageAttachmentFlags.from(shift)?
+                        else
+                            UnknownMessageAttachmentFlag(shift)
+                        end
+                    )
                 end
                 shift = shift + 1
             end

@@ -1312,6 +1312,13 @@ primitive HideMediaDownloadOptionsChannelFlag is ChannelFlag
     """
 
     fun value(): U8 => 15
+class val UnknownChannelFlag is ChannelFlag
+    let _value: U8
+
+    new val create(value': U8) =>
+        _value = value'
+
+    fun value(): U8 => _value
 primitive ChannelFlags
     fun from(value: U8): ChannelFlag ? =>
         match value
@@ -1328,7 +1335,13 @@ primitive _ChannelFlags
             var shift: U8 = 0
             while shift < 64 do
                 if (bits and (U64(1) << shift.u64())) != 0 then
-                    try flags.push(ChannelFlags.from(shift)?) end
+                    flags.push(
+                        try
+                            ChannelFlags.from(shift)?
+                        else
+                            UnknownChannelFlag(shift)
+                        end
+                    )
                 end
                 shift = shift + 1
             end
