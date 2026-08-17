@@ -1,3 +1,4 @@
+use cli = "cli"
 use data = "../../discord/data"
 use files = "files"
 use rest = "../../discord/rest"
@@ -12,15 +13,15 @@ actor Main
         ) =
             try
                 (
-                    env.args(1)?,
-                    data.Snowflake(env.args(2)?.u64()?),
-                    env.args(3)?,
-                    env.args(4)?
+                    cli.EnvVars(env.vars)("DISCORD_TOKEN")?,
+                    data.Snowflake(env.args(1)?.u64()?),
+                    env.args(2)?,
+                    env.args(3)?
                 )
             else
                 env.err.print(
-                    "usage: guild_stickers <bot-token> <guild-id> <name> "
-                    + "<png-path>"
+                    "usage: DISCORD_TOKEN=<bot-token> guild_stickers "
+                    + "<guild-id> <name> <png-path>"
                 )
                 env.exitcode(1)
                 return

@@ -1,3 +1,4 @@
+use cli = "cli"
 use data = "../../discord/data"
 use discord = "../../discord"
 use gateway = "../../discord/gateway"
@@ -7,9 +8,9 @@ actor Main
     new create(env: Env) =>
         let token =
             try
-                env.args(1)?
+                cli.EnvVars(env.vars)("DISCORD_TOKEN")?
             else
-                env.err.print("usage: user_apps <bot-token>")
+                env.err.print("usage: DISCORD_TOKEN=<bot-token> user_apps")
                 env.exitcode(1)
                 return
             end

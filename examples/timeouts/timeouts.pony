@@ -1,3 +1,4 @@
+use cli = "cli"
 use data = "../../discord/data"
 use rest = "../../discord/rest"
 use time = "time"
@@ -12,15 +13,15 @@ actor Main
         ) =
             try
                 (
-                    env.args(1)?,
+                    cli.EnvVars(env.vars)("DISCORD_TOKEN")?,
+                    data.Snowflake(env.args(1)?.u64()?),
                     data.Snowflake(env.args(2)?.u64()?),
-                    data.Snowflake(env.args(3)?.u64()?),
-                    env.args(4)?.i64()?
+                    env.args(3)?.i64()?
                 )
             else
                 env.err.print(
-                    "usage: timeouts <bot-token> <guild-id> <user-id> "
-                    + "<minutes, or 0 to lift>"
+                    "usage: DISCORD_TOKEN=<bot-token> timeouts <guild-id> "
+                    + "<user-id> <minutes, or 0 to lift>"
                 )
                 env.exitcode(1)
                 return

@@ -1,3 +1,4 @@
+use cli = "cli"
 use data = "../../discord/data"
 use rest = "../../discord/rest"
 
@@ -11,15 +12,15 @@ actor Main
         ) =
             try
                 (
-                    env.args(1)?,
+                    cli.EnvVars(env.vars)("DISCORD_TOKEN")?,
+                    data.Snowflake(env.args(1)?.u64()?),
                     data.Snowflake(env.args(2)?.u64()?),
-                    data.Snowflake(env.args(3)?.u64()?),
-                    data.Snowflake(env.args(4)?.u64()?)
+                    data.Snowflake(env.args(3)?.u64()?)
                 )
             else
                 env.err.print(
-                    "usage: forwarding <bot-token> <from-channel-id> "
-                    + "<message-id> <to-channel-id>"
+                    "usage: DISCORD_TOKEN=<bot-token> forwarding "
+                    + "<from-channel-id> <message-id> <to-channel-id>"
                 )
                 env.exitcode(1)
                 return

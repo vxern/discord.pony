@@ -1,3 +1,4 @@
+use cli = "cli"
 use data = "../../discord/data"
 use rest = "../../discord/rest"
 
@@ -5,9 +6,9 @@ actor Main
     new create(env: Env) =>
         let token =
             try
-                env.args(1)?
+                cli.EnvVars(env.vars)("DISCORD_TOKEN")?
             else
-                env.err.print("usage: monetization <bot-token>")
+                env.err.print("usage: DISCORD_TOKEN=<bot-token> monetization")
                 env.exitcode(1)
                 return
             end

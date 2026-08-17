@@ -1,3 +1,4 @@
+use cli = "cli"
 use data = "../../discord/data"
 use rest = "../../discord/rest"
 
@@ -10,13 +11,14 @@ actor Main
         ) =
             try
                 (
-                    env.args(1)?,
-                    data.Snowflake(env.args(2)?.u64()?),
-                    data.Snowflake(env.args(3)?.u64()?)
+                    cli.EnvVars(env.vars)("DISCORD_TOKEN")?,
+                    data.Snowflake(env.args(1)?.u64()?),
+                    data.Snowflake(env.args(2)?.u64()?)
                 )
             else
                 env.err.print(
-                    "usage: automod <bot-token> <guild-id> <alert-channel-id>"
+                    "usage: DISCORD_TOKEN=<bot-token> automod <guild-id> "
+                    + "<alert-channel-id>"
                 )
                 env.exitcode(1)
                 return

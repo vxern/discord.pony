@@ -1,4 +1,5 @@
 use base64 = "encode/base64"
+use cli = "cli"
 use data = "../../discord/data"
 use files = "files"
 use rest = "../../discord/rest"
@@ -7,9 +8,16 @@ actor Main
     new create(env: Env) =>
         (let token: String, let name: String, let path: String) =
             try
-                (env.args(1)?, env.args(2)?, env.args(3)?)
+                (
+                    cli.EnvVars(env.vars)("DISCORD_TOKEN")?,
+                    env.args(1)?,
+                    env.args(2)?
+                )
             else
-                env.err.print("usage: app_emoji <bot-token> <name> <png-path>")
+                env.err.print(
+                    "usage: DISCORD_TOKEN=<bot-token> app_emoji <name> "
+                    + "<png-path>"
+                )
                 env.exitcode(1)
                 return
             end

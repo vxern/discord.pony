@@ -22,6 +22,8 @@ actor Main is TestList
         test(_StressBucketIdentifyConcurrency)
         test(_StressConnectionQueueCap)
         test(_StressDispatchNameScan)
+        test(_StressDispatchSubscriptions)
+        test(_StressDispatchRegistry)
         test(_StressReceiveNesting)
         test(_StressReceiveStall)
         test(_StressShardFormula)
@@ -598,6 +600,96 @@ class iso _StressDispatchNameScan is UnitTest
                 + "ns per decode attempt"
             )
         end
+
+class iso _StressDispatchSubscriptions is UnitTest
+    fun name(): String => "stress/dispatch/subscriptions"
+
+    fun apply(h: TestHelper) =>
+        let noisy = ["PRESENCE_UPDATE"; "TYPING_START"; "MESSAGE_REACTION_ADD"]
+
+        for event_name in noisy.values() do
+            h.assert_true(
+                _GatewayWanted(event_name, None),
+                event_name + " was skipped before any listener was registered"
+            )
+        end
+
+        let none = recover val collections.Set[String] end
+
+        h.assert_true(
+            _GatewayWanted("READY", none),
+            "READY was skipped, so the session could not be tracked"
+        )
+        h.assert_true(
+            _GatewayWanted("RESUMED", none),
+            "RESUMED was skipped, so the backoff could not be reset"
+        )
+
+        for event_name in noisy.values() do
+            h.assert_false(
+                _GatewayWanted(event_name, none),
+                event_name + " was decoded with nothing listening for it"
+            )
+        end
+
+        let wanted = recover val
+            collections.Set[String] .> set("MESSAGE_CREATE")
+        end
+
+        h.assert_true(
+            _GatewayWanted("MESSAGE_CREATE", wanted),
+            "MESSAGE_CREATE was skipped with a listener registered on it"
+        )
+
+        for event_name in noisy.values() do
+            h.assert_false(
+                _GatewayWanted(event_name, wanted),
+                event_name + " was decoded for a bot listening only for "
+                + "messages"
+            )
+        end
+
+actor _Heard
+    let _h: TestHelper
+    var _count: USize = 0
+
+    new create(h: TestHelper) => _h = h
+
+    be saw() => _count = _count + 1
+
+    be settle(expected: USize, gateway: GatewayApi, api: rest.RestApi) =>
+        _h.assert_eq[USize](
+            expected, _count, "a listener ran a different number of times"
+        )
+
+        gateway.dispose()
+        api.dispose()
+
+        _h.complete(true)
+
+class iso _StressDispatchRegistry is UnitTest
+    fun name(): String => "stress/dispatch/registry"
+
+    fun apply(h: TestHelper) =>
+        h.long_test(time.Nanos.from_seconds(30))
+
+        let client = rest.Rest(h.env, rest.RestOptions("stress"))
+        let gateway = GatewayApi(
+            h.env, GatewayOptions("stress", []), client.routes
+        )
+        let api = client.api
+        let events = Events(gateway)
+        let heard = _Heard(h)
+        let handler: GatewayEventHandler[None] = { (data: None) => heard.saw() }
+
+        events.on_resumed(handler)
+        events._dispatch("RESUMED", None)
+        events.off(handler)
+        events._dispatch("RESUMED", None)
+        events.on_resumed({ (data: None) => heard.settle(1, gateway, api) })
+        events._dispatch("RESUMED", None)
+
+    fun timed_out(h: TestHelper) => h.fail("the dispatcher never ran a listener")
 
 class iso _StressReceiveNesting is UnitTest
     fun name(): String => "stress/receive/nesting"

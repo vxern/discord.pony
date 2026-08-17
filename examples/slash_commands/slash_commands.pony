@@ -1,3 +1,4 @@
+use cli = "cli"
 use data = "../../discord/data"
 use discord = "../../discord"
 use gateway = "../../discord/gateway"
@@ -7,9 +8,15 @@ actor Main
     new create(env: Env) =>
         (let token: String, let guild_id: data.Snowflake) =
             try
-                (env.args(1)?, data.Snowflake(env.args(2)?.u64()?))
+                (
+                    cli.EnvVars(env.vars)("DISCORD_TOKEN")?,
+                    data.Snowflake(env.args(1)?.u64()?)
+                )
             else
-                env.err.print("usage: slash_commands <bot-token> <guild-id>")
+                env.err.print(
+                    "usage: DISCORD_TOKEN=<bot-token> slash_commands "
+                    + "<guild-id>"
+                )
                 env.exitcode(1)
                 return
             end

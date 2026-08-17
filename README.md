@@ -40,11 +40,13 @@ package boundaries, so pull in whichever ones you use:
 Note that constructing a `Bot` opens a gateway connection straight away. For
 REST-only work, construct a `Rest` on its own.
 
-Working examples live in [examples/](examples/):
+Working examples live in [examples/](examples/). Each one reads the bot token
+from the `DISCORD_TOKEN` environment variable, so it never lands in the process
+arguments, where any other user on the machine could read it:
 
 ```bash
 corral run -- ponyc -Dopenssl_3.0.x -o build ./examples/polls
-./build/polls <bot-token> <channel-id>
+DISCORD_TOKEN=<bot-token> ./build/polls <channel-id>
 ```
 
 ## REST

@@ -1,3 +1,4 @@
+use cli = "cli"
 use data = "../../discord/data"
 use rest = "../../discord/rest"
 use time = "time"
@@ -6,9 +7,15 @@ actor Main
     new create(env: Env) =>
         (let token: String, let guild_id: data.Snowflake) =
             try
-                (env.args(1)?, data.Snowflake(env.args(2)?.u64()?))
+                (
+                    cli.EnvVars(env.vars)("DISCORD_TOKEN")?,
+                    data.Snowflake(env.args(1)?.u64()?)
+                )
             else
-                env.err.print("usage: scheduled_events <bot-token> <guild-id>")
+                env.err.print(
+                    "usage: DISCORD_TOKEN=<bot-token> scheduled_events "
+                    + "<guild-id>"
+                )
                 env.exitcode(1)
                 return
             end
