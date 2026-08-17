@@ -189,6 +189,6 @@ class GuildNavigationTypeLinkedRolesWithId is GuildNavigationType
     """
     let id: data.Snowflake
 
-    new apply(id': data.Snowflake) => id = id'
+    new create(id': data.Snowflake) => id = id'
 
     fun value(): String => "linked-roles:" + id.string()

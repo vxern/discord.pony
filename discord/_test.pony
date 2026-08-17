@@ -70,6 +70,6 @@ class iso _TestFormattingGuildNavigation is UnitTest
             "<103735883630395392:linked-roles:103735883630395392>",
             Formatting.guild_navigation(
                 id,
-                GuildNavigationTypeLinkedRolesWithId.apply(id)
+                GuildNavigationTypeLinkedRolesWithId(id)
             )
         )
