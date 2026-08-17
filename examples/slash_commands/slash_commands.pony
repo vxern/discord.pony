@@ -105,7 +105,9 @@ actor Main
                     data.CreateInteractionResponseParams(
                         data.ChannelMessageWithSourceInteractionCallbackType,
                         data.InteractionCallbackMessageParams(
-                            where content' = content
+                            where
+                                content' = content,
+                                allowed_mentions' = data.AllowedMentions.none()
                         )
                     ),
                     {()(out) => out.print("responded")}

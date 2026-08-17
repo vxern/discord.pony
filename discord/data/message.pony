@@ -3667,6 +3667,12 @@ class val AllowedMentions is Jsonable
         users = users'
         replied_user = replied_user'
 
+    new val none() =>
+        parse = recover val Array[AllowedMention] end
+        roles = None
+        users = None
+        replied_user = None
+
     new val from_json(obj: json.JsonObject) ? =>
         var parse': (Array[AllowedMention] val | None) = None
         var roles': (Array[Snowflake] val | None) = None
@@ -4495,7 +4501,7 @@ class val CreateMessageParams is ToJsonable
         nonce': (String | None) = None,
         tts': (Bool | None) = None,
         embeds': (Array[MessageEmbed] val | None) = None,
-        allowed_mentions': (AllowedMentions | None) = None,
+        allowed_mentions': (AllowedMentions | None) = AllowedMentions.none(),
         message_reference': (MessageReference | None) = None,
         components': (Array[Component] val | None) = None,
         sticker_ids': (Array[Snowflake] val | None) = None,
@@ -4629,7 +4635,7 @@ class val ForumThreadMessageParams is ToJsonable
     new val create(
         content': (String | None) = None,
         embeds': (Array[MessageEmbed] val | None) = None,
-        allowed_mentions': (AllowedMentions | None) = None,
+        allowed_mentions': (AllowedMentions | None) = AllowedMentions.none(),
         components': (Array[Component] val | None) = None,
         sticker_ids': (Array[Snowflake] val | None) = None,
         attachments': (Array[MessageAttachmentParams] val | None) = None,

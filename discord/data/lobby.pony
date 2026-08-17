@@ -839,7 +839,7 @@ class val SendLobbyMessageParams is ToJsonable
     new val create(
         content': (String | None) = None,
         metadata': (collections.Map[String, String] val | None) = None,
-        allowed_mentions': (AllowedMentions | None) = None,
+        allowed_mentions': (AllowedMentions | None) = AllowedMentions.none(),
         flags': (Array[MessageFlag] val | None) = None
     ) =>
         content = content'

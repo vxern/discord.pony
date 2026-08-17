@@ -482,7 +482,7 @@ class val ExecuteWebhookParams is ToJsonable
         avatar_url': (String | None) = None,
         tts': (Bool | None) = None,
         embeds': (Array[MessageEmbed] val | None) = None,
-        allowed_mentions': (AllowedMentions | None) = None,
+        allowed_mentions': (AllowedMentions | None) = AllowedMentions.none(),
         components': (Array[Component] val | None) = None,
         attachments': (Array[MessageAttachmentParams] val | None) = None,
         flags': (Array[MessageFlag] val | None) = None,
