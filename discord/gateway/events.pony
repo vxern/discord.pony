@@ -5,17 +5,29 @@ use "debug"
 type GatewayEventHandler[A: Any val] is {(A): (Bool | None)} val
 
 trait _Removable
+    fun ref attach(owner: Events tag)
+
     fun ref remove(handler: Any val)
 
     fun ref clear()
+
+    fun size(): USize
 
 class _Listeners[A: Any val] is _Removable
     embed _order: List[GatewayEventHandler[A]] = List[GatewayEventHandler[A]]
     embed _index: MapIs[Any val, ListNode[GatewayEventHandler[A]]] =
         MapIs[Any val, ListNode[GatewayEventHandler[A]]]
 
+    var _owner: (Events tag | None) = None
+
+    fun ref attach(owner: Events tag) =>
+        _owner = owner
+
+    fun size(): USize => _order.size()
+
     fun ref add(handler: GatewayEventHandler[A]) =>
         if _index.contains(handler) then return end
+        let was_empty = _order.size() == 0
         let node = ListNode[GatewayEventHandler[A]](handler)
         _order.append_node(node)
         _index(handler) = node
@@ -23,6 +35,7 @@ class _Listeners[A: Any val] is _Removable
             "[gateway/events] a listener was added, " + _order.size().string()
             + " now on this event"
         )
+        if was_empty then _resync() end
 
     fun ref remove(handler: Any val) =>
         try
@@ -32,11 +45,19 @@ class _Listeners[A: Any val] is _Removable
                 + _order.size().string()
                 + " now on this event"
             )
+            if _order.size() == 0 then _resync() end
         end
 
     fun ref clear() =>
+        let was_empty = _order.size() == 0
         _index.clear()
         _order.clear()
+        if not was_empty then _resync() end
+
+    fun _resync() =>
+        match _owner
+        | let owner: Events tag => owner._resync()
+        end
 
     fun ref apply(event: A) =>
         Debug.out(
@@ -205,96 +226,121 @@ actor Events
     embed _webhooks_update: _Listeners[WebhooksUpdate] =
         _Listeners[WebhooksUpdate]
 
-    embed _all: Array[_Removable] = Array[_Removable]
+    embed _all: Map[String, _Removable] = Map[String, _Removable]
 
     new create(api: GatewayApi) =>
         _api = api
 
-        _all.push(_ready)
-        _all.push(_resumed)
-        _all.push(_rate_limited)
-        _all.push(_application_command_permissions_update)
-        _all.push(_auto_moderation_rule_create)
-        _all.push(_auto_moderation_rule_update)
-        _all.push(_auto_moderation_rule_delete)
-        _all.push(_auto_moderation_action_execution)
-        _all.push(_channel_create)
-        _all.push(_channel_update)
-        _all.push(_channel_delete)
-        _all.push(_channel_info)
-        _all.push(_channel_pins_update)
-        _all.push(_thread_create)
-        _all.push(_thread_update)
-        _all.push(_thread_delete)
-        _all.push(_thread_list_sync)
-        _all.push(_thread_member_update)
-        _all.push(_thread_members_update)
-        _all.push(_entitlement_create)
-        _all.push(_entitlement_update)
-        _all.push(_entitlement_delete)
-        _all.push(_guild_create)
-        _all.push(_guild_update)
-        _all.push(_guild_delete)
-        _all.push(_guild_audit_log_entry_create)
-        _all.push(_guild_ban_add)
-        _all.push(_guild_ban_remove)
-        _all.push(_guild_emojis_update)
-        _all.push(_guild_stickers_update)
-        _all.push(_guild_integrations_update)
-        _all.push(_guild_member_add)
-        _all.push(_guild_member_remove)
-        _all.push(_guild_member_update)
-        _all.push(_guild_members_chunk)
-        _all.push(_guild_role_create)
-        _all.push(_guild_role_update)
-        _all.push(_guild_role_delete)
-        _all.push(_guild_scheduled_event_create)
-        _all.push(_guild_scheduled_event_update)
-        _all.push(_guild_scheduled_event_delete)
-        _all.push(_guild_scheduled_event_user_add)
-        _all.push(_guild_scheduled_event_user_remove)
-        _all.push(_guild_soundboard_sound_create)
-        _all.push(_guild_soundboard_sound_update)
-        _all.push(_guild_soundboard_sound_delete)
-        _all.push(_guild_soundboard_sounds_update)
-        _all.push(_soundboard_sounds)
-        _all.push(_integration_create)
-        _all.push(_integration_update)
-        _all.push(_integration_delete)
-        _all.push(_interaction_create)
-        _all.push(_invite_create)
-        _all.push(_invite_delete)
-        _all.push(_message_create)
-        _all.push(_message_update)
-        _all.push(_message_delete)
-        _all.push(_message_delete_bulk)
-        _all.push(_message_reaction_add)
-        _all.push(_message_reaction_remove)
-        _all.push(_message_reaction_remove_all)
-        _all.push(_message_reaction_remove_emoji)
-        _all.push(_message_poll_vote_add)
-        _all.push(_message_poll_vote_remove)
-        _all.push(_presence_update)
-        _all.push(_stage_instance_create)
-        _all.push(_stage_instance_update)
-        _all.push(_stage_instance_delete)
-        _all.push(_subscription_create)
-        _all.push(_subscription_update)
-        _all.push(_subscription_delete)
-        _all.push(_typing_start)
-        _all.push(_user_update)
-        _all.push(_voice_channel_effect_send)
-        _all.push(_voice_channel_status_update)
-        _all.push(_voice_channel_start_time_update)
-        _all.push(_voice_state_update)
-        _all.push(_voice_server_update)
-        _all.push(_webhooks_update)
+        _all("READY") = _ready
+        _all("RESUMED") = _resumed
+        _all("RATE_LIMITED") = _rate_limited
+        _all("APPLICATION_COMMAND_PERMISSIONS_UPDATE") =
+            _application_command_permissions_update
+        _all("AUTO_MODERATION_RULE_CREATE") = _auto_moderation_rule_create
+        _all("AUTO_MODERATION_RULE_UPDATE") = _auto_moderation_rule_update
+        _all("AUTO_MODERATION_RULE_DELETE") = _auto_moderation_rule_delete
+        _all("AUTO_MODERATION_ACTION_EXECUTION") =
+            _auto_moderation_action_execution
+        _all("CHANNEL_CREATE") = _channel_create
+        _all("CHANNEL_UPDATE") = _channel_update
+        _all("CHANNEL_DELETE") = _channel_delete
+        _all("CHANNEL_INFO") = _channel_info
+        _all("CHANNEL_PINS_UPDATE") = _channel_pins_update
+        _all("THREAD_CREATE") = _thread_create
+        _all("THREAD_UPDATE") = _thread_update
+        _all("THREAD_DELETE") = _thread_delete
+        _all("THREAD_LIST_SYNC") = _thread_list_sync
+        _all("THREAD_MEMBER_UPDATE") = _thread_member_update
+        _all("THREAD_MEMBERS_UPDATE") = _thread_members_update
+        _all("ENTITLEMENT_CREATE") = _entitlement_create
+        _all("ENTITLEMENT_UPDATE") = _entitlement_update
+        _all("ENTITLEMENT_DELETE") = _entitlement_delete
+        _all("GUILD_CREATE") = _guild_create
+        _all("GUILD_UPDATE") = _guild_update
+        _all("GUILD_DELETE") = _guild_delete
+        _all("GUILD_AUDIT_LOG_ENTRY_CREATE") = _guild_audit_log_entry_create
+        _all("GUILD_BAN_ADD") = _guild_ban_add
+        _all("GUILD_BAN_REMOVE") = _guild_ban_remove
+        _all("GUILD_EMOJIS_UPDATE") = _guild_emojis_update
+        _all("GUILD_STICKERS_UPDATE") = _guild_stickers_update
+        _all("GUILD_INTEGRATIONS_UPDATE") = _guild_integrations_update
+        _all("GUILD_MEMBER_ADD") = _guild_member_add
+        _all("GUILD_MEMBER_REMOVE") = _guild_member_remove
+        _all("GUILD_MEMBER_UPDATE") = _guild_member_update
+        _all("GUILD_MEMBERS_CHUNK") = _guild_members_chunk
+        _all("GUILD_ROLE_CREATE") = _guild_role_create
+        _all("GUILD_ROLE_UPDATE") = _guild_role_update
+        _all("GUILD_ROLE_DELETE") = _guild_role_delete
+        _all("GUILD_SCHEDULED_EVENT_CREATE") = _guild_scheduled_event_create
+        _all("GUILD_SCHEDULED_EVENT_UPDATE") = _guild_scheduled_event_update
+        _all("GUILD_SCHEDULED_EVENT_DELETE") = _guild_scheduled_event_delete
+        _all("GUILD_SCHEDULED_EVENT_USER_ADD") =
+            _guild_scheduled_event_user_add
+        _all("GUILD_SCHEDULED_EVENT_USER_REMOVE") =
+            _guild_scheduled_event_user_remove
+        _all("GUILD_SOUNDBOARD_SOUND_CREATE") =
+            _guild_soundboard_sound_create
+        _all("GUILD_SOUNDBOARD_SOUND_UPDATE") =
+            _guild_soundboard_sound_update
+        _all("GUILD_SOUNDBOARD_SOUND_DELETE") =
+            _guild_soundboard_sound_delete
+        _all("GUILD_SOUNDBOARD_SOUNDS_UPDATE") =
+            _guild_soundboard_sounds_update
+        _all("SOUNDBOARD_SOUNDS") = _soundboard_sounds
+        _all("INTEGRATION_CREATE") = _integration_create
+        _all("INTEGRATION_UPDATE") = _integration_update
+        _all("INTEGRATION_DELETE") = _integration_delete
+        _all("INTERACTION_CREATE") = _interaction_create
+        _all("INVITE_CREATE") = _invite_create
+        _all("INVITE_DELETE") = _invite_delete
+        _all("MESSAGE_CREATE") = _message_create
+        _all("MESSAGE_UPDATE") = _message_update
+        _all("MESSAGE_DELETE") = _message_delete
+        _all("MESSAGE_DELETE_BULK") = _message_delete_bulk
+        _all("MESSAGE_REACTION_ADD") = _message_reaction_add
+        _all("MESSAGE_REACTION_REMOVE") = _message_reaction_remove
+        _all("MESSAGE_REACTION_REMOVE_ALL") = _message_reaction_remove_all
+        _all("MESSAGE_REACTION_REMOVE_EMOJI") = _message_reaction_remove_emoji
+        _all("MESSAGE_POLL_VOTE_ADD") = _message_poll_vote_add
+        _all("MESSAGE_POLL_VOTE_REMOVE") = _message_poll_vote_remove
+        _all("PRESENCE_UPDATE") = _presence_update
+        _all("STAGE_INSTANCE_CREATE") = _stage_instance_create
+        _all("STAGE_INSTANCE_UPDATE") = _stage_instance_update
+        _all("STAGE_INSTANCE_DELETE") = _stage_instance_delete
+        _all("SUBSCRIPTION_CREATE") = _subscription_create
+        _all("SUBSCRIPTION_UPDATE") = _subscription_update
+        _all("SUBSCRIPTION_DELETE") = _subscription_delete
+        _all("TYPING_START") = _typing_start
+        _all("USER_UPDATE") = _user_update
+        _all("VOICE_CHANNEL_EFFECT_SEND") = _voice_channel_effect_send
+        _all("VOICE_CHANNEL_STATUS_UPDATE") = _voice_channel_status_update
+        _all("VOICE_CHANNEL_START_TIME_UPDATE") =
+            _voice_channel_start_time_update
+        _all("VOICE_STATE_UPDATE") = _voice_state_update
+        _all("VOICE_SERVER_UPDATE") = _voice_server_update
+        _all("WEBHOOKS_UPDATE") = _webhooks_update
+
+        for listeners in _all.values() do listeners.attach(this) end
 
     be off(handler: Any val) =>
         for listeners in _all.values() do listeners.remove(handler) end
 
     be clear() =>
         for listeners in _all.values() do listeners.clear() end
+
+    be _resync() =>
+        var names = recover iso Set[String] end
+
+        for (name, listeners) in _all.pairs() do
+            if listeners.size() > 0 then names.set(name) end
+        end
+
+        Debug.out(
+            "[gateway/events] " + names.size().string()
+            + " event(s) now have a listener"
+        )
+
+        _api._subscribed(consume names)
 
     be request_guild_members(event: GatewayRequestGuildMembersEvent) =>
         Debug.out("[gateway/events] requesting guild members")

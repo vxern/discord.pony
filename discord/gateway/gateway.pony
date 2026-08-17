@@ -33,6 +33,7 @@ actor GatewayApi
     embed _pending: Array[GatewaySendableEvent] = Array[GatewaySendableEvent]
 
     var _events: (Events | None) = None
+    var _subscriptions: (collections.Set[String] val | None) = None
     var _count: USize = 1
     var _started: Bool = false
     var _planned: Bool = false
@@ -62,6 +63,15 @@ actor GatewayApi
 
         _deliver(event)
 
+    be _subscribed(names: collections.Set[String] val) =>
+        if _disposed then return end
+
+        _subscriptions = names
+
+        for connection in _shards.values() do
+            connection._subscribed(names)
+        end
+
     be _listen(events: Events) =>
         if _started then return end
 
@@ -73,6 +83,7 @@ actor GatewayApi
             let connection = _GatewayConnection(_env, _options, _routes)
             _shards(0) = connection
             _count = 1
+            _tell_subscriptions(connection)
             connection._listen(events)
             _flush()
         else
@@ -172,12 +183,20 @@ actor GatewayApi
 
             _shards(id) = connection
 
+            _tell_subscriptions(connection)
+
             match _events
             | let events: Events => connection._listen(events)
             end
         end
 
         _flush()
+
+    fun _tell_subscriptions(connection: _GatewayConnection) =>
+        match _subscriptions
+        | let names: collections.Set[String] val =>
+            connection._subscribed(names)
+        end
 
     fun ref _flush() =>
         while _pending.size() > 0 do
@@ -396,6 +415,7 @@ actor _GatewayConnection is (mare.WebSocketClientActor & _WantsIdentify)
 
     var _ws: mare.WebSocketClient = mare.WebSocketClient.none()
     var _events: (Events | None) = None
+    var _subscriptions: (collections.Set[String] val | None) = None
     var _open: Bool = false
     var _sequence_number: (USize | None) = None
     var _session_id: (String | None) = None
@@ -692,6 +712,15 @@ actor _GatewayConnection is (mare.WebSocketClientActor & _WantsIdentify)
                     return
                 end
 
+            if not _GatewayWanted(name, _subscriptions) then
+                Debug.out(
+                    "[gateway] skipping " + name
+                    + ": nothing is listening for it, so its data is left "
+                    + "unread"
+                )
+                return
+            end
+
             let event =
                 try
                     GatewayDispatchEvents.from(name, payload.d)?
@@ -788,6 +817,13 @@ actor _GatewayConnection is (mare.WebSocketClientActor & _WantsIdentify)
         _events = events
 
         if first then _connect() end
+
+    be _subscribed(names: collections.Set[String] val) =>
+        Debug.out(
+            "[gateway] " + names.size().string()
+            + " event(s) are being listened for, the rest will be skipped"
+        )
+        _subscriptions = names
 
     be _send_message(event: GatewaySendableEvent) =>
         Debug.out(

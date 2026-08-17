@@ -1,4 +1,18 @@
+use collections = "collections"
 use time = "time"
+
+primitive _GatewayWanted
+    fun apply(
+        name: String,
+        subscriptions: (collections.Set[String] val | None)
+    ): Bool =>
+        if (name == "READY") or (name == "RESUMED") then return true end
+
+        match subscriptions
+        | let names: collections.Set[String] val => names.contains(name)
+        else
+            true
+        end
 
 primitive _GatewayNesting
     fun within(text: String, limit: USize): Bool =>
