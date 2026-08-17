@@ -2152,6 +2152,8 @@ primitive _ActivityButtons
         """
 
         let array = value as json.JsonArray
+        if array.size() == 0 then return _Strings(value)? end
+
         match array(0)?
         | let _: String => _Strings(value)?
         else
