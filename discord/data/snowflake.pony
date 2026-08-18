@@ -1,12 +1,16 @@
-"""
-https://docs.discord.com/developers/reference#snowflakes
-"""
 use collections = "collections"
 use json = "json"
 
 class val Snowflake is (
     Stringable & collections.Hashable & Equatable[Snowflake]
 )
+    """
+    https://docs.discord.com/developers/reference#snowflakes
+
+    A unique identifier for a Discord object, carrying the time it was created
+    along with the worker, process and sequence number that produced it.
+    """
+
     let value: U64
 
     new val create(value': U64) => value = value'
