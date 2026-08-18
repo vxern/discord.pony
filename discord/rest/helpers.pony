@@ -113,8 +113,8 @@ primitive _HeaderValue
 
 primitive _PathSegment
     """
-    Percent-encodes a caller-supplied path segment, so its content cannot
-    change which route the request lands on.
+    Percent-encodes every byte of a path segment that falls outside the RFC 3986
+    unreserved set (`ALPHA`, `DIGIT`, `-`, `.`, `_`, `~`).
     """
 
     fun apply(segment: String val): String val =>
