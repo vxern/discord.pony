@@ -344,6 +344,7 @@ actor Bucket
             _options.on_error(
                 RestError(job.request, "the bucket was disposed of")
             )
+            _api._request_settled()
 
             return
         end
@@ -361,6 +362,7 @@ actor Bucket
                     job.request, "the bucket queue is full at " + cap.string()
                 )
             )
+            _api._request_settled()
 
             return
         end
@@ -412,6 +414,7 @@ actor Bucket
                         _queue.dequeue()?.request, "the bucket was disposed of"
                     )
                 )
+                _api._request_settled()
             else
                 break
             end
@@ -510,6 +513,7 @@ actor Bucket
             _options.on_error(
                 RestError(job.request, "the bucket was disposed of")
             )
+            _api._request_settled()
 
             return
         end
@@ -526,6 +530,7 @@ actor Bucket
                     + RestConstants.max_attempts().string() + " attempt(s)"
                 )
             )
+            _api._request_settled()
         end
 
         _drain()
@@ -540,6 +545,7 @@ actor Bucket
             _options.on_error(
                 RestError(job.request, "the bucket was disposed of")
             )
+            _api._request_settled()
 
             return
         end
@@ -561,6 +567,7 @@ actor Bucket
                 "[rest/" + _id
                 + "] dropping a response: the bucket was disposed of"
             )
+            _api._request_settled()
             return
         end
 
@@ -654,7 +661,10 @@ actor Bucket
                 )
             end
 
-            if giving_up then job.handler(job.request, response) end
+            if giving_up then
+                job.handler(job.request, response)
+                _api._request_settled()
+            end
         else
             let retrying =
                 _IsRetriable(response.status, job.request.method)
@@ -671,6 +681,7 @@ actor Bucket
                     + job.request.path + " to the caller"
                 )
                 job.handler(job.request, response)
+                _api._request_settled()
             end
         end
 

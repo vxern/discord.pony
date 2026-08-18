@@ -154,6 +154,7 @@ actor RestApi
 
     let _global_bucket: GlobalBucket
     var _disposed: Bool = false
+    var _in_flight: USize = 0
 
     new create(env: Env, options': RestOptions) =>
         options = options'
@@ -166,7 +167,7 @@ actor RestApi
                     .> set_authority(
                         files.FilePath(
                             files.FileAuth(env.root),
-                            options'.ca_certificates_path
+                            options'.ca_certificates_path.path
                         )
                     )?
                 end
@@ -181,7 +182,7 @@ actor RestApi
         if _ssl_context is None then
             Debug.out(
                 "[rest] could not build an SSL context from "
-                + options.ca_certificates_path
+                + options.ca_certificates_path.path
             )
         end
 
@@ -201,6 +202,23 @@ actor RestApi
                 + request.path + ": the client was disposed of"
             )
             options.on_error(RestError(request, "the client was disposed of"))
+            return
+        end
+
+        let in_flight_cap = RestConstants.max_requests_in_flight()
+        if _in_flight >= in_flight_cap then
+            Debug.out(
+                "[rest] dropping " + request.method.string() + " "
+                + request.path + ": " + in_flight_cap.string()
+                + " request(s) are already in hand"
+            )
+            options.on_error(
+                RestError(
+                    request,
+                    "the client is already holding " + in_flight_cap.string()
+                    + " request(s)"
+                )
+            )
             return
         end
 
@@ -226,7 +244,12 @@ actor RestApi
             + " goes to bucket " + id
         )
 
+        _in_flight = _in_flight + 1
+
         bucket.enqueue(request, handler, route)
+
+    be _request_settled() =>
+        if _in_flight > 0 then _in_flight = _in_flight - 1 end
 
     be _readmit(job: _QueuedRequest) =>
         if _disposed then
@@ -455,7 +478,7 @@ actor RestApi
                 RestError(
                     request,
                     "no certificate authority at "
-                    + options.ca_certificates_path
+                    + options.ca_certificates_path.path
                 )
             )
             on_failure()
@@ -759,6 +782,8 @@ primitive RestConstants
 
     fun max_queued_requests_per_bucket(): USize => 1_000
 
+    fun max_requests_in_flight(): USize => 20_000
+
     fun max_attempts(): USize => 3
 
     fun max_rate_limit_attempts(): USize =>
@@ -802,18 +827,26 @@ primitive _ConnectionConfig
             connection_timeout' = connect_timeout
         )
 
+class val CaCertificatesPath
+    let path: String
+
+    new val create(path': String) =>
+        path = path'
+
 primitive RestDefaults
     fun version(): ApiVersion val => ApiVersion10
 
     fun user_agent(): String =>
         "DiscordBot (https://github.com/vxern/discord.pony, 1.0.0)"
 
-    fun ca_certificates_path(): String =>
-        ifdef osx then
-            "/etc/ssl/cert.pem"
-        else
-            "/etc/ssl/certs/ca-certificates.crt"
-        end
+    fun ca_certificates_path(): CaCertificatesPath =>
+        CaCertificatesPath(
+            ifdef osx then
+                "/etc/ssl/cert.pem"
+            else
+                "/etc/ssl/certs/ca-certificates.crt"
+            end
+        )
 
     fun on_error(): RestErrorHandler => { (error': RestError) => None }
 
@@ -824,14 +857,15 @@ class val RestOptions
         """
     let version: ApiVersion val
     let user_agent: String
-    let ca_certificates_path: String
+    let ca_certificates_path: CaCertificatesPath
     let on_error: RestErrorHandler
 
     new val create(
         token': String,
         version': ApiVersion val = RestDefaults.version(),
         user_agent': String = RestDefaults.user_agent(),
-        ca_certificates_path': String = RestDefaults.ca_certificates_path(),
+        ca_certificates_path': CaCertificatesPath =
+            RestDefaults.ca_certificates_path(),
         on_error': RestErrorHandler = RestDefaults.on_error()
     ) =>
         token = token'

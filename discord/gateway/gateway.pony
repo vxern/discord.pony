@@ -243,7 +243,7 @@ class val GatewayOptions
     let properties: IdentifyConnectionProperties
     let version: ApiVersion val
     let user_agent: String
-    let ca_certificates_path: String
+    let ca_certificates_path: rest.CaCertificatesPath
     let large_threshold: (USize | None)
     let shard: ((USize, USize) | None)
     let presence: (GatewayPresenceUpdate | None)
@@ -257,7 +257,8 @@ class val GatewayOptions
             GatewayDefaults.properties(),
         version': ApiVersion val = GatewayDefaults.version(),
         user_agent': String = GatewayDefaults.user_agent(),
-        ca_certificates_path': String = GatewayDefaults.ca_certificates_path(),
+        ca_certificates_path': rest.CaCertificatesPath =
+            GatewayDefaults.ca_certificates_path(),
         large_threshold': (USize | None) = None,
         shard': ((USize, USize) | None) = None,
         presence': (GatewayPresenceUpdate | None) = None,
@@ -287,7 +288,8 @@ class val GatewayOptions
             large_threshold,
             (id, count),
             presence,
-            on_error
+            on_error,
+            sharding
         )
 
     fun path(): String =>
@@ -354,12 +356,14 @@ primitive GatewayDefaults
 
         IdentifyConnectionProperties(os, "discord.pony", "discord.pony")
 
-    fun ca_certificates_path(): String =>
-        ifdef osx then
-            "/etc/ssl/cert.pem"
-        else
-            "/etc/ssl/certs/ca-certificates.crt"
-        end
+    fun ca_certificates_path(): rest.CaCertificatesPath =>
+        rest.CaCertificatesPath(
+            ifdef osx then
+                "/etc/ssl/cert.pem"
+            else
+                "/etc/ssl/certs/ca-certificates.crt"
+            end
+        )
 
     fun on_error(): GatewayErrorHandler => { (error': GatewayError) => None }
 
@@ -466,7 +470,7 @@ actor _GatewayConnection is (mare.WebSocketClientActor & _WantsIdentify)
                     .> set_authority(
                         files.FilePath(
                             files.FileAuth(env.root),
-                            options'.ca_certificates_path
+                            options'.ca_certificates_path.path
                         )
                     )?
                 end
@@ -493,7 +497,7 @@ actor _GatewayConnection is (mare.WebSocketClientActor & _WantsIdentify)
         if _ssl_context is None then
             Debug.out(
                 "[gateway] could not build an SSL context from "
-                + options.ca_certificates_path
+                + options.ca_certificates_path.path
             )
         end
 
