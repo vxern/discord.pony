@@ -21,6 +21,7 @@ actor Main is TestList
         test(_StressBucketHeartbeatBypass)
         test(_StressBucketIdentifyConcurrency)
         test(_StressConnectionQueueCap)
+        test(_StressResumeUrl)
         test(_StressDispatchNameScan)
         test(_StressDispatchSubscriptions)
         test(_StressDispatchRegistry)
@@ -570,6 +571,39 @@ class iso _StressConnectionQueueCap is UnitTest
         counter.settle(connection, timers, api)
 
     fun timed_out(h: TestHelper) => h.fail("the connection never went quiet")
+
+class iso _StressResumeUrl is UnitTest
+    fun name(): String => "stress/connection/resume_url"
+
+    fun apply(h: TestHelper) =>
+        let trusted = [
+            "wss://gateway.discord.gg"
+            "wss://gateway.discord.gg/"
+            "wss://gateway-us-east1-b.discord.gg"
+            "wss://GATEWAY.DISCORD.GG/?v=10"
+            "wss://discord.gg"
+        ]
+
+        for url in trusted.values() do
+            h.assert_true(_GatewayUrl.trusted(url), url)
+        end
+
+        let untrusted = [
+            "wss://gateway.discord.gg.evil.com"
+            "wss://evil.com"
+            "wss://notdiscord.gg"
+            "wss://evil.com/gateway.discord.gg"
+            "wss://evil.com@gateway.discord.gg"
+            "wss://gateway.discord.gg:8443"
+            "ws://gateway.discord.gg"
+            "https://gateway.discord.gg"
+            "gateway.discord.gg"
+            ""
+        ]
+
+        for url in untrusted.values() do
+            h.assert_false(_GatewayUrl.trusted(url), url)
+        end
 
 class iso _StressDispatchNameScan is UnitTest
     fun name(): String => "stress/dispatch/name_scan"

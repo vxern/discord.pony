@@ -294,7 +294,11 @@ class val GatewayOptions
         "/?v=" + version.value().string() + "&encoding=json"
 
 primitive GatewayConstants
-    fun base_url(): String => "wss://gateway.discord.gg"
+    fun scheme(): String => "wss://"
+
+    fun domain(): String => "discord.gg"
+
+    fun base_url(): String => scheme() + "gateway." + domain()
 
     fun port(): String => "443"
 
@@ -366,6 +370,22 @@ primitive _GatewayUrl
             try url.find("/", start)? else url.size().isize() end
 
         url.substring(start, finish)
+
+    fun trusted(url: String): Bool =>
+        if not url.at(GatewayConstants.scheme()) then return false end
+
+        let name: String = host(url).lower()
+
+        if name.contains("@") or name.contains(":") then return false end
+
+        let domain: String = GatewayConstants.domain()
+
+        if name == domain then return true end
+
+        let suffix: String = "." + domain
+
+        (name.size() > suffix.size())
+            and name.at(suffix, (name.size() - suffix.size()).isize())
 
 primitive _GatewayRunning
 primitive _GatewayGaveUp
@@ -1146,13 +1166,27 @@ actor _GatewayConnection is (mare.WebSocketClientActor & _WantsIdentify)
         match event
         | let ready: GatewayReady =>
             _session_id = ready.session_id
-            _resume_url = ready.resume_gateway_url
 
-            Debug.out(
-                "[gateway] ready as " + ready.user.username + " on session "
-                + ready.session_id + ", resumable through "
-                + ready.resume_gateway_url
-            )
+            if _GatewayUrl.trusted(ready.resume_gateway_url) then
+                _resume_url = ready.resume_gateway_url
+
+                Debug.out(
+                    "[gateway] ready as " + ready.user.username
+                    + " on session " + ready.session_id
+                    + ", resumable through " + ready.resume_gateway_url
+                )
+            else
+                _resume_url = None
+
+                Debug.out(
+                    "[gateway] ready as " + ready.user.username
+                    + " on session " + ready.session_id
+                    + ", but the resume url " + ready.resume_gateway_url
+                    + " is not a " + GatewayConstants.domain()
+                    + " address, so falling back to "
+                    + GatewayConstants.base_url()
+                )
+            end
         end
 
         if (name == "READY") or (name == "RESUMED") then
