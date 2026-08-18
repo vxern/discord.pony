@@ -749,6 +749,10 @@ primitive RestConstants
 
     fun response_timeout_ms(): U64 => 30_000
 
+    fun max_response_body_bytes(): USize => 4_194_304
+
+    fun max_response_nesting_depth(): USize => 64
+
     fun max_connections(): USize => 20
 
     fun max_queued_requests(): USize => 10_000
@@ -793,7 +797,9 @@ primitive _ConnectionConfig
             end
 
         courier.ClientConnectionConfig(
-            where connection_timeout' = connect_timeout
+            where
+            max_body_size' = RestConstants.max_response_body_bytes(),
+            connection_timeout' = connect_timeout
         )
 
 primitive RestDefaults

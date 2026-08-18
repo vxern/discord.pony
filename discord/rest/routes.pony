@@ -6236,6 +6236,20 @@ primitive _Decode
         Parses a response body as JSON, erroring if it is not well-formed.
         """
 
+        if
+            not _ResponseNesting.within(
+                response.body,
+                RestConstants.max_response_nesting_depth()
+            )
+        then
+            Debug.out(
+                "[rest/decode] the body nests deeper than "
+                + RestConstants.max_response_nesting_depth().string()
+                + " levels, so it was not parsed"
+            )
+            error
+        end
+
         match json.JsonParser.parse(String.from_array(response.body))
         | let error': json.JsonParseError =>
             Debug.out(

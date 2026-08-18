@@ -31,6 +31,7 @@ actor Main is TestList
         test(_TestBuildHeaders)
         test(_TestDecodeRejectsNonSuccess)
         test(_TestExcerptTrimsAndScrubs)
+        test(_TestDecodeRejectsDeepNesting)
 
 primitive _Fixtures
     fun request(
@@ -552,3 +553,72 @@ class iso _TestExcerptTrimsAndScrubs is UnitTest
 
         h.assert_false(undecodable.reason.contains("secret"))
         h.assert_true(undecodable.reason.contains("18 bytes"))
+
+primitive _Nested
+    fun apply(depth: USize): String val =>
+        recover val
+            let source = String((depth * 2) + 1)
+            var index: USize = 0
+
+            while index < depth do
+                source.append("[")
+                index = index + 1
+            end
+
+            index = 0
+
+            while index < depth do
+                source.append("]")
+                index = index + 1
+            end
+
+            source
+        end
+
+class iso _TestDecodeRejectsDeepNesting is UnitTest
+    fun name(): String => "rest/decode/rejects a body nested past the limit"
+
+    fun apply(h: TestHelper) =>
+        let limit = RestConstants.max_response_nesting_depth()
+
+        h.assert_true(
+            _ResponseNesting.within(
+                """{"embeds":[{"fields":[{"name":"[{"}]}]}""".array(), limit
+            ),
+            "a body nested the way Discord nests them was turned away"
+        )
+
+        h.assert_true(
+            _ResponseNesting.within("""{"a":"\"[[[["}""".array(), 1),
+            "brackets behind an escaped quote were counted as nesting"
+        )
+
+        h.assert_false(
+            _ResponseNesting.within("""{"a":"\\","b":[[[]]]}""".array(), 3),
+            "an escaped backslash swallowed the quote that closed the string"
+        )
+
+        h.assert_true(
+            _ResponseNesting.within(_Nested(limit).array(), limit),
+            "a body exactly at the depth limit was turned away"
+        )
+
+        h.assert_false(
+            _ResponseNesting.within(_Nested(limit + 1).array(), limit),
+            "a body one level past the limit was let through"
+        )
+
+        try
+            _Decode.parse(
+                _Fixtures.response(200 where body = _Nested(limit + 1))
+            )?
+            h.fail("a body past the depth limit was parsed")
+        end
+
+        try
+            _Decode.parse(
+                _Fixtures.response(200 where body = """{"id":"1"}""")
+            )?
+        else
+            h.fail("a body Discord would send was turned away")
+        end

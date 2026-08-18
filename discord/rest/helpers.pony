@@ -83,6 +83,38 @@ class iso _Elapsed is time.TimerNotify
         _action()
         _repeat
 
+primitive _ResponseNesting
+    fun within(body: Array[U8] val, limit: USize): Bool =>
+        var depth: USize = 0
+        var in_string = false
+        var escaped = false
+
+        for byte in body.values() do
+            if escaped then
+                escaped = false
+                continue
+            end
+
+            if in_string then
+                match byte
+                | '\\' => escaped = true
+                | '"' => in_string = false
+                end
+
+                continue
+            end
+
+            match byte
+            | '"' => in_string = true
+            | '[' | '{' =>
+                depth = depth + 1
+                if depth > limit then return false end
+            | ']' | '}' => if depth > 0 then depth = depth - 1 end
+            end
+        end
+
+        true
+
 primitive _HeaderValue
     """
     Strips the control characters a header value may not carry, so caller text
