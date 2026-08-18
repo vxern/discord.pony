@@ -30,6 +30,7 @@ actor Main is TestList
         test(_TestBuildPath)
         test(_TestBuildHeaders)
         test(_TestDecodeRejectsNonSuccess)
+        test(_TestExcerptTrimsAndScrubs)
 
 primitive _Fixtures
     fun request(
@@ -523,3 +524,31 @@ class iso _TestDecodeRejectsNonSuccess is UnitTest
         else
             h.fail("a 403 should be rejected")
         end
+
+class iso _TestExcerptTrimsAndScrubs is UnitTest
+    fun name(): String => "rest/excerpt trims and scrubs a body"
+
+    fun apply(h: TestHelper) =>
+        h.assert_eq[String](
+            "{\"code\":50001}", _Excerpt("{\"code\":50001}".array())
+        )
+
+        h.assert_eq[String]("a  b c", _Excerpt("a\r\nb\tc".array()))
+
+        let long: String val = recover val
+            let body = String(20_000)
+            while body.size() < 20_000 do body.push('x') end
+            body
+        end
+
+        let excerpt = _Excerpt(long.array())
+        h.assert_true(excerpt.size() < 600)
+        h.assert_true(excerpt.contains("... (20000 bytes in all)"))
+
+        let undecodable = _Decode.undecodable(
+            _Fixtures.request(courier.GET, "/api/v10/webhooks/123"),
+            _Fixtures.response(200 where body = "{\"token\":\"secret\"}")
+        )
+
+        h.assert_false(undecodable.reason.contains("secret"))
+        h.assert_true(undecodable.reason.contains("18 bytes"))

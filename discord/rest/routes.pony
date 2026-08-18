@@ -6195,13 +6195,13 @@ primitive _Decode
             Debug.out(
                 "[rest/decode] " + request.method.string() + " " + request.path
                 + " was refused with " + response.status.string() + " "
-                + response.reason + ": " + String.from_array(response.body)
+                + response.reason + ": " + _Excerpt(response.body)
             )
 
             RestError(
                 request,
                 "Discord answered " + response.status.string() + " "
-                + response.reason + ": " + String.from_array(response.body)
+                + response.reason + ": " + _Excerpt(response.body)
             )
         else
             Debug.out(
@@ -6222,13 +6222,13 @@ primitive _Decode
         Debug.out(
             "[rest/decode] " + request.method.string() + " " + request.path
             + " came back in a shape this route cannot read: "
-            + String.from_array(response.body)
+            + _Excerpt(response.body)
         )
 
         RestError(
             request,
-            "the response body did not match the type this route returns: "
-            + String.from_array(response.body)
+            "the response body did not match the type this route returns, "
+            + response.body.size().string() + " bytes of it"
         )
 
     fun parse(response: courier.HTTPResponse val): json.JsonValue ? =>
