@@ -707,6 +707,16 @@ class iso _StressReceiveNesting is UnitTest
         )
 
         h.assert_true(
+            _GatewayNesting.within("""{"a":"\"[[[["}""", 1),
+            "brackets behind an escaped quote were counted as nesting"
+        )
+
+        h.assert_false(
+            _GatewayNesting.within("""{"a":"\\","b":[[[]]]}""", 3),
+            "an escaped backslash swallowed the quote that closed the string"
+        )
+
+        h.assert_true(
             _GatewayNesting.within(_Nested(limit), limit),
             "a payload exactly at the depth limit was turned away"
         )
