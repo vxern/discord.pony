@@ -59,6 +59,34 @@ primitive _RedactedPath
 
         "/".join(segments.values())
 
+primitive _Excerpt
+    fun apply(body: Array[U8] val): String val =>
+        let limit: USize = 512
+
+        recover val
+            let safe = String(limit + 32)
+            var taken: USize = 0
+
+            for byte in body.values() do
+                if taken == limit then
+                    safe.append(
+                        "... (" + body.size().string() + " bytes in all)"
+                    )
+                    break
+                end
+
+                if (byte < 0x20) or (byte == 0x7F) then
+                    safe.push(' ')
+                else
+                    safe.push(byte)
+                end
+
+                taken = taken + 1
+            end
+
+            safe
+        end
+
 class val RestError
     let request: courier.HTTPRequest val
     let reason: String
@@ -199,6 +227,41 @@ actor RestApi
         )
 
         bucket.enqueue(request, handler, route)
+
+    be _readmit(job: _QueuedRequest) =>
+        if _disposed then
+            Debug.out(
+                "[rest] dropping " + job.request.method.string() + " "
+                + job.request.path + ": the client was disposed of"
+            )
+            options.on_error(
+                RestError(job.request, "the client was disposed of")
+            )
+            return
+        end
+
+        let id = _bucket_key(job.route, job.request)
+        let now = time.Time.nanos()
+
+        _route_used(job.route) = now
+        _bucket_used(id) = now
+
+        let bucket =
+            try
+                _buckets(id)?
+            else
+                Debug.out("[rest] opening a new bucket for " + id)
+                let bucket' = Bucket(this, options, _global_bucket, id, _timers)
+                _buckets(id) = bucket'
+                bucket'
+            end
+
+        Debug.out(
+            "[rest] " + job.request.method.string() + " " + job.request.path
+            + " goes to bucket " + id + ", the one it was in having been swept"
+        )
+
+        bucket.adopt(job)
 
     be dispose() =>
         Debug.out(

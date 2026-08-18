@@ -271,6 +271,7 @@ actor Bucket
     var _requests_remaining: USize = 1
 
     var _disposed: Bool = false
+    var _swept: Bool = false
     var _restarting: Bool = false
 
     new create(
@@ -322,6 +323,18 @@ actor Bucket
         end
 
     fun ref _admit(job: _QueuedRequest) =>
+        if _swept then
+            Debug.out(
+                "[rest/" + _id + "] handing " + job.request.method.string()
+                + " " + job.request.path
+                + " back: the bucket went away before it arrived"
+            )
+
+            _api._readmit(job)
+
+            return
+        end
+
         if _disposed then
             Debug.out(
                 "[rest/" + _id
@@ -381,6 +394,7 @@ actor Bucket
         Debug.out("[rest/" + _id + "] idle, letting the bucket go")
 
         _disposed = true
+        _swept = true
         _api._bucket_swept(this)
 
     be dispose() =>
