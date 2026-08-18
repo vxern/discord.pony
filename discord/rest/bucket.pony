@@ -643,7 +643,7 @@ actor Bucket
             if giving_up then job.handler(job.request, response) end
         else
             let retrying =
-                _IsRetriable(response.status)
+                _IsRetriable(response.status, job.request.method)
                     and _retry(
                         job,
                         "Discord answered " + response.status.string() + " "

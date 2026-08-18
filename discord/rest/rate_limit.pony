@@ -109,14 +109,25 @@ primitive _IsGlobalRateLimit
         headers.get(_RateLimitConstants.bucket_header_name()) is None
 
 primitive _IsRetriable
-    fun apply(status: U16): Bool =>
+    fun apply(status: U16, method: courier.Method): Bool =>
         """
         The statuses Discord hands back for a hiccup on their side, rather
         than for anything wrong with the request.
+
+        A 5xx does not say whether Discord applied the request before it
+        broke, so only idempotent methods go again: resending a POST could
+        leave a second message, ban or role behind, and the API takes no
+        idempotency key with which to tell the two apart.
         """
 
         match status
-        | 500 | 502 | 503 | 504 => true
+        | 500 | 502 | 503 | 504 =>
+            match method
+            | courier.GET | courier.HEAD | courier.PUT | courier.DELETE =>
+                true
+            else
+                false
+            end
         else
             false
         end

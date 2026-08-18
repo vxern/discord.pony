@@ -354,15 +354,25 @@ class iso _TestIsRetriable is UnitTest
     fun name(): String => "rest/retriable statuses"
 
     fun apply(h: TestHelper) =>
-        h.assert_true(_IsRetriable(500))
-        h.assert_true(_IsRetriable(502))
-        h.assert_true(_IsRetriable(503))
-        h.assert_true(_IsRetriable(504))
-        h.assert_false(_IsRetriable(200))
-        h.assert_false(_IsRetriable(400))
-        h.assert_false(_IsRetriable(403))
-        h.assert_false(_IsRetriable(429))
-        h.assert_false(_IsRetriable(501))
+        h.assert_true(_IsRetriable(500, courier.GET))
+        h.assert_true(_IsRetriable(502, courier.GET))
+        h.assert_true(_IsRetriable(503, courier.GET))
+        h.assert_true(_IsRetriable(504, courier.GET))
+        h.assert_false(_IsRetriable(200, courier.GET))
+        h.assert_false(_IsRetriable(400, courier.GET))
+        h.assert_false(_IsRetriable(403, courier.GET))
+        h.assert_false(_IsRetriable(429, courier.GET))
+        h.assert_false(_IsRetriable(501, courier.GET))
+
+        h.assert_true(_IsRetriable(500, courier.HEAD))
+        h.assert_true(_IsRetriable(500, courier.PUT))
+        h.assert_true(_IsRetriable(500, courier.DELETE))
+
+        h.assert_false(_IsRetriable(500, courier.POST))
+        h.assert_false(_IsRetriable(502, courier.POST))
+        h.assert_false(_IsRetriable(503, courier.POST))
+        h.assert_false(_IsRetriable(504, courier.POST))
+        h.assert_false(_IsRetriable(500, courier.PATCH))
 
 class iso _TestBackoffGrowsAndStaysBounded is UnitTest
     fun name(): String => "rest/backoff grows and stays bounded"
