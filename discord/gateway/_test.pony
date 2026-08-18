@@ -558,6 +558,7 @@ class iso _StressConnectionQueueCap is UnitTest
         (let connection, let api) = _Stress.connection(
             h, { (err: GatewayError) => counter.saw(err) }
         )
+        let timers = time.Timers
 
         var index: USize = 0
 
@@ -566,7 +567,7 @@ class iso _StressConnectionQueueCap is UnitTest
             index = index + 1
         end
 
-        counter.settle(connection, api)
+        counter.settle(connection, timers, api)
 
     fun timed_out(h: TestHelper) => h.fail("the connection never went quiet")
 
@@ -853,6 +854,9 @@ actor _Overflows
 
     var _overflows: USize = 0
     var _recoveries: USize = 0
+    var _quiet: USize = 0
+    var _last: USize = 0
+    var _rounds: USize = 0
     var _done: Bool = false
 
     new create(h: TestHelper, flood: USize) =>
@@ -866,8 +870,32 @@ actor _Overflows
             _recoveries = _recoveries + 1
         end
 
-    be settle(connection: _GatewayConnection, api: rest.RestApi) =>
+    be settle(
+        connection: _GatewayConnection,
+        timers: time.Timers,
+        api: rest.RestApi
+    ) =>
         if _done then return end
+
+        let reports = _overflows + _recoveries
+
+        _rounds = _rounds + 1
+        _quiet =
+            if (reports > 0) and (reports == _last) then _quiet + 1 else 0 end
+        _last = reports
+
+        if (_quiet < 4) and (_rounds < 40) then
+            let self: _Overflows tag = this
+
+            timers(
+                time.Timer(
+                    _Elapsed({() => self.settle(connection, timers, api)}),
+                    time.Nanos.from_millis(250)
+                )
+            )
+
+            return
+        end
 
         _done = true
 
@@ -884,6 +912,7 @@ actor _Overflows
         )
 
         connection.dispose()
+        timers.dispose()
         api.dispose()
 
         _h.complete(true)
