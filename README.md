@@ -88,7 +88,7 @@ DISCORD_TOKEN=<bot-token> ./build/polls <channel-id>
     - ✅ Create Auto Moderation Rule
     - ✅ Modify Auto Moderation Rule
     - ✅ Delete Auto Moderation Rule
-- Channel 
+- Channel
     - ✅ Get Channel
     - ✅ Modify Channel
     - ✅ Delete/Close Channel
@@ -113,7 +113,7 @@ DISCORD_TOKEN=<bot-token> ./build/polls <channel-id>
     - ✅ List Public Archived Threads
     - ✅ List Private Archived Threads
     - ✅ List Joined Private Archived Threads
-- Emoji 
+- Emoji
     - ✅ List Guild Emojis
     - ✅ Get Guild Emoji
     - ✅ Create Guild Emoji
@@ -130,7 +130,7 @@ DISCORD_TOKEN=<bot-token> ./build/polls <channel-id>
     - ✅ Consume an Entitlement
     - ✅ Create Test Entitlement
     - ✅ Delete Test Entitlement
-- Guild 
+- Guild
     - ✅ Get Guild
     - ✅ Get Guild Preview
     - ✅ Modify Guild
@@ -196,7 +196,7 @@ DISCORD_TOKEN=<bot-token> ./build/polls <channel-id>
     - ✅ Get Target Users
     - ✅ Update Target Users
     - ✅ Get Target Users Job Status
-- Lobby 
+- Lobby
     - ✅ Create Lobby
     - ✅ Create or Join Lobby
     - ✅ Get Lobby
@@ -213,7 +213,7 @@ DISCORD_TOKEN=<bot-token> ./build/polls <channel-id>
     - ✅ Update Lobby Message Moderation Metadata
     - ✅ Create Lobby Channel Invite for Self
     - ✅ Create Lobby Channel Invite for User
-- Message 
+- Message
     - ✅ Get Channel Messages
     - ✅ Search Guild Messages
     - ✅ Get Channel Message
@@ -263,7 +263,7 @@ DISCORD_TOKEN=<bot-token> ./build/polls <channel-id>
     - ✅ Create Guild Sticker
     - ✅ Modify Guild Sticker
     - ✅ Delete Guild Sticker
-- User 
+- User
     - ✅ Get Current User
     - ✅ Get User
     - ✅ Modify Current User
@@ -282,7 +282,7 @@ DISCORD_TOKEN=<bot-token> ./build/polls <channel-id>
     - ✅ Get User Voice State
     - ✅ Modify Current User Voice State
     - ✅ Modify User Voice State
-- Webhook 
+- Webhook
     - ✅ Create Webhook
     - ✅ Get Channel Webhooks
     - ✅ Get Guild Webhooks
@@ -307,7 +307,7 @@ DISCORD_TOKEN=<bot-token> ./build/polls <channel-id>
     - ✅ Get Followup Message
     - ✅ Edit Followup Message
     - ✅ Delete Followup Message
-- Application Commands 
+- Application Commands
     - ✅ Get Global Application Commands
     - ✅ Create Global Application Command
     - ✅ Get Global Application Command
