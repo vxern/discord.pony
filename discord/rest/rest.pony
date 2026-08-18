@@ -737,7 +737,7 @@ primitive RestDefaults
     fun version(): ApiVersion val => ApiVersion10
 
     fun user_agent(): String =>
-        "discord.pony (https://github.com/vxern/discord.pony, 1.0.0)"
+        "DiscordBot (https://github.com/vxern/discord.pony, 1.0.0)"
 
     fun ca_certificates_path(): String =>
         ifdef osx then
