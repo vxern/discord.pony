@@ -237,7 +237,7 @@ DISCORD_TOKEN=<bot-token> ./build/polls <channel-id>
 - Poll
     - ✅ Get Answer Voters
     - ✅ End Poll
-- SKU (1) & Subscription
+- SKU & Subscription
     - ✅ List SKUs
     - ✅ List SKU Subscriptions
     - ✅ Get SKU Subscription
