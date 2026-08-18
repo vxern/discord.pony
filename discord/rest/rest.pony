@@ -880,7 +880,9 @@ class val RestOptions
             match body
             | let _: String => headers'.set("Content-Type", "application/json")
             | let multipart: _Multipart =>
-                headers'.set("Content-Type", multipart.content_type)
+                headers'.set(
+                    "Content-Type", _HeaderValue(multipart.content_type)
+                )
             end
 
             match reason

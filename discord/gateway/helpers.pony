@@ -57,3 +57,31 @@ class iso _Elapsed is time.TimerNotify
     fun ref apply(timer: time.Timer, count: U64): Bool =>
         _action()
         _repeat
+
+primitive _HeaderValue
+    """
+    Strips the control characters a header value may not carry, so caller text
+    put into a header cannot inject one of its own.
+    """
+
+    fun apply(value: String val): String val =>
+        var carries_control = false
+
+        for byte in value.values() do
+            if (byte < ' ') or (byte == 0x7f) then
+                carries_control = true
+                break
+            end
+        end
+
+        if not carries_control then return value end
+
+        recover val
+            let stripped = String(value.size())
+
+            for byte in value.values() do
+                if (byte >= ' ') and (byte != 0x7f) then stripped.push(byte) end
+            end
+
+            stripped
+        end

@@ -14,6 +14,7 @@ actor Main is TestList
         test(_TestFormattingGuildNavigation)
         test(_TestPermissionRoundTrip)
         test(_TestGatewayBotInfoBounds)
+        test(_TestCDNPathSegments)
 
 class iso _TestFormattingMentions is UnitTest
     fun name(): String => "formatting/mentions"
@@ -150,3 +151,36 @@ class iso _TestGatewayBotInfoBounds is UnitTest
                 "a negative " + key + " must not decode"
             )
         end
+
+class iso _TestCDNPathSegments is UnitTest
+    fun name(): String => "cdn/path_segments"
+
+    fun apply(h: TestHelper) =>
+        let id = data.Snowflake(80351110224678912)
+        let hash = "a_1269e74af4df7417b13759eae50c83dc"
+
+        h.assert_eq[String](
+            "/icons/80351110224678912/" + hash + ".png",
+            CDN.guild_icon(id, hash, ImageFormatPNG)
+        )
+
+        h.assert_eq[String](
+            "/icons/80351110224678912/..%2F..%2Fadmin.png",
+            CDN.guild_icon(id, "../../admin", ImageFormatPNG)
+        )
+
+        h.assert_eq[String](
+            "/avatars/80351110224678912/hash%3Fsize%3D4096.png",
+            CDN.user_avatar(id, "hash?size=4096", ImageFormatPNG)
+        )
+
+        h.assert_eq[String](
+            "/guilds/80351110224678912/users/80351110224678912/banners/"
+            + "a%20b.png",
+            CDN.member_banner(id, id, "a b", ImageFormatPNG)
+        )
+
+        h.assert_eq[String](
+            "/avatar-decoration-presets/a_%0D%0Ax.png",
+            CDN.avatar_decoration("a_\r\nx")
+        )

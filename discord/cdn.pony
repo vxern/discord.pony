@@ -41,9 +41,8 @@ primitive CDN
         size: ImageSize = CDNDefaults.size(),
         animated: Bool = CDNDefaults.animated()
     ): String =>
-        "/icons/" + id.string() + "/" + icon + format.extension() + _CDNQuery(
-            size, animated
-        )
+        "/icons/" + id.string() + "/" + _PathSegment(icon)
+        + format.extension() + _CDNQuery(size, animated)
 
     fun guild_splash(
         id: Snowflake,
@@ -51,8 +50,8 @@ primitive CDN
         format: (ImageFormatPNG | ImageFormatJPEG | ImageFormatWEBP),
         size: ImageSize = CDNDefaults.size()
     ): String =>
-        "/splashes/" + id.string() + "/" + splash + format.extension()
-        + _CDNQuery(size)
+        "/splashes/" + id.string() + "/" + _PathSegment(splash)
+        + format.extension() + _CDNQuery(size)
 
     fun guild_discovery_splash(
         id: Snowflake,
@@ -60,8 +59,8 @@ primitive CDN
         format: (ImageFormatPNG | ImageFormatJPEG | ImageFormatWEBP),
         size: ImageSize = CDNDefaults.size()
     ): String =>
-        "/discovery-splashes/" + id.string() + "/" + splash + format.extension()
-        + _CDNQuery(size)
+        "/discovery-splashes/" + id.string() + "/" + _PathSegment(splash)
+        + format.extension() + _CDNQuery(size)
 
     fun guild_banner(
         id: Snowflake,
@@ -72,8 +71,8 @@ primitive CDN
         size: ImageSize = CDNDefaults.size(),
         animated: Bool = CDNDefaults.animated()
     ): String =>
-        "/banners/" + id.string() + "/" + banner + format.extension()
-        + _CDNQuery(size, animated)
+        "/banners/" + id.string() + "/" + _PathSegment(banner)
+        + format.extension() + _CDNQuery(size, animated)
 
     fun user_banner(
         id: Snowflake,
@@ -84,8 +83,8 @@ primitive CDN
         size: ImageSize = CDNDefaults.size(),
         animated: Bool = CDNDefaults.animated()
     ): String =>
-        "/banners/" + id.string() + "/" + banner + format.extension()
-        + _CDNQuery(size, animated)
+        "/banners/" + id.string() + "/" + _PathSegment(banner)
+        + format.extension() + _CDNQuery(size, animated)
 
     fun default_user_avatar(
         index: Snowflake,
@@ -107,8 +106,8 @@ primitive CDN
         size: ImageSize = CDNDefaults.size(),
         animated: Bool = CDNDefaults.animated()
     ): String =>
-        "/avatars/" + id.string() + "/" + avatar + format.extension()
-        + _CDNQuery(size, animated)
+        "/avatars/" + id.string() + "/" + _PathSegment(avatar)
+        + format.extension() + _CDNQuery(size, animated)
 
     fun member_avatar(
         guild_id: Snowflake,
@@ -121,14 +120,15 @@ primitive CDN
         animated: Bool = CDNDefaults.animated()
     ): String =>
         "/guilds/" + guild_id.string() + "/users/" + user_id.string()
-        + "/avatars/" + avatar + format.extension() + _CDNQuery(size, animated)
+        + "/avatars/" + _PathSegment(avatar) + format.extension()
+        + _CDNQuery(size, animated)
 
     fun avatar_decoration(
         asset: String,
         size: ImageSize = CDNDefaults.size()
     ): String =>
-        "/avatar-decoration-presets/" + asset + ImageFormatPNG.extension()
-        + _CDNQuery(size)
+        "/avatar-decoration-presets/" + _PathSegment(asset)
+        + ImageFormatPNG.extension() + _CDNQuery(size)
 
     fun application_icon(
         id: Snowflake,
@@ -136,8 +136,8 @@ primitive CDN
         format: (ImageFormatPNG | ImageFormatJPEG | ImageFormatWEBP),
         size: ImageSize = CDNDefaults.size()
     ): String =>
-        "/app-icons/" + id.string() + "/" + icon + format.extension()
-        + _CDNQuery(size)
+        "/app-icons/" + id.string() + "/" + _PathSegment(icon)
+        + format.extension() + _CDNQuery(size)
 
     fun application_cover(
         id: Snowflake,
@@ -145,8 +145,8 @@ primitive CDN
         format: (ImageFormatPNG | ImageFormatJPEG | ImageFormatWEBP),
         size: ImageSize = CDNDefaults.size()
     ): String =>
-        "/app-icons/" + id.string() + "/" + cover + format.extension()
-        + _CDNQuery(size)
+        "/app-icons/" + id.string() + "/" + _PathSegment(cover)
+        + format.extension() + _CDNQuery(size)
 
     fun application_asset(
         id: Snowflake,
@@ -165,8 +165,8 @@ primitive CDN
         size: ImageSize = CDNDefaults.size()
     ): String =>
         "/app-assets/" + application_id.string() + "/achievements/"
-        + achievement_id.string() + "/icons/" + icon + format.extension()
-        + _CDNQuery(size)
+        + achievement_id.string() + "/icons/" + _PathSegment(icon)
+        + format.extension() + _CDNQuery(size)
 
     fun store_page_asset(
         application_id: Snowflake,
@@ -192,8 +192,8 @@ primitive CDN
         format: (ImageFormatPNG | ImageFormatJPEG | ImageFormatWEBP),
         size: ImageSize = CDNDefaults.size()
     ): String =>
-        "/team-icons/" + id.string() + "/" + icon + format.extension()
-        + _CDNQuery(size)
+        "/team-icons/" + id.string() + "/" + _PathSegment(icon)
+        + format.extension() + _CDNQuery(size)
 
     fun sticker(
         id: Snowflake,
@@ -212,8 +212,8 @@ primitive CDN
         format: (ImageFormatPNG | ImageFormatJPEG | ImageFormatWEBP),
         size: ImageSize = CDNDefaults.size()
     ): String =>
-        "/role-icons/" + id.string() + "/" + icon + format.extension()
-        + _CDNQuery(size)
+        "/role-icons/" + id.string() + "/" + _PathSegment(icon)
+        + format.extension() + _CDNQuery(size)
 
     fun scheduled_event_cover(
         id: Snowflake,
@@ -221,8 +221,8 @@ primitive CDN
         format: (ImageFormatPNG | ImageFormatJPEG | ImageFormatWEBP),
         size: ImageSize = CDNDefaults.size()
     ): String =>
-        "/guild-events/" + id.string() + "/" + cover + format.extension()
-        + _CDNQuery(size)
+        "/guild-events/" + id.string() + "/" + _PathSegment(cover)
+        + format.extension() + _CDNQuery(size)
 
     fun member_banner(
         guild_id: Snowflake,
@@ -235,7 +235,8 @@ primitive CDN
         animated: Bool = CDNDefaults.animated()
     ): String =>
         "/guilds/" + guild_id.string() + "/users/" + user_id.string()
-        + "/banners/" + banner + format.extension() + _CDNQuery(size, animated)
+        + "/banners/" + _PathSegment(banner) + format.extension()
+        + _CDNQuery(size, animated)
 
     fun tag_badge(
         guild_id: Snowflake,
@@ -243,7 +244,7 @@ primitive CDN
         format: (ImageFormatPNG | ImageFormatJPEG | ImageFormatWEBP),
         size: ImageSize = CDNDefaults.size()
     ): String =>
-        "/guild-tag-badges/" + guild_id.string() + "/" + badge
+        "/guild-tag-badges/" + guild_id.string() + "/" + _PathSegment(badge)
         + format.extension() + _CDNQuery(size)
 
     fun soundboard_sound(id: Snowflake): String =>

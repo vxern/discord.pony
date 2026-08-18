@@ -542,7 +542,7 @@ actor _GatewayConnection is (mare.WebSocketClientActor & _WantsIdentify)
             end
 
         let headers: Array[(String val, String val)] val =
-            [("User-Agent", options.user_agent)]
+            [("User-Agent", _HeaderValue(options.user_agent))]
 
         Debug.out(
             "[gateway] dialling " + _GatewayUrl.host(url) + ":"
